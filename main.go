@@ -10,6 +10,7 @@ import (
 	"chorego/parser"
 
 	"github.com/antlr4-go/antlr/v4"
+	"github.com/dave/jennifer/jen"
 )
 
 func main() {
@@ -42,7 +43,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	file := epp.EppFunc(function)
+	network := epp.EppFunc(function)
+
+	file := jen.NewFile("choreography")
+	network.Codegen(file)
 
 	err := file.Render(os.Stdout)
 	if err != nil {

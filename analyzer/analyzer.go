@@ -5,7 +5,7 @@ import (
 )
 
 type AnalyzerListener struct {
-	*parser.BaseChoregoListener
+	parser.BaseChoregoListener
 	ErrorListener ErrorListener
 }
 
