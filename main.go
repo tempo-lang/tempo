@@ -6,6 +6,7 @@ import (
 
 	"chorego/analyzer"
 	"chorego/epp"
+	"chorego/misc"
 	"chorego/parser"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -18,11 +19,34 @@ func main() {
 	p := parser.NewChoregoParser(stream)
 	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 
+	terminateErrorListener := misc.TerminateErrorListener{}
+	p.AddErrorListener(&terminateErrorListener)
+
+	// parse program
 	function := p.Func_()
 
-	antlr.ParseTreeWalkerDefault.Walk(analyzer.New(), function)
+	if terminateErrorListener.ProducedError {
+		os.Exit(1)
+	}
+
+	a := analyzer.New()
+	antlr.ParseTreeWalkerDefault.Walk(a, function)
+
+	analyzerErrorListener, ok := a.ErrorListener.(*analyzer.DefaultErrorListener)
+	if !ok {
+		fmt.Println("Analyzer error listener was expected to be DefaultErrorListener")
+		os.Exit(1)
+	}
+
+	if analyzerErrorListener.ProducedError {
+		os.Exit(1)
+	}
 
 	file := epp.EppFunc(function)
-	fmt.Printf("\n\n%#v", file)
 
+	err := file.Render(os.Stdout)
+	if err != nil {
+		fmt.Printf("Failed to render file: %v\n", err)
+		os.Exit(1)
+	}
 }
