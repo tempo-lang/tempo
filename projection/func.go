@@ -11,6 +11,7 @@ type Func struct {
 	Choreography *Choreography
 	FuncCtx      parser.IFuncContext
 	Name         string
+	Role         string
 	Params       []FuncParam
 }
 
@@ -33,7 +34,7 @@ func (f *Func) AddParam(param parser.IFunc_paramContext, paramType string) *Func
 
 func (f *Func) Codegen(file *jen.File) {
 	file.Func().
-		Id(fmt.Sprintf("%s_%s", f.Name, f.Choreography.Name)).
+		Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
 		ParamsFunc(func(params *jen.Group) {
 			for _, param := range f.Params {
 				params.Id(param.Name).Id(param.Type)

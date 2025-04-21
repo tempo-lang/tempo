@@ -23,6 +23,7 @@ func (c *Choreography) AddFunc(role string, funcCtx parser.IFuncContext) *Func {
 		Choreography: c,
 		FuncCtx:      funcCtx,
 		Name:         funcCtx.Ident().GetText(),
+		Role:         role,
 	}
 	return c.Funcs[role]
 }

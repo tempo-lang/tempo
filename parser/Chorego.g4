@@ -9,7 +9,7 @@ func: FUNC role_type_normal ident func_param_list scope;
 func_param_list:
 	LPAREN (func_param (COMMA func_param)*)? RPAREN;
 
-func_param: ident ( COLON value_type)?;
+func_param: ident COLON value_type;
 
 scope: LCURLY RCURLY;
 
