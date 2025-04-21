@@ -4,22 +4,20 @@ grammar Chorego;
  * Parser Rules
  */
 
-func: FUNC role_type_normal ident func_param_list scope;
+func: FUNC roleTypeNormal ident funcParamList scope;
 
-func_param_list:
-	LPAREN (func_param (COMMA func_param)*)? RPAREN;
+funcParamList: LPAREN (funcParam (COMMA funcParam)*)? RPAREN;
 
-func_param: ident COLON value_type;
+funcParam: ident COLON valueType;
 
 scope: LCURLY RCURLY;
 
-value_type: ident role_type;
-role_type: role_type_normal | role_type_shared;
+valueType: ident roleType;
+roleType: roleTypeNormal | roleTypeShared;
 
-role_type_shared:
-	ROLE_AT (LSQUARE ident (COMMA ident)* RSQUARE);
+roleTypeShared: ROLE_AT (LSQUARE ident (COMMA ident)* RSQUARE);
 
-role_type_normal:
+roleTypeNormal:
 	ROLE_AT (ident | (LPAREN ident (COMMA ident)* RPAREN));
 
 ident: ID;

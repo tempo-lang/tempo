@@ -7,7 +7,7 @@ import (
 )
 
 func EppFunc(function parser.IFuncContext) *projection.Choreography {
-	func_role := function.Role_type_normal()
+	func_role := function.RoleTypeNormal()
 
 	choreography := projection.NewChoreography(function.Ident().GetText())
 
@@ -23,19 +23,19 @@ func eppFuncRole(choreography *projection.Choreography, function parser.IFuncCon
 	fn := choreography.AddFunc(roleName, function)
 
 	// project parameters
-	for _, param := range function.Func_param_list().AllFunc_param() {
-		if roleTypeNormal := param.Value_type().Role_type().Role_type_normal(); roleTypeNormal != nil {
+	for _, param := range function.FuncParamList().AllFuncParam() {
+		if roleTypeNormal := param.ValueType().RoleType().RoleTypeNormal(); roleTypeNormal != nil {
 			paramRoles := roleTypeNormal.AllIdent()
 			containsRole := slices.ContainsFunc(paramRoles, func(role parser.IIdentContext) bool {
 				return role.GetText() == roleName
 			})
 
 			if containsRole {
-				fn.AddParam(param, param.Value_type().Ident().GetText())
+				fn.AddParam(param, param.ValueType().Ident().GetText())
 			}
 		}
 
-		if roleTypeShared := param.Value_type().Role_type().Role_type_shared(); roleTypeShared != nil {
+		if roleTypeShared := param.ValueType().RoleType().RoleTypeShared(); roleTypeShared != nil {
 			panic("shared role type in parameter not supported yet")
 		}
 	}

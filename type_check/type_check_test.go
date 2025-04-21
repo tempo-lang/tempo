@@ -1,9 +1,9 @@
-package analyzer_test
+package type_check_test
 
 import (
-	"chorego/analyzer"
-	"chorego/analyzer/analyzer_error"
 	"chorego/parser"
+	"chorego/type_check"
+	"chorego/type_check/type_error"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -44,11 +44,11 @@ func (a *AntlrTestErrorListener) SyntaxError(recognizer antlr.Recognizer, offend
 }
 
 type TestErrorListener struct {
-	errors []analyzer_error.Error
+	errors []type_error.Error
 }
 
 // ReportAnalyzerError implements analyzer.ErrorListener.
-func (t *TestErrorListener) ReportAnalyzerError(err analyzer_error.Error) {
+func (t *TestErrorListener) ReportAnalyzerError(err type_error.Error) {
 	t.errors = append(t.errors, err)
 }
 
@@ -69,7 +69,7 @@ func (data *AnalyzerTestData) Assert(t *testing.T) {
 
 		f := p.Func_()
 
-		a := analyzer.New()
+		a := type_check.New()
 		errorListener := NewTestErrorListener()
 		a.ErrorListener = errorListener
 

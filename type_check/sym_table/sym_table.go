@@ -1,8 +1,8 @@
 package sym_table
 
 import (
-	"chorego/analyzer/analyzer_error"
 	"chorego/parser"
+	"chorego/type_check/type_error"
 )
 
 type SymTable struct {
@@ -47,10 +47,10 @@ func (sym *SymTable) LookupSymbol(name string) Symbol {
 	return nil
 }
 
-func (sym *SymTable) InsertSymbol(symbol Symbol) *analyzer_error.SymbolAlreadyExists {
+func (sym *SymTable) InsertSymbol(symbol Symbol) *type_error.SymbolAlreadyExists {
 	existing, exists := sym.Scope().symbols[symbol.SymbolName()]
 	if exists {
-		return analyzer_error.NewSymbolAlreadyExistsError(existing.Ident(), symbol.Ident())
+		return type_error.NewSymbolAlreadyExistsError(existing.Ident(), symbol.Ident())
 	}
 
 	sym.Scope().symbols[symbol.SymbolName()] = symbol
@@ -67,10 +67,10 @@ type Symbol interface {
 }
 
 type FuncParamSymbol struct {
-	Param parser.IFunc_paramContext
+	Param parser.IFuncParamContext
 }
 
-func NewFuncParamSymbol(param parser.IFunc_paramContext) *FuncParamSymbol {
+func NewFuncParamSymbol(param parser.IFuncParamContext) *FuncParamSymbol {
 	return &FuncParamSymbol{
 		Param: param,
 	}

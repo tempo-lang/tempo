@@ -17,12 +17,12 @@ type Func struct {
 
 type FuncParam struct {
 	Func     *Func
-	ParamCtx parser.IFunc_paramContext
+	ParamCtx parser.IFuncParamContext
 	Name     string
 	Type     string
 }
 
-func (f *Func) AddParam(param parser.IFunc_paramContext, paramType string) *Func {
+func (f *Func) AddParam(param parser.IFuncParamContext, paramType string) *Func {
 	f.Params = append(f.Params, FuncParam{
 		Func:     f,
 		ParamCtx: param,

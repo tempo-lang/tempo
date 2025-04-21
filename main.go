@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"chorego/analyzer"
 	"chorego/epp"
 	"chorego/misc"
 	"chorego/parser"
+	"chorego/type_check"
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/dave/jennifer/jen"
@@ -30,10 +30,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	a := analyzer.New()
+	a := type_check.New()
 	antlr.ParseTreeWalkerDefault.Walk(a, function)
 
-	analyzerErrorListener, ok := a.ErrorListener.(*analyzer.DefaultErrorListener)
+	analyzerErrorListener, ok := a.ErrorListener.(*type_check.DefaultErrorListener)
 	if !ok {
 		fmt.Println("Analyzer error listener was expected to be DefaultErrorListener")
 		os.Exit(1)

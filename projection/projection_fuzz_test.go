@@ -1,10 +1,10 @@
 package projection_test
 
 import (
-	"chorego/analyzer"
 	"chorego/epp"
 	"chorego/misc"
 	"chorego/parser"
+	"chorego/type_check"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -38,10 +38,10 @@ func FuzzProjection(f *testing.F) {
 			return
 		}
 
-		a := analyzer.New()
+		a := type_check.New()
 		antlr.ParseTreeWalkerDefault.Walk(a, function)
 
-		analyzerErrorListener := a.ErrorListener.(*analyzer.DefaultErrorListener)
+		analyzerErrorListener := a.ErrorListener.(*type_check.DefaultErrorListener)
 
 		if analyzerErrorListener.ProducedError {
 			return
@@ -62,7 +62,7 @@ func FuzzProjection(f *testing.F) {
 		conf := types.Config{}
 		_, err = conf.Check("choreography", fset, []*ast.File{parsedAST}, nil)
 		if err != nil {
-			t.Errorf("Go code type errors: %v\n\nINPUT:\n%s\n\nPROJECTION:\n%s", err, source, output)
+			t.Errorf("Go code type error: %v\n\nINPUT:\n%s\n\nPROJECTION:\n%s", err, source, output)
 		}
 	})
 }

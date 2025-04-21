@@ -1,14 +1,14 @@
-package analyzer
+package type_check
 
 import (
-	"chorego/analyzer/analyzer_error"
 	"chorego/parser"
+	"chorego/type_check/type_error"
 	"cmp"
 	"slices"
 )
 
-func (a AnalyzerListener) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
-	roles := ctx.Role_type_normal().AllIdent()
+func (a TypeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
+	roles := ctx.RoleTypeNormal().AllIdent()
 	slices.SortFunc(roles, func(a, b parser.IIdentContext) int {
 		return cmp.Compare(a.GetText(), b.GetText())
 	})
@@ -21,7 +21,7 @@ func (a AnalyzerListener) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 			} else {
 				// report collected duplicates error if any
 				if len(duplicateRoles) > 1 {
-					a.ErrorListener.ReportAnalyzerError(analyzer_error.NewDuplicateRolesError(ctx, duplicateRoles))
+					a.ErrorListener.ReportAnalyzerError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
 					duplicateRoles = roles[i+1 : i+2]
 				}
 			}
@@ -29,7 +29,7 @@ func (a AnalyzerListener) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 
 		// report last error if present
 		if len(duplicateRoles) > 1 {
-			a.ErrorListener.ReportAnalyzerError(analyzer_error.NewDuplicateRolesError(ctx, duplicateRoles))
+			a.ErrorListener.ReportAnalyzerError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
 		}
 	}
 }

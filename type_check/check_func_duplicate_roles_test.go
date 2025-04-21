@@ -1,4 +1,4 @@
-package analyzer_test
+package type_check_test
 
 import (
 	"testing"

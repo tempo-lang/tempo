@@ -1,4 +1,4 @@
-package analyzer_error
+package type_error
 
 import (
 	"chorego/parser"
