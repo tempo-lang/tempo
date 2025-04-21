@@ -1,1 +1,1 @@
-func@(A,B,C) foo() {}
+func@(A,B,C) foo(fst: int@A, snd: int@(A,B)) {}

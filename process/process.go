@@ -1,16 +1,21 @@
 package process
 
-import "github.com/dave/jennifer/jen"
+import (
+	"chorego/parser"
+
+	"github.com/dave/jennifer/jen"
+)
 
 type Process struct {
 	Name  string
 	Funcs []*Func
 }
 
-func (p *Process) AddFunc(name string) *Func {
+func (p *Process) AddFunc(funcCtx parser.IFuncContext) *Func {
 	fn := &Func{
 		Process: p,
-		Name:    name,
+		FuncCtx: funcCtx,
+		Name:    funcCtx.Ident().GetText(),
 	}
 
 	p.Funcs = append(p.Funcs, fn)

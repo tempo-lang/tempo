@@ -4,8 +4,8 @@ import "github.com/dave/jennifer/jen"
 
 type Network map[string]*Process
 
-func NewNetwork() Network {
-	return Network{}
+func NewNetwork() *Network {
+	return &Network{}
 }
 
 // Process returns the process with the given name, creating one if it doesn't exist yet.

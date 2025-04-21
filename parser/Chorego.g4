@@ -13,14 +13,14 @@ func_param: ident ( COLON value_type)?;
 
 scope: LCURLY RCURLY;
 
-value_type: ident? role_type | ident role_type?;
+value_type: ident role_type;
 role_type: role_type_normal | role_type_shared;
-
-role_type_normal:
-	ROLE_AT (ident | (LPAREN ident (COMMA ident)* RPAREN));
 
 role_type_shared:
 	ROLE_AT (LSQUARE ident (COMMA ident)* RSQUARE);
+
+role_type_normal:
+	ROLE_AT (ident | (LPAREN ident (COMMA ident)* RPAREN));
 
 ident: ID;
 
