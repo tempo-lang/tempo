@@ -43,10 +43,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	network := epp.EppFunc(function)
+	choreography := epp.EppFunc(function)
 
 	file := jen.NewFile("choreography")
-	network.Codegen(file)
+	choreography.Codegen(file)
 
 	err := file.Render(os.Stdout)
 	if err != nil {

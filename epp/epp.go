@@ -2,26 +2,25 @@ package epp
 
 import (
 	"chorego/parser"
-	"chorego/process"
+	"chorego/projection"
 	"slices"
 )
 
-func EppFunc(function parser.IFuncContext) *process.Network {
+func EppFunc(function parser.IFuncContext) *projection.Choreography {
 	func_role := function.Role_type_normal()
 
-	network := process.NewNetwork()
+	choreography := projection.NewChoreography(function.Ident().GetText())
 
 	for _, role := range func_role.AllIdent() {
-		eppFuncRole(network, function, role)
+		eppFuncRole(choreography, function, role)
 	}
 
-	return network
+	return choreography
 }
 
-func eppFuncRole(network *process.Network, function parser.IFuncContext, role parser.IIdentContext) {
+func eppFuncRole(choreography *projection.Choreography, function parser.IFuncContext, role parser.IIdentContext) {
 	roleName := role.ID().GetText()
-	proc := network.Process(roleName)
-	fn := proc.AddFunc(function)
+	fn := choreography.AddFunc(roleName, function)
 
 	// project parameters
 	for _, param := range function.Func_param_list().AllFunc_param() {

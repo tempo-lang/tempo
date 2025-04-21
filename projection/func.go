@@ -1,4 +1,4 @@
-package process
+package projection
 
 import (
 	"chorego/parser"
@@ -8,10 +8,10 @@ import (
 )
 
 type Func struct {
-	Process *Process
-	FuncCtx parser.IFuncContext
-	Name    string
-	Params  []FuncParam
+	Choreography *Choreography
+	FuncCtx      parser.IFuncContext
+	Name         string
+	Params       []FuncParam
 }
 
 type FuncParam struct {
@@ -32,10 +32,8 @@ func (f *Func) AddParam(param parser.IFunc_paramContext, paramType string) *Func
 }
 
 func (f *Func) Codegen(file *jen.File) {
-	// file.Commentf("Projection of function %s at role %s", f.Name, f.Process.Name)
-
 	file.Func().
-		Id(fmt.Sprintf("%s_%s", f.Name, f.Process.Name)).
+		Id(fmt.Sprintf("%s_%s", f.Name, f.Choreography.Name)).
 		ParamsFunc(func(params *jen.Group) {
 			for _, param := range f.Params {
 				params.Id(param.Name).Id(param.Type)

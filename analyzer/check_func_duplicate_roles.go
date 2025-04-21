@@ -1,6 +1,7 @@
 package analyzer
 
 import (
+	"chorego/analyzer/analyzer_error"
 	"chorego/parser"
 	"cmp"
 	"slices"
@@ -20,7 +21,7 @@ func (a AnalyzerListener) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 			} else {
 				// report collected duplicates error if any
 				if len(duplicateRoles) > 1 {
-					a.ErrorListener.ReportAnalyzerError(NewDuplicateRolesError(ctx, duplicateRoles))
+					a.ErrorListener.ReportAnalyzerError(analyzer_error.NewDuplicateRolesError(ctx, duplicateRoles))
 					duplicateRoles = roles[i+1 : i+2]
 				}
 			}
@@ -28,7 +29,7 @@ func (a AnalyzerListener) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 
 		// report last error if present
 		if len(duplicateRoles) > 1 {
-			a.ErrorListener.ReportAnalyzerError(NewDuplicateRolesError(ctx, duplicateRoles))
+			a.ErrorListener.ReportAnalyzerError(analyzer_error.NewDuplicateRolesError(ctx, duplicateRoles))
 		}
 	}
 }

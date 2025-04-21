@@ -2,6 +2,7 @@ package analyzer_test
 
 import (
 	"chorego/analyzer"
+	"chorego/analyzer/analyzer_error"
 	"chorego/parser"
 	"testing"
 
@@ -43,11 +44,11 @@ func (a *AntlrTestErrorListener) SyntaxError(recognizer antlr.Recognizer, offend
 }
 
 type TestErrorListener struct {
-	errors []analyzer.Error
+	errors []analyzer_error.Error
 }
 
 // ReportAnalyzerError implements analyzer.ErrorListener.
-func (t *TestErrorListener) ReportAnalyzerError(err analyzer.Error) {
+func (t *TestErrorListener) ReportAnalyzerError(err analyzer_error.Error) {
 	t.errors = append(t.errors, err)
 }
 
