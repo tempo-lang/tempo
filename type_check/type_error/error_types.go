@@ -63,3 +63,19 @@ func NewSymbolAlreadyExistsError(existing parser.IIdentContext, newSym parser.II
 		NewSymbol:      newSym,
 	}
 }
+
+type UnknownTypeError struct {
+	TypeName parser.IIdentContext
+}
+
+func NewUnknownTypeError(typeName parser.IIdentContext) *UnknownTypeError {
+	return &UnknownTypeError{
+		TypeName: typeName,
+	}
+}
+
+func (e *UnknownTypeError) analyzerError() {}
+
+func (e *UnknownTypeError) Error() string {
+	return fmt.Sprintf("unknown type '%s'", e.TypeName.GetText())
+}

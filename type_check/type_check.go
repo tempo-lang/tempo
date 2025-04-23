@@ -49,6 +49,6 @@ func (tc *TypeChecker) EnterFuncParam(ctx *parser.FuncParamContext) {
 	}
 }
 
-func (tc *TypeChecker) EnterValue_type(ctx *parser.ValueTypeContext) {
-
+func (tc *TypeChecker) EnterValueType(ctx *parser.ValueTypeContext) {
+	tc.checkValueType(ctx)
 }

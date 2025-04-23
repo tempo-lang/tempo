@@ -2,7 +2,9 @@ package projection
 
 import (
 	"chorego/parser"
+	"chorego/type_check"
 	"fmt"
+	"slices"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -37,8 +39,29 @@ func (f *Func) Codegen(file *jen.File) {
 		Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
 		ParamsFunc(func(params *jen.Group) {
 			for _, param := range f.Params {
-				params.Id(param.Name).Id(param.Type)
+
+				var typeName string
+				if slices.Contains(type_check.BuiltinTypes(), param.Type) {
+					typeName = BuiltinTypeGo(param.Type)
+				}
+
+				params.Id(param.Name).Id(typeName)
 			}
 		}).
 		Block()
+}
+
+func BuiltinTypeGo(t string) string {
+	switch t {
+	case "int":
+		return "int"
+	case "float":
+		return "float64"
+	case "string":
+		return "string"
+	case "boolean":
+		return "bool"
+	default:
+		panic(fmt.Sprintf("unknown builtin type: %s", t))
+	}
 }
