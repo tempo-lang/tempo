@@ -24,6 +24,7 @@ func (c *Choreography) AddFunc(role string, funcCtx parser.IFuncContext) *Func {
 		FuncCtx:      funcCtx,
 		Name:         funcCtx.Ident().GetText(),
 		Role:         role,
+		Body:         []Statement{},
 	}
 	return c.Funcs[role]
 }

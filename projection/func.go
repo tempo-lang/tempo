@@ -15,6 +15,7 @@ type Func struct {
 	Name         string
 	Role         string
 	Params       []FuncParam
+	Body         []Statement
 }
 
 type FuncParam struct {
@@ -34,6 +35,11 @@ func (f *Func) AddParam(param parser.IFuncParamContext, paramType string) *Func 
 	return f
 }
 
+func (f *Func) AddStmt(stmt Statement) *Func {
+	f.Body = append(f.Body, stmt)
+	return f
+}
+
 func (f *Func) Codegen(file *jen.File) {
 	file.Func().
 		Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
@@ -48,7 +54,14 @@ func (f *Func) Codegen(file *jen.File) {
 				params.Id(param.Name).Id(typeName)
 			}
 		}).
-		Block()
+		BlockFunc(func(block *jen.Group) {
+
+			for _, bodyStmt := range f.Body {
+				for _, stmt := range bodyStmt.Codegen() {
+					block.Add(stmt)
+				}
+			}
+		})
 }
 
 func BuiltinTypeGo(t string) string {

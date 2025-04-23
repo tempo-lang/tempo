@@ -24,19 +24,37 @@ func eppFuncRole(choreography *projection.Choreography, function parser.IFuncCon
 
 	// project parameters
 	for _, param := range function.FuncParamList().AllFuncParam() {
-		if roleTypeNormal := param.ValueType().RoleType().RoleTypeNormal(); roleTypeNormal != nil {
-			paramRoles := roleTypeNormal.AllIdent()
-			containsRole := slices.ContainsFunc(paramRoles, func(role parser.IIdentContext) bool {
-				return role.GetText() == roleName
-			})
-
-			if containsRole {
-				fn.AddParam(param, param.ValueType().Ident().GetText())
-			}
-		}
-
-		if roleTypeShared := param.ValueType().RoleType().RoleTypeShared(); roleTypeShared != nil {
-			panic("shared role type in parameter not supported yet")
+		if ValueExistsAtRole(param.ValueType(), roleName) {
+			fn.AddParam(param, param.ValueType().Ident().GetText())
 		}
 	}
+
+	// project body
+	for _, stmt := range function.Scope().AllStatement() {
+		if varDecl := stmt.StmtVarDecl(); varDecl != nil {
+			if ValueExistsAtRole(varDecl.ValueType(), roleName) {
+				variableName := varDecl.Ident().GetText()
+				varibleType := varDecl.ValueType().Ident().GetText()
+
+				expr := eppExpression(role, varDecl.Expression())
+
+				fn.AddStmt(projection.NewStmtVarDecl(variableName, varibleType, expr))
+			}
+		}
+	}
+}
+
+func ValueExistsAtRole(value parser.IValueTypeContext, roleName string) bool {
+	var roles []parser.IIdentContext
+	if roleTypeNormal := value.RoleType().RoleTypeNormal(); roleTypeNormal != nil {
+		roles = roleTypeNormal.AllIdent()
+	}
+	if roleTypeShared := value.RoleType().RoleTypeShared(); roleTypeShared != nil {
+		roles = roleTypeShared.AllIdent()
+	}
+
+	containsRole := slices.ContainsFunc(roles, func(role parser.IIdentContext) bool {
+		return role.GetText() == roleName
+	})
+	return containsRole
 }

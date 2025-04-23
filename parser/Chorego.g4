@@ -4,14 +4,10 @@ grammar Chorego;
  * Parser Rules
  */
 
-func: FUNC roleTypeNormal ident funcParamList scope;
+// identifier
+ident: ID;
 
-funcParamList: LPAREN (funcParam (COMMA funcParam)*)? RPAREN;
-
-funcParam: ident COLON valueType;
-
-scope: LCURLY RCURLY;
-
+// type declaration
 valueType: ident roleType;
 roleType: roleTypeNormal | roleTypeShared;
 
@@ -20,7 +16,23 @@ roleTypeShared: ROLE_AT (LSQUARE ident (COMMA ident)* RSQUARE);
 roleTypeNormal:
 	ROLE_AT (ident | (LPAREN ident (COMMA ident)* RPAREN));
 
-ident: ID;
+// function
+func: FUNC roleTypeNormal ident funcParamList scope;
+
+funcParamList: LPAREN (funcParam (COMMA funcParam)*)? RPAREN;
+
+funcParam: ident COLON valueType;
+
+// scope
+scope: LCURLY statement* RCURLY;
+
+// statements
+statement: stmtVarDecl;
+
+stmtVarDecl: LET ident COLON valueType EQUAL expression END;
+
+// expressions
+expression: NUMBER | ident;
 
 /*
  * Lexer Rules
@@ -29,6 +41,7 @@ ident: ID;
 // Keywords
 
 FUNC: 'func';
+LET: 'let';
 
 // Parenthesis
 
@@ -42,10 +55,12 @@ RCURLY: '}';
 
 // Symbols
 
+EQUAL: '=';
 ROLE_AT: '@';
 COMMA: ',';
 COLON: ':';
 
 ID: [a-zA-Z_][a-zA-Z_0-9]*;
 NUMBER: [0-9]+;
+END: ';';
 WHITESPACE: [ \t\r\n]+ -> skip;

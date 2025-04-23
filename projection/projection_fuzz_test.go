@@ -20,6 +20,12 @@ func FuzzProjection(f *testing.F) {
 	f.Add("func@(X,Y,Z) foo() {}")
 	f.Add("func@(A,B) foo(snd: int@(A,B)) {}")
 	f.Add("func@(A,B,C) foo(fst: float@A, snd: string@(A,B)) {}")
+	f.Add(`
+		func@(A,B,C) foo(fst: int@A, snd: int@(A,B)) {
+			let x: int@(B,C) = 42;
+			let y: int@(A,B) = 12;
+		}
+	`)
 
 	f.Fuzz(func(t *testing.T, source string) {
 		input := antlr.NewInputStream(source)

@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A,B,C)A(){let A:int@(A,B)=10;let A:int@(A,A)=0;}")
