@@ -5,57 +5,24 @@ import (
 	"os"
 
 	"chorego/epp"
-	"chorego/misc"
-	"chorego/parser"
-	"chorego/type_check"
 
 	"github.com/antlr4-go/antlr/v4"
-	"github.com/dave/jennifer/jen"
 )
 
 func main() {
-	input, _ := antlr.NewFileStream(os.Args[1])
-	terminateListener := misc.TerminateErrorListener{}
-
-	// lexer
-	lexer := parser.NewChoregoLexer(input)
-	lexer.AddErrorListener(&terminateListener)
-
-	// parser
-	stream := antlr.NewCommonTokenStream(lexer, 0)
-	p := parser.NewChoregoParser(stream)
-	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
-
-	p.AddErrorListener(&terminateListener)
-
-	// parse program
-	function := p.Func_()
-
-	if terminateListener.ProducedError {
-		os.Exit(1)
-	}
-
-	a := type_check.New()
-	antlr.ParseTreeWalkerDefault.Walk(a, function)
-
-	analyzerErrorListener, ok := a.ErrorListener.(*type_check.DefaultErrorListener)
-	if !ok {
-		fmt.Println("Analyzer error listener was expected to be DefaultErrorListener")
-		os.Exit(1)
-	}
-
-	if analyzerErrorListener.ProducedError {
-		os.Exit(1)
-	}
-
-	choreography := epp.EppFunc(function)
-
-	file := jen.NewFile("choreography")
-	choreography.Codegen(file)
-
-	err := file.Render(os.Stdout)
+	input, err := antlr.NewFileStream(os.Args[1])
 	if err != nil {
-		fmt.Printf("Failed to render file: %v\n", err)
+		fmt.Printf("failed to get file stream: %v\n", err)
 		os.Exit(1)
 	}
+
+	output, errors := epp.EndpointProject(input)
+	if errors != nil {
+		for _, err := range errors {
+			fmt.Printf("%v\n", err)
+		}
+		os.Exit(1)
+	}
+
+	fmt.Printf("%s", output)
 }

@@ -2,7 +2,6 @@ package type_check
 
 import (
 	"chorego/type_check/type_error"
-	"fmt"
 )
 
 type ErrorListener interface {
@@ -10,10 +9,9 @@ type ErrorListener interface {
 }
 
 type DefaultErrorListener struct {
-	ProducedError bool
+	Errors []type_error.Error
 }
 
 func (e *DefaultErrorListener) ReportAnalyzerError(err type_error.Error) {
-	e.ProducedError = true
-	fmt.Println(err.Error())
+	e.Errors = append(e.Errors, err)
 }

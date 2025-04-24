@@ -2,13 +2,9 @@ package projection_test
 
 import (
 	"chorego/epp"
-	"chorego/misc"
-	"chorego/parser"
-	"chorego/type_check"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
-	"github.com/dave/jennifer/jen"
 
 	"go/ast"
 	goparser "go/parser"
@@ -28,36 +24,11 @@ func FuzzProjection(f *testing.F) {
 	`)
 
 	f.Fuzz(func(t *testing.T, source string) {
-		terminateErrorListener := misc.TerminateErrorListener{}
 		input := antlr.NewInputStream(source)
-		lexer := parser.NewChoregoLexer(input)
-		lexer.AddErrorListener(&terminateErrorListener)
-		stream := antlr.NewCommonTokenStream(lexer, 0)
-		p := parser.NewChoregoParser(stream)
-		p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
-		p.AddErrorListener(&terminateErrorListener)
-
-		// parse program
-		function := p.Func_()
-
-		if terminateErrorListener.ProducedError {
+		output, errors := epp.EndpointProject(input)
+		if len(errors) > 0 {
 			return
 		}
-
-		a := type_check.New()
-		antlr.ParseTreeWalkerDefault.Walk(a, function)
-
-		analyzerErrorListener := a.ErrorListener.(*type_check.DefaultErrorListener)
-
-		if analyzerErrorListener.ProducedError {
-			return
-		}
-
-		choreography := epp.EppFunc(function)
-		file := jen.NewFile("choreography")
-		choreography.Codegen(file)
-
-		output := file.GoString()
 
 		fset := token.NewFileSet()
 		parsedAST, err := goparser.ParseFile(fset, "", output, goparser.AllErrors)

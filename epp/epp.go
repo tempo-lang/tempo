@@ -1,47 +1,60 @@
 package epp
 
 import (
+	"chorego/misc"
 	"chorego/parser"
-	"chorego/projection"
+	"chorego/type_check"
 	"slices"
+
+	"github.com/antlr4-go/antlr/v4"
+	"github.com/dave/jennifer/jen"
 )
 
-func EppFunc(function parser.IFuncContext) *projection.Choreography {
-	func_role := function.RoleTypeNormal()
+func EndpointProject(input antlr.CharStream) (output string, errors []error) {
+	// input, _ := antlr.NewFileStream(os.Args[1])
+	errorListener := misc.ErrorListener{}
 
-	choreography := projection.NewChoreography(function.Ident().GetText())
+	// lexer
+	lexer := parser.NewChoregoLexer(input)
+	lexer.AddErrorListener(&errorListener)
 
-	for _, role := range func_role.AllIdent() {
-		eppFuncRole(choreography, function, role)
+	// parser
+	stream := antlr.NewCommonTokenStream(lexer, 0)
+	p := parser.NewChoregoParser(stream)
+	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
+
+	p.AddErrorListener(&errorListener)
+
+	// parse program
+	function := p.Func_()
+
+	if len(errorListener.Errors) > 0 {
+		errors = errorListener.Errors
+		return
 	}
 
-	return choreography
-}
+	a := type_check.New()
+	antlr.ParseTreeWalkerDefault.Walk(a, function)
 
-func eppFuncRole(choreography *projection.Choreography, function parser.IFuncContext, role parser.IIdentContext) {
-	roleName := role.ID().GetText()
-	fn := choreography.AddFunc(roleName, function)
+	analyzerErrorListener, ok := a.ErrorListener.(*type_check.DefaultErrorListener)
+	if !ok {
+		panic("analyzer error listener was expected to be DefaultErrorListener")
+	}
 
-	// project parameters
-	for _, param := range function.FuncParamList().AllFuncParam() {
-		if ValueExistsAtRole(param.ValueType(), roleName) {
-			fn.AddParam(param, param.ValueType().Ident().GetText())
+	if len(analyzerErrorListener.Errors) > 0 {
+		for _, err := range analyzerErrorListener.Errors {
+			errors = append(errors, err)
 		}
+		return
 	}
 
-	// project body
-	for _, stmt := range function.Scope().AllStatement() {
-		if varDecl := stmt.StmtVarDecl(); varDecl != nil {
-			if ValueExistsAtRole(varDecl.ValueType(), roleName) {
-				variableName := varDecl.Ident().GetText()
-				varibleType := varDecl.ValueType().Ident().GetText()
+	choreography := EppFunc(function)
 
-				expr := eppExpression(role, varDecl.Expression())
+	file := jen.NewFile("choreography")
+	choreography.Codegen(file)
 
-				fn.AddStmt(projection.NewStmtVarDecl(variableName, varibleType, expr))
-			}
-		}
-	}
+	output = file.GoString()
+	return
 }
 
 func ValueExistsAtRole(value parser.IValueTypeContext, roleName string) bool {
