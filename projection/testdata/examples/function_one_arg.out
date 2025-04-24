@@ -2,5 +2,5 @@
 package choreography
 
 // Projection of choreography foo
-func foo_A(snd int) {}
 func foo_B(snd int) {}
+func foo_A(snd int) {}

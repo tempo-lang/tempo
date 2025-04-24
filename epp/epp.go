@@ -21,7 +21,7 @@ func EndpointProject(input antlr.CharStream) (output string, errors []error) {
 	// parser
 	stream := antlr.NewCommonTokenStream(lexer, 0)
 	p := parser.NewChoregoParser(stream)
-	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
+	// p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 
 	p.AddErrorListener(&errorListener)
 

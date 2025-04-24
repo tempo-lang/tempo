@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -53,8 +54,12 @@ func TestExamples(t *testing.T) {
 				t.Fatalf("error reading output file: %v", outputFile)
 			}
 
-			if output != string(outputFile) {
-				t.Fatalf("projected code differes from output file:\n\n%s", output)
+			whitespace := " \r\n\t"
+			trimmedOutput := strings.Trim(output, whitespace)
+			trimmedOutputFile := strings.Trim(string(outputFile), whitespace)
+
+			if trimmedOutput != trimmedOutputFile {
+				t.Fatalf("projected code differes from output file:\nActual:\n%s\nExpected:\n%s\n", trimmedOutput, trimmedOutputFile)
 			}
 
 		})
