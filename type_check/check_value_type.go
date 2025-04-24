@@ -7,7 +7,7 @@ import (
 )
 
 func BuiltinTypes() []string {
-	return []string{"int", "float", "string", "boolean"}
+	return []string{"Int", "Float", "String", "Bool"}
 }
 
 func (tc *TypeChecker) checkValueType(ctx parser.IValueTypeContext) {

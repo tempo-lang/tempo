@@ -15,18 +15,23 @@ import (
 
 func main() {
 	input, _ := antlr.NewFileStream(os.Args[1])
+	terminateListener := misc.TerminateErrorListener{}
+
+	// lexer
 	lexer := parser.NewChoregoLexer(input)
+	lexer.AddErrorListener(&terminateListener)
+
+	// parser
 	stream := antlr.NewCommonTokenStream(lexer, 0)
 	p := parser.NewChoregoParser(stream)
 	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 
-	terminateErrorListener := misc.TerminateErrorListener{}
-	p.AddErrorListener(&terminateErrorListener)
+	p.AddErrorListener(&terminateListener)
 
 	// parse program
 	function := p.Func_()
 
-	if terminateErrorListener.ProducedError {
+	if terminateListener.ProducedError {
 		os.Exit(1)
 	}
 

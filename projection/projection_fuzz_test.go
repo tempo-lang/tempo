@@ -18,23 +18,23 @@ import (
 
 func FuzzProjection(f *testing.F) {
 	f.Add("func@(X,Y,Z) foo() {}")
-	f.Add("func@(A,B) foo(snd: int@(A,B)) {}")
-	f.Add("func@(A,B,C) foo(fst: float@A, snd: string@(A,B)) {}")
+	f.Add("func@(A,B) foo(snd: Int@(A,B)) {}")
+	f.Add("func@(A,B,C) foo(fst: Float@A, snd: String@(A,B)) {}")
 	f.Add(`
-		func@(A,B,C) foo(fst: int@A, snd: int@(A,B)) {
-			let x: int@(B,C) = 42;
-			let y: int@(A,B) = 12;
+		func@(A,B,C) foo(fst: Int@A, snd: Int@(A,B)) {
+			let x: Int@(B,C) = 42;
+			let y: Int@(A,B) = 12;
 		}
 	`)
 
 	f.Fuzz(func(t *testing.T, source string) {
+		terminateErrorListener := misc.TerminateErrorListener{}
 		input := antlr.NewInputStream(source)
 		lexer := parser.NewChoregoLexer(input)
+		lexer.AddErrorListener(&terminateErrorListener)
 		stream := antlr.NewCommonTokenStream(lexer, 0)
 		p := parser.NewChoregoParser(stream)
 		p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
-
-		terminateErrorListener := misc.TerminateErrorListener{}
 		p.AddErrorListener(&terminateErrorListener)
 
 		// parse program

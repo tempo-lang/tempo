@@ -66,13 +66,13 @@ func (f *Func) Codegen(file *jen.File) {
 
 func BuiltinTypeGo(t string) string {
 	switch t {
-	case "int":
+	case "Int":
 		return "int"
-	case "float":
+	case "Float":
 		return "float64"
-	case "string":
+	case "String":
 		return "string"
-	case "boolean":
+	case "Bool":
 		return "bool"
 	default:
 		panic(fmt.Sprintf("unknown builtin type: %s", t))
