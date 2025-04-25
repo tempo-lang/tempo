@@ -10,12 +10,12 @@ func BuiltinTypes() []string {
 	return []string{"Int", "Float", "String", "Bool"}
 }
 
-func (tc *TypeChecker) checkValueType(ctx parser.IValueTypeContext) {
+func (tc *typeChecker) checkValueType(ctx parser.IValueTypeContext) {
 
 	typeName := ctx.Ident()
 	isBuiltin := slices.Contains(BuiltinTypes(), typeName.GetText())
 
 	if !isBuiltin {
-		tc.ErrorListener.ReportAnalyzerError(type_error.NewUnknownTypeError(typeName))
+		tc.ErrorListener.ReportTypeError(type_error.NewUnknownTypeError(typeName))
 	}
 }

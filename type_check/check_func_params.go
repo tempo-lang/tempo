@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-func (a *TypeChecker) checkFuncParamUnknownRoles(ctx *parser.FuncParamContext) {
+func (a *typeChecker) checkFuncParamUnknownRoles(ctx *parser.FuncParamContext) {
 	fn := a.funcScope()
 
 	allRoles := []parser.IIdentContext{}
@@ -23,7 +23,7 @@ func (a *TypeChecker) checkFuncParamUnknownRoles(ctx *parser.FuncParamContext) {
 		})
 
 		if !containsRole {
-			a.ErrorListener.ReportAnalyzerError(type_error.NewUnknownRoleError(fn, role))
+			a.ErrorListener.ReportTypeError(type_error.NewUnknownRoleError(fn, role))
 		}
 	}
 }

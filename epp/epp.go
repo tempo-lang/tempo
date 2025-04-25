@@ -26,32 +26,25 @@ func EndpointProject(input antlr.CharStream) (output string, errors []error) {
 	p.AddErrorListener(&errorListener)
 
 	// parse program
-	function := p.Func_()
+	sourceFile := p.SourceFile()
 
 	if len(errorListener.Errors) > 0 {
 		errors = errorListener.Errors
 		return
 	}
 
-	a := type_check.New()
-	antlr.ParseTreeWalkerDefault.Walk(a, function)
-
-	analyzerErrorListener, ok := a.ErrorListener.(*type_check.DefaultErrorListener)
-	if !ok {
-		panic("analyzer error listener was expected to be DefaultErrorListener")
-	}
-
-	if len(analyzerErrorListener.Errors) > 0 {
-		for _, err := range analyzerErrorListener.Errors {
+	typeErrors := type_check.TypeCheck(sourceFile)
+	if len(typeErrors) > 0 {
+		for _, err := range typeErrors {
 			errors = append(errors, err)
 		}
 		return
 	}
 
-	choreography := EppFunc(function)
+	eppFile := EppSourceFile(sourceFile)
 
 	file := jen.NewFile("choreography")
-	choreography.Codegen(file)
+	eppFile.Codegen(file)
 
 	output = file.GoString()
 	return

@@ -4,6 +4,9 @@ grammar Chorego;
  * Parser Rules
  */
 
+// source file
+sourceFile: func*;
+
 // identifier
 ident: ID;
 

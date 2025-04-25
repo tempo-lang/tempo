@@ -7,7 +7,7 @@ import (
 	"slices"
 )
 
-func (a TypeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
+func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 	roles := ctx.RoleTypeNormal().AllIdent()
 	slices.SortFunc(roles, func(a, b parser.IIdentContext) int {
 		return cmp.Compare(a.GetText(), b.GetText())
@@ -21,7 +21,7 @@ func (a TypeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 			} else {
 				// report collected duplicates error if any
 				if len(duplicateRoles) > 1 {
-					a.ErrorListener.ReportAnalyzerError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
+					a.ErrorListener.ReportTypeError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
 					duplicateRoles = roles[i+1 : i+2]
 				}
 			}
@@ -29,7 +29,7 @@ func (a TypeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 
 		// report last error if present
 		if len(duplicateRoles) > 1 {
-			a.ErrorListener.ReportAnalyzerError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
+			a.ErrorListener.ReportTypeError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
 		}
 	}
 }

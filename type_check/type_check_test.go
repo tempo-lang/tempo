@@ -1,8 +1,7 @@
 package type_check_test
 
 import (
-	"chorego/parser"
-	"chorego/type_check"
+	"chorego/epp"
 	"chorego/type_check/type_error"
 	"testing"
 
@@ -47,8 +46,8 @@ type TestErrorListener struct {
 	errors []type_error.Error
 }
 
-// ReportAnalyzerError implements analyzer.ErrorListener.
-func (t *TestErrorListener) ReportAnalyzerError(err type_error.Error) {
+// ReportTypeError implements analyzer.ErrorListener.
+func (t *TestErrorListener) ReportTypeError(err type_error.Error) {
 	t.errors = append(t.errors, err)
 }
 
@@ -61,34 +60,22 @@ func (data *AnalyzerTestData) Assert(t *testing.T) {
 		t.Parallel()
 
 		input := antlr.NewInputStream(data.input)
-		lexer := parser.NewChoregoLexer(input)
-		lexer.AddErrorListener(NewAntlrTestErrorListener(t))
-		stream := antlr.NewCommonTokenStream(lexer, 0)
-		p := parser.NewChoregoParser(stream)
-		p.AddErrorListener(NewAntlrTestErrorListener(t))
+		_, errors := epp.EndpointProject(input)
 
-		f := p.Func_()
-
-		a := type_check.New()
-		errorListener := NewTestErrorListener()
-		a.ErrorListener = errorListener
-
-		antlr.ParseTreeWalkerDefault.Walk(a, f)
-
-		for i := range min(len(data.errors), len(errorListener.errors)) {
+		for i := range min(len(data.errors), len(errors)) {
 			expected := data.errors[i]
-			actual := errorListener.errors[i].Error()
+			actual := errors[i].Error()
 			if expected != actual {
 				t.Errorf("error %d did not match, expected '%s', got '%s'.", i, expected, actual)
 			}
 		}
 
-		if len(data.errors) > len(errorListener.errors) {
-			t.Errorf("unexpected few actual errors: %v", data.errors[len(errorListener.errors):])
+		if len(data.errors) > len(errors) {
+			t.Errorf("unexpected few actual errors: %v", data.errors[len(errors):])
 		}
 
-		if len(errorListener.errors) > len(data.errors) {
-			t.Errorf("unexpected extra actual errors, expected %d got %d", len(data.errors), len(errorListener.errors))
+		if len(errors) > len(data.errors) {
+			t.Errorf("unexpected extra actual errors, expected %d got %d", len(data.errors), len(errors))
 		}
 	})
 }
