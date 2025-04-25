@@ -1,7 +1,7 @@
 package projection_test
 
 import (
-	"chorego/epp"
+	"chorego/chorego"
 	"errors"
 	"fmt"
 	"os"
@@ -29,7 +29,7 @@ func TestExamples(t *testing.T) {
 				t.Fatal("error reading source file:", err)
 			}
 
-			output, compilerErrors := epp.EndpointProject(input)
+			output, compilerErrors := chorego.Compile(input)
 			if len(compilerErrors) > 0 {
 				errorsFormatted := ""
 				for _, err := range compilerErrors {

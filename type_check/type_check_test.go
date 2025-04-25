@@ -1,7 +1,7 @@
 package type_check_test
 
 import (
-	"chorego/epp"
+	"chorego/chorego"
 	"chorego/type_check/type_error"
 	"testing"
 
@@ -60,7 +60,7 @@ func (data *AnalyzerTestData) Assert(t *testing.T) {
 		t.Parallel()
 
 		input := antlr.NewInputStream(data.input)
-		_, errors := epp.EndpointProject(input)
+		_, errors := chorego.Compile(input)
 
 		for i := range min(len(data.errors), len(errors)) {
 			expected := data.errors[i]

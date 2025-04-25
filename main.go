@@ -1,10 +1,9 @@
 package main
 
 import (
+	"chorego/chorego"
 	"fmt"
 	"os"
-
-	"chorego/epp"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -16,7 +15,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	output, errors := epp.EndpointProject(input)
+	output, errors := chorego.Compile(input)
 	if errors != nil {
 		for _, err := range errors {
 			fmt.Printf("%v\n", err)

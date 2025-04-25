@@ -1,0 +1,2 @@
+func@(A,B) hello(name: String@A) {}
+func@(A,B) goodbye(name: String@B) {}

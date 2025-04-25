@@ -1,7 +1,7 @@
 package projection_test
 
 import (
-	"chorego/epp"
+	"chorego/chorego"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -25,7 +25,7 @@ func FuzzProjection(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, source string) {
 		input := antlr.NewInputStream(source)
-		output, errors := epp.EndpointProject(input)
+		output, errors := chorego.Compile(input)
 		if len(errors) > 0 {
 			return
 		}

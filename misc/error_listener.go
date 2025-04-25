@@ -2,6 +2,7 @@ package misc
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -27,5 +28,8 @@ func (t *ErrorListener) ReportContextSensitivity(recognizer antlr.Parser, dfa *a
 
 // SyntaxError implements antlr.ErrorListener.
 func (t *ErrorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{}, line int, column int, msg string, e antlr.RecognitionException) {
-	t.Errors = append(t.Errors, errors.New("syntax error"))
+	t.Errors = append(
+		t.Errors,
+		fmt.Errorf("syntax error: %d:%d: %s", line, column, msg),
+	)
 }
