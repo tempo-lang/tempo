@@ -2,12 +2,13 @@ package type_error
 
 import (
 	"chorego/parser"
+	"chorego/type_check/types"
 	"fmt"
 )
 
 type Error interface {
 	error
-	analyzerError()
+	IsTypeError()
 }
 
 type DuplicateRolesError struct {
@@ -22,7 +23,7 @@ func NewDuplicateRolesError(function parser.IFuncContext, duplicateRoles []parse
 	}
 }
 
-func (e *DuplicateRolesError) analyzerError() {}
+func (e *DuplicateRolesError) IsTypeError() {}
 
 func (e *DuplicateRolesError) Error() string {
 	return fmt.Sprintf("function '%s' has duplicate role '%s'", e.Func.Ident().GetText(), e.DuplicateRoles[0].GetText())
@@ -40,7 +41,7 @@ func NewUnknownRoleError(function parser.IFuncContext, unknownRole parser.IIdent
 	}
 }
 
-func (e *UnknownRoleError) analyzerError() {}
+func (e *UnknownRoleError) IsTypeError() {}
 
 func (e *UnknownRoleError) Error() string {
 	return fmt.Sprintf("unknown role '%s' in function '%s'", e.UnknownRole.GetText(), e.Func.Ident().GetText())
@@ -51,7 +52,7 @@ type SymbolAlreadyExists struct {
 	NewSymbol      parser.IIdentContext
 }
 
-func (s *SymbolAlreadyExists) analyzerError() {}
+func (s *SymbolAlreadyExists) IsTypeError() {}
 
 func (s *SymbolAlreadyExists) Error() string {
 	return fmt.Sprintf("symbol '%s' already declared", s.NewSymbol.GetText())
@@ -74,8 +75,46 @@ func NewUnknownTypeError(typeName parser.IIdentContext) *UnknownTypeError {
 	}
 }
 
-func (e *UnknownTypeError) analyzerError() {}
+func (e *UnknownTypeError) IsTypeError() {}
 
 func (e *UnknownTypeError) Error() string {
 	return fmt.Sprintf("unknown type '%s'", e.TypeName.GetText())
+}
+
+type UnknownSymbolError struct {
+	SymName parser.IIdentContext
+}
+
+func (e *UnknownSymbolError) Error() string {
+	return fmt.Sprintf("unknown symbol '%s'", e.SymName.GetText())
+}
+
+func (e *UnknownSymbolError) IsTypeError() {}
+
+func NewUnknownSymbolError(symName parser.IIdentContext) *UnknownSymbolError {
+	return &UnknownSymbolError{
+		SymName: symName,
+	}
+}
+
+type TypeMismatchError struct {
+	DeclToken parser.IValueTypeContext
+	DeclType  types.Type
+	ExprToken parser.IExpressionContext
+	ExprType  types.Type
+}
+
+func (e *TypeMismatchError) Error() string {
+	return fmt.Sprintf("type mismatch, expected %s found %s", e.DeclType.ToString(), e.ExprType.ToString())
+}
+
+func (e *TypeMismatchError) IsTypeError() {}
+
+func NewTypeMismatchError(declToken parser.IValueTypeContext, declType types.Type, exprToken parser.IExpressionContext, exprType types.Type) *TypeMismatchError {
+	return &TypeMismatchError{
+		DeclToken: declToken,
+		DeclType:  declType,
+		ExprToken: exprToken,
+		ExprType:  exprType,
+	}
 }

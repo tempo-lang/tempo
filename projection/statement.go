@@ -1,8 +1,7 @@
 package projection
 
 import (
-	"chorego/type_check"
-	"slices"
+	"chorego/type_check/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -14,11 +13,11 @@ type Statement interface {
 
 type StmtVarDecl struct {
 	Name string
-	Type string
+	Type types.Type
 	Expr Expression
 }
 
-func NewStmtVarDecl(name string, typeName string, expr Expression) *StmtVarDecl {
+func NewStmtVarDecl(name string, typeName types.Type, expr Expression) *StmtVarDecl {
 	return &StmtVarDecl{
 		Name: name,
 		Type: typeName,
@@ -28,12 +27,7 @@ func NewStmtVarDecl(name string, typeName string, expr Expression) *StmtVarDecl 
 
 func (decl *StmtVarDecl) Codegen() jen.Statement {
 
-	typeName := decl.Type
-	if slices.Contains(type_check.BuiltinTypes(), decl.Type) {
-		typeName = BuiltinTypeGo(decl.Type)
-	}
-
-	genDecl := jen.Var().Id(decl.Name).Id(typeName).Op("=").Add(decl.Expr.Codegen())
+	genDecl := jen.Var().Id(decl.Name).Id(CodegenType(decl.Type)).Op("=").Add(decl.Expr.Codegen())
 	fixUnused := jen.Id(decl.Name).Op("=").Id(decl.Name).Comment("Suppress unused variable error")
 
 	return []jen.Code{genDecl, fixUnused}

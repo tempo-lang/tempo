@@ -27,6 +27,13 @@ func TestFuncDuplicateRoles(t *testing.T) {
 				"function 'foo' has duplicate role 'B'",
 			},
 		},
+		{
+			name:  "duplicate role one between",
+			input: "func@(B,A,B) foo(){}",
+			errors: []string{
+				"function 'foo' has duplicate role 'B'",
+			},
+		},
 	}
 
 	for _, test := range tests {

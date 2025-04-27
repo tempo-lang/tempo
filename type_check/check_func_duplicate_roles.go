@@ -22,8 +22,8 @@ func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 				// report collected duplicates error if any
 				if len(duplicateRoles) > 1 {
 					a.errorListener.ReportTypeError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
-					duplicateRoles = roles[i+1 : i+2]
 				}
+				duplicateRoles = roles[i+1 : i+2]
 			}
 		}
 

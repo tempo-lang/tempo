@@ -1,4 +1,4 @@
-func@(A,B,C) foo(fst: Int@A, snd: Int@(A,B)) {
-  let x: Int@(B,C) = 42;
+func@(A,B) foo(fst: Int@A, snd: Int@(A,B)) {
+  let x: Int@(B,C) = hello;
   let y: Int@(A,B) = 12;
 }

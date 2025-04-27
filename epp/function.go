@@ -3,6 +3,7 @@ package epp
 import (
 	"chorego/parser"
 	"chorego/projection"
+	"chorego/type_check"
 )
 
 func EppFunc(function parser.IFuncContext) *projection.Choreography {
@@ -24,7 +25,8 @@ func eppFuncRole(choreography *projection.Choreography, function parser.IFuncCon
 	// project parameters
 	for _, param := range function.FuncParamList().AllFuncParam() {
 		if ValueExistsAtRole(param.ValueType(), roleName) {
-			fn.AddParam(param, param.ValueType().Ident().GetText())
+			valType, _ := type_check.ParseValueType(param.ValueType())
+			fn.AddParam(param, valType)
 		}
 	}
 
@@ -33,7 +35,7 @@ func eppFuncRole(choreography *projection.Choreography, function parser.IFuncCon
 		if varDecl := stmt.StmtVarDecl(); varDecl != nil {
 			if ValueExistsAtRole(varDecl.ValueType(), roleName) {
 				variableName := varDecl.Ident().GetText()
-				varibleType := varDecl.ValueType().Ident().GetText()
+				varibleType, _ := type_check.ParseValueType(varDecl.ValueType())
 
 				expr := eppExpression(role, varDecl.Expression())
 

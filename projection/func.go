@@ -2,9 +2,8 @@ package projection
 
 import (
 	"chorego/parser"
-	"chorego/type_check"
+	"chorego/type_check/types"
 	"fmt"
-	"slices"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -22,10 +21,10 @@ type FuncParam struct {
 	Func     *Func
 	ParamCtx parser.IFuncParamContext
 	Name     string
-	Type     string
+	Type     types.Type
 }
 
-func (f *Func) AddParam(param parser.IFuncParamContext, paramType string) *Func {
+func (f *Func) AddParam(param parser.IFuncParamContext, paramType types.Type) *Func {
 	f.Params = append(f.Params, FuncParam{
 		Func:     f,
 		ParamCtx: param,
@@ -45,13 +44,7 @@ func (f *Func) Codegen(file *jen.File) {
 		Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
 		ParamsFunc(func(params *jen.Group) {
 			for _, param := range f.Params {
-
-				var typeName string
-				if slices.Contains(type_check.BuiltinTypes(), param.Type) {
-					typeName = BuiltinTypeGo(param.Type)
-				}
-
-				params.Id(param.Name).Id(typeName)
+				params.Id(param.Name).Id(CodegenType(param.Type))
 			}
 		}).
 		BlockFunc(func(block *jen.Group) {
@@ -62,19 +55,4 @@ func (f *Func) Codegen(file *jen.File) {
 				}
 			}
 		})
-}
-
-func BuiltinTypeGo(t string) string {
-	switch t {
-	case "Int":
-		return "int"
-	case "Float":
-		return "float64"
-	case "String":
-		return "string"
-	case "Bool":
-		return "bool"
-	default:
-		panic(fmt.Sprintf("unknown builtin type: %s", t))
-	}
 }

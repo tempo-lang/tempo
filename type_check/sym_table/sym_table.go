@@ -1,6 +1,7 @@
 package sym_table
 
 import (
+	"chorego/parser"
 	"chorego/type_check/type_error"
 )
 
@@ -37,14 +38,14 @@ func (sym *SymTable) Scope() *Scope {
 	return sym.scope[len(sym.scope)-1]
 }
 
-func (sym *SymTable) LookupSymbol(name string) Symbol {
+func (sym *SymTable) LookupSymbol(name parser.IIdentContext) (Symbol, *type_error.UnknownSymbolError) {
 	for i := len(sym.scope) - 1; i >= 0; i-- {
-		symbol := sym.scope[i].Get(name)
+		symbol := sym.scope[i].Get(name.GetText())
 		if symbol != nil {
-			return symbol
+			return symbol, nil
 		}
 	}
-	return nil
+	return nil, type_error.NewUnknownSymbolError(name)
 }
 
 func (sym *SymTable) InsertSymbol(symbol Symbol) *type_error.SymbolAlreadyExists {

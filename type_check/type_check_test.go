@@ -57,7 +57,6 @@ func NewTestErrorListener() *TestErrorListener {
 
 func (data *AnalyzerTestData) Assert(t *testing.T) {
 	t.Run(data.name, func(t *testing.T) {
-		t.Parallel()
 
 		input := antlr.NewInputStream(data.input)
 		_, errors := compiler.Compile(input)

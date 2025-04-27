@@ -1,10 +1,14 @@
 package sym_table
 
-import "chorego/parser"
+import (
+	"chorego/parser"
+	"chorego/type_check/types"
+)
 
 type Symbol interface {
 	SymbolName() string
 	Ident() parser.IIdentContext
+	Type() types.Type
 }
 
 type FuncSymbol struct {
@@ -17,6 +21,10 @@ func (f *FuncSymbol) Ident() parser.IIdentContext {
 
 func (f *FuncSymbol) SymbolName() string {
 	return f.Func.Ident().GetText()
+}
+
+func (f *FuncSymbol) Type() types.Type {
+	panic("unimplemented")
 }
 
 func NewFuncSymbol(fn parser.IFuncContext) *FuncSymbol {
@@ -39,6 +47,10 @@ func (param *FuncParamSymbol) Ident() parser.IIdentContext {
 	return param.Param.Ident()
 }
 
+func (f *FuncParamSymbol) Type() types.Type {
+	panic("unimplemented")
+}
+
 type VariableSymbol struct {
 	Decl parser.IStmtVarDeclContext
 }
@@ -53,4 +65,8 @@ func (v *VariableSymbol) SymbolName() string {
 
 func (v *VariableSymbol) Ident() parser.IIdentContext {
 	return v.Decl.Ident()
+}
+
+func (v *VariableSymbol) Type() types.Type {
+	panic("unimplemented")
 }
