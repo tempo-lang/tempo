@@ -1,4 +1,4 @@
-package chorego
+package compiler
 
 import (
 	"chorego/epp"

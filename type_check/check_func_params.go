@@ -23,7 +23,7 @@ func (a *typeChecker) checkFuncParamUnknownRoles(ctx *parser.FuncParamContext) {
 		})
 
 		if !containsRole {
-			a.ErrorListener.ReportTypeError(type_error.NewUnknownRoleError(fn, role))
+			a.errorListener.ReportTypeError(type_error.NewUnknownRoleError(fn, role))
 		}
 	}
 }

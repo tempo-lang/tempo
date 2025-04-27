@@ -1,7 +1,7 @@
 package main
 
 import (
-	"chorego/chorego"
+	"chorego/compiler"
 	"fmt"
 	"os"
 
@@ -15,7 +15,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	output, errors := chorego.Compile(input)
+	output, errors := compiler.Compile(input)
 	if errors != nil {
 		for _, err := range errors {
 			fmt.Printf("%v\n", err)

@@ -16,6 +16,6 @@ func (tc *typeChecker) checkValueType(ctx parser.IValueTypeContext) {
 	isBuiltin := slices.Contains(BuiltinTypes(), typeName.GetText())
 
 	if !isBuiltin {
-		tc.ErrorListener.ReportTypeError(type_error.NewUnknownTypeError(typeName))
+		tc.errorListener.ReportTypeError(type_error.NewUnknownTypeError(typeName))
 	}
 }

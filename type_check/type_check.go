@@ -10,7 +10,7 @@ import (
 
 type typeChecker struct {
 	parser.BaseChoregoListener
-	ErrorListener ErrorListener
+	errorListener ErrorListener
 
 	funcScopeStack []parser.IFuncContext
 	symTable       *sym_table.SymTable
@@ -21,7 +21,7 @@ func TypeCheck(sourceFile parser.ISourceFileContext) []type_error.Error {
 
 	antlr.ParseTreeWalkerDefault.Walk(tc, sourceFile)
 
-	analyzerErrorListener, ok := tc.ErrorListener.(*DefaultErrorListener)
+	analyzerErrorListener, ok := tc.errorListener.(*DefaultErrorListener)
 	if !ok {
 		panic("analyzer error listener was expected to be DefaultErrorListener")
 	}
@@ -31,10 +31,14 @@ func TypeCheck(sourceFile parser.ISourceFileContext) []type_error.Error {
 
 func new() *typeChecker {
 	return &typeChecker{
-		ErrorListener:  &DefaultErrorListener{},
+		errorListener:  &DefaultErrorListener{},
 		funcScopeStack: []parser.IFuncContext{},
 		symTable:       sym_table.New(),
 	}
+}
+
+func (tc *typeChecker) reportTypeError(err type_error.Error) {
+	tc.errorListener.ReportTypeError(err)
 }
 
 func (tc *typeChecker) funcScope() parser.IFuncContext {
@@ -48,7 +52,7 @@ func (tc *typeChecker) EnterSourceFile(ctx *parser.SourceFileContext) {
 	globalScope := tc.symTable.EnterScope() // enter global scope
 	typeErrors := addGlobalSymbols(globalScope, ctx)
 	for _, err := range typeErrors {
-		tc.ErrorListener.ReportTypeError(err)
+		tc.reportTypeError(err)
 	}
 }
 
@@ -73,10 +77,17 @@ func (tc *typeChecker) EnterFuncParam(ctx *parser.FuncParamContext) {
 
 	err := tc.symTable.InsertSymbol(sym_table.NewFuncParamSymbol(ctx))
 	if err != nil {
-		tc.ErrorListener.ReportTypeError(err)
+		tc.reportTypeError(err)
 	}
 }
 
 func (tc *typeChecker) EnterValueType(ctx *parser.ValueTypeContext) {
 	tc.checkValueType(ctx)
+}
+
+func (tc *typeChecker) EnterStmtVarDecl(ctx *parser.StmtVarDeclContext) {
+	err := tc.symTable.InsertSymbol(sym_table.NewVariableSymbol(ctx))
+	if err != nil {
+		tc.reportTypeError(err)
+	}
 }

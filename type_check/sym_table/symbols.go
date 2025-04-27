@@ -38,3 +38,19 @@ func (param *FuncParamSymbol) SymbolName() string {
 func (param *FuncParamSymbol) Ident() parser.IIdentContext {
 	return param.Param.Ident()
 }
+
+type VariableSymbol struct {
+	Decl parser.IStmtVarDeclContext
+}
+
+func NewVariableSymbol(decl parser.IStmtVarDeclContext) *VariableSymbol {
+	return &VariableSymbol{Decl: decl}
+}
+
+func (v *VariableSymbol) SymbolName() string {
+	return v.Decl.Ident().GetText()
+}
+
+func (v *VariableSymbol) Ident() parser.IIdentContext {
+	return v.Decl.Ident()
+}
