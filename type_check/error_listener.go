@@ -1,17 +1,15 @@
 package type_check
 
-import (
-	"chorego/type_check/type_error"
-)
+import "chorego/types"
 
 type ErrorListener interface {
-	ReportTypeError(err type_error.Error)
+	ReportTypeError(err types.Error)
 }
 
 type DefaultErrorListener struct {
-	Errors []type_error.Error
+	Errors []types.Error
 }
 
-func (e *DefaultErrorListener) ReportTypeError(err type_error.Error) {
+func (e *DefaultErrorListener) ReportTypeError(err types.Error) {
 	e.Errors = append(e.Errors, err)
 }

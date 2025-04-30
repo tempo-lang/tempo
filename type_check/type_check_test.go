@@ -2,7 +2,7 @@ package type_check_test
 
 import (
 	"chorego/compiler"
-	"chorego/type_check/type_error"
+	"go/types"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -43,11 +43,11 @@ func (a *AntlrTestErrorListener) SyntaxError(recognizer antlr.Recognizer, offend
 }
 
 type TestErrorListener struct {
-	errors []type_error.Error
+	errors []types.Error
 }
 
 // ReportTypeError implements analyzer.ErrorListener.
-func (t *TestErrorListener) ReportTypeError(err type_error.Error) {
+func (t *TestErrorListener) ReportTypeError(err types.Error) {
 	t.errors = append(t.errors, err)
 }
 

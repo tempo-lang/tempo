@@ -2,7 +2,7 @@ package projection
 
 import (
 	"chorego/parser"
-	"chorego/type_check/types"
+	"chorego/types"
 	"fmt"
 
 	"github.com/dave/jennifer/jen"

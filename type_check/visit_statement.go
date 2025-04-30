@@ -2,9 +2,8 @@ package type_check
 
 import (
 	"chorego/parser"
-	"chorego/type_check/sym_table"
-	"chorego/type_check/type_error"
-	"chorego/type_check/types"
+	"chorego/sym_table"
+	"chorego/types"
 )
 
 func (tc *typeChecker) VisitStatement(ctx *parser.StatementContext) any {
@@ -16,16 +15,20 @@ func (tc *typeChecker) VisitStatement(ctx *parser.StatementContext) any {
 }
 
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
-
 	exprType := ctx.Expression().Accept(tc).(types.Type)
-	declType, err := ParseValueType(ctx.ValueType())
+	declType, err := types.ParseValueType(ctx.ValueType())
+
+	stmtType := declType
+
 	if err != nil {
 		tc.reportError(err)
+		stmtType = types.Invalid()
 	} else if exprType != declType {
-		tc.reportError(type_error.NewTypeMismatchError(ctx.ValueType(), declType, ctx.Expression(), exprType))
+		tc.reportError(types.NewTypeMismatchError(ctx.ValueType(), declType, ctx.Expression(), exprType))
+		stmtType = types.Invalid()
 	}
 
-	if err := tc.symTable.InsertSymbol(sym_table.NewVariableSymbol(ctx)); err != nil {
+	if err := tc.symTable.InsertSymbol(sym_table.NewVariableSymbol(ctx, stmtType)); err != nil {
 		tc.reportError(err)
 	}
 

@@ -2,7 +2,7 @@ package type_check
 
 import (
 	"chorego/parser"
-	"chorego/type_check/type_error"
+	"chorego/types"
 	"cmp"
 	"slices"
 )
@@ -21,7 +21,7 @@ func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 			} else {
 				// report collected duplicates error if any
 				if len(duplicateRoles) > 1 {
-					a.errorListener.ReportTypeError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
+					a.errorListener.ReportTypeError(types.NewDuplicateRolesError(ctx, duplicateRoles))
 				}
 				duplicateRoles = roles[i+1 : i+2]
 			}
@@ -29,7 +29,7 @@ func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 
 		// report last error if present
 		if len(duplicateRoles) > 1 {
-			a.errorListener.ReportTypeError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
+			a.errorListener.ReportTypeError(types.NewDuplicateRolesError(ctx, duplicateRoles))
 		}
 	}
 }

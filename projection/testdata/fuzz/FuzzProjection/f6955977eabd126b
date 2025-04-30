@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A)A(){let A:A@(A)=A;let A:A@(A)=A;}")

@@ -1,7 +1,7 @@
 package projection
 
 import (
-	"chorego/type_check/types"
+	"chorego/types"
 	"fmt"
 )
 

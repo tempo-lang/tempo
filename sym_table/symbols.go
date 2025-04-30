@@ -2,7 +2,7 @@ package sym_table
 
 import (
 	"chorego/parser"
-	"chorego/type_check/types"
+	"chorego/types"
 )
 
 type Symbol interface {
@@ -12,7 +12,8 @@ type Symbol interface {
 }
 
 type FuncSymbol struct {
-	Func parser.IFuncContext
+	Func     parser.IFuncContext
+	funcType types.Type
 }
 
 func (f *FuncSymbol) Ident() parser.IIdentContext {
@@ -24,19 +25,20 @@ func (f *FuncSymbol) SymbolName() string {
 }
 
 func (f *FuncSymbol) Type() types.Type {
-	panic("unimplemented")
+	return f.funcType
 }
 
-func NewFuncSymbol(fn parser.IFuncContext) *FuncSymbol {
-	return &FuncSymbol{Func: fn}
+func NewFuncSymbol(fn parser.IFuncContext, funcType types.Type) *FuncSymbol {
+	return &FuncSymbol{Func: fn, funcType: funcType}
 }
 
 type FuncParamSymbol struct {
-	Param parser.IFuncParamContext
+	Param     parser.IFuncParamContext
+	paramType types.Type
 }
 
-func NewFuncParamSymbol(param parser.IFuncParamContext) *FuncParamSymbol {
-	return &FuncParamSymbol{Param: param}
+func NewFuncParamSymbol(param parser.IFuncParamContext, paramType types.Type) *FuncParamSymbol {
+	return &FuncParamSymbol{Param: param, paramType: paramType}
 }
 
 func (param *FuncParamSymbol) SymbolName() string {
@@ -48,15 +50,16 @@ func (param *FuncParamSymbol) Ident() parser.IIdentContext {
 }
 
 func (f *FuncParamSymbol) Type() types.Type {
-	panic("unimplemented")
+	return f.paramType
 }
 
 type VariableSymbol struct {
-	Decl parser.IStmtVarDeclContext
+	Decl    parser.IStmtVarDeclContext
+	varType types.Type
 }
 
-func NewVariableSymbol(decl parser.IStmtVarDeclContext) *VariableSymbol {
-	return &VariableSymbol{Decl: decl}
+func NewVariableSymbol(decl parser.IStmtVarDeclContext, varType types.Type) *VariableSymbol {
+	return &VariableSymbol{Decl: decl, varType: varType}
 }
 
 func (v *VariableSymbol) SymbolName() string {
@@ -68,5 +71,5 @@ func (v *VariableSymbol) Ident() parser.IIdentContext {
 }
 
 func (v *VariableSymbol) Type() types.Type {
-	panic("unimplemented")
+	return v.varType
 }

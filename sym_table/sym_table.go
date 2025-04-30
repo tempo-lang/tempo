@@ -2,7 +2,7 @@ package sym_table
 
 import (
 	"chorego/parser"
-	"chorego/type_check/type_error"
+	"chorego/types"
 )
 
 type SymTable struct {
@@ -38,17 +38,17 @@ func (sym *SymTable) Scope() *Scope {
 	return sym.scope[len(sym.scope)-1]
 }
 
-func (sym *SymTable) LookupSymbol(name parser.IIdentContext) (Symbol, *type_error.UnknownSymbolError) {
+func (sym *SymTable) LookupSymbol(name parser.IIdentContext) (Symbol, types.Error) {
 	for i := len(sym.scope) - 1; i >= 0; i-- {
 		symbol := sym.scope[i].Get(name.GetText())
 		if symbol != nil {
 			return symbol, nil
 		}
 	}
-	return nil, type_error.NewUnknownSymbolError(name)
+	return nil, types.NewUnknownSymbolError(name)
 }
 
-func (sym *SymTable) InsertSymbol(symbol Symbol) *type_error.SymbolAlreadyExists {
+func (sym *SymTable) InsertSymbol(symbol Symbol) types.Error {
 	return sym.Scope().InsertSymbol(symbol)
 }
 
@@ -56,10 +56,10 @@ func (scope *Scope) Get(name string) Symbol {
 	return scope.symbols[name]
 }
 
-func (scope *Scope) InsertSymbol(symbol Symbol) *type_error.SymbolAlreadyExists {
+func (scope *Scope) InsertSymbol(symbol Symbol) types.Error {
 	existing, exists := scope.symbols[symbol.SymbolName()]
 	if exists {
-		return type_error.NewSymbolAlreadyExistsError(existing.Ident(), symbol.Ident())
+		return types.NewSymbolAlreadyExistsError(existing.Ident(), symbol.Ident())
 	}
 
 	scope.symbols[symbol.SymbolName()] = symbol

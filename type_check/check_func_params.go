@@ -2,7 +2,7 @@ package type_check
 
 import (
 	"chorego/parser"
-	"chorego/type_check/type_error"
+	"chorego/types"
 	"slices"
 )
 
@@ -23,7 +23,7 @@ func (a *typeChecker) checkFuncParamUnknownRoles(ctx *parser.FuncParamContext) {
 		})
 
 		if !containsRole {
-			a.errorListener.ReportTypeError(type_error.NewUnknownRoleError(fn, role))
+			a.errorListener.ReportTypeError(types.NewUnknownRoleError(fn, role))
 		}
 	}
 }

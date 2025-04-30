@@ -2,8 +2,8 @@ package type_check
 
 import (
 	"chorego/parser"
-	"chorego/type_check/sym_table"
-	"chorego/type_check/type_error"
+	"chorego/sym_table"
+	"chorego/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -16,7 +16,7 @@ type typeChecker struct {
 	symTable       *sym_table.SymTable
 }
 
-func TypeCheck(sourceFile parser.ISourceFileContext) []type_error.Error {
+func TypeCheck(sourceFile parser.ISourceFileContext) []types.Error {
 	tc := new()
 
 	// check that tc implements visitor
@@ -41,7 +41,7 @@ func new() *typeChecker {
 	}
 }
 
-func (tc *typeChecker) reportError(err type_error.Error) {
+func (tc *typeChecker) reportError(err types.Error) {
 	tc.errorListener.ReportTypeError(err)
 }
 
@@ -88,7 +88,9 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
 	tc.checkFuncParamUnknownRoles(ctx)
 
-	err := tc.symTable.InsertSymbol(sym_table.NewFuncParamSymbol(ctx))
+	paramType := ctx.ValueType().Accept(tc).(types.Type)
+
+	err := tc.symTable.InsertSymbol(sym_table.NewFuncParamSymbol(ctx, paramType))
 	if err != nil {
 		tc.reportError(err)
 	}
@@ -115,10 +117,10 @@ func (tc *typeChecker) VisitScope(ctx *parser.ScopeContext) any {
 }
 
 func (tc *typeChecker) VisitValueType(ctx *parser.ValueTypeContext) any {
-	valType, err := ParseValueType(ctx)
+	valType, err := types.ParseValueType(ctx)
 	if err != nil {
 		tc.reportError(err)
-		return nil
+		return types.Invalid()
 	}
 
 	return valType

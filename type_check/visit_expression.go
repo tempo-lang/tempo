@@ -2,7 +2,7 @@ package type_check
 
 import (
 	"chorego/parser"
-	"chorego/type_check/types"
+	"chorego/types"
 )
 
 func (tc *typeChecker) VisitExpression(ctx *parser.ExpressionContext) any {

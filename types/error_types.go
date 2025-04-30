@@ -1,8 +1,7 @@
-package type_error
+package types
 
 import (
 	"chorego/parser"
-	"chorego/type_check/types"
 	"fmt"
 )
 
@@ -16,7 +15,7 @@ type DuplicateRolesError struct {
 	DuplicateRoles []parser.IIdentContext
 }
 
-func NewDuplicateRolesError(function parser.IFuncContext, duplicateRoles []parser.IIdentContext) *DuplicateRolesError {
+func NewDuplicateRolesError(function parser.IFuncContext, duplicateRoles []parser.IIdentContext) Error {
 	return &DuplicateRolesError{
 		Func:           function,
 		DuplicateRoles: duplicateRoles,
@@ -34,7 +33,7 @@ type UnknownRoleError struct {
 	UnknownRole parser.IIdentContext
 }
 
-func NewUnknownRoleError(function parser.IFuncContext, unknownRole parser.IIdentContext) *UnknownRoleError {
+func NewUnknownRoleError(function parser.IFuncContext, unknownRole parser.IIdentContext) Error {
 	return &UnknownRoleError{
 		Func:        function,
 		UnknownRole: unknownRole,
@@ -58,7 +57,7 @@ func (s *SymbolAlreadyExists) Error() string {
 	return fmt.Sprintf("symbol '%s' already declared", s.NewSymbol.GetText())
 }
 
-func NewSymbolAlreadyExistsError(existing parser.IIdentContext, newSym parser.IIdentContext) *SymbolAlreadyExists {
+func NewSymbolAlreadyExistsError(existing parser.IIdentContext, newSym parser.IIdentContext) Error {
 	return &SymbolAlreadyExists{
 		ExistingSymbol: existing,
 		NewSymbol:      newSym,
@@ -69,7 +68,7 @@ type UnknownTypeError struct {
 	TypeName parser.IIdentContext
 }
 
-func NewUnknownTypeError(typeName parser.IIdentContext) *UnknownTypeError {
+func NewUnknownTypeError(typeName parser.IIdentContext) Error {
 	return &UnknownTypeError{
 		TypeName: typeName,
 	}
@@ -91,7 +90,7 @@ func (e *UnknownSymbolError) Error() string {
 
 func (e *UnknownSymbolError) IsTypeError() {}
 
-func NewUnknownSymbolError(symName parser.IIdentContext) *UnknownSymbolError {
+func NewUnknownSymbolError(symName parser.IIdentContext) Error {
 	return &UnknownSymbolError{
 		SymName: symName,
 	}
@@ -99,9 +98,9 @@ func NewUnknownSymbolError(symName parser.IIdentContext) *UnknownSymbolError {
 
 type TypeMismatchError struct {
 	DeclToken parser.IValueTypeContext
-	DeclType  types.Type
+	DeclType  Type
 	ExprToken parser.IExpressionContext
-	ExprType  types.Type
+	ExprType  Type
 }
 
 func (e *TypeMismatchError) Error() string {
@@ -110,7 +109,7 @@ func (e *TypeMismatchError) Error() string {
 
 func (e *TypeMismatchError) IsTypeError() {}
 
-func NewTypeMismatchError(declToken parser.IValueTypeContext, declType types.Type, exprToken parser.IExpressionContext, exprType types.Type) *TypeMismatchError {
+func NewTypeMismatchError(declToken parser.IValueTypeContext, declType Type, exprToken parser.IExpressionContext, exprType Type) Error {
 	return &TypeMismatchError{
 		DeclToken: declToken,
 		DeclType:  declType,
@@ -118,3 +117,21 @@ func NewTypeMismatchError(declToken parser.IValueTypeContext, declType types.Typ
 		ExprType:  exprType,
 	}
 }
+
+type InvalidFunctionError struct {
+	Func        parser.IFuncContext
+	ParamErrors map[int]Error
+}
+
+func NewInvalidFuncError(fn parser.IFuncContext, params map[int]Error) Error {
+	return &InvalidFunctionError{
+		Func:        fn,
+		ParamErrors: params,
+	}
+}
+
+func (i *InvalidFunctionError) Error() string {
+	return fmt.Sprintf("invalid function type for '%s'", i.Func.Ident().GetText())
+}
+
+func (i *InvalidFunctionError) IsTypeError() {}
