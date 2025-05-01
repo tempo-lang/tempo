@@ -88,7 +88,7 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
 	tc.checkFuncParamUnknownRoles(ctx)
 
-	paramType := ctx.ValueType().Accept(tc).(types.Type)
+	paramType := ctx.ValueType().Accept(tc).(*types.Type)
 
 	err := tc.symTable.InsertSymbol(sym_table.NewFuncParamSymbol(ctx, paramType))
 	if err != nil {

@@ -4,7 +4,7 @@ import "fmt"
 
 type FunctionType struct {
 	// returnType Type
-	params []Type
+	params []*Type
 }
 
 func (f *FunctionType) ToString() string {
@@ -19,15 +19,15 @@ func (f *FunctionType) ToString() string {
 	return fmt.Sprintf("func (%s)", params)
 }
 
-func (f *FunctionType) IsType()     {}
+func (f *FunctionType) IsValue()    {}
 func (f *FunctionType) IsFunction() {}
 
 // func (f *FunctionType) ReturnType() Type
-func (f *FunctionType) Params() []Type {
+func (f *FunctionType) Params() []*Type {
 	return f.params
 }
 
-func Function(params []Type) *FunctionType {
+func Function(params []*Type) Value {
 	return &FunctionType{
 		// returnType: returnType,
 		params: params,

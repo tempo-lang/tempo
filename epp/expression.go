@@ -17,5 +17,9 @@ func eppExpression(role parser.IIdentContext, expr parser.IExpressionContext) pr
 		return projection.NewExprInt(num)
 	}
 
+	if ident := expr.Ident(); ident != nil {
+		return projection.NewExprIdent(ident.GetText())
+	}
+
 	panic(fmt.Sprintf("unknown expression: %s", expr.GetText()))
 }

@@ -21,10 +21,10 @@ type FuncParam struct {
 	Func     *Func
 	ParamCtx parser.IFuncParamContext
 	Name     string
-	Type     types.Type
+	Type     *types.Type
 }
 
-func (f *Func) AddParam(param parser.IFuncParamContext, paramType types.Type) *Func {
+func (f *Func) AddParam(param parser.IFuncParamContext, paramType *types.Type) *Func {
 	f.Params = append(f.Params, FuncParam{
 		Func:     f,
 		ParamCtx: param,

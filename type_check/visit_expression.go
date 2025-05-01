@@ -17,7 +17,7 @@ func (tc *typeChecker) VisitExpression(ctx *parser.ExpressionContext) any {
 	}
 
 	if num := ctx.NUMBER(); num != nil {
-		return types.Int()
+		return types.New(types.Int(), types.NewRole(nil, true))
 	}
 
 	panic("unexpected expression")

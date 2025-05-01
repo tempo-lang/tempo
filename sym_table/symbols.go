@@ -8,12 +8,12 @@ import (
 type Symbol interface {
 	SymbolName() string
 	Ident() parser.IIdentContext
-	Type() types.Type
+	Type() *types.Type
 }
 
 type FuncSymbol struct {
 	Func     parser.IFuncContext
-	funcType types.Type
+	funcType *types.Type
 }
 
 func (f *FuncSymbol) Ident() parser.IIdentContext {
@@ -24,20 +24,20 @@ func (f *FuncSymbol) SymbolName() string {
 	return f.Func.Ident().GetText()
 }
 
-func (f *FuncSymbol) Type() types.Type {
+func (f *FuncSymbol) Type() *types.Type {
 	return f.funcType
 }
 
-func NewFuncSymbol(fn parser.IFuncContext, funcType types.Type) *FuncSymbol {
+func NewFuncSymbol(fn parser.IFuncContext, funcType *types.Type) *FuncSymbol {
 	return &FuncSymbol{Func: fn, funcType: funcType}
 }
 
 type FuncParamSymbol struct {
 	Param     parser.IFuncParamContext
-	paramType types.Type
+	paramType *types.Type
 }
 
-func NewFuncParamSymbol(param parser.IFuncParamContext, paramType types.Type) *FuncParamSymbol {
+func NewFuncParamSymbol(param parser.IFuncParamContext, paramType *types.Type) *FuncParamSymbol {
 	return &FuncParamSymbol{Param: param, paramType: paramType}
 }
 
@@ -49,16 +49,16 @@ func (param *FuncParamSymbol) Ident() parser.IIdentContext {
 	return param.Param.Ident()
 }
 
-func (f *FuncParamSymbol) Type() types.Type {
+func (f *FuncParamSymbol) Type() *types.Type {
 	return f.paramType
 }
 
 type VariableSymbol struct {
 	Decl    parser.IStmtVarDeclContext
-	varType types.Type
+	varType *types.Type
 }
 
-func NewVariableSymbol(decl parser.IStmtVarDeclContext, varType types.Type) *VariableSymbol {
+func NewVariableSymbol(decl parser.IStmtVarDeclContext, varType *types.Type) *VariableSymbol {
 	return &VariableSymbol{Decl: decl, varType: varType}
 }
 
@@ -70,6 +70,6 @@ func (v *VariableSymbol) Ident() parser.IIdentContext {
 	return v.Decl.Ident()
 }
 
-func (v *VariableSymbol) Type() types.Type {
+func (v *VariableSymbol) Type() *types.Type {
 	return v.varType
 }

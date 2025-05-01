@@ -15,7 +15,7 @@ func (tc *typeChecker) VisitStatement(ctx *parser.StatementContext) any {
 }
 
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
-	exprType := ctx.Expression().Accept(tc).(types.Type)
+	exprType := ctx.Expression().Accept(tc).(*types.Type)
 	declType, err := types.ParseValueType(ctx.ValueType())
 
 	stmtType := declType
@@ -23,7 +23,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	if err != nil {
 		tc.reportError(err)
 		stmtType = types.Invalid()
-	} else if exprType != declType {
+	} else if !exprType.CanCoerceTo(declType) {
 		tc.reportError(types.NewTypeMismatchError(ctx.ValueType(), declType, ctx.Expression(), exprType))
 		stmtType = types.Invalid()
 	}

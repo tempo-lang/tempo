@@ -98,9 +98,9 @@ func NewUnknownSymbolError(symName parser.IIdentContext) Error {
 
 type TypeMismatchError struct {
 	DeclToken parser.IValueTypeContext
-	DeclType  Type
+	DeclType  *Type
 	ExprToken parser.IExpressionContext
-	ExprType  Type
+	ExprType  *Type
 }
 
 func (e *TypeMismatchError) Error() string {
@@ -109,7 +109,7 @@ func (e *TypeMismatchError) Error() string {
 
 func (e *TypeMismatchError) IsTypeError() {}
 
-func NewTypeMismatchError(declToken parser.IValueTypeContext, declType Type, exprToken parser.IExpressionContext, exprType Type) Error {
+func NewTypeMismatchError(declToken parser.IValueTypeContext, declType *Type, exprToken parser.IExpressionContext, exprType *Type) Error {
 	return &TypeMismatchError{
 		DeclToken: declToken,
 		DeclType:  declType,
@@ -120,10 +120,10 @@ func NewTypeMismatchError(declToken parser.IValueTypeContext, declType Type, exp
 
 type InvalidFunctionError struct {
 	Func        parser.IFuncContext
-	ParamErrors map[int]Error
+	ParamErrors map[int][]Error
 }
 
-func NewInvalidFuncError(fn parser.IFuncContext, params map[int]Error) Error {
+func NewInvalidFuncError(fn parser.IFuncContext, params map[int][]Error) Error {
 	return &InvalidFunctionError{
 		Func:        fn,
 		ParamErrors: params,

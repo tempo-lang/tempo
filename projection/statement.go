@@ -13,11 +13,11 @@ type Statement interface {
 
 type StmtVarDecl struct {
 	Name string
-	Type types.Type
+	Type *types.Type
 	Expr Expression
 }
 
-func NewStmtVarDecl(name string, typeName types.Type, expr Expression) *StmtVarDecl {
+func NewStmtVarDecl(name string, typeName *types.Type, expr Expression) *StmtVarDecl {
 	return &StmtVarDecl{
 		Name: name,
 		Type: typeName,

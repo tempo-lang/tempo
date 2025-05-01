@@ -17,8 +17,22 @@ func (e *ExprInt) Codegen() jen.Code {
 
 func (e *ExprInt) IsExpression() {}
 
-func NewExprInt(value int) *ExprInt {
+func NewExprInt(value int) Expression {
 	return &ExprInt{
 		Value: value,
 	}
+}
+
+type ExprIdent struct {
+	Name string
+}
+
+func (e *ExprIdent) Codegen() jen.Code {
+	return jen.Id(e.Name)
+}
+
+func (e *ExprIdent) IsExpression() {}
+
+func NewExprIdent(name string) Expression {
+	return &ExprIdent{Name: name}
 }

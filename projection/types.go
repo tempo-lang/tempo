@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-func CodegenType(t types.Type) string {
-	if builtinType, isBuiltin := t.(types.Builtin); isBuiltin {
+func CodegenType(t *types.Type) string {
+	if builtinType, isBuiltin := t.Value().(types.Builtin); isBuiltin {
 		return CodegenBuiltinType(builtinType)
 	}
 

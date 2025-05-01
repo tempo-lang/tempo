@@ -1,7 +1,7 @@
 package types
 
 type Builtin interface {
-	Type
+	Value
 	IsBuiltin()
 }
 
@@ -15,10 +15,10 @@ type StringType struct{}
 func (t *StringType) ToString() string {
 	return "String"
 }
-func (t *StringType) IsType()    {}
+func (t *StringType) IsValue()   {}
 func (t *StringType) IsBuiltin() {}
 
-func String() *StringType {
+func String() Value {
 	return &builtin_string
 }
 
@@ -27,10 +27,10 @@ type IntType struct{}
 func (t *IntType) ToString() string {
 	return "Int"
 }
-func (t *IntType) IsType()    {}
+func (t *IntType) IsValue()   {}
 func (t *IntType) IsBuiltin() {}
 
-func Int() *IntType {
+func Int() Value {
 	return &builtin_int
 }
 
@@ -39,10 +39,10 @@ type FloatType struct{}
 func (t *FloatType) ToString() string {
 	return "Float"
 }
-func (t *FloatType) IsType()    {}
+func (t *FloatType) IsValue()   {}
 func (t *FloatType) IsBuiltin() {}
 
-func Float() *FloatType {
+func Float() Value {
 	return &builtin_float
 }
 
@@ -51,9 +51,9 @@ type BoolType struct{}
 func (t *BoolType) ToString() string {
 	return "Bool"
 }
-func (t *BoolType) IsType()    {}
+func (t *BoolType) IsValue()   {}
 func (t *BoolType) IsBuiltin() {}
 
-func Bool() *BoolType {
+func Bool() Value {
 	return &builtin_bool
 }

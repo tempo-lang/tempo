@@ -1,20 +1,66 @@
 package types
 
-type Type interface {
-	ToString() string
-	IsType()
+import "fmt"
+
+type Type struct {
+	value Value
+	roles *Roles
 }
 
-type InvalidType struct{}
+func New(value Value, roles *Roles) *Type {
+	return &Type{
+		value: value,
+		roles: roles,
+	}
+}
 
-var invalid_type InvalidType = InvalidType{}
+func (t *Type) CanCoerceTo(other *Type) bool {
+	if t.value != other.value {
+		return false
+	}
 
-func (t *InvalidType) ToString() string {
+	if t.roles.participants == nil {
+		return true
+	}
+
+	if other.roles.participants == nil {
+		return false
+	}
+
+	if t.roles.Contains(other.roles) {
+		return true
+	}
+
+	return false
+}
+
+func (t *Type) Roles() *Roles {
+	return t.roles
+}
+
+func (t *Type) Value() Value {
+	return t.value
+}
+
+func (t *Type) ToString() string {
+	return fmt.Sprintf("%s@%s", t.value.ToString(), t.roles.ToString())
+}
+
+type Value interface {
+	ToString() string
+	IsValue()
+}
+
+type InvalidValue struct{}
+
+var invalid_type InvalidValue = InvalidValue{}
+
+func (t *InvalidValue) ToString() string {
 	return "ERROR"
 }
 
-func (t *InvalidType) IsType() {}
+func (t *InvalidValue) IsValue() {}
 
-func Invalid() *InvalidType {
-	return &invalid_type
+func Invalid() *Type {
+	return New(&invalid_type, NewRole(nil, false))
 }
