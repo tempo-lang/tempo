@@ -4,10 +4,13 @@ import (
 	"chorego/misc"
 	"chorego/parser"
 	"fmt"
+
+	"github.com/antlr4-go/antlr/v4"
 )
 
 type Error interface {
 	error
+	ParserRule() antlr.ParserRuleContext
 	IsTypeError()
 }
 
@@ -29,6 +32,10 @@ func (e *DuplicateRolesError) Error() string {
 	return fmt.Sprintf("function '%s' has duplicate role '%s'", e.Func.Ident().GetText(), e.DuplicateRoles[0].GetText())
 }
 
+func (e *DuplicateRolesError) ParserRule() antlr.ParserRuleContext {
+	return e.Func
+}
+
 type UnknownRoleError struct {
 	ValueType    parser.IValueTypeContext
 	UnknownRoles []string
@@ -47,9 +54,20 @@ func (e *UnknownRoleError) Error() string {
 	return fmt.Sprintf("unknown roles [%s] in '%s'", misc.JoinStrings(e.UnknownRoles, ","), e.ValueType.GetText())
 }
 
+func (e *UnknownRoleError) ParserRule() antlr.ParserRuleContext {
+	return e.ValueType
+}
+
 type SymbolAlreadyExists struct {
 	ExistingSymbol parser.IIdentContext
 	NewSymbol      parser.IIdentContext
+}
+
+func NewSymbolAlreadyExistsError(existing parser.IIdentContext, newSym parser.IIdentContext) Error {
+	return &SymbolAlreadyExists{
+		ExistingSymbol: existing,
+		NewSymbol:      newSym,
+	}
 }
 
 func (s *SymbolAlreadyExists) IsTypeError() {}
@@ -58,11 +76,8 @@ func (s *SymbolAlreadyExists) Error() string {
 	return fmt.Sprintf("symbol '%s' already declared", s.NewSymbol.GetText())
 }
 
-func NewSymbolAlreadyExistsError(existing parser.IIdentContext, newSym parser.IIdentContext) Error {
-	return &SymbolAlreadyExists{
-		ExistingSymbol: existing,
-		NewSymbol:      newSym,
-	}
+func (e *SymbolAlreadyExists) ParserRule() antlr.ParserRuleContext {
+	return e.NewSymbol
 }
 
 type UnknownTypeError struct {
@@ -81,8 +96,18 @@ func (e *UnknownTypeError) Error() string {
 	return fmt.Sprintf("unknown type '%s'", e.TypeName.GetText())
 }
 
+func (e *UnknownTypeError) ParserRule() antlr.ParserRuleContext {
+	return e.TypeName
+}
+
 type UnknownSymbolError struct {
 	SymName parser.IIdentContext
+}
+
+func NewUnknownSymbolError(symName parser.IIdentContext) Error {
+	return &UnknownSymbolError{
+		SymName: symName,
+	}
 }
 
 func (e *UnknownSymbolError) Error() string {
@@ -91,10 +116,8 @@ func (e *UnknownSymbolError) Error() string {
 
 func (e *UnknownSymbolError) IsTypeError() {}
 
-func NewUnknownSymbolError(symName parser.IIdentContext) Error {
-	return &UnknownSymbolError{
-		SymName: symName,
-	}
+func (e *UnknownSymbolError) ParserRule() antlr.ParserRuleContext {
+	return e.SymName
 }
 
 type TypeMismatchError struct {
@@ -104,12 +127,6 @@ type TypeMismatchError struct {
 	ExprType  *Type
 }
 
-func (e *TypeMismatchError) Error() string {
-	return fmt.Sprintf("type mismatch, expected %s found %s", e.DeclType.ToString(), e.ExprType.ToString())
-}
-
-func (e *TypeMismatchError) IsTypeError() {}
-
 func NewTypeMismatchError(declToken parser.IValueTypeContext, declType *Type, exprToken parser.IExpressionContext, exprType *Type) Error {
 	return &TypeMismatchError{
 		DeclToken: declToken,
@@ -117,6 +134,16 @@ func NewTypeMismatchError(declToken parser.IValueTypeContext, declType *Type, ex
 		ExprToken: exprToken,
 		ExprType:  exprType,
 	}
+}
+
+func (e *TypeMismatchError) Error() string {
+	return fmt.Sprintf("type mismatch, expected %s found %s", e.DeclType.ToString(), e.ExprType.ToString())
+}
+
+func (e *TypeMismatchError) IsTypeError() {}
+
+func (e *TypeMismatchError) ParserRule() antlr.ParserRuleContext {
+	return e.DeclToken
 }
 
 type InvalidFunctionError struct {
@@ -145,18 +172,26 @@ func (e *InvalidFunctionError) Error() string {
 
 func (i *InvalidFunctionError) IsTypeError() {}
 
+func (e *InvalidFunctionError) ParserRule() antlr.ParserRuleContext {
+	return e.Func
+}
+
 type InvalidNumberError struct {
-	num parser.IExpressionContext
+	Num parser.IExpressionContext
+}
+
+func NewInvalidNumberError(num parser.IExpressionContext) Error {
+	return &InvalidNumberError{
+		Num: num,
+	}
 }
 
 func (i *InvalidNumberError) Error() string {
-	return fmt.Sprintf("invalid number '%s'", i.num.GetText())
+	return fmt.Sprintf("invalid number '%s'", i.Num.GetText())
 }
 
 func (i *InvalidNumberError) IsTypeError() {}
 
-func NewInvalidNumberError(num parser.IExpressionContext) Error {
-	return &InvalidNumberError{
-		num: num,
-	}
+func (i *InvalidNumberError) ParserRule() antlr.ParserRuleContext {
+	return i.Num
 }

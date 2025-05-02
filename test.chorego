@@ -1,1 +1,5 @@
-func@(A)A(){let A:Int@(A)=0777777777777777777777;}
+func@(A,B) foo(){
+  let a: Int@(A) = 23;
+  let b: Int@B = a;
+  let c: Int@C = 1;
+}

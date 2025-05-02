@@ -2,6 +2,7 @@ package main
 
 import (
 	"chorego/compiler"
+	"chorego/types"
 	"fmt"
 	"os"
 
@@ -18,7 +19,12 @@ func main() {
 	output, errors := compiler.Compile(input)
 	if errors != nil {
 		for _, err := range errors {
-			fmt.Printf("%v\n", err)
+			if typeErr, ok := err.(types.Error); ok {
+				token := typeErr.ParserRule().GetStart()
+				fmt.Printf("Type error %d:%d: %s\n", token.GetLine(), token.GetColumn(), typeErr.Error())
+			} else {
+				fmt.Printf("%v\n", err)
+			}
 		}
 		os.Exit(1)
 	}
