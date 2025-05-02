@@ -63,7 +63,7 @@ ROLE_AT: '@';
 COMMA: ',';
 COLON: ':';
 
-ID: [a-zA-Z_][a-zA-Z_0-9]*;
+ID: ('_' [a-zA-Z_0-9]+ | [a-zA-Z][a-zA-Z_0-9]*);
 NUMBER: [0-9]+;
 END: ';';
 WHITESPACE: [ \t\r\n]+ -> skip;

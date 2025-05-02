@@ -144,3 +144,19 @@ func (e *InvalidFunctionError) Error() string {
 }
 
 func (i *InvalidFunctionError) IsTypeError() {}
+
+type InvalidNumberError struct {
+	num parser.IExpressionContext
+}
+
+func (i *InvalidNumberError) Error() string {
+	return fmt.Sprintf("invalid number '%s'", i.num.GetText())
+}
+
+func (i *InvalidNumberError) IsTypeError() {}
+
+func NewInvalidNumberError(num parser.IExpressionContext) Error {
+	return &InvalidNumberError{
+		num: num,
+	}
+}

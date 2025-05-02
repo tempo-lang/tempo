@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A,B,C)A(){let _:Int@(A)=0;}")
