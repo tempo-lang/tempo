@@ -17,6 +17,15 @@ func (tc *typeChecker) VisitStatement(ctx *parser.StatementContext) any {
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	exprType := ctx.Expression().Accept(tc).(*types.Type)
 	declType, err := types.ParseValueType(ctx.ValueType())
+	if err != nil {
+		tc.reportError(err)
+	} else {
+		funcRoles := tc.funcScope().funcType.Roles()
+
+		if unknownRoles := declType.Roles().SubtractParticipants(funcRoles); len(unknownRoles) > 0 {
+			tc.reportError(types.NewUnknownRoleError(ctx.ValueType(), unknownRoles))
+		}
+	}
 
 	stmtType := declType
 

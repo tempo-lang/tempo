@@ -9,7 +9,7 @@ func TestFuncParams(t *testing.T) {
 			name:  "unknown role",
 			input: "func@(A,B) foo(value: Int@C) {}",
 			errors: []string{
-				"unknown role 'C' in function 'foo'",
+				"invalid function type for 'foo': param 1: [unknown roles [C] in 'Int@C']",
 			},
 		},
 		{

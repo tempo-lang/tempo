@@ -1,6 +1,7 @@
 package types
 
 import (
+	"chorego/misc"
 	"chorego/parser"
 	"fmt"
 )
@@ -29,21 +30,21 @@ func (e *DuplicateRolesError) Error() string {
 }
 
 type UnknownRoleError struct {
-	Func        parser.IFuncContext
-	UnknownRole parser.IIdentContext
+	ValueType    parser.IValueTypeContext
+	UnknownRoles []string
 }
 
-func NewUnknownRoleError(function parser.IFuncContext, unknownRole parser.IIdentContext) Error {
+func NewUnknownRoleError(valueType parser.IValueTypeContext, unknownRoles []string) Error {
 	return &UnknownRoleError{
-		Func:        function,
-		UnknownRole: unknownRole,
+		ValueType:    valueType,
+		UnknownRoles: unknownRoles,
 	}
 }
 
 func (e *UnknownRoleError) IsTypeError() {}
 
 func (e *UnknownRoleError) Error() string {
-	return fmt.Sprintf("unknown role '%s' in function '%s'", e.UnknownRole.GetText(), e.Func.Ident().GetText())
+	return fmt.Sprintf("unknown roles [%s] in '%s'", misc.JoinStrings(e.UnknownRoles, ","), e.ValueType.GetText())
 }
 
 type SymbolAlreadyExists struct {
@@ -120,18 +121,26 @@ func NewTypeMismatchError(declToken parser.IValueTypeContext, declType *Type, ex
 
 type InvalidFunctionError struct {
 	Func        parser.IFuncContext
-	ParamErrors map[int][]Error
+	ParamErrors [][]Error
 }
 
-func NewInvalidFuncError(fn parser.IFuncContext, params map[int][]Error) Error {
+func NewInvalidFuncError(fn parser.IFuncContext, params [][]Error) Error {
 	return &InvalidFunctionError{
 		Func:        fn,
 		ParamErrors: params,
 	}
 }
 
-func (i *InvalidFunctionError) Error() string {
-	return fmt.Sprintf("invalid function type for '%s'", i.Func.Ident().GetText())
+func (e *InvalidFunctionError) Error() string {
+	paramErrors := ""
+	for i := 0; i < len(e.ParamErrors); i++ {
+		if len(e.ParamErrors[i]) > 0 {
+			paramErrors += fmt.Sprintf("param %d: %v, ", i+1, e.ParamErrors[i])
+		}
+	}
+	paramErrors = paramErrors[:len(paramErrors)-2]
+
+	return fmt.Sprintf("invalid function type for '%s': %s", e.Func.Ident().GetText(), paramErrors)
 }
 
 func (i *InvalidFunctionError) IsTypeError() {}

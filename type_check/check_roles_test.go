@@ -13,7 +13,7 @@ func TestValueRoles(t *testing.T) {
 				}
 			`,
 			errors: []string{
-				"unknown role 'B'",
+				"unknown roles [B] in 'Int@B'",
 			},
 		},
 		{

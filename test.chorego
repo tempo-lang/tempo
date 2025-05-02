@@ -1,4 +1,3 @@
-func@(A,B) foo(){
-  let x:Int@A = 32;
-  let y:Int@A = x;
+func@(A) foo() {
+  let x: Int@B = 32;
 }

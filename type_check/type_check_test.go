@@ -2,6 +2,7 @@ package type_check_test
 
 import (
 	"chorego/compiler"
+	"chorego/misc"
 	"go/types"
 	"testing"
 
@@ -74,7 +75,7 @@ func (data *AnalyzerTestData) Assert(t *testing.T) {
 		}
 
 		if len(errors) > len(data.errors) {
-			t.Errorf("unexpected extra actual errors, expected %d got %d", len(data.errors), len(errors))
+			t.Errorf("unexpected extra actual errors, expected %d got %d:\n- %s", len(data.errors), len(errors), misc.JoinStrings(errors, "\n- "))
 		}
 	})
 }

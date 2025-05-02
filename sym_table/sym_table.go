@@ -38,6 +38,10 @@ func (sym *SymTable) Scope() *Scope {
 	return sym.scope[len(sym.scope)-1]
 }
 
+func (sym *SymTable) IsGlobalScope() bool {
+	return len(sym.scope) == 1
+}
+
 func (sym *SymTable) LookupSymbol(name parser.IIdentContext) (Symbol, types.Error) {
 	for i := len(sym.scope) - 1; i >= 0; i-- {
 		symbol := sym.scope[i].Get(name.GetText())

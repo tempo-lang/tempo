@@ -3,7 +3,6 @@ package types
 import (
 	"chorego/parser"
 	"fmt"
-	"slices"
 )
 
 func BuiltinValues() map[string]Value {
@@ -39,31 +38,23 @@ func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
 	}
 
 	params := []*Type{}
-	paramErrors := map[int][]Error{}
+	paramErrors := [][]Error{}
 
 	for i, param := range ctx.FuncParamList().AllFuncParam() {
-		paramErrors[i] = []Error{}
+		paramErrors = append(paramErrors, []Error{})
 
 		paramType, err := ParseValueType(param.ValueType())
 		if err != nil {
 			paramErrors[i] = append(paramErrors[i], err)
 		}
 
-		var roleIdents []parser.IIdentContext
-		if roleNormal := param.ValueType().RoleType().RoleTypeNormal(); roleNormal != nil {
-			roleIdents = roleNormal.AllIdent()
-		}
-		if roleShared := param.ValueType().RoleType().RoleTypeShared(); roleShared != nil {
-			roleIdents = roleShared.AllIdent()
+		paramRoles, err := ParseRoleType(param.ValueType().RoleType())
+		if err != nil {
+			paramErrors[i] = append(paramErrors[i], err)
 		}
 
-		for _, r := range roleIdents {
-			foundRole := slices.ContainsFunc(funcRoles.participants, func(role string) bool {
-				return role == r.GetText()
-			})
-			if !foundRole {
-				paramErrors[i] = append(paramErrors[i], NewUnknownRoleError(ctx, r))
-			}
+		if unknownRoles := paramRoles.SubtractParticipants(funcRoles); len(unknownRoles) > 0 {
+			paramErrors[i] = append(paramErrors[i], NewUnknownRoleError(param.ValueType(), unknownRoles))
 		}
 
 		params = append(params, paramType)

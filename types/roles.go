@@ -38,6 +38,18 @@ func (r *Roles) ToString() string {
 	}
 }
 
+func (r *Roles) SubtractParticipants(other *Roles) []string {
+	result := []string{}
+
+	for _, role := range r.participants {
+		if !slices.Contains(other.participants, role) {
+			result = append(result, role)
+		}
+	}
+
+	return result
+}
+
 func (r *Roles) Contains(other *Roles) bool {
 	if r.isSharedRole != other.isSharedRole {
 		return false

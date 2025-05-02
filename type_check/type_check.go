@@ -12,7 +12,7 @@ type typeChecker struct {
 	*antlr.BaseParseTreeVisitor
 	errorListener ErrorListener
 
-	funcScopeStack []parser.IFuncContext
+	funcScopeStack []funcScope
 	symTable       *sym_table.SymTable
 }
 
@@ -36,20 +36,25 @@ func TypeCheck(sourceFile parser.ISourceFileContext) []types.Error {
 func new() *typeChecker {
 	return &typeChecker{
 		errorListener:  &DefaultErrorListener{},
-		funcScopeStack: []parser.IFuncContext{},
+		funcScopeStack: []funcScope{},
 		symTable:       sym_table.New(),
 	}
+}
+
+type funcScope struct {
+	fn       parser.IFuncContext
+	funcType *types.Type
 }
 
 func (tc *typeChecker) reportError(err types.Error) {
 	tc.errorListener.ReportTypeError(err)
 }
 
-func (tc *typeChecker) funcScope() parser.IFuncContext {
+func (tc *typeChecker) funcScope() *funcScope {
 	if len(tc.funcScopeStack) == 0 {
 		return nil
 	}
-	return tc.funcScopeStack[len(tc.funcScopeStack)-1]
+	return &tc.funcScopeStack[len(tc.funcScopeStack)-1]
 }
 
 func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result any) {
@@ -69,7 +74,17 @@ func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result an
 }
 
 func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
-	tc.funcScopeStack = append(tc.funcScopeStack, ctx)
+	funcType, err := types.ParseFuncType(ctx)
+	if err != nil && !tc.symTable.IsGlobalScope() {
+		// global scope errors has already been reported
+		tc.reportError(err)
+	}
+
+	tc.funcScopeStack = append(tc.funcScopeStack, funcScope{
+		fn:       ctx,
+		funcType: funcType,
+	})
+
 	tc.symTable.EnterScope()
 
 	tc.checkFuncDuplicateRoles(ctx)
@@ -86,8 +101,6 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 }
 
 func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
-	tc.checkFuncParamUnknownRoles(ctx)
-
 	paramType := ctx.ValueType().Accept(tc).(*types.Type)
 
 	err := tc.symTable.InsertSymbol(sym_table.NewFuncParamSymbol(ctx, paramType))
