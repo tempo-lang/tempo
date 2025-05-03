@@ -36,3 +36,21 @@ func (e *ExprIdent) IsExpression() {}
 func NewExprIdent(name string) Expression {
 	return &ExprIdent{Name: name}
 }
+
+type ExprBool struct {
+	Value bool
+}
+
+func (e *ExprBool) Codegen() jen.Code {
+	if e.Value {
+		return jen.True()
+	} else {
+		return jen.False()
+	}
+}
+
+func (e *ExprBool) IsExpression() {}
+
+func NewExprBool(value bool) Expression {
+	return &ExprBool{Value: value}
+}

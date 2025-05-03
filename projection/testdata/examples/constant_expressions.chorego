@@ -1,0 +1,4 @@
+func@(A) constants(){
+  let numberValue: Int@(A) = 123;
+  let booleanValue: Bool@(A) = true;
+}

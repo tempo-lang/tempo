@@ -35,7 +35,9 @@ statement: stmtVarDecl;
 stmtVarDecl: LET ident COLON valueType EQUAL expression END;
 
 // expressions
-expression: NUMBER | ident;
+expression: NUMBER | exprBool | ident;
+
+exprBool: TRUE | FALSE;
 
 /*
  * Lexer Rules
@@ -45,6 +47,9 @@ expression: NUMBER | ident;
 
 FUNC: 'func';
 LET: 'let';
+
+TRUE: 'true';
+FALSE: 'false';
 
 // Parenthesis
 

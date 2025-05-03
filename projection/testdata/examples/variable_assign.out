@@ -4,7 +4,7 @@ package choreography
 // Projection of choreography foo
 func foo_A() {
 	var x int = 32
-	x = x // Suppress unused variable error
+	_ = x // Suppress unused variable error
 	var y int = x
-	y = y // Suppress unused variable error
+	_ = y // Suppress unused variable error
 }

@@ -21,5 +21,10 @@ func eppExpression(role parser.IIdentContext, expr parser.IExpressionContext) pr
 		return projection.NewExprIdent(ident.GetText())
 	}
 
+	if boolean := expr.ExprBool(); boolean != nil {
+		value := boolean.TRUE() != nil
+		return projection.NewExprBool(value)
+	}
+
 	panic(fmt.Sprintf("unknown expression: %s", expr.GetText()))
 }

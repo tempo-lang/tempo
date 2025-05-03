@@ -1,5 +1,3 @@
-func@(A,B) foo(){
-  let a: Int@(A) = 23;
-  let b: Int@B = a;
-  let c: Int@C = 1;
+func@(A) foo(){
+  let value: Bool@(A) = false;
 }

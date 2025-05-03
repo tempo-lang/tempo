@@ -26,5 +26,14 @@ func (tc *typeChecker) VisitExpression(ctx *parser.ExpressionContext) any {
 		return types.New(types.Int(), types.NewRole(nil, true))
 	}
 
+	if boolean := ctx.ExprBool(); boolean != nil {
+		boolType := boolean.Accept(tc).(types.Value)
+		return types.New(boolType, types.NewRole(nil, true))
+	}
+
 	panic("unexpected expression")
+}
+
+func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
+	return types.Bool()
 }

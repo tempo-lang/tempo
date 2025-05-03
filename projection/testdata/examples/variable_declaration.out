@@ -4,15 +4,15 @@ package choreography
 // Projection of choreography foo
 func foo_A(fst int, snd int) {
 	var y int = 12
-	y = y // Suppress unused variable error
+	_ = y // Suppress unused variable error
 }
 func foo_B(snd int) {
 	var x int = 42
-	x = x // Suppress unused variable error
+	_ = x // Suppress unused variable error
 	var y int = 12
-	y = y // Suppress unused variable error
+	_ = y // Suppress unused variable error
 }
 func foo_C() {
 	var x int = 42
-	x = x // Suppress unused variable error
+	_ = x // Suppress unused variable error
 }
