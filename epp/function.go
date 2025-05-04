@@ -3,17 +3,20 @@ package epp
 import (
 	"chorego/parser"
 	"chorego/projection"
+	"chorego/type_check"
 	"chorego/types"
 	"fmt"
 )
 
-func EppFunc(function parser.IFuncContext) *projection.Choreography {
-	func_role := function.RoleTypeNormal()
+func EppFunc(info *type_check.Info, function parser.IFuncContext) *projection.Choreography {
+	obj := info.Symbols[function.Ident()]
+
+	func_role := obj.Type().Roles()
 
 	choreography := projection.NewChoreography(function.Ident().GetText())
 
-	for _, role := range func_role.AllIdent() {
-		eppFuncRole(choreography, function, role)
+	for _, role := range func_role.Participants() {
+		eppFuncRole(info, choreography, function, role)
 	}
 
 	return choreography
@@ -25,16 +28,17 @@ func assertValidTree(err types.Error) {
 	}
 }
 
-func eppFuncRole(choreography *projection.Choreography, function parser.IFuncContext, role parser.IIdentContext) {
-	roleName := role.ID().GetText()
+func eppFuncRole(info *type_check.Info, choreography *projection.Choreography, function parser.IFuncContext, roleName string) {
 	fn := choreography.AddFunc(roleName, function)
 
+	obj := info.Symbols[function.Ident()]
+	funcType := obj.Type().Value().(*types.FunctionType)
+
 	// project parameters
-	for _, param := range function.FuncParamList().AllFuncParam() {
-		if ValueExistsAtRole(param.ValueType(), roleName) {
-			valType, err := types.ParseValueType(param.ValueType())
-			assertValidTree(err)
-			fn.AddParam(param, valType)
+	for i, param := range function.FuncParamList().AllFuncParam() {
+		paramType := funcType.Params()[i]
+		if paramType.Roles().Contains(types.SingleRole(roleName)) {
+			fn.AddParam(param, paramType)
 		}
 	}
 
@@ -46,7 +50,7 @@ func eppFuncRole(choreography *projection.Choreography, function parser.IFuncCon
 				varibleType, err := types.ParseValueType(varDecl.ValueType())
 				assertValidTree(err)
 
-				expr := eppExpression(role, varDecl.Expression())
+				expr := eppExpression(varDecl.Expression())
 
 				fn.AddStmt(projection.NewStmtVarDecl(variableName, varibleType, expr))
 			}

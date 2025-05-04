@@ -14,6 +14,10 @@ func NewRole(participants []string, isShared bool) *Roles {
 	}
 }
 
+func SingleRole(name string) *Roles {
+	return NewRole([]string{name}, false)
+}
+
 func (r *Roles) IsSharedRole() bool {
 	return r.isSharedRole
 }
@@ -38,11 +42,11 @@ func (r *Roles) ToString() string {
 	}
 }
 
-func (r *Roles) SubtractParticipants(other *Roles) []string {
+func (r *Roles) SubtractParticipants(other []string) []string {
 	result := []string{}
 
 	for _, role := range r.participants {
-		if !slices.Contains(other.participants, role) {
+		if !slices.Contains(other, role) {
 			result = append(result, role)
 		}
 	}

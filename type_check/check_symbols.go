@@ -6,19 +6,15 @@ import (
 	"chorego/types"
 )
 
-func addGlobalSymbols(scope *sym_table.Scope, sourceFile *parser.SourceFileContext) (typeErrors []types.Error) {
-	typeErrors = []types.Error{}
-
+func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 	for _, fn := range sourceFile.AllFunc_() {
 		fnType, err := types.ParseFuncType(fn)
 		if err != nil {
-			typeErrors = append(typeErrors, err)
+			tc.reportError(err)
 		}
 
-		err = scope.InsertSymbol(sym_table.NewFuncSymbol(fn, fnType))
-		if err != nil {
-			typeErrors = append(typeErrors, err)
-		}
+		funcScope := tc.currentScope.MakeChild(fn.GetStart(), fn.GetStop(), fnType.Roles().Participants())
+		tc.insertSymbol(sym_table.NewFuncSymbol(fn, funcScope, fnType))
 	}
 
 	return

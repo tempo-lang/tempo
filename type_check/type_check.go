@@ -12,11 +12,11 @@ type typeChecker struct {
 	*antlr.BaseParseTreeVisitor
 	errorListener ErrorListener
 
-	funcScopeStack []funcScope
-	symTable       *sym_table.SymTable
+	currentScope *sym_table.Scope
+	info         *Info
 }
 
-func TypeCheck(sourceFile parser.ISourceFileContext) []types.Error {
+func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []types.Error) {
 	tc := new()
 
 	// check that tc implements visitor
@@ -30,62 +30,48 @@ func TypeCheck(sourceFile parser.ISourceFileContext) []types.Error {
 		panic("analyzer error listener was expected to be DefaultErrorListener")
 	}
 
-	return analyzerErrorListener.Errors
+	return tc.info, analyzerErrorListener.Errors
 }
 
 func new() *typeChecker {
 	return &typeChecker{
-		errorListener:  &DefaultErrorListener{},
-		funcScopeStack: []funcScope{},
-		symTable:       sym_table.New(),
+		errorListener: &DefaultErrorListener{},
+		currentScope:  nil,
+		info:          newInfo(),
 	}
-}
-
-type funcScope struct {
-	fn       parser.IFuncContext
-	funcType *types.Type
 }
 
 func (tc *typeChecker) reportError(err types.Error) {
 	tc.errorListener.ReportTypeError(err)
 }
 
-func (tc *typeChecker) funcScope() *funcScope {
-	if len(tc.funcScopeStack) == 0 {
-		return nil
+func (tc *typeChecker) insertSymbol(sym sym_table.Symbol) {
+	tc.info.Symbols[sym.Ident()] = sym
+	err := tc.currentScope.InsertSymbol(sym)
+	if err != nil {
+		tc.reportError(err)
 	}
-	return &tc.funcScopeStack[len(tc.funcScopeStack)-1]
 }
 
 func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result any) {
-	globalScope := tc.symTable.EnterScope() // enter global scope
+	tc.info.GlobalScope = sym_table.NewScope(ctx.GetStart(), ctx.GetStop(), nil, nil)
+	tc.currentScope = tc.info.GlobalScope
 
-	typeErrors := addGlobalSymbols(globalScope, ctx)
-	for _, err := range typeErrors {
-		tc.reportError(err)
-	}
+	tc.addGlobalSymbols(ctx)
 
 	for _, fn := range ctx.AllFunc_() {
 		fn.Accept(tc)
 	}
 
-	tc.symTable.ExitScope() // exit global scope
+	tc.currentScope = tc.currentScope.Parent()
 	return
 }
 
 func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
-	funcType, err := types.ParseFuncType(ctx)
-	if err != nil && !tc.symTable.IsGlobalScope() {
-		// global scope errors has already been reported
-		tc.reportError(err)
-	}
+	// functions are already resolved by addGlobalSymbols
+	sym := tc.info.Symbols[ctx.Ident()].(*sym_table.FuncSymbol)
 
-	tc.funcScopeStack = append(tc.funcScopeStack, funcScope{
-		fn:       ctx,
-		funcType: funcType,
-	})
-
-	tc.symTable.EnterScope()
+	tc.currentScope = sym.Scope()
 
 	tc.checkFuncDuplicateRoles(ctx)
 
@@ -95,18 +81,14 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 		stmt.Accept(tc)
 	}
 
-	tc.symTable.ExitScope()
-	tc.funcScopeStack = tc.funcScopeStack[:len(tc.funcScopeStack)-1]
+	tc.currentScope = tc.currentScope.Parent()
 	return nil
 }
 
 func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
 	paramType := ctx.ValueType().Accept(tc).(*types.Type)
 
-	err := tc.symTable.InsertSymbol(sym_table.NewFuncParamSymbol(ctx, paramType))
-	if err != nil {
-		tc.reportError(err)
-	}
+	tc.insertSymbol(sym_table.NewFuncParamSymbol(ctx, tc.currentScope, paramType))
 
 	return tc.VisitChildren(ctx)
 }
@@ -119,13 +101,13 @@ func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any 
 }
 
 func (tc *typeChecker) VisitScope(ctx *parser.ScopeContext) any {
-	tc.symTable.EnterScope()
+	tc.currentScope = tc.currentScope.MakeChild(ctx.GetStart(), ctx.GetStop(), tc.currentScope.Roles())
 
 	for _, stmt := range ctx.AllStatement() {
 		stmt.Accept(tc)
 	}
 
-	tc.symTable.ExitScope()
+	tc.currentScope = tc.currentScope.Parent()
 	return nil
 }
 

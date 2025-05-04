@@ -3,61 +3,51 @@ package sym_table
 import (
 	"chorego/parser"
 	"chorego/types"
+
+	"github.com/antlr4-go/antlr/v4"
 )
 
-type SymTable struct {
-	scope []*Scope
-}
-
 type Scope struct {
-	symbols map[string]Symbol
+	symbols  map[string]Symbol
+	parent   *Scope
+	children []*Scope
+	pos      antlr.Token
+	end      antlr.Token
+	roles    []string
 }
 
-func New() *SymTable {
-	return &SymTable{
-		scope: []*Scope{},
-	}
-}
-
-func newScope() *Scope {
+func NewScope(pos antlr.Token, end antlr.Token, parent *Scope, roles []string) *Scope {
 	return &Scope{
-		symbols: map[string]Symbol{},
+		symbols:  map[string]Symbol{},
+		parent:   parent,
+		children: []*Scope{},
+		pos:      pos,
+		end:      end,
+		roles:    roles,
 	}
 }
 
-func (sym *SymTable) EnterScope() *Scope {
-	sym.scope = append(sym.scope, newScope())
-	return sym.Scope()
+func (scope *Scope) LookupParent(name string) Symbol {
+	if sym, found := scope.symbols[name]; found {
+		return sym
+	}
+
+	if scope.parent != nil {
+		return scope.parent.LookupParent(name)
+	}
+	return nil
 }
 
-func (sym *SymTable) ExitScope() {
-	sym.scope = sym.scope[:len(sym.scope)-1]
+func (scope *Scope) Lookup(name string) Symbol {
+	return scope.symbols[name]
 }
 
-func (sym *SymTable) Scope() *Scope {
-	return sym.scope[len(sym.scope)-1]
-}
-
-func (sym *SymTable) IsGlobalScope() bool {
-	return len(sym.scope) == 1
-}
-
-func (sym *SymTable) LookupSymbol(name parser.IIdentContext) (Symbol, types.Error) {
-	for i := len(sym.scope) - 1; i >= 0; i-- {
-		symbol := sym.scope[i].Get(name.GetText())
-		if symbol != nil {
-			return symbol, nil
-		}
+func (scope *Scope) LookupSymbol(name parser.IIdentContext) (Symbol, types.Error) {
+	symbol := scope.LookupParent(name.GetText())
+	if symbol != nil {
+		return symbol, nil
 	}
 	return nil, types.NewUnknownSymbolError(name)
-}
-
-func (sym *SymTable) InsertSymbol(symbol Symbol) types.Error {
-	return sym.Scope().InsertSymbol(symbol)
-}
-
-func (scope *Scope) Get(name string) Symbol {
-	return scope.symbols[name]
 }
 
 func (scope *Scope) InsertSymbol(symbol Symbol) types.Error {
@@ -68,4 +58,47 @@ func (scope *Scope) InsertSymbol(symbol Symbol) types.Error {
 
 	scope.symbols[symbol.SymbolName()] = symbol
 	return nil
+}
+
+func (scope *Scope) HasParent() bool {
+	return scope.parent != nil
+}
+
+func (scope *Scope) Parent() *Scope {
+	return scope.parent
+}
+
+func (scope *Scope) Children() []*Scope {
+	return scope.children
+}
+
+func (scope *Scope) Roles() []string {
+	return scope.roles
+}
+
+func (scope *Scope) Pos() antlr.Token {
+	return scope.pos
+}
+
+func (scope *Scope) End() antlr.Token {
+	return scope.end
+}
+
+func (scope *Scope) Contains(pos antlr.Token) bool {
+	return scope.pos.GetTokenIndex() >= pos.GetTokenIndex() && scope.end.GetTokenIndex() <= pos.GetTokenIndex()
+}
+
+func (scope *Scope) Innermost(pos antlr.Token) *Scope {
+	for _, child := range scope.children {
+		if child.Contains(pos) {
+			return child.Innermost(pos)
+		}
+	}
+	return nil
+}
+
+func (scope *Scope) MakeChild(pos antlr.Token, end antlr.Token, roles []string) *Scope {
+	child := NewScope(pos, end, scope, roles)
+	scope.children = append(scope.children, child)
+	return child
 }

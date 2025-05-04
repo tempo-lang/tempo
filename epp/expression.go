@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func eppExpression(role parser.IIdentContext, expr parser.IExpressionContext) projection.Expression {
+func eppExpression(expr parser.IExpressionContext) projection.Expression {
 	if numToken := expr.NUMBER(); numToken != nil {
 		num, err := strconv.Atoi(numToken.GetText())
 		if err != nil {

@@ -18,7 +18,7 @@ func Compile(input antlr.CharStream) (output string, errors []error) {
 	}
 
 	// type check ast
-	typeErrors := type_check.TypeCheck(sourceFile)
+	info, typeErrors := type_check.TypeCheck(sourceFile)
 	if len(typeErrors) > 0 {
 		for _, err := range typeErrors {
 			errors = append(errors, err)
@@ -27,7 +27,7 @@ func Compile(input antlr.CharStream) (output string, errors []error) {
 	}
 
 	// endpoint project
-	eppFile := epp.EppSourceFile(sourceFile)
+	eppFile := epp.EppSourceFile(info, sourceFile)
 
 	// generate go code
 	file := jen.NewFile("choreography")

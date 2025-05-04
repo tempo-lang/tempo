@@ -20,9 +20,9 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	if err != nil {
 		tc.reportError(err)
 	} else {
-		funcRoles := tc.funcScope().funcType.Roles()
+		activeRoles := tc.currentScope.Roles()
 
-		if unknownRoles := declType.Roles().SubtractParticipants(funcRoles); len(unknownRoles) > 0 {
+		if unknownRoles := declType.Roles().SubtractParticipants(activeRoles); len(unknownRoles) > 0 {
 			tc.reportError(types.NewUnknownRoleError(ctx.ValueType(), unknownRoles))
 		}
 	}
@@ -37,9 +37,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 		stmtType = types.Invalid()
 	}
 
-	if err := tc.symTable.InsertSymbol(sym_table.NewVariableSymbol(ctx, stmtType)); err != nil {
-		tc.reportError(err)
-	}
+	tc.insertSymbol(sym_table.NewVariableSymbol(ctx, tc.currentScope, stmtType))
 
 	return tc.VisitChildren(ctx)
 }

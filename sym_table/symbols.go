@@ -9,67 +9,99 @@ type Symbol interface {
 	SymbolName() string
 	Ident() parser.IIdentContext
 	Type() *types.Type
+	Parent() *Scope
 }
 
 type FuncSymbol struct {
-	Func     parser.IFuncContext
+	funcCtx  parser.IFuncContext
+	scope    *Scope
 	funcType *types.Type
 }
 
+func (f *FuncSymbol) Parent() *Scope {
+	return f.scope.parent
+}
+
 func (f *FuncSymbol) Ident() parser.IIdentContext {
-	return f.Func.Ident()
+	return f.funcCtx.Ident()
 }
 
 func (f *FuncSymbol) SymbolName() string {
-	return f.Func.Ident().GetText()
+	return f.funcCtx.Ident().GetText()
 }
 
 func (f *FuncSymbol) Type() *types.Type {
 	return f.funcType
 }
 
-func NewFuncSymbol(fn parser.IFuncContext, funcType *types.Type) *FuncSymbol {
-	return &FuncSymbol{Func: fn, funcType: funcType}
+func (f *FuncSymbol) Func() parser.IFuncContext {
+	return f.funcCtx
+}
+
+func (f *FuncSymbol) Scope() *Scope {
+	return f.scope
+}
+
+func NewFuncSymbol(fn parser.IFuncContext, scope *Scope, funcType *types.Type) Symbol {
+	return &FuncSymbol{funcCtx: fn, scope: scope, funcType: funcType}
 }
 
 type FuncParamSymbol struct {
-	Param     parser.IFuncParamContext
+	param     parser.IFuncParamContext
 	paramType *types.Type
+	parent    *Scope
 }
 
-func NewFuncParamSymbol(param parser.IFuncParamContext, paramType *types.Type) *FuncParamSymbol {
-	return &FuncParamSymbol{Param: param, paramType: paramType}
+func NewFuncParamSymbol(param parser.IFuncParamContext, parent *Scope, paramType *types.Type) Symbol {
+	return &FuncParamSymbol{param: param, parent: parent, paramType: paramType}
 }
 
 func (param *FuncParamSymbol) SymbolName() string {
-	return param.Param.Ident().GetText()
+	return param.param.Ident().GetText()
 }
 
 func (param *FuncParamSymbol) Ident() parser.IIdentContext {
-	return param.Param.Ident()
+	return param.param.Ident()
 }
 
 func (f *FuncParamSymbol) Type() *types.Type {
 	return f.paramType
 }
 
+func (param *FuncParamSymbol) Parent() *Scope {
+	return param.parent
+}
+
+func (param *FuncParamSymbol) Param() parser.IFuncParamContext {
+	return param.param
+}
+
 type VariableSymbol struct {
-	Decl    parser.IStmtVarDeclContext
+	decl    parser.IStmtVarDeclContext
+	parent  *Scope
 	varType *types.Type
 }
 
-func NewVariableSymbol(decl parser.IStmtVarDeclContext, varType *types.Type) *VariableSymbol {
-	return &VariableSymbol{Decl: decl, varType: varType}
+func NewVariableSymbol(decl parser.IStmtVarDeclContext, parent *Scope, varType *types.Type) Symbol {
+	return &VariableSymbol{decl: decl, parent: parent, varType: varType}
 }
 
 func (v *VariableSymbol) SymbolName() string {
-	return v.Decl.Ident().GetText()
+	return v.decl.Ident().GetText()
 }
 
 func (v *VariableSymbol) Ident() parser.IIdentContext {
-	return v.Decl.Ident()
+	return v.decl.Ident()
 }
 
 func (v *VariableSymbol) Type() *types.Type {
 	return v.varType
+}
+
+func (v *VariableSymbol) Parent() *Scope {
+	return v.parent
+}
+
+func (v *VariableSymbol) VarDecl() parser.IStmtVarDeclContext {
+	return v.decl
 }

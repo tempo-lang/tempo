@@ -53,7 +53,7 @@ func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
 			paramErrors[i] = append(paramErrors[i], err)
 		}
 
-		if unknownRoles := paramRoles.SubtractParticipants(funcRoles); len(unknownRoles) > 0 {
+		if unknownRoles := paramRoles.SubtractParticipants(funcRoles.participants); len(unknownRoles) > 0 {
 			paramErrors[i] = append(paramErrors[i], NewUnknownRoleError(param.ValueType(), unknownRoles))
 		}
 

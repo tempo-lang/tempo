@@ -9,7 +9,7 @@ import (
 func (tc *typeChecker) VisitExpression(ctx *parser.ExpressionContext) any {
 
 	if ident := ctx.Ident(); ident != nil {
-		sym, err := tc.symTable.LookupSymbol(ident)
+		sym, err := tc.currentScope.LookupSymbol(ident)
 		if err != nil {
 			tc.reportError(err)
 			return types.Invalid()
