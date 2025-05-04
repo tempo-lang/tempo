@@ -9,9 +9,8 @@ import (
 )
 
 func EppFunc(info *type_check.Info, function parser.IFuncContext) *projection.Choreography {
-	obj := info.Symbols[function.Ident()]
-
-	func_role := obj.Type().Roles()
+	sym := info.Symbols[function.Ident()]
+	func_role := sym.Type().Roles()
 
 	choreography := projection.NewChoreography(function.Ident().GetText())
 
@@ -31,26 +30,27 @@ func assertValidTree(err types.Error) {
 func eppFuncRole(info *type_check.Info, choreography *projection.Choreography, function parser.IFuncContext, roleName string) {
 	fn := choreography.AddFunc(roleName, function)
 
-	obj := info.Symbols[function.Ident()]
-	funcType := obj.Type().Value().(*types.FunctionType)
+	funcSym := info.Symbols[function.Ident()]
+	funcType := funcSym.Type().Value().(*types.FunctionType)
 
 	// project parameters
 	for i, param := range function.FuncParamList().AllFuncParam() {
 		paramType := funcType.Params()[i]
-		if paramType.Roles().Contains(types.SingleRole(roleName)) {
+		if paramType.Roles().Contains(roleName) {
 			fn.AddParam(param, paramType)
 		}
 	}
 
 	// project body
-	for _, stmt := range function.Scope().AllStatement() {
+	for _, stmt := range function.Scope().AllStmt() {
 		if varDecl := stmt.StmtVarDecl(); varDecl != nil {
-			if ValueExistsAtRole(varDecl.ValueType(), roleName) {
+			varSym := info.Symbols[varDecl.Ident()]
+			if varSym.Type().Roles().Contains(roleName) {
 				variableName := varDecl.Ident().GetText()
 				varibleType, err := types.ParseValueType(varDecl.ValueType())
 				assertValidTree(err)
 
-				expr := eppExpression(varDecl.Expression())
+				expr := eppExpression(varDecl.Expr())
 
 				fn.AddStmt(projection.NewStmtVarDecl(variableName, varibleType, expr))
 			}

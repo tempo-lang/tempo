@@ -6,34 +6,40 @@ import (
 	"strconv"
 )
 
-func (tc *typeChecker) VisitExpression(ctx *parser.ExpressionContext) any {
+func (tc *typeChecker) VisitExprAdd(ctx *parser.ExprAddContext) any {
+	lhs := ctx.Expr(0).Accept(tc).(*types.Type)
+	rhs := ctx.Expr(1).Accept(tc).(*types.Type)
 
-	if ident := ctx.Ident(); ident != nil {
-		sym, err := tc.currentScope.LookupSymbol(ident)
-		if err != nil {
-			tc.reportError(err)
-			return types.Invalid()
-		}
-		return sym.Type()
-	}
-
-	if num := ctx.NUMBER(); num != nil {
-		_, err := strconv.Atoi(num.GetText())
-		if err != nil {
-			tc.reportError(types.NewInvalidNumberError(ctx))
-		}
-
+	if lhs.Value() == types.Int() && rhs.Value() == types.Int() {
 		return types.New(types.Int(), types.NewRole(nil, true))
 	}
 
-	if boolean := ctx.ExprBool(); boolean != nil {
-		boolType := boolean.Accept(tc).(types.Value)
-		return types.New(boolType, types.NewRole(nil, true))
-	}
+	tc.reportError(types.NewTypeMismatchError(ctx, lhs, rhs))
+	return types.Invalid()
+}
 
-	panic("unexpected expression")
+func (tc *typeChecker) VisitExprGroup(ctx *parser.ExprGroupContext) any {
+	return ctx.Expr().Accept(tc)
 }
 
 func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
-	return types.Bool()
+	return types.New(types.Bool(), types.NewRole(nil, true))
+}
+
+func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
+	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
+	if err != nil {
+		tc.reportError(err)
+		return types.Invalid()
+	}
+	return sym.Type()
+}
+
+func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
+	_, err := strconv.Atoi(ctx.GetText())
+	if err != nil {
+		tc.reportError(types.NewInvalidNumberError(ctx))
+	}
+
+	return types.New(types.Int(), types.NewRole(nil, true))
 }

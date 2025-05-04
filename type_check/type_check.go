@@ -77,7 +77,7 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 
 	ctx.FuncParamList().Accept(tc)
 
-	for _, stmt := range ctx.Scope().AllStatement() {
+	for _, stmt := range ctx.Scope().AllStmt() {
 		stmt.Accept(tc)
 	}
 
@@ -103,7 +103,7 @@ func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any 
 func (tc *typeChecker) VisitScope(ctx *parser.ScopeContext) any {
 	tc.currentScope = tc.currentScope.MakeChild(ctx.GetStart(), ctx.GetStop(), tc.currentScope.Roles())
 
-	for _, stmt := range ctx.AllStatement() {
+	for _, stmt := range ctx.AllStmt() {
 		stmt.Accept(tc)
 	}
 

@@ -54,7 +54,7 @@ func (r *Roles) SubtractParticipants(other []string) []string {
 	return result
 }
 
-func (r *Roles) Contains(other *Roles) bool {
+func (r *Roles) Encompass(other *Roles) bool {
 	if r.isSharedRole != other.isSharedRole {
 		return false
 	}
@@ -66,4 +66,8 @@ func (r *Roles) Contains(other *Roles) bool {
 	}
 
 	return true
+}
+
+func (r *Roles) Contains(role string) bool {
+	return slices.Contains(r.participants, role)
 }

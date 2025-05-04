@@ -54,3 +54,29 @@ func (e *ExprBool) IsExpression() {}
 func NewExprBool(value bool) Expression {
 	return &ExprBool{Value: value}
 }
+
+type Operator string
+
+const (
+	OperatorAdd = "+"
+)
+
+type ExprBinaryOp struct {
+	operator Operator
+	lhs      Expression
+	rhs      Expression
+}
+
+func (e *ExprBinaryOp) Codegen() jen.Code {
+	return jen.Add(e.lhs.Codegen()).Op(string(e.operator)).Add(e.rhs.Codegen())
+}
+
+func (e *ExprBinaryOp) IsExpression() {}
+
+func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression) Expression {
+	return &ExprBinaryOp{
+		operator: OperatorAdd,
+		lhs:      lhs,
+		rhs:      rhs,
+	}
+}

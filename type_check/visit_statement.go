@@ -6,7 +6,7 @@ import (
 	"chorego/types"
 )
 
-func (tc *typeChecker) VisitStatement(ctx *parser.StatementContext) any {
+func (tc *typeChecker) VisitStmt(ctx *parser.StmtContext) any {
 	if varDecl := ctx.StmtVarDecl(); varDecl != nil {
 		return varDecl.Accept(tc)
 	}
@@ -15,7 +15,7 @@ func (tc *typeChecker) VisitStatement(ctx *parser.StatementContext) any {
 }
 
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
-	exprType := ctx.Expression().Accept(tc).(*types.Type)
+	exprType := ctx.Expr().Accept(tc).(*types.Type)
 	declType, err := types.ParseValueType(ctx.ValueType())
 	if err != nil {
 		tc.reportError(err)
@@ -33,7 +33,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 		tc.reportError(err)
 		stmtType = types.Invalid()
 	} else if !exprType.CanCoerceTo(declType) {
-		tc.reportError(types.NewTypeMismatchError(ctx.ValueType(), declType, ctx.Expression(), exprType))
+		tc.reportError(types.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
 		stmtType = types.Invalid()
 	}
 

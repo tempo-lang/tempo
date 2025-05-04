@@ -27,7 +27,7 @@ func (t *Type) CanCoerceTo(other *Type) bool {
 		return false
 	}
 
-	if t.roles.Contains(other.roles) {
+	if t.roles.Encompass(other.roles) {
 		return true
 	}
 

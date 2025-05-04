@@ -27,17 +27,20 @@ funcParamList: LPAREN (funcParam (COMMA funcParam)*)? RPAREN;
 funcParam: ident COLON valueType;
 
 // scope
-scope: LCURLY statement* RCURLY;
+scope: LCURLY stmt* RCURLY;
 
 // statements
-statement: stmtVarDecl;
+stmt: stmtVarDecl;
 
-stmtVarDecl: LET ident COLON valueType EQUAL expression END;
+stmtVarDecl: LET ident COLON valueType EQUAL expr END;
 
 // expressions
-expression: NUMBER | exprBool | ident;
-
-exprBool: TRUE | FALSE;
+expr:
+	expr PLUS expr			# exprAdd
+	| NUMBER				# exprNum
+	| (TRUE | FALSE)		# exprBool
+	| ident					# exprIdent
+	| LPAREN expr RPAREN	# exprGroup;
 
 /*
  * Lexer Rules
@@ -67,6 +70,7 @@ EQUAL: '=';
 ROLE_AT: '@';
 COMMA: ',';
 COLON: ':';
+PLUS: '+';
 
 ID: ('_' [a-zA-Z_0-9]+ | [a-zA-Z][a-zA-Z_0-9]*);
 NUMBER: [0-9]+;

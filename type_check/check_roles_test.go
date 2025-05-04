@@ -25,7 +25,7 @@ func TestValueRoles(t *testing.T) {
 				}
 			`,
 			errors: []string{
-				"type mismatch, expected Int@(B) found Int@(A)",
+				"invalid declaration type, expected Int@(B) found Int@(A)",
 			},
 		},
 	}

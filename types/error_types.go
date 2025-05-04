@@ -120,15 +120,15 @@ func (e *UnknownSymbolError) ParserRule() antlr.ParserRuleContext {
 	return e.SymName
 }
 
-type TypeMismatchError struct {
+type InvalidDeclTypeError struct {
 	DeclToken parser.IValueTypeContext
 	DeclType  *Type
-	ExprToken parser.IExpressionContext
+	ExprToken parser.IExprContext
 	ExprType  *Type
 }
 
-func NewTypeMismatchError(declToken parser.IValueTypeContext, declType *Type, exprToken parser.IExpressionContext, exprType *Type) Error {
-	return &TypeMismatchError{
+func NewInvalidDeclTypeError(declToken parser.IValueTypeContext, declType *Type, exprToken parser.IExprContext, exprType *Type) Error {
+	return &InvalidDeclTypeError{
 		DeclToken: declToken,
 		DeclType:  declType,
 		ExprToken: exprToken,
@@ -136,14 +136,38 @@ func NewTypeMismatchError(declToken parser.IValueTypeContext, declType *Type, ex
 	}
 }
 
-func (e *TypeMismatchError) Error() string {
-	return fmt.Sprintf("type mismatch, expected %s found %s", e.DeclType.ToString(), e.ExprType.ToString())
+func (e *InvalidDeclTypeError) Error() string {
+	return fmt.Sprintf("invalid declaration type, expected %s found %s", e.DeclType.ToString(), e.ExprType.ToString())
 }
 
-func (e *TypeMismatchError) IsTypeError() {}
+func (e *InvalidDeclTypeError) IsTypeError() {}
 
-func (e *TypeMismatchError) ParserRule() antlr.ParserRuleContext {
+func (e *InvalidDeclTypeError) ParserRule() antlr.ParserRuleContext {
 	return e.DeclToken
+}
+
+type TypeMismatchError struct {
+	Expr       parser.IExprContext
+	FirstType  *Type
+	SecondType *Type
+}
+
+func (t *TypeMismatchError) Error() string {
+	return fmt.Sprintf("types %s and %s do not match", t.FirstType.ToString(), t.SecondType.ToString())
+}
+
+func (t *TypeMismatchError) IsTypeError() {}
+
+func (t *TypeMismatchError) ParserRule() antlr.ParserRuleContext {
+	return t.Expr
+}
+
+func NewTypeMismatchError(expr parser.IExprContext, firstType *Type, secondType *Type) Error {
+	return &TypeMismatchError{
+		Expr:       expr,
+		FirstType:  firstType,
+		SecondType: secondType,
+	}
 }
 
 type InvalidFunctionError struct {
@@ -177,10 +201,10 @@ func (e *InvalidFunctionError) ParserRule() antlr.ParserRuleContext {
 }
 
 type InvalidNumberError struct {
-	Num parser.IExpressionContext
+	Num parser.IExprContext
 }
 
-func NewInvalidNumberError(num parser.IExpressionContext) Error {
+func NewInvalidNumberError(num parser.IExprContext) Error {
 	return &InvalidNumberError{
 		Num: num,
 	}
