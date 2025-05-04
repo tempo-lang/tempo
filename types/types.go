@@ -15,6 +15,10 @@ func New(value Value, roles *Roles) *Type {
 }
 
 func (t *Type) CanCoerceTo(other *Type) bool {
+	if t.value == Invalid().value {
+		return true
+	}
+
 	if t.value != other.value {
 		return false
 	}

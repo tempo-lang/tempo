@@ -101,13 +101,6 @@ func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any 
 }
 
 func (tc *typeChecker) VisitScope(ctx *parser.ScopeContext) any {
-	tc.currentScope = tc.currentScope.MakeChild(ctx.GetStart(), ctx.GetStop(), tc.currentScope.Roles())
-
-	for _, stmt := range ctx.AllStmt() {
-		stmt.Accept(tc)
-	}
-
-	tc.currentScope = tc.currentScope.Parent()
 	return nil
 }
 

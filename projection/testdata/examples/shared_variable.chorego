@@ -1,0 +1,3 @@
+func@(A,B) shared() {
+  let x: Int@[A,B] = 10;
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -27,17 +28,31 @@ func FuzzProjection(f *testing.F) {
 		}
 	`)
 
+	// Add valid examples
 	paths, err := filepath.Glob(filepath.Join("testdata", "examples", "*.chorego"))
 	if err != nil {
 		f.Fatal(err)
 	}
-
 	for _, path := range paths {
 		dat, err := os.ReadFile(path)
 		if err != nil {
 			f.Fatal(err)
 		}
 		f.Add(string(dat))
+	}
+
+	// Add type checker examples
+	paths, err = filepath.Glob(filepath.Join("..", "type_check", "testdata", "examples", "*.txt"))
+	if err != nil {
+		f.Fatal(err)
+	}
+	for _, path := range paths {
+		dat, err := os.ReadFile(path)
+		if err != nil {
+			f.Fatal(err)
+		}
+		source := strings.SplitN(string(dat), "---", 2)[0]
+		f.Add(source)
 	}
 
 	f.Fuzz(func(t *testing.T, source string) {

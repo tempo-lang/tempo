@@ -1,0 +1,5 @@
+func@A wrongAdd() {
+  let x: Int@A = 2 + false;
+}
+---
+2:18: types Int@[] and Bool@[] do not match

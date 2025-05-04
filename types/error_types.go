@@ -143,7 +143,7 @@ func (e *InvalidDeclTypeError) Error() string {
 func (e *InvalidDeclTypeError) IsTypeError() {}
 
 func (e *InvalidDeclTypeError) ParserRule() antlr.ParserRuleContext {
-	return e.DeclToken
+	return e.ExprToken
 }
 
 type TypeMismatchError struct {

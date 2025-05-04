@@ -1,0 +1,5 @@
+func@(A) foo() {
+  let x: Int@B = 32;
+}
+---
+2:10: unknown roles [B] in 'Int@B'

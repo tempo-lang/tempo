@@ -1,0 +1,4 @@
+func@(A,B,A,B) foo() {}
+---
+1:1: function 'foo' has duplicate role 'A'
+1:1: function 'foo' has duplicate role 'B'

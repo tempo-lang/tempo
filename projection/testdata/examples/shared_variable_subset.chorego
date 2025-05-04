@@ -1,0 +1,5 @@
+func@(A,B,C) shareSubset() {
+  let x: Int@[A,B,C] = 10;
+  let y: Int@[A,B] = x;
+  let z: Int@A = y;
+}

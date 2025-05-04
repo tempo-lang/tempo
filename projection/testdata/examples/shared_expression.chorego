@@ -1,0 +1,5 @@
+func@(A,B,C) foo() {
+  let x: Int@[A,B] = 10;
+  let y: Int@[B,C] = 20;
+  let z: Int@B = x + y;
+}

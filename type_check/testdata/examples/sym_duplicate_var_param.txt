@@ -1,0 +1,5 @@
+func@A foo(p: Int@A) {
+  let p: Int@A = 1;
+}
+---
+2:7: symbol 'p' already declared

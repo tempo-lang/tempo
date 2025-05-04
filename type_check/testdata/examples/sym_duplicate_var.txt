@@ -1,0 +1,6 @@
+func@A foo() {
+  let x: Int@A = 1;
+  let x: Int@A = 2;
+}
+---
+3:7: symbol 'x' already declared

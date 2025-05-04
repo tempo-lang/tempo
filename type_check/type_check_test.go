@@ -3,79 +3,62 @@ package type_check_test
 import (
 	"chorego/compiler"
 	"chorego/misc"
-	"go/types"
+	"chorego/types"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
 )
 
-type AnalyzerTestData struct {
-	name   string
-	input  string
-	errors []string
-}
+func TestExamples(t *testing.T) {
+	paths, err := filepath.Glob(filepath.Join("testdata", "examples", "*.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
 
-type AntlrTestErrorListener struct {
-	t *testing.T
-}
+	for _, path := range paths {
+		_, filename := filepath.Split(path)
+		testname := filename[:len(filename)-len(filepath.Ext(path))]
 
-func NewAntlrTestErrorListener(t *testing.T) *AntlrTestErrorListener {
-	return &AntlrTestErrorListener{t}
-}
+		t.Run(testname, func(t *testing.T) {
 
-// ReportAmbiguity implements antlr.ErrorListener.
-func (a *AntlrTestErrorListener) ReportAmbiguity(recognizer antlr.Parser, dfa *antlr.DFA, startIndex int, stopIndex int, exact bool, ambigAlts *antlr.BitSet, configs *antlr.ATNConfigSet) {
-	a.t.Error("test failed to parse input")
-}
-
-// ReportAttemptingFullContext implements antlr.ErrorListener.
-func (a *AntlrTestErrorListener) ReportAttemptingFullContext(recognizer antlr.Parser, dfa *antlr.DFA, startIndex int, stopIndex int, conflictingAlts *antlr.BitSet, configs *antlr.ATNConfigSet) {
-	a.t.Error("test failed to parse input")
-}
-
-// ReportContextSensitivity implements antlr.ErrorListener.
-func (a *AntlrTestErrorListener) ReportContextSensitivity(recognizer antlr.Parser, dfa *antlr.DFA, startIndex int, stopIndex int, prediction int, configs *antlr.ATNConfigSet) {
-	a.t.Error("test failed to parse input")
-}
-
-// SyntaxError implements antlr.ErrorListener.
-func (a *AntlrTestErrorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{}, line int, column int, msg string, e antlr.RecognitionException) {
-	a.t.Error("test failed to parse input")
-}
-
-type TestErrorListener struct {
-	errors []types.Error
-}
-
-// ReportTypeError implements analyzer.ErrorListener.
-func (t *TestErrorListener) ReportTypeError(err types.Error) {
-	t.errors = append(t.errors, err)
-}
-
-func NewTestErrorListener() *TestErrorListener {
-	return &TestErrorListener{}
-}
-
-func (data *AnalyzerTestData) Assert(t *testing.T) {
-	t.Run(data.name, func(t *testing.T) {
-
-		input := antlr.NewInputStream(data.input)
-		_, errors := compiler.Compile(input)
-
-		for i := range min(len(data.errors), len(errors)) {
-			expected := data.errors[i]
-			actual := errors[i].Error()
-			if expected != actual {
-				t.Errorf("error %d did not match, expected '%s', got '%s'.", i, expected, actual)
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
 			}
-		}
 
-		if len(data.errors) > len(errors) {
-			t.Errorf("unexpected few actual errors: %v", data.errors[len(errors):])
-		}
+			split := strings.SplitN(string(data), "---", 2)
+			source := split[0]
+			expectedErrors := split[1]
 
-		if len(errors) > len(data.errors) {
-			t.Errorf("unexpected extra actual errors, expected %d got %d:\n- %s", len(data.errors), len(errors), misc.JoinStrings(errors, "\n- "))
-		}
-	})
+			input := antlr.NewInputStream(source)
+
+			_, compilerErrors := compiler.Compile(input)
+			formattedErrors := []string{}
+			for _, err := range compilerErrors {
+				typeError, ok := err.(types.Error)
+				if !ok {
+					t.Error("expected only type errors")
+					continue
+				}
+
+				line := typeError.ParserRule().GetStart().GetLine()
+				col := typeError.ParserRule().GetStart().GetColumn() + 1
+				formattedErrors = append(formattedErrors, fmt.Sprintf("%d:%d: %s", line, col, typeError.Error()))
+			}
+
+			actualErrors := misc.JoinStrings(formattedErrors, "\n")
+
+			expectedErrors = strings.Trim(expectedErrors, " \n")
+			actualErrors = strings.Trim(actualErrors, " \n")
+
+			if expectedErrors != actualErrors {
+				t.Errorf("Errors did not match expected in %s.\nExpected:\n%s\nActual:\n%s", testname, expectedErrors, actualErrors)
+			}
+
+		})
+	}
 }
