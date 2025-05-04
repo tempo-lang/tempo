@@ -146,6 +146,30 @@ func (e *InvalidDeclTypeError) ParserRule() antlr.ParserRuleContext {
 	return e.ExprToken
 }
 
+type InvalidAssignTypeError struct {
+	Assign   *parser.StmtAssignContext
+	VarType  *Type
+	ExprType *Type
+}
+
+func (i *InvalidAssignTypeError) Error() string {
+	return fmt.Sprintf("invalid assignment type, expected %s found %s", i.VarType.ToString(), i.ExprType.ToString())
+}
+
+func (i *InvalidAssignTypeError) IsTypeError() {}
+
+func (i *InvalidAssignTypeError) ParserRule() antlr.ParserRuleContext {
+	return i.Assign.Expr()
+}
+
+func NewInvalidAssignTypeError(assign *parser.StmtAssignContext, varType *Type, exprType *Type) Error {
+	return &InvalidAssignTypeError{
+		Assign:   assign,
+		VarType:  varType,
+		ExprType: exprType,
+	}
+}
+
 type TypeMismatchError struct {
 	Expr       parser.IExprContext
 	FirstType  *Type

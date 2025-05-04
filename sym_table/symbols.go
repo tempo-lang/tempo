@@ -77,12 +77,12 @@ func (param *FuncParamSymbol) Param() parser.IFuncParamContext {
 }
 
 type VariableSymbol struct {
-	decl    parser.IStmtVarDeclContext
+	decl    *parser.StmtVarDeclContext
 	parent  *Scope
 	varType *types.Type
 }
 
-func NewVariableSymbol(decl parser.IStmtVarDeclContext, parent *Scope, varType *types.Type) Symbol {
+func NewVariableSymbol(decl *parser.StmtVarDeclContext, parent *Scope, varType *types.Type) Symbol {
 	return &VariableSymbol{decl: decl, parent: parent, varType: varType}
 }
 
@@ -102,6 +102,6 @@ func (v *VariableSymbol) Parent() *Scope {
 	return v.parent
 }
 
-func (v *VariableSymbol) VarDecl() parser.IStmtVarDeclContext {
+func (v *VariableSymbol) VarDecl() *parser.StmtVarDeclContext {
 	return v.decl
 }

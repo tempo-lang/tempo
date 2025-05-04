@@ -1,0 +1,7 @@
+func@A assign() {
+  let x: Int@A = 10;
+  let y: Bool@A = true;
+  x = y;
+}
+---
+4:7: invalid assignment type, expected Int@(A) found Bool@(A)

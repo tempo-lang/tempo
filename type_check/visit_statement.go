@@ -6,14 +6,6 @@ import (
 	"chorego/types"
 )
 
-func (tc *typeChecker) VisitStmt(ctx *parser.StmtContext) any {
-	if varDecl := ctx.StmtVarDecl(); varDecl != nil {
-		return varDecl.Accept(tc)
-	}
-
-	panic("unexpected statement")
-}
-
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	exprType := ctx.Expr().Accept(tc).(*types.Type)
 	declType, err := types.ParseValueType(ctx.ValueType())
@@ -38,5 +30,21 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 
 	tc.insertSymbol(sym_table.NewVariableSymbol(ctx, tc.currentScope, stmtType))
 
-	return tc.VisitChildren(ctx)
+	return nil
+}
+
+func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
+	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
+	if err != nil {
+		tc.reportError(err)
+	}
+
+	tc.info.Symbols[ctx.Ident()] = sym
+
+	exprType := ctx.Expr().Accept(tc).(*types.Type)
+	if !exprType.CanCoerceTo(sym.Type()) {
+		tc.reportError(types.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
+	}
+
+	return nil
 }

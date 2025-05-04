@@ -17,7 +17,7 @@ type StmtVarDecl struct {
 	Expr Expression
 }
 
-func NewStmtVarDecl(name string, typeName *types.Type, expr Expression) *StmtVarDecl {
+func NewStmtVarDecl(name string, typeName *types.Type, expr Expression) Statement {
 	return &StmtVarDecl{
 		Name: name,
 		Type: typeName,
@@ -34,3 +34,21 @@ func (decl *StmtVarDecl) Codegen() jen.Statement {
 }
 
 func (decl *StmtVarDecl) IsStatement() {}
+
+type StmtAssign struct {
+	Name string
+	Expr Expression
+}
+
+func (s *StmtAssign) Codegen() jen.Statement {
+	return []jen.Code{jen.Id(s.Name).Op("=").Add(s.Expr.Codegen())}
+}
+
+func (s *StmtAssign) IsStatement() {}
+
+func NewStmtAssign(name string, expr Expression) Statement {
+	return &StmtAssign{
+		Name: name,
+		Expr: expr,
+	}
+}

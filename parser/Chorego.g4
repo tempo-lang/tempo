@@ -30,9 +30,9 @@ funcParam: ident COLON valueType;
 scope: LCURLY stmt* RCURLY;
 
 // statements
-stmt: stmtVarDecl;
-
-stmtVarDecl: LET ident COLON valueType EQUAL expr END;
+stmt:
+	LET ident COLON valueType EQUAL expr END	# stmtVarDecl
+	| ident EQUAL expr END						# stmtAssign;
 
 // expressions
 expr:

@@ -1,0 +1,4 @@
+func@A assign() {
+  let x: Int@A = 10;
+  x = 20;
+}

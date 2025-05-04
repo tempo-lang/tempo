@@ -43,17 +43,29 @@ func eppFuncRole(info *type_check.Info, choreography *projection.Choreography, f
 
 	// project body
 	for _, stmt := range function.Scope().AllStmt() {
-		if varDecl := stmt.StmtVarDecl(); varDecl != nil {
-			varSym := info.Symbols[varDecl.Ident()]
+		switch stmt := stmt.(type) {
+		case *parser.StmtAssignContext:
+			sym := info.Symbols[stmt.Ident()]
+			if sym.Type().Roles().Contains(roleName) {
+				varName := stmt.Ident().GetText()
+				expr := eppExpression(stmt.Expr())
+				fn.AddStmt(projection.NewStmtAssign(varName, expr))
+			}
+		case *parser.StmtVarDeclContext:
+			varSym := info.Symbols[stmt.Ident()]
 			if varSym.Type().Roles().Contains(roleName) {
-				variableName := varDecl.Ident().GetText()
-				varibleType, err := types.ParseValueType(varDecl.ValueType())
+				variableName := stmt.Ident().GetText()
+				varibleType, err := types.ParseValueType(stmt.ValueType())
 				assertValidTree(err)
 
-				expr := eppExpression(varDecl.Expr())
+				expr := eppExpression(stmt.Expr())
 
 				fn.AddStmt(projection.NewStmtVarDecl(variableName, varibleType, expr))
 			}
+		case *parser.StmtContext:
+			panic("statement should never be base type")
+		default:
+			panic(fmt.Sprintf("unknown statement: %#v", stmt))
 		}
 	}
 }
