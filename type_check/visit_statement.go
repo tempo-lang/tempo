@@ -30,7 +30,6 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	stmtType := declType
 
 	if err != nil {
-		tc.reportError(err)
 		stmtType = types.Invalid()
 	} else if !exprType.CanCoerceTo(declType) {
 		tc.reportError(types.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))

@@ -55,7 +55,7 @@ func (r *Roles) SubtractParticipants(other []string) []string {
 }
 
 func (r *Roles) Encompass(other *Roles) bool {
-	if r.isSharedRole != other.isSharedRole {
+	if len(other.participants) > 1 && r.isSharedRole != other.isSharedRole {
 		return false
 	}
 

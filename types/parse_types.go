@@ -94,5 +94,5 @@ func ParseRoleTypeShared(ctx parser.IRoleTypeSharedContext) (*Roles, Error) {
 	for _, role := range ctx.AllIdent() {
 		participants = append(participants, role.GetText())
 	}
-	return NewRole(participants, false), nil
+	return NewRole(participants, true), nil
 }
