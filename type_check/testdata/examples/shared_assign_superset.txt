@@ -3,3 +3,5 @@ func@(A,B,C) foo(){
   let x: Int@[A,B,C] = 20;
   x = shared;
 }
+---
+4:7: invalid assignment type, expected Int@[A,B,C] found Int@[A,B]

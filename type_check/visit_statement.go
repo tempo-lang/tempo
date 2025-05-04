@@ -37,13 +37,13 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
 	if err != nil {
 		tc.reportError(err)
-	}
+	} else {
+		tc.info.Symbols[ctx.Ident()] = sym
 
-	tc.info.Symbols[ctx.Ident()] = sym
-
-	exprType := ctx.Expr().Accept(tc).(*types.Type)
-	if !exprType.CanCoerceTo(sym.Type()) {
-		tc.reportError(types.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
+		exprType := ctx.Expr().Accept(tc).(*types.Type)
+		if !exprType.CanCoerceTo(sym.Type()) {
+			tc.reportError(types.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
+		}
 	}
 
 	return nil

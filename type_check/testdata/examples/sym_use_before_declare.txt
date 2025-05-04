@@ -1,0 +1,6 @@
+func@A foo() {
+  let x: Int@A = y;
+  let y: Int@A = 10;
+}
+---
+2:18: unknown symbol 'y'

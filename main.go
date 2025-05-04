@@ -21,7 +21,7 @@ func main() {
 		for _, err := range errors {
 			if typeErr, ok := err.(types.Error); ok {
 				token := typeErr.ParserRule().GetStart()
-				fmt.Printf("Type error %d:%d: %s\n", token.GetLine(), token.GetColumn(), typeErr.Error())
+				fmt.Printf("Type error %d:%d: %s\n", token.GetLine(), token.GetColumn()+1, typeErr.Error())
 			} else {
 				fmt.Printf("%v\n", err)
 			}
