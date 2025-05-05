@@ -15,11 +15,19 @@ func New(value Value, roles *Roles) *Type {
 }
 
 func (t *Type) CanCoerceTo(other *Type) bool {
+	otherValue := other.value
 	if t.value == Invalid().value {
 		return true
 	}
 
-	if t.value != other.value {
+	// plain types can coerce to async types
+	if _, isAsync := t.value.(*Async); !isAsync {
+		if otherAsync, otherIsAsync := otherValue.(*Async); otherIsAsync {
+			otherValue = otherAsync.Inner()
+		}
+	}
+
+	if t.value != otherValue {
 		return false
 	}
 

@@ -44,7 +44,7 @@ func (f *Func) Codegen(file *jen.File) {
 		Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
 		ParamsFunc(func(params *jen.Group) {
 			for _, param := range f.Params {
-				params.Id(param.Name).Id(CodegenType(param.Type))
+				params.Id(param.Name).Add(CodegenType(param.Type.Value()))
 			}
 		}).
 		BlockFunc(func(block *jen.Group) {

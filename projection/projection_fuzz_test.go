@@ -17,6 +17,42 @@ import (
 	"go/types"
 )
 
+type runtimeImporter struct {
+	pkg *types.Package
+}
+
+// Import implements types.Importer.
+func (r *runtimeImporter) Import(path string) (*types.Package, error) {
+	if path == "chorego/runtime" {
+		return r.pkg, nil
+	}
+	return nil, fmt.Errorf("failed to import %s", path)
+}
+
+func newRuntimeImporter() (*runtimeImporter, error) {
+
+	runtimeSource, err := os.ReadFile("../runtime/runtime.go")
+	if err != nil {
+		return nil, err
+	}
+
+	fset := token.NewFileSet()
+	parsedAST, err := goparser.ParseFile(fset, "", runtimeSource, goparser.AllErrors)
+	if err != nil {
+		return nil, err
+	}
+
+	conf := types.Config{}
+	pkg, err := conf.Check("chorego/runtime", fset, []*ast.File{parsedAST}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &runtimeImporter{
+		pkg: pkg,
+	}, nil
+}
+
 func FuzzProjection(f *testing.F) {
 	f.Add("func@(X,Y,Z) foo() {}")
 	f.Add("func@(A,B) foo(snd: Int@(A,B)) {}")
@@ -55,6 +91,11 @@ func FuzzProjection(f *testing.F) {
 		f.Add(source)
 	}
 
+	importer, err := newRuntimeImporter()
+	if err != nil {
+		f.Fatalf("Failed to make runtime importer: %v", err)
+	}
+
 	f.Fuzz(func(t *testing.T, source string) {
 		timeout := time.After(3 * time.Second)
 		result := make(chan error)
@@ -75,6 +116,8 @@ func FuzzProjection(f *testing.F) {
 			}
 
 			conf := types.Config{}
+			conf.Importer = importer
+
 			_, err = conf.Check("choreography", fset, []*ast.File{parsedAST}, nil)
 			if err != nil {
 				result <- fmt.Errorf("Go code type error: %v\n\nINPUT:\n%s\n\nPROJECTION:\n%s", err, source, output)

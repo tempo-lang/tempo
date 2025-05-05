@@ -1,5 +1,30 @@
 package runtime
 
+type Env struct {
+	trans Transport
+}
+
+type Transport interface {
+	Send(receiver string, value any)
+	Recv(sender string) *Async
+}
+
+func New(trans Transport) *Env {
+	return &Env{
+		trans: trans,
+	}
+}
+
+func (e *Env) Send(receiver string, value any) {
+	e.trans.Send(receiver, value)
+}
+
+func (e *Env) Recv(sender string) *Async {
+	return e.trans.Recv(sender)
+}
+
+// Async
+
 type Async struct {
 	value   any
 	valChan <-chan (any)

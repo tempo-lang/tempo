@@ -3,27 +3,37 @@ package projection
 import (
 	"chorego/types"
 	"fmt"
+
+	"github.com/dave/jennifer/jen"
 )
 
-func CodegenType(t *types.Type) string {
-	if builtinType, isBuiltin := t.Value().(types.Builtin); isBuiltin {
+func CodegenType(t types.Value) jen.Code {
+	if builtinType, isBuiltin := t.(types.Builtin); isBuiltin {
 		return CodegenBuiltinType(builtinType)
+	}
+
+	if asyncType, isAsync := t.(*types.Async); isAsync {
+		return CodegenAsyncType(asyncType)
 	}
 
 	panic(fmt.Sprintf("failed to generate type: %v", t))
 }
 
-func CodegenBuiltinType(builtinType types.Builtin) string {
+func CodegenBuiltinType(builtinType types.Builtin) jen.Code {
 	switch builtinType.(type) {
 	case *types.IntType:
-		return "int"
+		return jen.Int()
 	case *types.FloatType:
-		return "float64"
+		return jen.Float64()
 	case *types.StringType:
-		return "string"
+		return jen.String()
 	case *types.BoolType:
-		return "bool"
+		return jen.Bool()
 	default:
 		panic(fmt.Sprintf("unknown builtin type: %s", builtinType.ToString()))
 	}
+}
+
+func CodegenAsyncType(asyncType *types.Async) jen.Code {
+	return jen.Op("*").Qual("chorego/runtime", "Async")
 }

@@ -49,3 +49,7 @@ func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
 
 	return types.New(types.Int(), types.NewRole(nil, true))
 }
+
+func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
+	panic("unimplemented")
+}

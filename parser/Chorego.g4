@@ -11,7 +11,7 @@ sourceFile: func*;
 ident: ID;
 
 // type declaration
-valueType: ident roleType;
+valueType: ASYNC? ident roleType;
 roleType: roleTypeNormal | roleTypeShared;
 
 roleTypeShared: ROLE_AT (LSQUARE ident (COMMA ident)* RSQUARE);
@@ -39,6 +39,7 @@ expr:
 	expr PLUS expr			# exprAdd
 	| NUMBER				# exprNum
 	| (TRUE | FALSE)		# exprBool
+	| AWAIT expr			# exprAwait
 	| ident					# exprIdent
 	| LPAREN expr RPAREN	# exprGroup;
 
@@ -50,6 +51,8 @@ expr:
 
 FUNC: 'func';
 LET: 'let';
+ASYNC: 'async';
+AWAIT: 'await';
 
 TRUE: 'true';
 FALSE: 'false';

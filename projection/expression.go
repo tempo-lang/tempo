@@ -80,3 +80,21 @@ func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression) Expressi
 		rhs:      rhs,
 	}
 }
+
+type ExprAsync struct {
+	inner Expression
+}
+
+func (e *ExprAsync) Codegen() jen.Code {
+	return jen.Qual("chorego/runtime", "FixedAsync").Call(e.inner.Codegen())
+}
+
+func (e *ExprAsync) IsExpression() {}
+
+func (e *ExprAsync) Inner() Expression {
+	return e.inner
+}
+
+func NewExprAsync(inner Expression) Expression {
+	return &ExprAsync{inner: inner}
+}

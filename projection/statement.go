@@ -27,7 +27,7 @@ func NewStmtVarDecl(name string, typeName *types.Type, expr Expression) Statemen
 
 func (decl *StmtVarDecl) Codegen() jen.Statement {
 
-	genDecl := jen.Var().Id(decl.Name).Id(CodegenType(decl.Type)).Op("=").Add(decl.Expr.Codegen())
+	genDecl := jen.Var().Id(decl.Name).Add(CodegenType(decl.Type.Value())).Op("=").Add(decl.Expr.Codegen())
 	fixUnused := jen.Id("_").Op("=").Id(decl.Name).Comment("Suppress unused variable error")
 
 	return []jen.Code{genDecl, fixUnused}

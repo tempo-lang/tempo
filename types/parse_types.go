@@ -16,18 +16,28 @@ func BuiltinValues() map[string]Value {
 
 func ParseValueType(ctx parser.IValueTypeContext) (*Type, Error) {
 
+	isAsync := ctx.ASYNC() != nil
+
 	role, err := ParseRoleType(ctx.RoleType())
 	if err != nil {
-		return nil, err
+		return Invalid(), err
 	}
 
 	typeName := ctx.Ident()
-	builtinType, isBuiltinType := BuiltinValues()[typeName.GetText()]
-	if isBuiltinType {
-		return New(builtinType, role), nil
+	var typeValue Value = nil
+
+	if builtinType, isBuiltinType := BuiltinValues()[typeName.GetText()]; isBuiltinType {
+		typeValue = builtinType
 	}
 
-	return nil, NewUnknownTypeError(typeName)
+	if typeValue != nil {
+		if isAsync {
+			typeValue = NewAsync(typeValue)
+		}
+		return New(typeValue, role), nil
+	} else {
+		return Invalid(), NewUnknownTypeError(typeName)
+	}
 }
 
 func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
