@@ -37,6 +37,8 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
 	if err != nil {
 		tc.reportError(err)
+	} else if !sym.IsAssignable() {
+		tc.reportError(types.NewUnassignableSymbolError(ctx, sym.Type()))
 	} else {
 		tc.info.Symbols[ctx.Ident()] = sym
 

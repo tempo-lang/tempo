@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A,B,C)A000(){let x:Int@[A]=00;let y:Int@[A]=00;let A:Int@B=0+x;}")

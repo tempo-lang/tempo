@@ -1,5 +1,3 @@
-func@(A,B,C) foo(){
-  let shared: Int@[A,B] = 10;
-  let x: Int@[A,B,C] = 20;
-  x = shared;
+func@(A) A() {
+  A = A;
 }

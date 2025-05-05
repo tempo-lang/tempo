@@ -11,7 +11,13 @@ func (tc *typeChecker) VisitExprAdd(ctx *parser.ExprAddContext) any {
 	rhs := ctx.Expr(1).Accept(tc).(*types.Type)
 
 	if lhs.Value() == types.Int() && rhs.Value() == types.Int() {
-		return types.New(types.Int(), types.NewRole(nil, true))
+		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
+		if err != nil {
+			tc.reportError(err)
+			return types.Invalid()
+		} else {
+			return types.New(types.Int(), newRoles)
+		}
 	}
 
 	tc.reportError(types.NewTypeMismatchError(ctx, lhs, rhs))

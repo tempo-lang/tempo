@@ -10,6 +10,7 @@ type Symbol interface {
 	Ident() parser.IIdentContext
 	Type() *types.Type
 	Parent() *Scope
+	IsAssignable() bool
 }
 
 type FuncSymbol struct {
@@ -42,6 +43,10 @@ func (f *FuncSymbol) Scope() *Scope {
 	return f.scope
 }
 
+func (f *FuncSymbol) IsAssignable() bool {
+	return false
+}
+
 func NewFuncSymbol(fn parser.IFuncContext, scope *Scope, funcType *types.Type) Symbol {
 	return &FuncSymbol{funcCtx: fn, scope: scope, funcType: funcType}
 }
@@ -72,6 +77,10 @@ func (param *FuncParamSymbol) Parent() *Scope {
 	return param.parent
 }
 
+func (param *FuncParamSymbol) IsAssignable() bool {
+	return true
+}
+
 func (param *FuncParamSymbol) Param() parser.IFuncParamContext {
 	return param.param
 }
@@ -100,6 +109,10 @@ func (v *VariableSymbol) Type() *types.Type {
 
 func (v *VariableSymbol) Parent() *Scope {
 	return v.parent
+}
+
+func (v *VariableSymbol) IsAssignable() bool {
+	return true
 }
 
 func (v *VariableSymbol) VarDecl() *parser.StmtVarDeclContext {

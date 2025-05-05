@@ -48,6 +48,29 @@ func NewUnknownRoleError(valueType parser.IValueTypeContext, unknownRoles []stri
 	}
 }
 
+type UnmergableRolesError struct {
+	Expr  parser.IExprContext
+	Roles []*Roles
+}
+
+func (u *UnmergableRolesError) Error() string {
+	roles := misc.JoinStringsFunc(u.Roles, ", ", func(role *Roles) string { return role.ToString() })
+	return fmt.Sprintf("can not merge roles %s", roles)
+}
+
+func (u *UnmergableRolesError) IsTypeError() {}
+
+func (u *UnmergableRolesError) ParserRule() antlr.ParserRuleContext {
+	return u.Expr
+}
+
+func NewUnmergableRolesError(expr parser.IExprContext, roles []*Roles) Error {
+	return &UnmergableRolesError{
+		Expr:  expr,
+		Roles: roles,
+	}
+}
+
 func (e *UnknownRoleError) IsTypeError() {}
 
 func (e *UnknownRoleError) Error() string {
@@ -242,4 +265,26 @@ func (i *InvalidNumberError) IsTypeError() {}
 
 func (i *InvalidNumberError) ParserRule() antlr.ParserRuleContext {
 	return i.Num
+}
+
+type UnassignableSymbolError struct {
+	Assign *parser.StmtAssignContext
+	Type   *Type
+}
+
+func (u *UnassignableSymbolError) Error() string {
+	return fmt.Sprintf("can not assign value to '%s' of type '%s'", u.Assign.Ident().GetText(), u.Type.ToString())
+}
+
+func (u *UnassignableSymbolError) IsTypeError() {}
+
+func (u *UnassignableSymbolError) ParserRule() antlr.ParserRuleContext {
+	return u.Assign
+}
+
+func NewUnassignableSymbolError(assign *parser.StmtAssignContext, symType *Type) Error {
+	return &UnassignableSymbolError{
+		Assign: assign,
+		Type:   symType,
+	}
 }

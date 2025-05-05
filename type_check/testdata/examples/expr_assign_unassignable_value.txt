@@ -1,0 +1,5 @@
+func@(A) foo() {
+  foo = foo;
+}
+---
+2:3: can not assign value to 'foo' of type 'func()@(A)'

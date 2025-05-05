@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"chorego/misc"
+	"fmt"
+)
 
 type FunctionType struct {
 	// returnType Type
@@ -8,15 +11,8 @@ type FunctionType struct {
 }
 
 func (f *FunctionType) ToString() string {
-
-	params := "("
-	for _, param := range f.params {
-		params += param.ToString() + ", "
-	}
-	params = params[:len(params)-2]
-	params += ")"
-
-	return fmt.Sprintf("func (%s)", params)
+	params := misc.JoinStringsFunc(f.params, ", ", func(param *Type) string { return param.ToString() })
+	return fmt.Sprintf("func(%s)", params)
 }
 
 func (f *FunctionType) IsValue()    {}

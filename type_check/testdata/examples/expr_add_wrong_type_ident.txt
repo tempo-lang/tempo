@@ -1,0 +1,6 @@
+func@(A,B) foo(){
+  let x:Int@A = 10;
+  let y:Int@B = x + 10;
+}
+---
+3:17: invalid declaration type, expected Int@(B) found Int@(A)
