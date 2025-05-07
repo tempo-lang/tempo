@@ -11,16 +11,14 @@ sourceFile: func*;
 ident: ID;
 
 // type declaration
-valueType: ASYNC? ident roleType;
-roleType: roleTypeNormal | roleTypeShared;
+valueType: ASYNC? ident ROLE_AT roleType;
 
-roleTypeShared: ROLE_AT (LSQUARE ident (COMMA ident)* RSQUARE);
-
-roleTypeNormal:
-	ROLE_AT (ident | (LPAREN ident (COMMA ident)* RPAREN));
+roleType:
+	(LSQUARE ident (COMMA ident)* RSQUARE)				# roleTypeShared
+	| (ident | (LPAREN ident (COMMA ident)* RPAREN))	# roleTypeNormal;
 
 // function
-func: FUNC roleTypeNormal ident funcParamList scope;
+func: FUNC ROLE_AT roleType ident funcParamList scope;
 
 funcParamList: LPAREN (funcParam (COMMA funcParam)*)? RPAREN;
 
@@ -36,12 +34,13 @@ stmt:
 
 // expressions
 expr:
-	expr PLUS expr			# exprAdd
-	| NUMBER				# exprNum
-	| (TRUE | FALSE)		# exprBool
-	| AWAIT expr			# exprAwait
-	| ident					# exprIdent
-	| LPAREN expr RPAREN	# exprGroup;
+	expr PLUS expr					# exprAdd
+	| NUMBER						# exprNum
+	| (TRUE | FALSE)				# exprBool
+	| AWAIT expr					# exprAwait
+	| roleType COM roleType expr	# exprCom
+	| ident							# exprIdent
+	| LPAREN expr RPAREN			# exprGroup;
 
 /*
  * Lexer Rules
@@ -74,6 +73,7 @@ ROLE_AT: '@';
 COMMA: ',';
 COLON: ':';
 PLUS: '+';
+COM: '->';
 
 ID: ('_' [a-zA-Z_0-9]+ | [a-zA-Z][a-zA-Z_0-9]*);
 NUMBER: [0-9]+;

@@ -114,7 +114,7 @@ func (e *ExprAsync) Codegen() jen.Code {
 }
 
 func (e *ExprAsync) Type() types.Value {
-	return types.NewAsync(e.Type())
+	return types.NewAsync(e.inner.Type())
 }
 
 func (e *ExprAsync) IsExpression() {}
@@ -137,7 +137,6 @@ func (e *ExprAwait) Inner() Expression {
 }
 
 func (e *ExprAwait) Codegen() jen.Code {
-
 	return jen.Add(e.Inner().Codegen()).Dot("Get").Params().Assert(CodegenType(e.typeVal))
 }
 
@@ -149,4 +148,67 @@ func (e *ExprAwait) IsExpression() {}
 
 func NewExprAwait(inner Expression, typeVal types.Value) Expression {
 	return &ExprAwait{expr: inner, typeVal: typeVal}
+}
+
+type ExprSend struct {
+	expr     Expression
+	receiver string
+}
+
+func (e *ExprSend) Codegen() jen.Code {
+	value := e.expr.Codegen()
+	return jen.Qual("chorego/runtime", "Send").Call(jen.Lit(e.receiver), value)
+}
+
+func (e *ExprSend) IsExpression() {}
+
+func (e *ExprSend) Type() types.Value {
+	return types.Unit()
+}
+
+func NewExprSend(expr Expression, receiver string) Expression {
+	return &ExprSend{
+		expr:     expr,
+		receiver: receiver,
+	}
+}
+
+type ExprRecv struct {
+	recvType types.Value
+	sender   string
+}
+
+func (e *ExprRecv) Codegen() jen.Code {
+	return jen.Qual("chorego/runtime", "Recv").Call(jen.Lit(e.sender))
+}
+
+func (e *ExprRecv) IsExpression() {}
+
+func (e *ExprRecv) Type() types.Value {
+	return types.NewAsync(e.recvType)
+}
+
+func NewExprRecv(recvType types.Value, sender string) Expression {
+	return &ExprRecv{
+		recvType: recvType,
+		sender:   sender,
+	}
+}
+
+type ExprUnit struct{}
+
+func (e *ExprUnit) Codegen() jen.Code {
+	return jen.Add()
+}
+
+func (e *ExprUnit) IsExpression() {}
+
+func (e *ExprUnit) Type() types.Value {
+	return types.Unit()
+}
+
+var expr_unit ExprUnit = ExprUnit{}
+
+func Unit() Expression {
+	return &expr_unit
 }

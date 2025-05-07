@@ -73,6 +73,10 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 
 	tc.currentScope = sym.Scope()
 
+	if sym.Type().Roles().IsSharedRole() {
+		tc.reportError(types.NewUnexpectedSharedTypeError(ctx.Ident(), sym.Type()))
+	}
+
 	tc.checkFuncDuplicateRoles(ctx)
 
 	ctx.FuncParamList().Accept(tc)

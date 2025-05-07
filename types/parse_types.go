@@ -42,7 +42,7 @@ func ParseValueType(ctx parser.IValueTypeContext) (*Type, Error) {
 
 func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
 
-	funcRoles, err := ParseRoleTypeNormal(ctx.RoleTypeNormal())
+	funcRoles, err := ParseRoleType(ctx.RoleType())
 	if err != nil {
 		return nil, err
 	}
@@ -82,16 +82,17 @@ func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
 }
 
 func ParseRoleType(ctx parser.IRoleTypeContext) (*Roles, Error) {
-	if roleNormal := ctx.RoleTypeNormal(); roleNormal != nil {
-		return ParseRoleTypeNormal(roleNormal)
+	switch ctx := ctx.(type) {
+	case *parser.RoleTypeNormalContext:
+		return ParseRoleTypeNormal(ctx)
+	case *parser.RoleTypeSharedContext:
+		return ParseRoleTypeShared(ctx)
 	}
-	if roleShared := ctx.RoleTypeShared(); roleShared != nil {
-		return ParseRoleTypeShared(roleShared)
-	}
-	panic(fmt.Sprintf("unexpected role type: %v", ctx))
+
+	panic(fmt.Sprintf("unexpected role type: %#v", ctx))
 }
 
-func ParseRoleTypeNormal(ctx parser.IRoleTypeNormalContext) (*Roles, Error) {
+func ParseRoleTypeNormal(ctx *parser.RoleTypeNormalContext) (*Roles, Error) {
 	participants := []string{}
 	for _, role := range ctx.AllIdent() {
 		participants = append(participants, role.GetText())
@@ -99,7 +100,7 @@ func ParseRoleTypeNormal(ctx parser.IRoleTypeNormalContext) (*Roles, Error) {
 	return NewRole(participants, false), nil
 }
 
-func ParseRoleTypeShared(ctx parser.IRoleTypeSharedContext) (*Roles, Error) {
+func ParseRoleTypeShared(ctx *parser.RoleTypeSharedContext) (*Roles, Error) {
 	participants := []string{}
 	for _, role := range ctx.AllIdent() {
 		participants = append(participants, role.GetText())

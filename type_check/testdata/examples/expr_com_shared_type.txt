@@ -1,0 +1,5 @@
+func@(A,B) foo() {
+  let x: Int@B = await [A] -> B 10;
+}
+---
+2:24: can not communicate shared type 'Int@[]'

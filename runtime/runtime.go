@@ -1,12 +1,13 @@
 package runtime
 
 type Env struct {
-	trans Transport
+	trans   Transport
+	roleSub map[string]string
 }
 
 type Transport interface {
-	Send(receiver string, value any)
-	Recv(sender string) *Async
+	Send(role string, value any)
+	Recv(role string) *Async
 }
 
 func New(trans Transport) *Env {
@@ -15,12 +16,51 @@ func New(trans Transport) *Env {
 	}
 }
 
-func (e *Env) Send(receiver string, value any) {
-	e.trans.Send(receiver, value)
+func (e *Env) Send(role string, value any) {
+	if sub, ok := e.roleSub[role]; ok {
+		role = sub
+	}
+	e.trans.Send(role, value)
 }
 
-func (e *Env) Recv(sender string) *Async {
-	return e.trans.Recv(sender)
+func (e *Env) Recv(role string) *Async {
+	if sub, ok := e.roleSub[role]; ok {
+		role = sub
+	}
+	return e.trans.Recv(role)
+}
+
+// Role maps a static role name to the name substituted in the invocation of the current function.
+func (e *Env) Role(name string) string {
+	return e.roleSub[name]
+}
+
+// Substitute will return a copy of the environment with a new role substitution map.
+func (e *Env) Substitute(roles ...string) *Env {
+	newSub := map[string]string{}
+	for i := 0; i < len(roles)/2; i += 2 {
+		old := roles[i]
+		new := roles[i+1]
+		newSub[old] = new
+	}
+
+	return &Env{
+		trans:   e.trans,
+		roleSub: newSub,
+	}
+}
+
+// Clone will return a copy of the environment.
+func (e *Env) Clone() *Env {
+	newRoleSub := map[string]string{}
+	for key, value := range e.roleSub {
+		newRoleSub[key] = value
+	}
+
+	return &Env{
+		trans:   e.trans,
+		roleSub: newRoleSub,
+	}
 }
 
 // Async

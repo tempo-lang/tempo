@@ -81,6 +81,28 @@ func (e *UnknownRoleError) ParserRule() antlr.ParserRuleContext {
 	return e.ValueType
 }
 
+type UnexpectedSharedType struct {
+	Ident parser.IIdentContext
+	Type  *Type
+}
+
+func (u *UnexpectedSharedType) Error() string {
+	return fmt.Sprintf("symbol '%s' is not allowed to have shared type", u.Ident.GetText())
+}
+
+func (u *UnexpectedSharedType) IsTypeError() {}
+
+func (u *UnexpectedSharedType) ParserRule() antlr.ParserRuleContext {
+	return u.Ident
+}
+
+func NewUnexpectedSharedTypeError(ident parser.IIdentContext, identType *Type) Error {
+	return &UnexpectedSharedType{
+		Ident: ident,
+		Type:  identType,
+	}
+}
+
 type SymbolAlreadyExists struct {
 	ExistingSymbol parser.IIdentContext
 	NewSymbol      parser.IIdentContext
@@ -308,5 +330,49 @@ func NewExpectedAsyncTypeError(expr parser.IExprContext, exprType *Type) Error {
 	return &ExpectedAsyncTypeError{
 		Expr: expr,
 		Type: exprType,
+	}
+}
+
+type ComSharedTypeError struct {
+	Com       *parser.ExprComContext
+	InnerType *Type
+}
+
+func (e *ComSharedTypeError) Error() string {
+	return fmt.Sprintf("can not communicate shared type '%s'", e.InnerType.ToString())
+}
+
+func (e *ComSharedTypeError) IsTypeError() {}
+
+func (e *ComSharedTypeError) ParserRule() antlr.ParserRuleContext {
+	return e.Com
+}
+
+func NewComSharedTypeError(com *parser.ExprComContext, innerType *Type) Error {
+	return &ComSharedTypeError{
+		Com:       com,
+		InnerType: innerType,
+	}
+}
+
+type ComDistributedTypeError struct {
+	Com       *parser.ExprComContext
+	InnerType *Type
+}
+
+func (e *ComDistributedTypeError) Error() string {
+	return fmt.Sprintf("can not communicate distributed type '%s'", e.InnerType.ToString())
+}
+
+func (e *ComDistributedTypeError) IsTypeError() {}
+
+func (e *ComDistributedTypeError) ParserRule() antlr.ParserRuleContext {
+	return e.Com
+}
+
+func NewComDistributedTypeError(com *parser.ExprComContext, innerType *Type) Error {
+	return &ComDistributedTypeError{
+		Com:       com,
+		InnerType: innerType,
 	}
 }

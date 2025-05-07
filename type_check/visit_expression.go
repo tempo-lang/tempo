@@ -67,3 +67,32 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 	tc.reportError(types.NewExpectedAsyncTypeError(ctx, exprType))
 	return tc.registerType(ctx, types.Invalid())
 }
+
+func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
+
+	innerExprType := ctx.Expr().Accept(tc).(*types.Type)
+
+	fromRoles, err := types.ParseRoleType(ctx.RoleType(0))
+	if err != nil {
+		tc.reportError(err)
+	} else {
+		if fromRoles.IsSharedRole() {
+			tc.reportError(types.NewComSharedTypeError(ctx, innerExprType))
+		}
+
+		if len(fromRoles.Participants()) > 1 {
+			tc.reportError(types.NewComDistributedTypeError(ctx, innerExprType))
+		}
+	}
+
+	toRoles, err := types.ParseRoleType(ctx.RoleType(1))
+	if err != nil {
+		tc.reportError(err)
+	}
+
+	// TODO: Check properties for to role
+
+	recvType := types.New(types.NewAsync(innerExprType.Value()), toRoles)
+
+	return tc.registerType(ctx, recvType)
+}

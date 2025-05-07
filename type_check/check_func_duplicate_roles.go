@@ -8,7 +8,7 @@ import (
 )
 
 func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
-	roles := ctx.RoleTypeNormal().AllIdent()
+	roles := parser.RoleTypeAllIdents(ctx.RoleType())
 	slices.SortFunc(roles, func(a, b parser.IIdentContext) int {
 		return cmp.Compare(a.GetText(), b.GetText())
 	})

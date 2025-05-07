@@ -14,7 +14,7 @@ func EppStmt(info *type_check.Info, roleName string, stmt parser.IStmtContext) p
 		sym := info.Symbols[stmt.Ident()]
 		if sym.Type().Roles().Contains(roleName) {
 			varName := stmt.Ident().GetText()
-			expr := eppExpression(info, stmt.Expr())
+			expr := eppExpression(info, roleName, stmt.Expr())
 			return (projection.NewStmtAssign(varName, expr))
 		}
 	case *parser.StmtVarDeclContext:
@@ -24,7 +24,7 @@ func EppStmt(info *type_check.Info, roleName string, stmt parser.IStmtContext) p
 			varibleType, err := types.ParseValueType(stmt.ValueType())
 			assertValidTree(err)
 
-			expr := eppExpression(info, stmt.Expr())
+			expr := eppExpression(info, roleName, stmt.Expr())
 			if _, isAsync := varibleType.Value().(*types.Async); isAsync {
 				expr = projection.NewExprAsync(expr)
 			}

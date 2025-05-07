@@ -2,6 +2,7 @@ package parser
 
 import (
 	"chorego/misc"
+	"fmt"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -29,4 +30,14 @@ func Parse(input antlr.CharStream) (sourceFile ISourceFileContext, errors []erro
 	}
 
 	return
+}
+
+func RoleTypeAllIdents(ctx IRoleTypeContext) []IIdentContext {
+	switch ctx := ctx.(type) {
+	case *RoleTypeNormalContext:
+		return ctx.AllIdent()
+	case *RoleTypeSharedContext:
+		return ctx.AllIdent()
+	}
+	panic(fmt.Sprintf("unexpected IRoleTypeContext: %#v", ctx))
 }

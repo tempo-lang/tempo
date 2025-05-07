@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 type Type struct {
 	value Value
@@ -12,6 +15,10 @@ func New(value Value, roles *Roles) *Type {
 		value: value,
 		roles: roles,
 	}
+}
+
+func ValuesEqual(a, b Value) bool {
+	return reflect.DeepEqual(a, b)
 }
 
 func (t *Type) CanCoerceTo(other *Type) bool {
@@ -27,7 +34,7 @@ func (t *Type) CanCoerceTo(other *Type) bool {
 		}
 	}
 
-	if t.value != otherValue {
+	if !ValuesEqual(t.value, otherValue) {
 		return false
 	}
 
@@ -75,4 +82,18 @@ func (t *InvalidValue) IsValue() {}
 
 func Invalid() *Type {
 	return New(&invalid_type, NewRole(nil, false))
+}
+
+type UnitValue struct{}
+
+func (u *UnitValue) IsValue() {}
+
+func (u *UnitValue) ToString() string {
+	return "()"
+}
+
+var unit_value UnitValue = UnitValue{}
+
+func Unit() Value {
+	return &unit_value
 }
