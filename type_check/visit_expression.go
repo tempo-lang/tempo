@@ -6,6 +6,11 @@ import (
 	"strconv"
 )
 
+func (tc *typeChecker) registerType(expr parser.IExprContext, exprType *types.Type) *types.Type {
+	tc.info.Types[expr] = exprType
+	return exprType
+}
+
 func (tc *typeChecker) VisitExprAdd(ctx *parser.ExprAddContext) any {
 	lhs := ctx.Expr(0).Accept(tc).(*types.Type)
 	rhs := ctx.Expr(1).Accept(tc).(*types.Type)
@@ -14,31 +19,32 @@ func (tc *typeChecker) VisitExprAdd(ctx *parser.ExprAddContext) any {
 		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
 		if err != nil {
 			tc.reportError(err)
-			return types.Invalid()
+			return tc.registerType(ctx, types.Invalid())
 		} else {
-			return types.New(types.Int(), newRoles)
+			return tc.registerType(ctx, types.New(types.Int(), newRoles))
 		}
 	}
 
 	tc.reportError(types.NewTypeMismatchError(ctx, lhs, rhs))
-	return types.Invalid()
+	return tc.registerType(ctx, types.Invalid())
 }
 
 func (tc *typeChecker) VisitExprGroup(ctx *parser.ExprGroupContext) any {
-	return ctx.Expr().Accept(tc)
+	innerType := ctx.Expr().Accept(tc).(*types.Type)
+	return tc.registerType(ctx, innerType)
 }
 
 func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
-	return types.New(types.Bool(), types.NewRole(nil, true))
+	return tc.registerType(ctx, types.New(types.Bool(), types.NewRole(nil, true)))
 }
 
 func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
 	if err != nil {
 		tc.reportError(err)
-		return types.Invalid()
+		return tc.registerType(ctx, types.Invalid())
 	}
-	return sym.Type()
+	return tc.registerType(ctx, sym.Type())
 }
 
 func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
@@ -47,9 +53,17 @@ func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
 		tc.reportError(types.NewInvalidNumberError(ctx))
 	}
 
-	return types.New(types.Int(), types.NewRole(nil, true))
+	return tc.registerType(ctx, types.New(types.Int(), types.NewRole(nil, true)))
 }
 
 func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
-	panic("unimplemented")
+
+	exprType := ctx.Expr().Accept(tc).(*types.Type)
+
+	if asyncType, isAsync := exprType.Value().(*types.Async); isAsync {
+		return tc.registerType(ctx, types.New(asyncType.Inner(), exprType.Roles()))
+	}
+
+	tc.reportError(types.NewExpectedAsyncTypeError(ctx, exprType))
+	return tc.registerType(ctx, types.Invalid())
 }

@@ -288,3 +288,25 @@ func NewUnassignableSymbolError(assign *parser.StmtAssignContext, symType *Type)
 		Type:   symType,
 	}
 }
+
+type ExpectedAsyncTypeError struct {
+	Expr parser.IExprContext
+	Type *Type
+}
+
+func (e *ExpectedAsyncTypeError) Error() string {
+	return fmt.Sprintf("expected async type '%s'", e.Type.ToString())
+}
+
+func (e *ExpectedAsyncTypeError) IsTypeError() {}
+
+func (e *ExpectedAsyncTypeError) ParserRule() antlr.ParserRuleContext {
+	return e.Expr
+}
+
+func NewExpectedAsyncTypeError(expr parser.IExprContext, exprType *Type) Error {
+	return &ExpectedAsyncTypeError{
+		Expr: expr,
+		Type: exprType,
+	}
+}
