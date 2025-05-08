@@ -34,8 +34,8 @@ func (f *Func) AddParam(param parser.IFuncParamContext, paramType *types.Type) *
 	return f
 }
 
-func (f *Func) AddStmt(stmt Statement) *Func {
-	f.Body = append(f.Body, stmt)
+func (f *Func) AddStmt(stmt ...Statement) *Func {
+	f.Body = append(f.Body, stmt...)
 	return f
 }
 
@@ -43,6 +43,7 @@ func (f *Func) Codegen(file *jen.File) {
 	file.Func().
 		Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
 		ParamsFunc(func(params *jen.Group) {
+			params.Id("env").Add(jen.Op("*").Qual("chorego/runtime", "Env"))
 			for _, param := range f.Params {
 				params.Id(param.Name).Add(CodegenType(param.Type.Value()))
 			}

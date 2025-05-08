@@ -4,7 +4,7 @@ package choreography
 import runtime "chorego/runtime"
 
 // Projection of choreography foo
-func foo_A() {
+func foo_A(env *runtime.Env) {
 	var x *runtime.Async = runtime.FixedAsync(10)
 	_ = x // Suppress unused variable error
 	var y int = x.Get().(int)

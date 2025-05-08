@@ -43,9 +43,7 @@ func eppFuncRole(info *type_check.Info, choreography *projection.Choreography, f
 
 	// project body
 	for _, stmt := range function.Scope().AllStmt() {
-		eppStmt := EppStmt(info, roleName, stmt)
-		if eppStmt != nil {
-			fn.AddStmt(eppStmt)
-		}
+		eppStmts := EppStmt(info, roleName, stmt)
+		fn.AddStmt(eppStmts...)
 	}
 }

@@ -157,7 +157,7 @@ type ExprSend struct {
 
 func (e *ExprSend) Codegen() jen.Code {
 	value := e.expr.Codegen()
-	return jen.Qual("chorego/runtime", "Send").Call(jen.Lit(e.receiver), value)
+	return jen.Id("env").Dot("Send").Call(jen.Lit(e.receiver), value)
 }
 
 func (e *ExprSend) IsExpression() {}
@@ -179,7 +179,7 @@ type ExprRecv struct {
 }
 
 func (e *ExprRecv) Codegen() jen.Code {
-	return jen.Qual("chorego/runtime", "Recv").Call(jen.Lit(e.sender))
+	return jen.Id("env").Dot("Recv").Call(jen.Lit(e.sender))
 }
 
 func (e *ExprRecv) IsExpression() {}

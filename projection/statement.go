@@ -52,3 +52,19 @@ func NewStmtAssign(name string, expr Expression) Statement {
 		Expr: expr,
 	}
 }
+
+type StmtExpr struct {
+	Expr Expression
+}
+
+func (s *StmtExpr) Codegen() jen.Statement {
+	return []jen.Code{s.Expr.Codegen()}
+}
+
+func (s *StmtExpr) IsStatement() {}
+
+func NewStmtExpr(expr Expression) Statement {
+	return &StmtExpr{
+		Expr: expr,
+	}
+}
