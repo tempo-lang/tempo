@@ -12,6 +12,10 @@ var builtin_bool BoolType = BoolType{}
 
 type StringType struct{}
 
+func (t *StringType) IsSendable() bool {
+	return true
+}
+
 func (t *StringType) ToString() string {
 	return "String"
 }
@@ -23,6 +27,10 @@ func String() Value {
 }
 
 type IntType struct{}
+
+func (t *IntType) IsSendable() bool {
+	return true
+}
 
 func (t *IntType) ToString() string {
 	return "Int"
@@ -36,6 +44,10 @@ func Int() Value {
 
 type FloatType struct{}
 
+func (t *FloatType) IsSendable() bool {
+	return true
+}
+
 func (t *FloatType) ToString() string {
 	return "Float"
 }
@@ -47,6 +59,10 @@ func Float() Value {
 }
 
 type BoolType struct{}
+
+func (t *BoolType) IsSendable() bool {
+	return true
+}
 
 func (t *BoolType) ToString() string {
 	return "Bool"

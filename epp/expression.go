@@ -34,8 +34,12 @@ func eppExpression(info *type_check.Info, roleName string, expr parser.IExprCont
 		return projection.NewExprInt(num), []projection.Expression{}
 	case *parser.ExprAwaitContext:
 		inner, aux := eppExpression(info, roleName, expr.Expr())
-		asyncType := inner.Type().(*types.Async)
-		return projection.NewExprAwait(inner, asyncType.Inner()), aux
+		if inner != nil {
+			asyncType := info.Types[expr.Expr()].Value().(*types.Async)
+			return projection.NewExprAwait(inner, asyncType.Inner()), aux
+		} else {
+			return nil, aux
+		}
 	case *parser.ExprComContext:
 		sender := expr.RoleType(0).(*parser.RoleTypeNormalContext)
 		senderRole := sender.Ident(0).GetText()
@@ -52,10 +56,11 @@ func eppExpression(info *type_check.Info, roleName string, expr parser.IExprCont
 		}
 
 		if roleName == receiverRole {
-			return projection.NewExprRecv(inner.Type(), senderRole), aux
+			innerType := info.Types[expr.Expr()]
+			return projection.NewExprRecv(innerType.Value(), senderRole), aux
 		}
 
-		return projection.Unit(), aux
+		return nil, aux
 	case *parser.ExprContext:
 		panic("expr should never be base type")
 	}

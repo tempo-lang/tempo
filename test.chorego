@@ -1,4 +1,3 @@
 func@(A, B) foo() {
-  let value: async Int@B = A -> B 10;
-  let another: Int@B = await value;
+  let value: Int@A = await B -> A (await A -> B 10);
 }

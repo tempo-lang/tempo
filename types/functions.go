@@ -10,6 +10,10 @@ type FunctionType struct {
 	params []*Type
 }
 
+func (f *FunctionType) IsSendable() bool {
+	return false
+}
+
 func (f *FunctionType) ToString() string {
 	params := misc.JoinStringsFunc(f.params, ", ", func(param *Type) string { return param.ToString() })
 	return fmt.Sprintf("func(%s)", params)

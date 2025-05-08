@@ -5,7 +5,6 @@ import (
 	"chorego/projection"
 	"chorego/type_check"
 	"chorego/types"
-	"fmt"
 )
 
 func EppFunc(info *type_check.Info, function parser.IFuncContext) *projection.Choreography {
@@ -19,12 +18,6 @@ func EppFunc(info *type_check.Info, function parser.IFuncContext) *projection.Ch
 	}
 
 	return choreography
-}
-
-func assertValidTree(err types.Error) {
-	if err != nil {
-		panic(fmt.Sprintf("expected valid syntax tree: %v", err))
-	}
 }
 
 func eppFuncRole(info *type_check.Info, choreography *projection.Choreography, function parser.IFuncContext, roleName string) {

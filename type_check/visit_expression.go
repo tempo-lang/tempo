@@ -72,6 +72,10 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
 	innerExprType := ctx.Expr().Accept(tc).(*types.Type)
 
+	if !innerExprType.Value().IsSendable() {
+		tc.reportError(types.NewUnsendableTypeError(ctx, innerExprType))
+	}
+
 	fromRoles, err := types.ParseRoleType(ctx.RoleType(0))
 	if err != nil {
 		tc.reportError(err)
@@ -92,7 +96,10 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
 	// TODO: Check properties for to role
 
-	recvType := types.New(types.NewAsync(innerExprType.Value()), toRoles)
+	recvType := types.Invalid()
+	if innerExprType.Value().IsSendable() {
+		recvType = types.New(types.NewAsync(innerExprType.Value()), toRoles)
+	}
 
 	return tc.registerType(ctx, recvType)
 }

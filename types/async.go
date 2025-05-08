@@ -6,6 +6,10 @@ type Async struct {
 	inner Value
 }
 
+func (a *Async) IsSendable() bool {
+	return false
+}
+
 func (a *Async) IsValue() {}
 
 func (a *Async) ToString() string {

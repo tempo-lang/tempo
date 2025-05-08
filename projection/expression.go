@@ -195,20 +195,24 @@ func NewExprRecv(recvType types.Value, sender string) Expression {
 	}
 }
 
-type ExprUnit struct{}
+// type ExprUnit struct {
+// 	exprType *types.Type
+// }
 
-func (e *ExprUnit) Codegen() jen.Code {
-	return jen.Add()
-}
+// func (e *ExprUnit) Codegen() jen.Code {
+// 	return jen.Add()
+// }
 
-func (e *ExprUnit) IsExpression() {}
+// func (e *ExprUnit) IsExpression() {}
 
-func (e *ExprUnit) Type() types.Value {
-	return types.Unit()
-}
+// func (e *ExprUnit) Type() types.Value {
+// 	return types.Unit()
+// }
 
-var expr_unit ExprUnit = ExprUnit{}
+// func (e *ExprUnit) RemoteType() *types.Type {
+// 	return e.exprType
+// }
 
-func Unit() Expression {
-	return &expr_unit
-}
+// func NewUnit(exprType *types.Type) Expression {
+// 	return &ExprUnit{exprType: exprType}
+// }

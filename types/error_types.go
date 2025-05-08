@@ -376,3 +376,25 @@ func NewComDistributedTypeError(com *parser.ExprComContext, innerType *Type) Err
 		InnerType: innerType,
 	}
 }
+
+type UnsendableTypeError struct {
+	Com            *parser.ExprComContext
+	UnsendableType *Type
+}
+
+func (u *UnsendableTypeError) Error() string {
+	return fmt.Sprintf("can not send type '%s'", u.UnsendableType.ToString())
+}
+
+func (u *UnsendableTypeError) IsTypeError() {}
+
+func (u *UnsendableTypeError) ParserRule() antlr.ParserRuleContext {
+	return u.Com.Expr()
+}
+
+func NewUnsendableTypeError(com *parser.ExprComContext, unsendableType *Type) Error {
+	return &UnsendableTypeError{
+		Com:            com,
+		UnsendableType: unsendableType,
+	}
+}
