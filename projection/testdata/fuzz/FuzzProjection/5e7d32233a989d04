@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A,B) foo() {\n  let result: Int@A = await B->A (await A->J 10);\n}")

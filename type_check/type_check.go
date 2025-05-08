@@ -4,6 +4,7 @@ import (
 	"chorego/parser"
 	"chorego/sym_table"
 	"chorego/types"
+	"slices"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -51,6 +52,24 @@ func (tc *typeChecker) insertSymbol(sym sym_table.Symbol) {
 	if err != nil {
 		tc.reportError(err)
 	}
+}
+
+func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool {
+	idents := parser.RoleTypeAllIdents(roleType)
+	unknownRoles := []string{}
+
+	for _, ident := range idents {
+		if !slices.Contains(tc.currentScope.Roles(), ident.GetText()) {
+			unknownRoles = append(unknownRoles, ident.GetText())
+		}
+	}
+
+	if len(unknownRoles) > 0 {
+		tc.reportError(types.NewUnknownRoleError(roleType, unknownRoles))
+		return false
+	}
+
+	return true
 }
 
 func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result any) {

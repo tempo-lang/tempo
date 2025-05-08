@@ -84,6 +84,8 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 			tc.reportError(types.NewComSharedTypeError(ctx, innerExprType))
 		}
 
+		tc.checkRolesInScope(ctx.RoleType(0))
+
 		if len(fromRoles.Participants()) > 1 {
 			tc.reportError(types.NewComDistributedTypeError(ctx, innerExprType))
 		}
@@ -92,9 +94,11 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	toRoles, err := types.ParseRoleType(ctx.RoleType(1))
 	if err != nil {
 		tc.reportError(err)
-	}
+	} else {
+		tc.checkRolesInScope(ctx.RoleType(1))
 
-	// TODO: Check properties for to role
+		// TODO: Check properties for to role
+	}
 
 	recvType := types.Invalid()
 	if innerExprType.Value().IsSendable() {

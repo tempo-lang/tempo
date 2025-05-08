@@ -37,15 +37,25 @@ func (e *DuplicateRolesError) ParserRule() antlr.ParserRuleContext {
 }
 
 type UnknownRoleError struct {
-	ValueType    parser.IValueTypeContext
+	RoleType     parser.IRoleTypeContext
 	UnknownRoles []string
 }
 
-func NewUnknownRoleError(valueType parser.IValueTypeContext, unknownRoles []string) Error {
+func NewUnknownRoleError(roleType parser.IRoleTypeContext, unknownRoles []string) Error {
 	return &UnknownRoleError{
-		ValueType:    valueType,
+		RoleType:     roleType,
 		UnknownRoles: unknownRoles,
 	}
+}
+
+func (e *UnknownRoleError) IsTypeError() {}
+
+func (e *UnknownRoleError) Error() string {
+	return fmt.Sprintf("unknown roles '%s'", misc.JoinStrings(e.UnknownRoles, ","))
+}
+
+func (e *UnknownRoleError) ParserRule() antlr.ParserRuleContext {
+	return e.RoleType
 }
 
 type UnmergableRolesError struct {
@@ -69,16 +79,6 @@ func NewUnmergableRolesError(expr parser.IExprContext, roles []*Roles) Error {
 		Expr:  expr,
 		Roles: roles,
 	}
-}
-
-func (e *UnknownRoleError) IsTypeError() {}
-
-func (e *UnknownRoleError) Error() string {
-	return fmt.Sprintf("unknown roles [%s] in '%s'", misc.JoinStrings(e.UnknownRoles, ","), e.ValueType.GetText())
-}
-
-func (e *UnknownRoleError) ParserRule() antlr.ParserRuleContext {
-	return e.ValueType
 }
 
 type UnexpectedSharedType struct {
