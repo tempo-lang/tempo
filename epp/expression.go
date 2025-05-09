@@ -62,6 +62,11 @@ func eppExpression(info *type_check.Info, roleName string, expr parser.IExprCont
 			return projection.NewExprRecv(innerType.Value(), senderRole), aux
 		}
 
+		valueType := info.Types[expr.Expr()]
+		if valueType.Roles().Contains(roleName) {
+			return projection.NewExprAsync(inner), aux
+		}
+
 		return nil, aux
 	case *parser.ExprContext:
 		panic("expr should never be base type")

@@ -60,7 +60,7 @@ func TestExamples(t *testing.T) {
 			trimmedOutputFile := strings.Trim(string(outputFile), whitespace)
 
 			if trimmedOutput != trimmedOutputFile {
-				t.Fatalf("projected code differes from output file:\n%s\n", diff.LineDiff(trimmedOutput, trimmedOutputFile))
+				t.Fatalf("projected code differes from output file:\n%s\n", diff.LineDiff(trimmedOutputFile, trimmedOutput))
 			}
 
 		})

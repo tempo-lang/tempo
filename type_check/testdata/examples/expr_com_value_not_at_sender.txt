@@ -2,3 +2,5 @@ func@(A,B) foo() {
     let x: Int@A = 10;
     let y: Int@A = await B->A x;
 }
+---
+3:31: value of type 'Int@(A)' is not present at sender 'B'

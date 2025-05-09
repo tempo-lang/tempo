@@ -3,6 +3,7 @@ package type_check
 import (
 	"chorego/parser"
 	"chorego/types"
+	"slices"
 	"strconv"
 )
 
@@ -89,6 +90,11 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		if len(fromRoles.Participants()) > 1 {
 			tc.reportError(types.NewComDistributedTypeError(ctx, innerExprType))
 		}
+
+		exprHasParticipants := len(innerExprType.Roles().Participants()) > 0
+		if exprHasParticipants && !innerExprType.Roles().Contains(fromRoles.Participants()[0]) {
+			tc.reportError(types.NewComValueNotAtSenderError(ctx, innerExprType))
+		}
 	}
 
 	toRoles, err := types.ParseRoleType(ctx.RoleType(1))
@@ -100,7 +106,16 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
 	recvType := types.Invalid()
 	if innerExprType.Value().IsSendable() {
-		recvType = types.New(types.NewAsync(innerExprType.Value()), toRoles)
+		newParticipants := []string{}
+		newParticipants = append(newParticipants, innerExprType.Roles().Participants()...)
+		for _, role := range toRoles.Participants() {
+			if !slices.Contains(newParticipants, role) {
+				newParticipants = append(newParticipants, role)
+			}
+		}
+
+		isShared := len(newParticipants) > 1
+		recvType = types.New(types.NewAsync(innerExprType.Value()), types.NewRole(newParticipants, isShared))
 	}
 
 	return tc.registerType(ctx, recvType)

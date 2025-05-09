@@ -1,0 +1,4 @@
+func@(A,B,C) foo() {
+    let x: Int@A = 10;
+    let y: Int@[A,B,C] = await A->[B,C] x;
+}

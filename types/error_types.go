@@ -398,3 +398,26 @@ func NewUnsendableTypeError(com *parser.ExprComContext, unsendableType *Type) Er
 		UnsendableType: unsendableType,
 	}
 }
+
+type ComValueNotAtSenderError struct {
+	Com      *parser.ExprComContext
+	ExprType *Type
+}
+
+func (c *ComValueNotAtSenderError) Error() string {
+	sender := parser.RoleTypeAllIdents(c.Com.RoleType(0))[0]
+	return fmt.Sprintf("value of type '%s' is not present at sender '%s'", c.ExprType.ToString(), sender.GetText())
+}
+
+func (c *ComValueNotAtSenderError) IsTypeError() {}
+
+func (c *ComValueNotAtSenderError) ParserRule() antlr.ParserRuleContext {
+	return c.Com.Expr()
+}
+
+func NewComValueNotAtSenderError(com *parser.ExprComContext, exprType *Type) Error {
+	return &ComValueNotAtSenderError{
+		Com:      com,
+		ExprType: exprType,
+	}
+}
