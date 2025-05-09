@@ -6,6 +6,7 @@ import (
 	"chorego/type_check"
 	"chorego/types"
 	"fmt"
+	"slices"
 	"strconv"
 )
 
@@ -44,18 +45,19 @@ func eppExpression(info *type_check.Info, roleName string, expr parser.IExprCont
 		sender := expr.RoleType(0).(*parser.RoleTypeNormalContext)
 		senderRole := sender.Ident(0).GetText()
 
-		receiver := parser.RoleTypeAllIdents(expr.RoleType(1))
-		if len(receiver) != 1 {
-			panic("sending shared value not implemented yet")
-		}
-		receiverRole := receiver[0].GetText()
+		receivers := parser.RoleTypeAllIdents(expr.RoleType(1))
 		inner, aux := eppExpression(info, roleName, expr.Expr())
 
-		if roleName == senderRole {
-			aux = append(aux, projection.NewExprSend(inner, receiverRole))
+		receiverRoles := []string{}
+		for _, receiver := range receivers {
+			receiverRoles = append(receiverRoles, receiver.GetText())
 		}
 
-		if roleName == receiverRole {
+		if roleName == senderRole {
+			aux = append(aux, projection.NewExprSend(inner, receiverRoles))
+		}
+
+		if slices.Contains(receiverRoles, roleName) {
 			innerType := info.Types[expr.Expr()]
 			return projection.NewExprRecv(innerType.Value(), senderRole), aux
 		}

@@ -5,7 +5,7 @@ import runtime "chorego/runtime"
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	env.Send("B", 10)
+	env.Send(10, "B")
 }
 func foo_B(env *runtime.Env) {
 	var value *runtime.Async = env.Recv("A")

@@ -96,8 +96,6 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		tc.reportError(err)
 	} else {
 		tc.checkRolesInScope(ctx.RoleType(1))
-
-		// TODO: Check properties for to role
 	}
 
 	recvType := types.Invalid()

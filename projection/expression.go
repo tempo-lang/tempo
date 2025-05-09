@@ -151,13 +151,20 @@ func NewExprAwait(inner Expression, typeVal types.Value) Expression {
 }
 
 type ExprSend struct {
-	expr     Expression
-	receiver string
+	expr      Expression
+	receivers []string
 }
 
 func (e *ExprSend) Codegen() jen.Code {
-	value := e.expr.Codegen()
-	return jen.Id("env").Dot("Send").Call(jen.Lit(e.receiver), value)
+	args := []jen.Code{
+		e.expr.Codegen(),
+	}
+
+	for _, role := range e.receivers {
+		args = append(args, jen.Lit(role))
+	}
+
+	return jen.Id("env").Dot("Send").Call(args...)
 }
 
 func (e *ExprSend) IsExpression() {}
@@ -166,10 +173,10 @@ func (e *ExprSend) Type() types.Value {
 	return types.Unit()
 }
 
-func NewExprSend(expr Expression, receiver string) Expression {
+func NewExprSend(expr Expression, receivers []string) Expression {
 	return &ExprSend{
-		expr:     expr,
-		receiver: receiver,
+		expr:      expr,
+		receivers: receivers,
 	}
 }
 

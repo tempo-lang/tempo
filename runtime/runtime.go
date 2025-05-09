@@ -6,7 +6,7 @@ type Env struct {
 }
 
 type Transport interface {
-	Send(role string, value any)
+	Send(value any, roles ...string)
 	Recv(role string) *Async
 }
 
@@ -16,11 +16,14 @@ func New(trans Transport) *Env {
 	}
 }
 
-func (e *Env) Send(role string, value any) {
-	if sub, ok := e.roleSub[role]; ok {
-		role = sub
+func (e *Env) Send(value any, roles ...string) {
+	subRoles := make([]string, len(roles))
+	for i, role := range roles {
+		if sub, ok := e.roleSub[role]; ok {
+			subRoles[i] = sub
+		}
 	}
-	e.trans.Send(role, value)
+	e.trans.Send(value, subRoles...)
 }
 
 func (e *Env) Recv(role string) *Async {

@@ -1,3 +1,3 @@
-func@(A,B) foo() {
-    let result: Int@A = await J->A 10;
+func@(A,B,C) foo() {
+    let result: Int@[A,B,C] = await A->[A,B,C] 10;
 }

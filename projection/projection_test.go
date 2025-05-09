@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/andreyvit/diff"
 	"github.com/antlr4-go/antlr/v4"
 )
 
@@ -59,7 +60,7 @@ func TestExamples(t *testing.T) {
 			trimmedOutputFile := strings.Trim(string(outputFile), whitespace)
 
 			if trimmedOutput != trimmedOutputFile {
-				t.Fatalf("projected code differes from output file:\nActual:\n%s\nExpected:\n%s\n", trimmedOutput, trimmedOutputFile)
+				t.Fatalf("projected code differes from output file:\n%s\n", diff.LineDiff(trimmedOutput, trimmedOutputFile))
 			}
 
 		})
