@@ -1,0 +1,5 @@
+func@(A,B,C) Trans() {
+  let x: Int@A = 10;
+  let y: Int@[A,B] = await A->B x;
+  let z: Int@[A,B,C] = await B->C y;
+}
