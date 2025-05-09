@@ -5,6 +5,7 @@ import (
 	"chorego/types"
 	"fmt"
 	"os"
+	"path"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -16,7 +17,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	output, errors := compiler.Compile(input)
+	filename := path.Base(os.Args[1])
+	options := compiler.Options{
+		PackageName: filename[0 : len(filename)-len(path.Ext(filename))],
+	}
+
+	output, errors := compiler.Compile(input, &options)
 	if errors != nil {
 		for _, err := range errors {
 			if typeErr, ok := err.(types.Error); ok {

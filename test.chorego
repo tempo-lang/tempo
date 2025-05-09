@@ -1,4 +1,4 @@
 func@(A,B) foo() {
     let x: Int@A = 10;
-    let y: Int@A = await B->A x;
+    let y: Int@A = await B->A 10;
 }

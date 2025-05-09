@@ -19,23 +19,23 @@ func New(trans Transport) *Env {
 func (e *Env) Send(value any, roles ...string) {
 	subRoles := make([]string, len(roles))
 	for i, role := range roles {
-		if sub, ok := e.roleSub[role]; ok {
-			subRoles[i] = sub
-		}
+		subRoles[i] = e.Role(role)
 	}
 	e.trans.Send(value, subRoles...)
 }
 
 func (e *Env) Recv(role string) *Async {
-	if sub, ok := e.roleSub[role]; ok {
-		role = sub
-	}
+	role = e.Role(role)
 	return e.trans.Recv(role)
 }
 
 // Role maps a static role name to the name substituted in the invocation of the current function.
 func (e *Env) Role(name string) string {
-	return e.roleSub[name]
+	if sub, ok := e.roleSub[name]; ok {
+		return sub
+	} else {
+		return name
+	}
 }
 
 // Substitute will return a copy of the environment with a new role substitution map.
@@ -69,28 +69,32 @@ func (e *Env) Clone() *Env {
 // Async
 
 type Async struct {
-	value   any
-	valChan <-chan (any)
+	value    any
+	callback func() any
+	called   bool
 }
 
 func (a *Async) Get() any {
-	if a.value != nil {
+	if a.called {
 		return a.value
 	}
-	a.value = <-a.valChan
+	a.value = a.callback()
+	a.called = true
 	return a.value
 }
 
 func FixedAsync(value any) *Async {
 	return &Async{
-		value:   value,
-		valChan: nil,
+		value:    value,
+		callback: nil,
+		called:   true,
 	}
 }
 
-func NewAsync(valChan <-chan (any)) *Async {
+func NewAsync(callback func() any) *Async {
 	return &Async{
-		value:   nil,
-		valChan: valChan,
+		value:    nil,
+		callback: callback,
+		called:   false,
 	}
 }

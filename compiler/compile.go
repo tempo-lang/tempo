@@ -9,7 +9,11 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-func Compile(input antlr.CharStream) (output string, errors []error) {
+type Options struct {
+	PackageName string
+}
+
+func Compile(input antlr.CharStream, options *Options) (output string, errors []error) {
 	// parse source input
 	sourceFile, syntaxErrors := parser.Parse(input)
 	if len(syntaxErrors) > 0 {
@@ -30,7 +34,12 @@ func Compile(input antlr.CharStream) (output string, errors []error) {
 	eppFile := epp.EppSourceFile(info, sourceFile)
 
 	// generate go code
-	file := jen.NewFile("choreography")
+	packageName := "choreography"
+	if options != nil && options.PackageName != "" {
+		packageName = options.PackageName
+	}
+
+	file := jen.NewFile(packageName)
 	eppFile.Codegen(file)
 
 	output = file.GoString()

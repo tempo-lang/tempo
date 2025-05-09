@@ -30,7 +30,7 @@ func TestExamples(t *testing.T) {
 				t.Fatal("error reading source file:", err)
 			}
 
-			output, compilerErrors := compiler.Compile(input)
+			output, compilerErrors := compiler.Compile(input, nil)
 			if len(compilerErrors) > 0 {
 				errorsFormatted := ""
 				for _, err := range compilerErrors {

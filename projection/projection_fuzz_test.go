@@ -102,7 +102,7 @@ func FuzzProjection(f *testing.F) {
 
 		go func() {
 			input := antlr.NewInputStream(source)
-			output, errors := compiler.Compile(input)
+			output, errors := compiler.Compile(input, nil)
 			if len(errors) > 0 {
 				result <- nil
 				return

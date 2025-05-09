@@ -36,7 +36,7 @@ func TestExamples(t *testing.T) {
 
 			input := antlr.NewInputStream(source)
 
-			_, compilerErrors := compiler.Compile(input)
+			_, compilerErrors := compiler.Compile(input, nil)
 			formattedErrors := []string{}
 			for _, err := range compilerErrors {
 				typeError, ok := err.(types.Error)
