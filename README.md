@@ -2,6 +2,18 @@
 
 Tempo is a practical choreographic programming language that is compiled to Go source code.
 
+The language is under development, here is a brief list of implemented things.
+
+- [x] Primitive values and types
+- [x] Shared variables
+- [x] Asynchronous values
+- [x] Channels
+- [x] If statements
+- [ ] Function calls
+- [ ] Struct types
+- [ ] Closures
+- [ ] Co-routines
+
 ## Values and Types
 
 Values are statically typed with the addition of roles.
