@@ -1,4 +1,10 @@
 func@(A,B) foo() {
-    let x: Int@A = 10;
+    let x: Int@C = 10;
     let y: Int@A = await B->A 10;
+    let cond: Bool@B = true;
+    if cond {
+        x = x + 1;
+    } else {
+        x = x + 1;
+    }
 }

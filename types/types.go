@@ -21,20 +21,27 @@ func ValuesEqual(a, b Value) bool {
 	return reflect.DeepEqual(a, b)
 }
 
-func (t *Type) CanCoerceTo(other *Type) bool {
-	otherValue := other.value
-	if t.value == Invalid().value {
+func ValueCoerseTo(thisValue, otherValue Value) bool {
+	if thisValue == Invalid().value {
 		return true
 	}
 
 	// plain types can coerce to async types
-	if _, isAsync := t.value.(*Async); !isAsync {
+	if _, isAsync := thisValue.(*Async); !isAsync {
 		if otherAsync, otherIsAsync := otherValue.(*Async); otherIsAsync {
 			otherValue = otherAsync.Inner()
 		}
 	}
 
-	if !ValuesEqual(t.value, otherValue) {
+	if !ValuesEqual(thisValue, otherValue) {
+		return false
+	}
+
+	return true
+}
+
+func (t *Type) CanCoerceTo(other *Type) bool {
+	if !ValueCoerseTo(t.value, other.value) {
 		return false
 	}
 

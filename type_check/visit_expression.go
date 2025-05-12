@@ -45,6 +45,9 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
 	}
+
+	tc.checkRolesInScope(ctx, sym.Type().Roles())
+
 	return tc.registerType(ctx, sym.Type())
 }
 
@@ -73,8 +76,11 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
 	innerExprType := ctx.Expr().Accept(tc).(*types.Type)
 
+	invalidType := false
+
 	if !innerExprType.Value().IsSendable() {
 		tc.reportError(types.NewUnsendableTypeError(ctx, innerExprType))
+		invalidType = true
 	}
 
 	fromRoles, err := types.ParseRoleType(ctx.RoleType(0))
@@ -85,7 +91,7 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 			tc.reportError(types.NewComSharedTypeError(ctx, innerExprType))
 		}
 
-		tc.checkRolesInScope(ctx.RoleType(0))
+		tc.checkRolesInScope(ctx, fromRoles)
 
 		if len(fromRoles.Participants()) > 1 {
 			tc.reportError(types.NewComDistributedTypeError(ctx, innerExprType))
@@ -101,11 +107,13 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	if err != nil {
 		tc.reportError(err)
 	} else {
-		tc.checkRolesInScope(ctx.RoleType(1))
+		if !tc.checkRolesInScope(ctx, toRoles) {
+			invalidType = true
+		}
 	}
 
 	recvType := types.Invalid()
-	if innerExprType.Value().IsSendable() {
+	if !invalidType {
 		newParticipants := []string{}
 		newParticipants = append(newParticipants, innerExprType.Roles().Participants()...)
 		for _, role := range toRoles.Participants() {

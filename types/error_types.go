@@ -58,6 +58,30 @@ func (e *UnknownRoleError) ParserRule() antlr.ParserRuleContext {
 	return e.RoleType
 }
 
+type ValueRoleNotInScopeError struct {
+	Value             antlr.ParserRuleContext
+	ValueRoles        *Roles
+	InaccessibleRoles []string
+}
+
+func (v *ValueRoleNotInScopeError) Error() string {
+	return fmt.Sprintf("value '%s' has roles '%s' that are not in scope", v.Value.GetText(), misc.JoinStrings(v.InaccessibleRoles, ","))
+}
+
+func (v *ValueRoleNotInScopeError) IsTypeError() {}
+
+func (v *ValueRoleNotInScopeError) ParserRule() antlr.ParserRuleContext {
+	return v.Value
+}
+
+func NewValueRoleNotInScopeError(value antlr.ParserRuleContext, valueRoles *Roles, inaccessibleRoles []string) Error {
+	return &ValueRoleNotInScopeError{
+		Value:             value,
+		ValueRoles:        valueRoles,
+		InaccessibleRoles: inaccessibleRoles,
+	}
+}
+
 type UnmergableRolesError struct {
 	Expr  parser.IExprContext
 	Roles []*Roles
@@ -236,6 +260,30 @@ func NewTypeMismatchError(expr parser.IExprContext, firstType *Type, secondType 
 		Expr:       expr,
 		FirstType:  firstType,
 		SecondType: secondType,
+	}
+}
+
+type InvalidValueError struct {
+	Expr          parser.IExprContext
+	ActualValue   Value
+	ExpectedValue Value
+}
+
+func (i *InvalidValueError) Error() string {
+	return fmt.Sprintf("invalid value, expected '%s' but found '%s'", i.ExpectedValue.ToString(), i.ActualValue.ToString())
+}
+
+func (i *InvalidValueError) IsTypeError() {}
+
+func (i *InvalidValueError) ParserRule() antlr.ParserRuleContext {
+	return i.Expr
+}
+
+func NewInvalidValueError(expr parser.IExprContext, actualValue Value, expectedValue Value) Error {
+	return &InvalidValueError{
+		Expr:          expr,
+		ActualValue:   actualValue,
+		ExpectedValue: expectedValue,
 	}
 }
 

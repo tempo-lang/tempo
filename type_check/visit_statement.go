@@ -12,7 +12,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	if err != nil {
 		tc.reportError(err)
 	} else {
-		tc.checkRolesInScope(ctx.ValueType().RoleType())
+		tc.checkRolesInScope(ctx.Expr(), exprType.Roles())
 	}
 
 	stmtType := declType
@@ -33,15 +33,50 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
 	if err != nil {
 		tc.reportError(err)
-	} else if !sym.IsAssignable() {
-		tc.reportError(types.NewUnassignableSymbolError(ctx, sym.Type()))
 	} else {
 		tc.info.Symbols[ctx.Ident()] = sym
 
-		exprType := ctx.Expr().Accept(tc).(*types.Type)
-		if !exprType.CanCoerceTo(sym.Type()) {
-			tc.reportError(types.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
+		if !sym.IsAssignable() {
+			tc.reportError(types.NewUnassignableSymbolError(ctx, sym.Type()))
+		} else {
+			exprType := ctx.Expr().Accept(tc).(*types.Type)
+			if !exprType.CanCoerceTo(sym.Type()) {
+				tc.reportError(types.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
+			}
 		}
+
+		tc.checkRolesInScope(ctx.Ident(), sym.Type().Roles())
+	}
+
+	return nil
+}
+
+func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
+	guardType := ctx.Expr().Accept(tc).(*types.Type)
+
+	if !types.ValueCoerseTo(guardType.Value(), types.Bool()) {
+		tc.reportError(types.NewInvalidValueError(ctx.Expr(), guardType.Value(), types.Bool()))
+	}
+
+	tc.checkRolesInScope(ctx.Expr(), guardType.Roles())
+
+	scopeRoles := guardType.Roles().Participants()
+
+	// Then branch
+	thenBranch := ctx.Scope(0)
+	tc.currentScope = tc.currentScope.MakeChild(thenBranch.GetStart(), thenBranch.GetStop(), scopeRoles)
+	for _, stmt := range thenBranch.AllStmt() {
+		stmt.Accept(tc)
+	}
+	tc.currentScope = tc.currentScope.Parent()
+
+	if elseBranch := ctx.Scope(1); elseBranch != nil {
+		// Else branch
+		tc.currentScope = tc.currentScope.MakeChild(elseBranch.GetStart(), elseBranch.GetStop(), scopeRoles)
+		for _, stmt := range elseBranch.AllStmt() {
+			stmt.Accept(tc)
+		}
+		tc.currentScope = tc.currentScope.Parent()
 	}
 
 	return nil

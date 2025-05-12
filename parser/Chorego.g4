@@ -30,6 +30,7 @@ scope: LCURLY stmt* RCURLY;
 // statements
 stmt:
 	LET ident COLON valueType EQUAL expr END	# stmtVarDecl
+	| IF expr scope (ELSE scope)?				# stmtIf
 	| ident EQUAL expr END						# stmtAssign;
 
 // expressions
@@ -52,6 +53,8 @@ FUNC: 'func';
 LET: 'let';
 ASYNC: 'async';
 AWAIT: 'await';
+IF: 'if';
+ELSE: 'else';
 
 TRUE: 'true';
 FALSE: 'false';

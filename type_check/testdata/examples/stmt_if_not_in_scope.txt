@@ -1,0 +1,9 @@
+func@(A,B) foo() {
+    let x: Int@A = 10;
+    let cond: Bool@B = true;
+    if cond {
+        x = 20;
+    }
+}
+---
+5:9: value 'x' has roles 'A' that are not in scope

@@ -68,3 +68,39 @@ func NewStmtExpr(expr Expression) Statement {
 		Expr: expr,
 	}
 }
+
+type StmtIf struct {
+	Guard      Expression
+	ThenBranch []Statement
+	ElseBranch []Statement
+}
+
+func NewStmtIf(guard Expression, thenBranch, elseBranch []Statement) Statement {
+	return &StmtIf{
+		Guard:      guard,
+		ThenBranch: thenBranch,
+		ElseBranch: elseBranch,
+	}
+}
+
+func (s *StmtIf) Codegen() jen.Statement {
+	thenStmts := jen.Statement{}
+	for _, stmt := range s.ThenBranch {
+		thenStmts = append(thenStmts, stmt.Codegen()...)
+	}
+
+	ifStmt := jen.If(s.Guard.Codegen()).Block(thenStmts...)
+
+	if elseStmts := s.ElseBranch; len(elseStmts) > 0 {
+		elseStmts := jen.Statement{}
+		for _, stmt := range s.ElseBranch {
+			elseStmts = append(elseStmts, stmt.Codegen()...)
+		}
+
+		ifStmt = ifStmt.Else().Block(elseStmts...)
+	}
+
+	return []jen.Code{ifStmt}
+}
+
+func (s *StmtIf) IsStatement() {}

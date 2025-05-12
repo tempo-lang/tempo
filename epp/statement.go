@@ -45,6 +45,30 @@ func EppStmt(info *type_check.Info, roleName string, stmt parser.IStmtContext) (
 			result = append(result, projection.NewStmtVarDecl(variableName, varibleType, expr))
 			return
 		}
+	case *parser.StmtIfContext:
+		guard, aux := eppExpression(info, roleName, stmt.Expr())
+		for _, e := range aux {
+			result = append(result, projection.NewStmtExpr(e))
+		}
+
+		guardType := info.Types[stmt.Expr()]
+
+		if guardType.Roles().Contains(roleName) {
+			thenBranch := []projection.Statement{}
+			for _, s := range stmt.Scope(0).AllStmt() {
+				thenBranch = append(thenBranch, EppStmt(info, roleName, s)...)
+			}
+
+			elseBranch := []projection.Statement{}
+			if elseScope := stmt.Scope(1); elseScope != nil {
+				for _, s := range elseScope.AllStmt() {
+					elseBranch = append(elseBranch, EppStmt(info, roleName, s)...)
+				}
+			}
+
+			result = append(result, projection.NewStmtIf(guard, thenBranch, elseBranch))
+		}
+
 	case *parser.StmtContext:
 		panic("statement should never be base type")
 	default:
