@@ -1,13 +1,13 @@
 package type_check_test
 
 import (
-	"chorego/compiler"
-	"chorego/misc"
-	"chorego/types"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"tempo/compiler"
+	"tempo/misc"
+	"tempo/types"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"

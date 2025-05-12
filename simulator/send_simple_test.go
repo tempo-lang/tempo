@@ -1,10 +1,10 @@
 package simulator_test
 
 import (
-	"chorego/runtime"
-	"chorego/simulator"
-	"chorego/simulator/send_simple"
-	"chorego/transports"
+	"tempo/runtime"
+	"tempo/simulator"
+	"tempo/simulator/send_simple"
+	"tempo/transports"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"

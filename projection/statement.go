@@ -1,7 +1,7 @@
 package projection
 
 import (
-	"chorego/types"
+	"tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )

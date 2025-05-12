@@ -1,9 +1,9 @@
 package types
 
 import (
-	"chorego/misc"
-	"chorego/parser"
 	"slices"
+	"tempo/misc"
+	"tempo/parser"
 )
 
 type Roles struct {

@@ -1,9 +1,9 @@
 package compiler
 
 import (
-	"chorego/epp"
-	"chorego/parser"
-	"chorego/type_check"
+	"tempo/epp"
+	"tempo/parser"
+	"tempo/type_check"
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/dave/jennifer/jen"

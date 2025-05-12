@@ -1,9 +1,9 @@
 package projection
 
 import (
-	"chorego/parser"
-	"chorego/types"
 	"fmt"
+	"tempo/parser"
+	"tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -43,7 +43,7 @@ func (f *Func) Codegen(file *jen.File) {
 	file.Func().
 		Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
 		ParamsFunc(func(params *jen.Group) {
-			params.Id("env").Add(jen.Op("*").Qual("chorego/runtime", "Env"))
+			params.Id("env").Add(jen.Op("*").Qual("tempo/runtime", "Env"))
 			for _, param := range f.Params {
 				params.Id(param.Name).Add(CodegenType(param.Type.Value()))
 			}

@@ -1,9 +1,9 @@
 package type_check
 
 import (
-	"chorego/parser"
-	"chorego/sym_table"
-	"chorego/types"
+	"tempo/parser"
+	"tempo/sym_table"
+	"tempo/types"
 )
 
 type Info struct {

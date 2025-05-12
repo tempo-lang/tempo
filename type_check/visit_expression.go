@@ -1,10 +1,10 @@
 package type_check
 
 import (
-	"chorego/parser"
-	"chorego/types"
 	"slices"
 	"strconv"
+	"tempo/parser"
+	"tempo/types"
 )
 
 func (tc *typeChecker) registerType(expr parser.IExprContext, exprType *types.Type) *types.Type {

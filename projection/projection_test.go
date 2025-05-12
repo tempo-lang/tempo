@@ -1,12 +1,12 @@
 package projection_test
 
 import (
-	"chorego/compiler"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"tempo/compiler"
 	"testing"
 
 	"github.com/andreyvit/diff"
@@ -15,7 +15,7 @@ import (
 
 func TestExamples(t *testing.T) {
 
-	paths, err := filepath.Glob(filepath.Join("testdata", "examples", "*.chorego"))
+	paths, err := filepath.Glob(filepath.Join("testdata", "examples", "*.tempo"))
 	if err != nil {
 		t.Fatal(err)
 	}

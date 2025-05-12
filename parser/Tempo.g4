@@ -1,4 +1,4 @@
-grammar Chorego;
+grammar Tempo;
 
 /*
  * Parser Rules

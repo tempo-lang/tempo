@@ -1,6 +1,6 @@
 package type_check
 
-import "chorego/types"
+import "tempo/types"
 
 type ErrorListener interface {
 	ReportTypeError(err types.Error)

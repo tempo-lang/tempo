@@ -1,9 +1,9 @@
 package simulator
 
 import (
-	"chorego/runtime"
-	"chorego/transports"
 	"sync"
+	"tempo/runtime"
+	"tempo/transports"
 )
 
 type Process struct {

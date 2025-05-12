@@ -1,13 +1,13 @@
 package epp
 
 import (
-	"chorego/parser"
-	"chorego/projection"
-	"chorego/type_check"
-	"chorego/types"
 	"fmt"
 	"slices"
 	"strconv"
+	"tempo/parser"
+	"tempo/projection"
+	"tempo/type_check"
+	"tempo/types"
 )
 
 func eppExpression(info *type_check.Info, roleName string, expr parser.IExprContext) (projection.Expression, []projection.Expression) {

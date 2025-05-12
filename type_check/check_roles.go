@@ -1,9 +1,9 @@
 package type_check
 
 import (
-	"chorego/parser"
-	"chorego/types"
 	"slices"
+	"tempo/parser"
+	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -29,6 +29,9 @@ func (tc *typeChecker) checkRolesInScope(value antlr.ParserRuleContext, roleType
 func (tc *typeChecker) checkRolesExist(roleType parser.IRoleTypeContext) bool {
 	idents := parser.RoleTypeAllIdents(roleType)
 	unknownRoles := []string{}
+
+	// TODO: finish this
+	_ = idents
 
 	if len(unknownRoles) > 0 {
 		tc.reportError(types.NewUnknownRoleError(roleType, unknownRoles))

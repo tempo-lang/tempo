@@ -1,8 +1,8 @@
 package sym_table
 
 import (
-	"chorego/parser"
-	"chorego/types"
+	"tempo/parser"
+	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )

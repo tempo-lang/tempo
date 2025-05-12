@@ -1,11 +1,11 @@
 package epp
 
 import (
-	"chorego/parser"
-	"chorego/projection"
-	"chorego/type_check"
-	"chorego/types"
 	"fmt"
+	"tempo/parser"
+	"tempo/projection"
+	"tempo/type_check"
+	"tempo/types"
 )
 
 func EppStmt(info *type_check.Info, roleName string, stmt parser.IStmtContext) (result []projection.Statement) {

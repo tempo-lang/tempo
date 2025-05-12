@@ -1,11 +1,11 @@
 package projection_test
 
 import (
-	"chorego/compiler"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"tempo/compiler"
 	"testing"
 	"time"
 
@@ -23,7 +23,7 @@ type runtimeImporter struct {
 
 // Import implements types.Importer.
 func (r *runtimeImporter) Import(path string) (*types.Package, error) {
-	if path == "chorego/runtime" {
+	if path == "tempo/runtime" {
 		return r.pkg, nil
 	}
 	return nil, fmt.Errorf("failed to import %s", path)
@@ -43,7 +43,7 @@ func newRuntimeImporter() (*runtimeImporter, error) {
 	}
 
 	conf := types.Config{}
-	pkg, err := conf.Check("chorego/runtime", fset, []*ast.File{parsedAST}, nil)
+	pkg, err := conf.Check("tempo/runtime", fset, []*ast.File{parsedAST}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func FuzzProjection(f *testing.F) {
 	`)
 
 	// Add valid examples
-	paths, err := filepath.Glob(filepath.Join("testdata", "examples", "*.chorego"))
+	paths, err := filepath.Glob(filepath.Join("testdata", "examples", "*.tempo"))
 	if err != nil {
 		f.Fatal(err)
 	}

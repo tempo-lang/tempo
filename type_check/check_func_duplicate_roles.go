@@ -1,10 +1,10 @@
 package type_check
 
 import (
-	"chorego/parser"
-	"chorego/types"
 	"cmp"
 	"slices"
+	"tempo/parser"
+	"tempo/types"
 )
 
 func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {

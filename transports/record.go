@@ -1,6 +1,6 @@
 package transports
 
-import "chorego/runtime"
+import "tempo/runtime"
 
 type SendValue struct {
 	Value     any

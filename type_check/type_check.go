@@ -1,9 +1,9 @@
 package type_check
 
 import (
-	"chorego/parser"
-	"chorego/sym_table"
-	"chorego/types"
+	"tempo/parser"
+	"tempo/sym_table"
+	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -20,7 +20,7 @@ func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []types.Error) {
 	tc := new()
 
 	// check that tc implements visitor
-	var visitor parser.ChoregoVisitor = tc
+	var visitor parser.TempoVisitor = tc
 	_ = visitor
 
 	sourceFile.Accept(tc)

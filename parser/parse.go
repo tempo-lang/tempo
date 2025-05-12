@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"chorego/misc"
 	"fmt"
+	"tempo/misc"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -12,12 +12,12 @@ func Parse(input antlr.CharStream) (sourceFile ISourceFileContext, errors []erro
 	errorListener := misc.ErrorListener{}
 
 	// lexer
-	lexer := NewChoregoLexer(input)
+	lexer := NewTempoLexer(input)
 	lexer.AddErrorListener(&errorListener)
 
 	// parser
 	stream := antlr.NewCommonTokenStream(lexer, 0)
-	p := NewChoregoParser(stream)
+	p := NewTempoParser(stream)
 	// p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 
 	p.AddErrorListener(&errorListener)

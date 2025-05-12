@@ -1,8 +1,8 @@
 package types
 
 import (
-	"chorego/misc"
 	"fmt"
+	"tempo/misc"
 )
 
 type FunctionType struct {

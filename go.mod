@@ -1,4 +1,4 @@
-module chorego
+module tempo
 
 go 1.23.2
 

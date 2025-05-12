@@ -1,8 +1,8 @@
 package transports
 
 import (
-	"chorego/runtime"
 	"sync"
+	"tempo/runtime"
 )
 
 type LocalQueue struct {

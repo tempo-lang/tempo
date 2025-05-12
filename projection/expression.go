@@ -1,7 +1,7 @@
 package projection
 
 import (
-	"chorego/types"
+	"tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -110,7 +110,7 @@ type ExprAsync struct {
 }
 
 func (e *ExprAsync) Codegen() jen.Code {
-	return jen.Qual("chorego/runtime", "FixedAsync").Call(e.inner.Codegen())
+	return jen.Qual("tempo/runtime", "FixedAsync").Call(e.inner.Codegen())
 }
 
 func (e *ExprAsync) Type() types.Value {

@@ -1,7 +1,7 @@
 package projection
 
 import (
-	"chorego/parser"
+	"tempo/parser"
 
 	"github.com/dave/jennifer/jen"
 )

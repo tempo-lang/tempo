@@ -5,9 +5,9 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch chorego",
+      "name": "Launch tempo",
       "type": "go",
-      "args": ["test.chorego"],
+      "args": ["test.tempo"],
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}"

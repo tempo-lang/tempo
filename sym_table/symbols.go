@@ -1,8 +1,8 @@
 package sym_table
 
 import (
-	"chorego/parser"
-	"chorego/types"
+	"tempo/parser"
+	"tempo/types"
 )
 
 type Symbol interface {

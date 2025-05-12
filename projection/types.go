@@ -1,8 +1,8 @@
 package projection
 
 import (
-	"chorego/types"
 	"fmt"
+	"tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -35,5 +35,5 @@ func CodegenBuiltinType(builtinType types.Builtin) jen.Code {
 }
 
 func CodegenAsyncType(asyncType *types.Async) jen.Code {
-	return jen.Op("*").Qual("chorego/runtime", "Async")
+	return jen.Op("*").Qual("tempo/runtime", "Async")
 }

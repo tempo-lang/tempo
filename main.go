@@ -1,11 +1,11 @@
 package main
 
 import (
-	"chorego/compiler"
-	"chorego/types"
 	"fmt"
 	"os"
 	"path"
+	"tempo/compiler"
+	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )

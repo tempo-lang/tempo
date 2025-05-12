@@ -1,8 +1,8 @@
 package types
 
 import (
-	"chorego/parser"
 	"fmt"
+	"tempo/parser"
 )
 
 func BuiltinValues() map[string]Value {

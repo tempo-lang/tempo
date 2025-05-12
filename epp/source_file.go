@@ -1,9 +1,9 @@
 package epp
 
 import (
-	"chorego/parser"
-	"chorego/projection"
-	"chorego/type_check"
+	"tempo/parser"
+	"tempo/projection"
+	"tempo/type_check"
 )
 
 func EppSourceFile(info *type_check.Info, sourceFile parser.ISourceFileContext) *projection.SourceFile {

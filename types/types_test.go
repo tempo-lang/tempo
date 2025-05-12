@@ -1,7 +1,7 @@
 package types_test
 
 import (
-	"chorego/types"
+	"tempo/types"
 	"testing"
 )
 

@@ -1,10 +1,10 @@
 package epp
 
 import (
-	"chorego/parser"
-	"chorego/projection"
-	"chorego/type_check"
-	"chorego/types"
+	"tempo/parser"
+	"tempo/projection"
+	"tempo/type_check"
+	"tempo/types"
 )
 
 func EppFunc(info *type_check.Info, function parser.IFuncContext) *projection.Choreography {

@@ -1,9 +1,9 @@
 package types
 
 import (
-	"chorego/misc"
-	"chorego/parser"
 	"fmt"
+	"tempo/misc"
+	"tempo/parser"
 
 	"github.com/antlr4-go/antlr/v4"
 )
