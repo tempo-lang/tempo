@@ -72,6 +72,10 @@ func (t *Type) ToString() string {
 	return fmt.Sprintf("%s@%s", t.value.ToString(), t.roles.ToString())
 }
 
+func (t *Type) IsInvalid() bool {
+	return t.Value() == Invalid().value
+}
+
 type Value interface {
 	IsSendable() bool
 	ToString() string

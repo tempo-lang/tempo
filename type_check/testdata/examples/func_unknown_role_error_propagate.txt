@@ -2,6 +2,7 @@ func@(A) foo() {
     let x: Int@B = 10;
     x = x + 1;
     let y: Int@A = await x;
-
-    let z: async Int@A = A->Z 10;
 }
+---
+2:16: unknown roles 'B'
+4:20: expected async type 'Int@[]'

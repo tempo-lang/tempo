@@ -16,7 +16,11 @@ func (tc *typeChecker) VisitExprAdd(ctx *parser.ExprAddContext) any {
 	lhs := ctx.Expr(0).Accept(tc).(*types.Type)
 	rhs := ctx.Expr(1).Accept(tc).(*types.Type)
 
-	if lhs.Value() == types.Int() && rhs.Value() == types.Int() {
+	if lhs.IsInvalid() || rhs.IsInvalid() {
+		return types.Invalid()
+	}
+
+	if types.ValueCoerseTo(lhs.Value(), types.Int()) && types.ValueCoerseTo(rhs.Value(), types.Int()) {
 		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
 		if err != nil {
 			tc.reportError(err)
@@ -64,6 +68,10 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 
 	exprType := ctx.Expr().Accept(tc).(*types.Type)
 
+	if exprType.IsInvalid() {
+		return types.Invalid()
+	}
+
 	if asyncType, isAsync := exprType.Value().(*types.Async); isAsync {
 		return tc.registerType(ctx, types.New(asyncType.Inner(), exprType.Roles()))
 	}
@@ -77,6 +85,7 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	innerExprType := ctx.Expr().Accept(tc).(*types.Type)
 
 	invalidType := false
+	invalidRole := false
 
 	if !innerExprType.Value().IsSendable() {
 		tc.reportError(types.NewUnsendableTypeError(ctx, innerExprType))
@@ -109,15 +118,17 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	if err != nil {
 		tc.reportError(err)
 	} else {
-		if tc.checkRolesExist(ctx.RoleType(1)) {
+		if !tc.checkRolesExist(ctx.RoleType(1)) {
+			invalidRole = true
+		} else {
 			if !tc.checkRolesInScope(ctx, toRoles) {
-				invalidType = true
+				invalidRole = true
 			}
 		}
 	}
 
 	recvType := types.Invalid()
-	if !invalidType {
+	if !invalidType && !invalidRole {
 		newParticipants := []string{}
 		newParticipants = append(newParticipants, innerExprType.Roles().Participants()...)
 		for _, role := range toRoles.Participants() {
@@ -128,6 +139,10 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
 		isShared := len(newParticipants) > 1
 		recvType = types.New(types.NewAsync(innerExprType.Value()), types.NewRole(newParticipants, isShared))
+	}
+
+	if !invalidType && invalidRole {
+		recvType = types.New(types.NewAsync(innerExprType.Value()), types.EveryoneRole())
 	}
 
 	return tc.registerType(ctx, recvType)

@@ -9,21 +9,32 @@ import (
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	exprType := ctx.Expr().Accept(tc).(*types.Type)
 	declType, err := types.ParseValueType(ctx.ValueType())
+	typeFailed := false
+	roleFailed := false
+
 	if err != nil {
 		tc.reportError(err)
+		typeFailed = true
 	} else {
-		tc.checkRolesExist(ctx.ValueType().RoleType())
+		if !tc.checkRolesExist(ctx.ValueType().RoleType()) {
+			roleFailed = true
+		}
 	}
 
-	tc.checkRolesInScope(ctx.Expr(), exprType.Roles())
+	if !tc.checkRolesInScope(ctx.Expr(), exprType.Roles()) {
+		roleFailed = true
+	}
+
+	if !typeFailed && !exprType.CanCoerceTo(declType) {
+		tc.reportError(types.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
+		typeFailed = true
+	}
 
 	stmtType := declType
-
-	if err != nil {
+	if typeFailed {
 		stmtType = types.Invalid()
-	} else if !exprType.CanCoerceTo(declType) {
-		tc.reportError(types.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
-		stmtType = types.Invalid()
+	} else if roleFailed {
+		stmtType = types.New(declType.Value(), types.EveryoneRole())
 	}
 
 	tc.insertSymbol(sym_table.NewVariableSymbol(ctx, tc.currentScope, stmtType))
