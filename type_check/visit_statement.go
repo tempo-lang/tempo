@@ -12,8 +12,10 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	if err != nil {
 		tc.reportError(err)
 	} else {
-		tc.checkRolesInScope(ctx.Expr(), exprType.Roles())
+		tc.checkRolesExist(ctx.ValueType().RoleType())
 	}
+
+	tc.checkRolesInScope(ctx.Expr(), exprType.Roles())
 
 	stmtType := declType
 

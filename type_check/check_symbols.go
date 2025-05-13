@@ -14,6 +14,8 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		}
 
 		funcScope := tc.currentScope.MakeChild(fn.GetStart(), fn.GetStop(), fnType.Roles().Participants())
-		tc.insertSymbol(sym_table.NewFuncSymbol(fn, funcScope, fnType))
+		funcSym := sym_table.NewFuncSymbol(fn, funcScope, fnType)
+		funcScope.SetFunc(funcSym.(*sym_table.FuncSymbol))
+		tc.insertSymbol(funcSym)
 	}
 }

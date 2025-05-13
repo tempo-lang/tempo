@@ -14,6 +14,7 @@ type Scope struct {
 	pos      antlr.Token
 	end      antlr.Token
 	roles    []string
+	funcSym  *FuncSymbol
 }
 
 func NewScope(pos antlr.Token, end antlr.Token, parent *Scope, roles []string) *Scope {
@@ -24,6 +25,7 @@ func NewScope(pos antlr.Token, end antlr.Token, parent *Scope, roles []string) *
 		pos:      pos,
 		end:      end,
 		roles:    roles,
+		funcSym:  nil,
 	}
 }
 
@@ -101,4 +103,16 @@ func (scope *Scope) MakeChild(pos antlr.Token, end antlr.Token, roles []string) 
 	child := NewScope(pos, end, scope, roles)
 	scope.children = append(scope.children, child)
 	return child
+}
+
+func (scope *Scope) SetFunc(funcSym *FuncSymbol) {
+	scope.funcSym = funcSym
+}
+
+func (scope *Scope) GetFunc() *FuncSymbol {
+	s := scope
+	for s.funcSym == nil && s.parent != nil {
+		s = s.parent
+	}
+	return s.funcSym
 }

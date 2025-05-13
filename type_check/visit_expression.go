@@ -91,7 +91,9 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 			tc.reportError(types.NewComSharedTypeError(ctx, innerExprType))
 		}
 
-		tc.checkRolesInScope(ctx, fromRoles)
+		if tc.checkRolesExist(ctx.RoleType(0)) {
+			tc.checkRolesInScope(ctx, fromRoles)
+		}
 
 		if len(fromRoles.Participants()) > 1 {
 			tc.reportError(types.NewComDistributedTypeError(ctx, innerExprType))
@@ -107,8 +109,10 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	if err != nil {
 		tc.reportError(err)
 	} else {
-		if !tc.checkRolesInScope(ctx, toRoles) {
-			invalidType = true
+		if tc.checkRolesExist(ctx.RoleType(1)) {
+			if !tc.checkRolesInScope(ctx, toRoles) {
+				invalidType = true
+			}
 		}
 	}
 
