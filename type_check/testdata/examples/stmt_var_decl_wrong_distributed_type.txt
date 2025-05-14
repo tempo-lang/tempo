@@ -1,0 +1,5 @@
+func@(A,B) foo() {
+    let x: Int@(A,B) = 10;
+}
+---
+Error

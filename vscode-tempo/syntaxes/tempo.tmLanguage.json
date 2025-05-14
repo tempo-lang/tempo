@@ -1,0 +1,230 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Tempo",
+	"patterns": [
+		{
+			"include": "#literals"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#variableDeclaration"
+		},
+		{
+			"include": "#funcDeclaration"
+		},
+		{
+			"include": "#keywords"
+		}
+	],
+	"repository": {
+		"literals": {
+			"patterns": [
+				{
+					"match": "\\b(true|false)\\b",
+					"name": "constant.language.boolean.tempo"
+				},
+				{
+					"match": "\\b[0-9]+\\b",
+					"name": "constant.numeric.integer.tempo"
+				},
+				{
+					"name": "string.quoted.double.tempo",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"name": "constant.character.escape.tempo",
+							"match": "\\\\."
+						}
+					]
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					"match": "\\b(async|await|if|else)\\b",
+					"captures": {
+						"1": {
+							"name": "keyword.control.flow.$1.tempo"
+						}
+					}
+				},
+				{
+					"match": "\\b(func)\\b",
+					"name": "storage.type.func.tempo"
+				},
+				{
+					"match": "\\b(let)\\b",
+					"name": "storage.type.local.tempo"
+				}
+			]
+		},
+		"funcDeclaration": {
+			"begin": "\\b(func)\\b",
+			"beginCaptures": {
+				"1": {
+					"name": "storage.type.func.tempo"
+				}
+			},
+			"end": "(\\{)",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.block.begin.tempo"
+				}
+			},
+			"name": "meta.function.signature.tempo",
+			"patterns": [
+				{
+					"include": "#roleList"
+				},
+				{
+					"include": "#funcName"
+				},
+				{
+					"include": "#parameters"
+				}
+			]
+		},
+		"funcName": {
+			"match": "([_a-zA-Z][_a-zA-Z0-9]*)(?=\\s*\\()",
+			"name": "entity.name.function.tempo"
+		},
+		"parameters": {
+			"begin": "(\\()",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.definition.parameters.begin.bracket.round.tempo"
+				}
+			},
+			"end": "(\\))",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.parameters.end.bracket.round.tempo"
+				}
+			}
+		},
+		"roleList": {
+			"patterns": [
+				{
+					"match": "(\\@)([a-zA-Z][_a-zA-Z0-9]*)",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.roles.tempo"
+						},
+						"2": {
+							"name": "storage.type.role.tempo"
+						}
+					}
+				},
+				{
+					"begin": "(\\@)(\\()",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.definition.roles.tempo"
+						},
+						"2": {
+							"name": "punctuation.bracket.round.tempo"
+						}
+					},
+					"end": "(\\))",
+					"endCaptures": {
+						"1": {
+							"name": "punctuation.bracket.round.tempo"
+						}
+					},
+					"patterns": [
+						{
+							"match": "([a-zA-Z][_a-zA-Z0-9]*)",
+							"name": "storage.type.role.tempo"
+						}
+					]
+				},
+				{
+					"begin": "(\\@)(\\[)",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.definition.roles.tempo"
+						},
+						"2": {
+							"name": "punctuation.bracket.round.tempo"
+						}
+					},
+					"end": "(\\])",
+					"endCaptures": {
+						"1": {
+							"name": "punctuation.bracket.round.tempo"
+						}
+					},
+					"patterns": [
+						{
+							"match": "([a-zA-Z][_a-zA-Z0-9]*)",
+							"name": "storage.type.role.tempo"
+						}
+					]
+				}
+			]
+		},
+		"typeDeclaration": {
+			"patterns": [
+				{
+					"match": "\\b(async)\\b",
+					"captures": {
+						"1": {
+							"name": "storage.modifier.async.tempo"
+						}
+					}
+				},
+				{
+					"match": "\\b(Int)\\b",
+					"captures": {
+						"1": {
+							"name": "support.type.numeric.tempo"
+						}
+					}
+				},
+				{
+					"match": "\\b(Bool)\\b",
+					"captures": {
+						"1": {
+							"name": "support.type.boolean.tempo"
+						}
+					}
+				},
+				{
+					"match": "\\b([a-zA-Z][_a-zA-Z0-9]*)\\b",
+					"captures": {
+						"1": {
+							"name": "entity.name.type.tempo"
+						}
+					}
+				}
+			]
+		},
+		"variableDeclaration": {
+			"begin": "\\b(let)\\b",
+			"beginCaptures": {
+				"1": {
+					"name": "storage.type.local.tempo"
+				}
+			},
+			"end": "(\\=)",
+			"endCaptures": {
+				"1": {
+					"name": "keyword.operator.assignment.tempo"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#roleList"
+				},
+				{
+					"include": "#typeDeclaration"
+				}
+			]
+		}
+	},
+	"scopeName": "source.tempo"
+}

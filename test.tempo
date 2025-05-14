@@ -1,7 +1,7 @@
-func@(A) foo() {
-    let x: Int@B = 10;
-    x = x + 1;
-    let y: Int@A = await x;
-
-    let z: async Int@A = A->Z 10;
+func@(A,B,C) foo() {
+    let x: Bool@[A,B] = true;
+    let y: Int@[A,C,B] = 10;
+    if x {
+        y = 1;
+    }
 }

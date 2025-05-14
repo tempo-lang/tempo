@@ -1,0 +1,8 @@
+func@(A,B) foo() {
+    let x: Bool@A = true;
+    if x {
+        let y: Int@B = 10;
+    }
+}
+---
+Error Int@B not in scope

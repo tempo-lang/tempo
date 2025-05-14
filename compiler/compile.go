@@ -17,7 +17,9 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 	// parse source input
 	sourceFile, syntaxErrors := parser.Parse(input)
 	if len(syntaxErrors) > 0 {
-		errors = syntaxErrors
+		for _, err := range syntaxErrors {
+			errors = append(errors, err)
+		}
 		return
 	}
 
