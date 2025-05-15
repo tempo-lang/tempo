@@ -50,7 +50,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	tc.checkRolesInScope(ctx, sym.Type().Roles())
+	tc.checkExprInScope(ctx, sym.Type().Roles())
 
 	return tc.registerType(ctx, sym.Type())
 }
@@ -100,8 +100,8 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 			tc.reportError(types.NewComSharedTypeError(ctx, innerExprType))
 		}
 
-		if tc.checkRolesExist(ctx.RoleType(0)) {
-			tc.checkRolesInScope(ctx, fromRoles)
+		if tc.checkRolesInScope(ctx.RoleType(0)) {
+			tc.checkExprInScope(ctx, fromRoles)
 		}
 
 		if len(fromRoles.Participants()) > 1 {
@@ -118,10 +118,10 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	if err != nil {
 		tc.reportError(err)
 	} else {
-		if !tc.checkRolesExist(ctx.RoleType(1)) {
+		if !tc.checkRolesInScope(ctx.RoleType(1)) {
 			invalidRole = true
 		} else {
-			if !tc.checkRolesInScope(ctx, toRoles) {
+			if !tc.checkExprInScope(ctx, toRoles) {
 				invalidRole = true
 			}
 		}

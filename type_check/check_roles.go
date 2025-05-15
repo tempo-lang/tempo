@@ -8,7 +8,7 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-func (tc *typeChecker) checkRolesInScope(value antlr.ParserRuleContext, roleType *types.Roles) bool {
+func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType *types.Roles) bool {
 	idents := roleType.Participants()
 	unknownRoles := []string{}
 
@@ -26,19 +26,19 @@ func (tc *typeChecker) checkRolesInScope(value antlr.ParserRuleContext, roleType
 	return true
 }
 
-func (tc *typeChecker) checkRolesExist(roleType parser.IRoleTypeContext) bool {
+func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool {
 	idents := parser.RoleTypeAllIdents(roleType)
-	funcRoles := tc.currentScope.GetFunc().Type().Roles().Participants()
+	scopeRoles := tc.currentScope.Roles()
 
 	unknownRoles := []string{}
 	for _, i := range idents {
-		if !slices.Contains(funcRoles, i.GetText()) {
+		if !slices.Contains(scopeRoles, i.GetText()) {
 			unknownRoles = append(unknownRoles, i.GetText())
 		}
 	}
 
 	if len(unknownRoles) > 0 {
-		tc.reportError(types.NewUnknownRoleError(roleType, unknownRoles))
+		tc.reportError(types.NewRolesNotInScopeError(roleType, unknownRoles))
 		return false
 	}
 

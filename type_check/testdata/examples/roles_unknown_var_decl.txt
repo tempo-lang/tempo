@@ -2,4 +2,4 @@ func@(A) foo() {
   let x: Int@B = 32;
 }
 ---
-2:14: unknown roles 'B'
+2:14: roles 'B' are not in scope

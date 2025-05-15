@@ -36,25 +36,25 @@ func (e *DuplicateRolesError) ParserRule() antlr.ParserRuleContext {
 	return e.Func
 }
 
-type UnknownRoleError struct {
+type RolesNotInScopeError struct {
 	RoleType     parser.IRoleTypeContext
 	UnknownRoles []string
 }
 
-func NewUnknownRoleError(roleType parser.IRoleTypeContext, unknownRoles []string) Error {
-	return &UnknownRoleError{
+func NewRolesNotInScopeError(roleType parser.IRoleTypeContext, unknownRoles []string) Error {
+	return &RolesNotInScopeError{
 		RoleType:     roleType,
 		UnknownRoles: unknownRoles,
 	}
 }
 
-func (e *UnknownRoleError) IsTypeError() {}
+func (e *RolesNotInScopeError) IsTypeError() {}
 
-func (e *UnknownRoleError) Error() string {
-	return fmt.Sprintf("unknown roles '%s'", misc.JoinStrings(e.UnknownRoles, ","))
+func (e *RolesNotInScopeError) Error() string {
+	return fmt.Sprintf("roles '%s' are not in scope", misc.JoinStrings(e.UnknownRoles, ","))
 }
 
-func (e *UnknownRoleError) ParserRule() antlr.ParserRuleContext {
+func (e *RolesNotInScopeError) ParserRule() antlr.ParserRuleContext {
 	return e.RoleType
 }
 
@@ -468,4 +468,24 @@ func NewComValueNotAtSenderError(com *parser.ExprComContext, exprType *Type) Err
 		Com:      com,
 		ExprType: exprType,
 	}
+}
+
+type NotDistributedTypeError struct {
+	valueType parser.IValueTypeContext
+}
+
+func NewNotDistributedTypeError(valueType parser.IValueTypeContext) Error {
+	return &NotDistributedTypeError{
+		valueType: valueType,
+	}
+}
+
+func (e *NotDistributedTypeError) Error() string {
+	return fmt.Sprintf("type '%s' is not distributed", e.valueType.GetText())
+}
+
+func (e *NotDistributedTypeError) IsTypeError() {}
+
+func (e *NotDistributedTypeError) ParserRule() antlr.ParserRuleContext {
+	return e.valueType
 }

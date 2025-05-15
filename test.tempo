@@ -1,7 +1,6 @@
 func@(A,B,C) foo() {
-    let x: Bool@[A,B] = true;
-    let y: Int@[A,C,B] = 10;
-    if x {
-        y = 1;
-    }
+    let x: Int@A = 2;
+    let y: Int@B = 4;
+    
+    x = x + y;
 }

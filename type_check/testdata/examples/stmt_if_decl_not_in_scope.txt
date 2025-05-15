@@ -5,4 +5,4 @@ func@(A,B) foo() {
     }
 }
 ---
-Error Int@B not in scope
+4:20: roles 'B' are not in scope

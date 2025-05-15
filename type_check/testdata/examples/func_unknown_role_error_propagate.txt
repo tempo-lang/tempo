@@ -4,5 +4,5 @@ func@(A) foo() {
     let y: Int@A = await x;
 }
 ---
-2:16: unknown roles 'B'
+2:16: roles 'B' are not in scope
 4:20: expected async type 'Int@[]'

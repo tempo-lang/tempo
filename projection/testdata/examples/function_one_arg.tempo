@@ -1,1 +1,1 @@
-func@(B,A) foo(snd: Int@(B,A)) {}
+func@(B,A) foo(snd: Int@[B,A]) {}

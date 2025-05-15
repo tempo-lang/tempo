@@ -16,12 +16,12 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 		tc.reportError(err)
 		typeFailed = true
 	} else {
-		if !tc.checkRolesExist(ctx.ValueType().RoleType()) {
+		if !tc.checkRolesInScope(ctx.ValueType().RoleType()) {
 			roleFailed = true
 		}
 	}
 
-	if !tc.checkRolesInScope(ctx.Expr(), exprType.Roles()) {
+	if !tc.checkExprInScope(ctx.Expr(), exprType.Roles()) {
 		roleFailed = true
 	}
 
@@ -58,7 +58,7 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 			}
 		}
 
-		tc.checkRolesInScope(ctx.Ident(), sym.Type().Roles())
+		tc.checkExprInScope(ctx.Ident(), sym.Type().Roles())
 	}
 
 	return nil
@@ -71,7 +71,7 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 		tc.reportError(types.NewInvalidValueError(ctx.Expr(), guardType.Value(), types.Bool()))
 	}
 
-	tc.checkRolesInScope(ctx.Expr(), guardType.Roles())
+	tc.checkExprInScope(ctx.Expr(), guardType.Roles())
 
 	scopeRoles := guardType.Roles().Participants()
 

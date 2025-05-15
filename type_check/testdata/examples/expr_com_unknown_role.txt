@@ -2,4 +2,4 @@ func@(A,B) foo() {
     let result: Int@A = await J->A 10;
 }
 ---
-2:31: unknown roles 'J'
+2:31: roles 'J' are not in scope

@@ -28,6 +28,9 @@ func ParseValueType(ctx parser.IValueTypeContext) (*Type, Error) {
 
 	if builtinType, isBuiltinType := BuiltinValues()[typeName.GetText()]; isBuiltinType {
 		typeValue = builtinType
+		if !role.isSharedRole && len(role.participants) > 1 {
+			return Invalid(), NewNotDistributedTypeError(ctx)
+		}
 	}
 
 	if typeValue != nil {
@@ -64,7 +67,7 @@ func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
 		}
 
 		if unknownRoles := paramRoles.SubtractParticipants(funcRoles.participants); len(unknownRoles) > 0 {
-			paramErrors[i] = append(paramErrors[i], NewUnknownRoleError(param.ValueType().RoleType(), unknownRoles))
+			paramErrors[i] = append(paramErrors[i], NewRolesNotInScopeError(param.ValueType().RoleType(), unknownRoles))
 		}
 
 		params = append(params, paramType)
