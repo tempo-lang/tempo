@@ -6,7 +6,7 @@ import runtime "tempo/runtime"
 // Projection of choreography constants
 func constants_A(env *runtime.Env) {
 	var numberValue int = 123
-	_ = numberValue // Suppress unused variable error
+	_ = numberValue
 	var booleanValue bool = true
-	_ = booleanValue // Suppress unused variable error
+	_ = booleanValue
 }

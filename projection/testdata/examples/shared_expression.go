@@ -6,17 +6,17 @@ import runtime "tempo/runtime"
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 }
 func foo_B(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 	var y int = 20
-	_ = y // Suppress unused variable error
+	_ = y
 	var z int = x + y
-	_ = z // Suppress unused variable error
+	_ = z
 }
 func foo_C(env *runtime.Env) {
 	var y int = 20
-	_ = y // Suppress unused variable error
+	_ = y
 }

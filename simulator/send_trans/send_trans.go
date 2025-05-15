@@ -6,21 +6,21 @@ import runtime "tempo/runtime"
 // Projection of choreography Trans
 func Trans_A(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 	env.Send(x, "B")
 	var y int = runtime.FixedAsync(x).Get().(int)
-	_ = y // Suppress unused variable error
+	_ = y
 	var z int = runtime.FixedAsync(y).Get().(int)
-	_ = z // Suppress unused variable error
+	_ = z
 }
 func Trans_B(env *runtime.Env) {
 	var y int = env.Recv("A").Get().(int)
-	_ = y // Suppress unused variable error
+	_ = y
 	env.Send(y, "C")
 	var z int = runtime.FixedAsync(y).Get().(int)
-	_ = z // Suppress unused variable error
+	_ = z
 }
 func Trans_C(env *runtime.Env) {
 	var z int = env.Recv("B").Get().(int)
-	_ = z // Suppress unused variable error
+	_ = z
 }

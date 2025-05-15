@@ -33,7 +33,7 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 	}
 
 	// endpoint project
-	eppFile := epp.EppSourceFile(info, sourceFile)
+	eppFile := epp.EndpointProject(info, sourceFile)
 
 	// generate go code
 	packageName := "choreography"

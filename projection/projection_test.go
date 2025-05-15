@@ -39,11 +39,11 @@ func TestExamples(t *testing.T) {
 				t.Fatalf("source produced errors: %s", errorsFormatted)
 			}
 
-			outputPath := filepath.Join("testdata", "examples", testname+".out")
+			outputPath := filepath.Join("testdata", "examples", testname+".go")
 
 			// If output path does not exist already
 			if _, err := os.Stat(outputPath); errors.Is(err, os.ErrNotExist) {
-				newPath := filepath.Join("testdata", "examples", testname+"_new.out")
+				newPath := filepath.Join("testdata", "examples", testname+"_new.go")
 				if err := os.WriteFile(newPath, []byte(output), 0655); err != nil {
 					t.Fatalf("error writing output: %v", err)
 				}

@@ -6,10 +6,10 @@ import runtime "tempo/runtime"
 // Projection of choreography SimpleSend
 func SimpleSend_A(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 	env.Send(x, "B")
 }
 func SimpleSend_B(env *runtime.Env) {
 	var y int = env.Recv("A").Get().(int)
-	_ = y // Suppress unused variable error
+	_ = y
 }

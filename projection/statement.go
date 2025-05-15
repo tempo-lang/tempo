@@ -1,8 +1,6 @@
 package projection
 
 import (
-	"tempo/types"
-
 	"github.com/dave/jennifer/jen"
 )
 
@@ -13,22 +11,20 @@ type Statement interface {
 
 type StmtVarDecl struct {
 	Name string
-	Type *types.Type
 	Expr Expression
 }
 
-func NewStmtVarDecl(name string, typeName *types.Type, expr Expression) Statement {
+func NewStmtVarDecl(name string, expr Expression) Statement {
 	return &StmtVarDecl{
 		Name: name,
-		Type: typeName,
 		Expr: expr,
 	}
 }
 
 func (decl *StmtVarDecl) Codegen() jen.Statement {
 
-	genDecl := jen.Var().Id(decl.Name).Add(CodegenType(decl.Type.Value())).Op("=").Add(decl.Expr.Codegen())
-	fixUnused := jen.Id("_").Op("=").Id(decl.Name).Comment("Suppress unused variable error")
+	genDecl := jen.Var().Id(decl.Name).Add(CodegenType(decl.Expr.Type())).Op("=").Add(decl.Expr.Codegen())
+	fixUnused := jen.Id("_").Op("=").Id(decl.Name)
 
 	return []jen.Code{genDecl, fixUnused}
 }
@@ -58,7 +54,11 @@ type StmtExpr struct {
 }
 
 func (s *StmtExpr) Codegen() jen.Statement {
-	return []jen.Code{s.Expr.Codegen()}
+	if s.Expr.ReturnsValue() {
+		return []jen.Code{jen.Id("_").Op("=").Add(s.Expr.Codegen())}
+	} else {
+		return []jen.Code{s.Expr.Codegen()}
+	}
 }
 
 func (s *StmtExpr) IsStatement() {}

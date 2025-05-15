@@ -6,38 +6,42 @@ import (
 	"strconv"
 	"tempo/parser"
 	"tempo/projection"
-	"tempo/type_check"
 	"tempo/types"
 )
 
-func eppExpression(info *type_check.Info, roleName string, expr parser.IExprContext) (projection.Expression, []projection.Expression) {
+func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projection.Expression, []projection.Statement) {
 
-	exprType := info.Types[expr]
+	exprType := epp.info.Types[expr]
 
 	switch expr := expr.(type) {
 	case *parser.ExprAddContext:
-		lhs, aux := eppExpression(info, roleName, expr.Expr(0))
-		rhs, rhsAux := eppExpression(info, roleName, expr.Expr(1))
+		lhs, aux := epp.eppExpression(roleName, expr.Expr(0))
+		rhs, rhsAux := epp.eppExpression(roleName, expr.Expr(1))
 		aux = append(aux, rhsAux...)
 		return projection.NewExprBinaryOp(projection.OperatorAdd, lhs, rhs, exprType.Value()), aux
 	case *parser.ExprBoolContext:
 		value := expr.TRUE() != nil
-		return projection.NewExprBool(value), []projection.Expression{}
+		return projection.NewExprBool(value), []projection.Statement{}
 	case *parser.ExprGroupContext:
-		return eppExpression(info, roleName, expr.Expr())
+		return epp.eppExpression(roleName, expr.Expr())
 	case *parser.ExprIdentContext:
-		return projection.NewExprIdent(expr.Ident().GetText(), exprType.Value()), []projection.Expression{}
+		return projection.NewExprIdent(expr.Ident().GetText(), exprType.Value()), []projection.Statement{}
 	case *parser.ExprNumContext:
 		num, err := strconv.Atoi(expr.GetText())
 		if err != nil {
 			panic(fmt.Sprintf("expected NUMBER to be convertible to int: %s", expr.GetText()))
 		}
-		return projection.NewExprInt(num), []projection.Expression{}
+		return projection.NewExprInt(num), []projection.Statement{}
 	case *parser.ExprAwaitContext:
-		inner, aux := eppExpression(info, roleName, expr.Expr())
+		inner, aux := epp.eppExpression(roleName, expr.Expr())
 		if inner != nil {
-			asyncType := info.Types[expr.Expr()].Value().(*types.Async)
-			return projection.NewExprAwait(inner, asyncType.Inner()), aux
+			if innerExprAsync, innerIsFixedAsync := inner.(*projection.ExprAsync); innerIsFixedAsync {
+				// await fixed async cancels out
+				return innerExprAsync.Inner(), aux
+			} else {
+				asyncType := epp.info.Types[expr.Expr()].Value().(*types.Async)
+				return projection.NewExprAwait(inner, asyncType.Inner()), aux
+			}
 		} else {
 			return nil, aux
 		}
@@ -46,25 +50,34 @@ func eppExpression(info *type_check.Info, roleName string, expr parser.IExprCont
 		senderRole := sender.Ident(0).GetText()
 
 		receivers := parser.RoleTypeAllIdents(expr.RoleType(1))
-		inner, aux := eppExpression(info, roleName, expr.Expr())
+		inner, aux := epp.eppExpression(roleName, expr.Expr())
 
 		receiverRoles := []string{}
 		for _, receiver := range receivers {
 			receiverRoles = append(receiverRoles, receiver.GetText())
 		}
 
+		exprValue := projection.NewExprAsync(inner)
 		if roleName == senderRole {
-			aux = append(aux, projection.NewExprSend(inner, receiverRoles))
+			if inner.HasSideEffects() {
+				tmpName := epp.nextTmpName()
+				aux = append(aux, projection.NewStmtVarDecl(tmpName, exprValue))
+				exprValue = projection.NewExprIdent(tmpName, exprValue.Type())
+				aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(projection.NewExprAwait(exprValue, inner.Type()), receiverRoles)))
+			} else {
+				aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(inner, receiverRoles)))
+			}
 		}
 
+		// receiver
 		if slices.Contains(receiverRoles, roleName) {
-			innerType := info.Types[expr.Expr()]
+			innerType := epp.info.Types[expr.Expr()]
 			return projection.NewExprRecv(innerType.Value(), senderRole), aux
 		}
 
-		valueType := info.Types[expr.Expr()]
+		valueType := epp.info.Types[expr.Expr()]
 		if valueType.Roles().Contains(roleName) {
-			return projection.NewExprAsync(inner), aux
+			return exprValue, aux
 		}
 
 		return nil, aux

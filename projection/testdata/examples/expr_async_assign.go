@@ -5,8 +5,11 @@ import runtime "tempo/runtime"
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var x *runtime.Async = runtime.FixedAsync(10)
-	_ = x // Suppress unused variable error
-	var y int = x.Get().(int)
-	_ = y // Suppress unused variable error
+	env.Send(10, "B")
+}
+func foo_B(env *runtime.Env) {
+	var value *runtime.Async = env.Recv("A")
+	_ = value
+	var another int = value.Get().(int)
+	_ = another
 }

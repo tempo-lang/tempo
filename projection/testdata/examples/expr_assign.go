@@ -6,6 +6,6 @@ import runtime "tempo/runtime"
 // Projection of choreography assign
 func assign_A(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 	x = 20
 }

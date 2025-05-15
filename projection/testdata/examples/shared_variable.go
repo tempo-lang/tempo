@@ -6,9 +6,9 @@ import runtime "tempo/runtime"
 // Projection of choreography shared
 func shared_A(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 }
 func shared_B(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 }

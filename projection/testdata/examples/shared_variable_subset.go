@@ -6,19 +6,19 @@ import runtime "tempo/runtime"
 // Projection of choreography shareSubset
 func shareSubset_A(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 	var y int = x
-	_ = y // Suppress unused variable error
+	_ = y
 	var z int = y
-	_ = z // Suppress unused variable error
+	_ = z
 }
 func shareSubset_B(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 	var y int = x
-	_ = y // Suppress unused variable error
+	_ = y
 }
 func shareSubset_C(env *runtime.Env) {
 	var x int = 10
-	_ = x // Suppress unused variable error
+	_ = x
 }
