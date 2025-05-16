@@ -1,6 +1,7 @@
 package projection
 
 import (
+	"fmt"
 	"tempo/types"
 
 	"github.com/dave/jennifer/jen"
@@ -265,5 +266,43 @@ func NewExprRecv(recvType types.Value, sender string) Expression {
 	return &ExprRecv{
 		recvType: recvType,
 		sender:   sender,
+	}
+}
+
+type ExprCall struct {
+	FuncName   string
+	FuncRole   string
+	Args       []Expression
+	ReturnType types.Value
+}
+
+func (e *ExprCall) Codegen() jen.Code {
+	args := make([]jen.Code, len(e.Args))
+	for i, arg := range e.Args {
+		args[i] = arg.Codegen()
+	}
+	return jen.Id(fmt.Sprintf("%s_%s", e.FuncName, e.FuncRole)).Call(args...)
+}
+
+func (e *ExprCall) Type() types.Value {
+	return e.ReturnType
+}
+
+func (e *ExprCall) ReturnsValue() bool {
+	return e.ReturnType != types.Unit()
+}
+
+func (e *ExprCall) HasSideEffects() bool {
+	return true
+}
+
+func (e *ExprCall) IsExpression() {}
+
+func NewExprCall(funcName string, funcRole string, args []Expression, returnType types.Value) Expression {
+	return &ExprCall{
+		FuncName:   funcName,
+		FuncRole:   funcRole,
+		Args:       args,
+		ReturnType: returnType,
 	}
 }

@@ -67,7 +67,12 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 
 			result = append(result, projection.NewStmtIf(guard, thenBranch, elseBranch))
 		}
-
+	case *parser.StmtExprContext:
+		expr, aux := epp.eppExpression(roleName, stmt.Expr())
+		result = aux
+		if expr != nil {
+			result = append(result, projection.NewStmtExpr(expr))
+		}
 	case *parser.StmtContext:
 		panic("statement should never be base type")
 	default:

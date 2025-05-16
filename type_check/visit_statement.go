@@ -94,3 +94,8 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 
 	return nil
 }
+
+func (tc *typeChecker) VisitStmtExpr(ctx *parser.StmtExprContext) any {
+	ctx.Expr().Accept(tc)
+	return nil
+}

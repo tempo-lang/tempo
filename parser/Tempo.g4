@@ -18,11 +18,14 @@ roleType:
 	| (ident | (LPAREN ident (COMMA ident)* RPAREN))	# roleTypeNormal;
 
 // function
-func: FUNC ROLE_AT roleType ident funcParamList scope;
+func:
+	FUNC ROLE_AT roleType ident funcParamList valueType? scope;
 
 funcParamList: LPAREN (funcParam (COMMA funcParam)*)? RPAREN;
 
 funcParam: ident COLON valueType;
+
+funcArgList: LPAREN (expr (COMMA expr)*)? RPAREN;
 
 // scope
 scope: LCURLY stmt* RCURLY;
@@ -31,17 +34,19 @@ scope: LCURLY stmt* RCURLY;
 stmt:
 	LET ident COLON valueType EQUAL expr END	# stmtVarDecl
 	| IF expr scope (ELSE scope)?				# stmtIf
-	| ident EQUAL expr END						# stmtAssign;
+	| ident EQUAL expr END						# stmtAssign
+	| expr END									# stmtExpr;
 
 // expressions
 expr:
-	expr PLUS expr					# exprAdd
-	| NUMBER						# exprNum
-	| (TRUE | FALSE)				# exprBool
-	| AWAIT expr					# exprAwait
-	| roleType COM roleType expr	# exprCom
-	| ident							# exprIdent
-	| LPAREN expr RPAREN			# exprGroup;
+	expr PLUS expr							# exprAdd
+	| NUMBER								# exprNum
+	| (TRUE | FALSE)						# exprBool
+	| AWAIT expr							# exprAwait
+	| roleType COM roleType expr			# exprCom
+	| ident funcArgList ROLE_AT roleType	# exprCall
+	| ident									# exprIdent
+	| LPAREN expr RPAREN					# exprGroup;
 
 /*
  * Lexer Rules

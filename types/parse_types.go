@@ -73,7 +73,15 @@ func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
 		params = append(params, paramType)
 	}
 
-	fn := New(Function(params), funcRoles)
+	returnType := New(Unit(), EveryoneRole())
+	if ctx.ValueType() != nil {
+		returnType, err = ParseValueType(ctx.ValueType())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fn := New(Function(params, returnType), funcRoles)
 
 	for _, errList := range paramErrors {
 		if len(errList) > 0 {

@@ -91,8 +91,11 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 
 func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
 	paramType := ctx.ValueType().Accept(tc).(*types.Type)
+	paramSym := sym_table.NewFuncParamSymbol(ctx, tc.currentScope, paramType)
+	tc.insertSymbol(paramSym)
 
-	tc.insertSymbol(sym_table.NewFuncParamSymbol(ctx, tc.currentScope, paramType))
+	funcSym := tc.currentScope.GetFunc()
+	funcSym.AddParam(paramSym.(*sym_table.FuncParamSymbol))
 
 	return tc.VisitChildren(ctx)
 }

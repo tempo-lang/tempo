@@ -17,6 +17,7 @@ type FuncSymbol struct {
 	funcCtx  parser.IFuncContext
 	scope    *Scope
 	funcType *types.Type
+	params   []*FuncParamSymbol
 }
 
 func (f *FuncSymbol) Parent() *Scope {
@@ -39,6 +40,10 @@ func (f *FuncSymbol) Func() parser.IFuncContext {
 	return f.funcCtx
 }
 
+func (f *FuncSymbol) FuncValue() *types.FunctionType {
+	return f.funcType.Value().(*types.FunctionType)
+}
+
 func (f *FuncSymbol) Scope() *Scope {
 	return f.scope
 }
@@ -47,8 +52,21 @@ func (f *FuncSymbol) IsAssignable() bool {
 	return false
 }
 
+func (f *FuncSymbol) Params() []*FuncParamSymbol {
+	return f.params
+}
+
+func (f *FuncSymbol) AddParam(param *FuncParamSymbol) {
+	f.params = append(f.params, param)
+}
+
 func NewFuncSymbol(fn parser.IFuncContext, scope *Scope, funcType *types.Type) Symbol {
-	return &FuncSymbol{funcCtx: fn, scope: scope, funcType: funcType}
+	return &FuncSymbol{
+		funcCtx:  fn,
+		scope:    scope,
+		funcType: funcType,
+		params:   []*FuncParamSymbol{},
+	}
 }
 
 type FuncParamSymbol struct {

@@ -20,10 +20,11 @@ func (epp *epp) eppFunc(function parser.IFuncContext) *projection.Choreography {
 }
 
 func (epp *epp) eppFuncRole(choreography *projection.Choreography, function parser.IFuncContext, roleName string) {
-	fn := choreography.AddFunc(roleName, function)
-
 	funcSym := epp.info.Symbols[function.Ident()]
 	funcType := funcSym.Type().Value().(*types.FunctionType)
+
+	returnValue := epp.eppType(roleName, funcType.ReturnType())
+	fn := choreography.AddFunc(roleName, function, returnValue)
 
 	// project parameters
 	for i, param := range function.FuncParamList().AllFuncParam() {

@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strconv"
 	"tempo/parser"
+	"tempo/sym_table"
 	"tempo/types"
 )
 
@@ -69,7 +70,7 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 	exprType := ctx.Expr().Accept(tc).(*types.Type)
 
 	if exprType.IsInvalid() {
-		return types.Invalid()
+		return tc.registerType(ctx, types.Invalid())
 	}
 
 	if asyncType, isAsync := exprType.Value().(*types.Async); isAsync {
@@ -146,4 +147,68 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	}
 
 	return tc.registerType(ctx, recvType)
+}
+
+func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
+	invalidType := false
+	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
+	if err != nil {
+		tc.reportError(err)
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	tc.info.Symbols[ctx.Ident()] = sym
+	funcSym, ok := sym.(*sym_table.FuncSymbol)
+	if !ok {
+		tc.reportError(types.NewCallNonFunctionError(ctx, sym.Type()))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	callRoles, err := types.ParseRoleType(ctx.RoleType())
+	if err != nil {
+		tc.reportError(err)
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	funcRoles := parser.RoleTypeAllIdents(funcSym.Func().RoleType())
+	if len(callRoles.Participants()) != len(funcRoles) {
+		tc.reportError(types.NewCallWrongRoleCountError(ctx))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	roleSubst := map[string]string{}
+	for i, callRole := range callRoles.Participants() {
+		funcRole := funcRoles[i].GetText()
+		roleSubst[funcRole] = callRole
+	}
+
+	argExprs := ctx.FuncArgList().AllExpr()
+	if len(funcSym.Params()) != len(argExprs) {
+		tc.reportError(types.NewCallWrongArgCountError(ctx))
+		invalidType = true
+	}
+
+	for i, param := range funcSym.Params() {
+		arg := argExprs[i]
+
+		argType := arg.Accept(tc).(*types.Type)
+
+		paramTypeSubst := param.Type().SubstituteRoles(roleSubst)
+
+		if !argType.CanCoerceTo(paramTypeSubst) {
+			tc.reportError(types.NewTypeMismatchError(arg, argType, paramTypeSubst))
+			invalidType = true
+		}
+	}
+
+	returnType := types.Invalid()
+	if !invalidType {
+		returnType = funcSym.FuncValue().ReturnType().SubstituteRoles(roleSubst)
+	}
+
+	return tc.registerType(ctx, returnType)
+}
+
+func (tc *typeChecker) VisitFuncArgList(ctx *parser.FuncArgListContext) any {
+	return nil
 }

@@ -14,6 +14,7 @@ type Func struct {
 	Name         string
 	Role         string
 	Params       []FuncParam
+	ReturnValue  types.Value
 	Body         []Statement
 }
 
@@ -39,21 +40,27 @@ func (f *Func) AddStmt(stmt ...Statement) *Func {
 	return f
 }
 
-func (f *Func) Codegen(file *jen.File) {
-	file.Func().
+func (f *Func) Codegen() *jen.Statement {
+	result := jen.Func().
 		Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
 		ParamsFunc(func(params *jen.Group) {
 			params.Id("env").Add(jen.Op("*").Qual("tempo/runtime", "Env"))
 			for _, param := range f.Params {
 				params.Id(param.Name).Add(CodegenType(param.Type.Value()))
 			}
-		}).
-		BlockFunc(func(block *jen.Group) {
-
-			for _, bodyStmt := range f.Body {
-				for _, stmt := range bodyStmt.Codegen() {
-					block.Add(stmt)
-				}
-			}
 		})
+
+	if f.ReturnValue != types.Unit() {
+		result = result.Add(CodegenType(f.ReturnValue))
+	}
+
+	result = result.BlockFunc(func(block *jen.Group) {
+		for _, bodyStmt := range f.Body {
+			for _, stmt := range bodyStmt.Codegen() {
+				block.Add(stmt)
+			}
+		}
+	})
+
+	return result
 }

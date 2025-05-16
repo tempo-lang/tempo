@@ -31,7 +31,6 @@ func EveryoneRole() *Roles {
 }
 
 func RoleIntersect(expr parser.IExprContext, roles ...*Roles) (*Roles, Error) {
-
 	nonEmptyRoles := []*Roles{}
 	for _, role := range roles {
 		if len(role.participants) > 0 {
@@ -80,7 +79,7 @@ func (r *Roles) IsSharedRole() bool {
 }
 
 func (r *Roles) Participants() []string {
-	return r.participants
+	return slices.Clone(r.participants)
 }
 
 func (r *Roles) ToString() string {
@@ -121,4 +120,13 @@ func (r *Roles) Encompass(other *Roles) bool {
 
 func (r *Roles) Contains(role string) bool {
 	return slices.Contains(r.participants, role)
+}
+
+func (t *Type) SubstituteRoles(subst map[string]string) *Type {
+	roleSubst := t.Roles().Participants()
+	for i := range roleSubst {
+		roleSubst[i] = subst[roleSubst[i]]
+	}
+
+	return New(t.Value(), NewRole(roleSubst, t.Roles().IsSharedRole()))
 }

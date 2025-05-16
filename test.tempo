@@ -1,5 +1,8 @@
-func@(A,B,C) foo() {
+func@(X,Y) bar(value: Int@X) Int@Y {
+    return X->Y value;
+}
+
+func@(A,B) foo() {
     let x: Int@A = 10;
-    let y: Int@[A,B] = await A->B x;
-    let z: Int@[A,B,C] = await B->C y;
+    let Y: Int@B = bar(x)@(A,B);
 }

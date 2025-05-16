@@ -6,8 +6,8 @@ import (
 )
 
 type FunctionType struct {
-	// returnType Type
-	params []*Type
+	params     []*Type
+	returnType *Type
 }
 
 func (f *FunctionType) IsSendable() bool {
@@ -22,14 +22,17 @@ func (f *FunctionType) ToString() string {
 func (f *FunctionType) IsValue()    {}
 func (f *FunctionType) IsFunction() {}
 
-// func (f *FunctionType) ReturnType() Type
 func (f *FunctionType) Params() []*Type {
 	return f.params
 }
 
-func Function(params []*Type) Value {
+func (f *FunctionType) ReturnType() *Type {
+	return f.returnType
+}
+
+func Function(params []*Type, returnType *Type) Value {
 	return &FunctionType{
-		// returnType: returnType,
-		params: params,
+		params:     params,
+		returnType: returnType,
 	}
 }

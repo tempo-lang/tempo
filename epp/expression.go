@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"tempo/parser"
 	"tempo/projection"
+	"tempo/sym_table"
 	"tempo/types"
 )
 
@@ -78,6 +79,39 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		valueType := epp.info.Types[expr.Expr()]
 		if valueType.Roles().Contains(roleName) {
 			return exprValue, aux
+		}
+
+		return nil, aux
+	case *parser.ExprCallContext:
+		funcSym := epp.info.Symbols[expr.Ident()].(*sym_table.FuncSymbol)
+
+		aux := []projection.Statement{}
+		argValues := []projection.Expression{}
+
+		for i, arg := range expr.FuncArgList().AllExpr() {
+			argVal, extra := epp.eppExpression(roleName, arg)
+			aux = append(aux, extra...)
+
+			if funcSym.Params()[i].Type().Roles().Contains(roleName) {
+				argValues = append(argValues, argVal)
+			}
+		}
+
+		funcRoles := parser.RoleTypeAllIdents(funcSym.Func().RoleType())
+		callRoles, _ := types.ParseRoleType(expr.RoleType())
+
+		argRoleSubst := map[string]string{}
+		paramRoleSubst := map[string]string{}
+		for i, callRole := range callRoles.Participants() {
+			funcRole := funcRoles[i].GetText()
+			argRoleSubst[callRole] = funcRole
+			paramRoleSubst[funcRole] = callRole
+		}
+
+		if callRoles.Contains(roleName) {
+			returnType := funcSym.FuncValue().ReturnType().SubstituteRoles(paramRoleSubst)
+			returnValue := epp.eppType(roleName, returnType)
+			return projection.NewExprCall(funcSym.SymbolName(), argRoleSubst[roleName], argValues, returnValue), aux
 		}
 
 		return nil, aux
