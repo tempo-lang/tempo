@@ -82,6 +82,28 @@ func NewValueRoleNotInScopeError(value antlr.ParserRuleContext, valueRoles *Role
 	}
 }
 
+type ReturnNotAllRolesError struct {
+	Return       *parser.StmtReturnContext
+	MissignRoles []string
+}
+
+func NewReturnNotAllRolesError(ret *parser.StmtReturnContext, missingRoles []string) Error {
+	return &ReturnNotAllRolesError{
+		Return:       ret,
+		MissignRoles: missingRoles,
+	}
+}
+
+func (e *ReturnNotAllRolesError) Error() string {
+	return fmt.Sprintf("return statement is missing roles: %s", misc.JoinStrings(e.MissignRoles, ","))
+}
+
+func (e *ReturnNotAllRolesError) IsTypeError() {}
+
+func (e *ReturnNotAllRolesError) ParserRule() antlr.ParserRuleContext {
+	return e.Return.Expr()
+}
+
 type UnmergableRolesError struct {
 	Expr  parser.IExprContext
 	Roles []*Roles
@@ -260,6 +282,30 @@ func NewTypeMismatchError(expr parser.IExprContext, firstType *Type, secondType 
 		Expr:       expr,
 		FirstType:  firstType,
 		SecondType: secondType,
+	}
+}
+
+type IncompatibleTypesError struct {
+	Expr         parser.IExprContext
+	ExprType     *Type
+	ExpectedType *Type
+}
+
+func (e *IncompatibleTypesError) Error() string {
+	return fmt.Sprintf("type '%s' is not compatible with type '%s'", e.ExprType.ToString(), e.ExpectedType.ToString())
+}
+
+func (e *IncompatibleTypesError) IsTypeError() {}
+
+func (e *IncompatibleTypesError) ParserRule() antlr.ParserRuleContext {
+	return e.Expr
+}
+
+func NewIncompatibleTypesError(expr parser.IExprContext, exprType *Type, expectedType *Type) Error {
+	return &IncompatibleTypesError{
+		Expr:         expr,
+		ExprType:     exprType,
+		ExpectedType: expectedType,
 	}
 }
 

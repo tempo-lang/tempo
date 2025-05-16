@@ -34,6 +34,7 @@ scope: LCURLY stmt* RCURLY;
 stmt:
 	LET ident COLON valueType EQUAL expr END	# stmtVarDecl
 	| IF expr scope (ELSE scope)?				# stmtIf
+	| RETURN expr END							# stmtReturn
 	| ident EQUAL expr END						# stmtAssign
 	| expr END									# stmtExpr;
 
@@ -55,6 +56,7 @@ expr:
 // Keywords
 
 FUNC: 'func';
+RETURN: 'return';
 LET: 'let';
 ASYNC: 'async';
 AWAIT: 'await';

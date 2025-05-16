@@ -60,6 +60,15 @@ func (f *FuncSymbol) AddParam(param *FuncParamSymbol) {
 	f.params = append(f.params, param)
 }
 
+func (f *FuncSymbol) Roles() *types.Roles {
+	idents := parser.RoleTypeAllIdents(f.Func().RoleType())
+	result := make([]string, len(idents))
+	for i, ident := range idents {
+		result[i] = ident.GetText()
+	}
+	return types.NewRole(result, false)
+}
+
 func NewFuncSymbol(fn parser.IFuncContext, scope *Scope, funcType *types.Type) Symbol {
 	return &FuncSymbol{
 		funcCtx:  fn,

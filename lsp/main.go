@@ -193,6 +193,7 @@ func (s *tempoServer) textDocumentDidChange(ctx *glsp.Context, params *protocol.
 }
 
 func parserRuleToRange(rule antlr.ParserRuleContext) protocol.Range {
+	endTokenLength := rule.GetStop().GetStop() - rule.GetStop().GetStart()
 	return protocol.Range{
 		Start: protocol.Position{
 			Line:      uint32(rule.GetStart().GetLine() - 1),
@@ -200,7 +201,7 @@ func parserRuleToRange(rule antlr.ParserRuleContext) protocol.Range {
 		},
 		End: protocol.Position{
 			Line:      uint32(rule.GetStop().GetLine() - 1),
-			Character: uint32(rule.GetStop().GetColumn()),
+			Character: uint32(rule.GetStop().GetColumn() + endTokenLength + 1),
 		},
 	}
 }

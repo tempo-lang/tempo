@@ -38,13 +38,13 @@ func (e *Env) Role(name string) string {
 	}
 }
 
-// Substitute will return a copy of the environment with a new role substitution map.
-func (e *Env) Substitute(roles ...string) *Env {
+// Subst will return a copy of the environment with a new role substitution map.
+func (e *Env) Subst(roles ...string) *Env {
 	newSub := map[string]string{}
 	for i := 0; i < len(roles)/2; i += 2 {
 		old := roles[i]
 		new := roles[i+1]
-		newSub[old] = new
+		newSub[new] = old
 	}
 
 	return &Env{

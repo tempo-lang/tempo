@@ -196,7 +196,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		paramTypeSubst := param.Type().SubstituteRoles(roleSubst)
 
 		if !argType.CanCoerceTo(paramTypeSubst) {
-			tc.reportError(types.NewTypeMismatchError(arg, argType, paramTypeSubst))
+			tc.reportError(types.NewIncompatibleTypesError(arg, argType, paramTypeSubst))
 			invalidType = true
 		}
 	}

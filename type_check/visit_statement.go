@@ -99,3 +99,22 @@ func (tc *typeChecker) VisitStmtExpr(ctx *parser.StmtExprContext) any {
 	ctx.Expr().Accept(tc)
 	return nil
 }
+
+func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
+	returnType := ctx.Expr().Accept(tc).(*types.Type)
+
+	expectedReturnType := tc.currentScope.GetFunc().FuncValue().ReturnType()
+
+	if !returnType.CanCoerceTo(expectedReturnType) {
+		tc.reportError(types.NewIncompatibleTypesError(ctx.Expr(), returnType, expectedReturnType))
+	}
+
+	missingRoles := tc.currentScope.GetFunc().Roles().
+		SubtractParticipants(tc.currentScope.Roles().Participants())
+
+	if len(missingRoles) > 0 {
+		tc.reportError(types.NewReturnNotAllRolesError(ctx, missingRoles))
+	}
+
+	return nil
+}

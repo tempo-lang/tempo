@@ -45,7 +45,7 @@
 		"keywords": {
 			"patterns": [
 				{
-					"match": "\\b(async|await|if|else)\\b",
+					"match": "\\b(async|await|if|else|return)\\b",
 					"captures": {
 						"1": {
 							"name": "keyword.control.flow.$1.tempo"
@@ -85,6 +85,9 @@
 				},
 				{
 					"include": "#parameters"
+				},
+				{
+					"include": "#typeDeclaration"
 				}
 			]
 		},
@@ -104,7 +107,15 @@
 				"1": {
 					"name": "punctuation.definition.parameters.end.bracket.round.tempo"
 				}
-			}
+			},
+			"patterns": [
+				{
+					"include": "#roleList"
+				},
+				{
+					"include": "#typeDeclaration"
+				}
+			]
 		},
 		"roleList": {
 			"patterns": [

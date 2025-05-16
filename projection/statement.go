@@ -104,3 +104,19 @@ func (s *StmtIf) Codegen() jen.Statement {
 }
 
 func (s *StmtIf) IsStatement() {}
+
+type StmtReturn struct {
+	Expr Expression
+}
+
+func NewStmtReturn(expr Expression) Statement {
+	return &StmtReturn{
+		Expr: expr,
+	}
+}
+
+func (s *StmtReturn) Codegen() jen.Statement {
+	return []jen.Code{jen.Return(s.Expr.Codegen())}
+}
+
+func (s *StmtReturn) IsStatement() {}

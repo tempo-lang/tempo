@@ -1,7 +1,6 @@
 package type_check
 
 import (
-	"slices"
 	"tempo/parser"
 	"tempo/types"
 
@@ -13,7 +12,7 @@ func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType 
 	unknownRoles := []string{}
 
 	for _, ident := range idents {
-		if !slices.Contains(tc.currentScope.Roles(), ident) {
+		if !tc.currentScope.Roles().Contains(ident) {
 			unknownRoles = append(unknownRoles, ident)
 		}
 	}
@@ -32,7 +31,7 @@ func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool 
 
 	unknownRoles := []string{}
 	for _, i := range idents {
-		if !slices.Contains(scopeRoles, i.GetText()) {
+		if !scopeRoles.Contains(i.GetText()) {
 			unknownRoles = append(unknownRoles, i.GetText())
 		}
 	}

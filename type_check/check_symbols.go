@@ -14,6 +14,24 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		}
 
 		funcScope := tc.currentScope.MakeChild(fn.GetStart(), fn.GetStop(), fnType.Roles().Participants())
+		tc.currentScope = funcScope
+
+		// return type
+		if fn.ValueType() != nil {
+			fn.ValueType().Accept(tc)
+			if !tc.checkRolesInScope(fn.ValueType().RoleType()) {
+				fnValue := fnType.Value().(*types.FunctionType)
+
+				// make return type invalid
+				fnType = types.New(
+					types.Function(fnValue.Params(), types.Invalid()),
+					fnType.Roles(),
+				)
+			}
+		}
+
+		tc.currentScope = tc.currentScope.Parent()
+
 		funcSym := sym_table.NewFuncSymbol(fn, funcScope, fnType)
 		funcScope.SetFunc(funcSym.(*sym_table.FuncSymbol))
 		tc.insertSymbol(funcSym)

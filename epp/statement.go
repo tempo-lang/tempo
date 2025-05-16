@@ -73,6 +73,15 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 		if expr != nil {
 			result = append(result, projection.NewStmtExpr(expr))
 		}
+	case *parser.StmtReturnContext:
+		expr, aux := epp.eppExpression(roleName, stmt.Expr())
+		result = aux
+
+		scope := epp.info.GlobalScope.Innermost(stmt.GetStart())
+		funcReturnRoles := scope.GetFunc().FuncValue().ReturnType().Roles()
+		if funcReturnRoles.Contains(roleName) {
+			result = append(result, projection.NewStmtReturn(expr))
+		}
 	case *parser.StmtContext:
 		panic("statement should never be base type")
 	default:

@@ -74,8 +74,8 @@ func (scope *Scope) Children() []*Scope {
 	return scope.children
 }
 
-func (scope *Scope) Roles() []string {
-	return scope.roles
+func (scope *Scope) Roles() *types.Roles {
+	return types.NewRole(scope.roles, false)
 }
 
 func (scope *Scope) Pos() antlr.Token {
@@ -87,13 +87,18 @@ func (scope *Scope) End() antlr.Token {
 }
 
 func (scope *Scope) Contains(pos antlr.Token) bool {
-	return scope.pos.GetTokenIndex() >= pos.GetTokenIndex() && scope.end.GetTokenIndex() <= pos.GetTokenIndex()
+	return scope.pos.GetTokenIndex() <= pos.GetTokenIndex() && pos.GetTokenIndex() <= scope.end.GetTokenIndex()
 }
 
 func (scope *Scope) Innermost(pos antlr.Token) *Scope {
 	for _, child := range scope.children {
 		if child.Contains(pos) {
-			return child.Innermost(pos)
+			inner := child.Innermost(pos)
+			if inner != nil {
+				return inner
+			} else {
+				return child
+			}
 		}
 	}
 	return nil

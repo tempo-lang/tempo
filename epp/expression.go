@@ -85,18 +85,6 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	case *parser.ExprCallContext:
 		funcSym := epp.info.Symbols[expr.Ident()].(*sym_table.FuncSymbol)
 
-		aux := []projection.Statement{}
-		argValues := []projection.Expression{}
-
-		for i, arg := range expr.FuncArgList().AllExpr() {
-			argVal, extra := epp.eppExpression(roleName, arg)
-			aux = append(aux, extra...)
-
-			if funcSym.Params()[i].Type().Roles().Contains(roleName) {
-				argValues = append(argValues, argVal)
-			}
-		}
-
 		funcRoles := parser.RoleTypeAllIdents(funcSym.Func().RoleType())
 		callRoles, _ := types.ParseRoleType(expr.RoleType())
 
@@ -108,10 +96,31 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			paramRoleSubst[funcRole] = callRole
 		}
 
+		aux := []projection.Statement{}
+		argValues := []projection.Expression{}
+
+		for i, arg := range expr.FuncArgList().AllExpr() {
+			argVal, extra := epp.eppExpression(roleName, arg)
+			aux = append(aux, extra...)
+
+			if funcSym.Params()[i].Type().Roles().Contains(argRoleSubst[roleName]) {
+				argValues = append(argValues, argVal)
+			}
+		}
+
 		if callRoles.Contains(roleName) {
 			returnType := funcSym.FuncValue().ReturnType().SubstituteRoles(paramRoleSubst)
 			returnValue := epp.eppType(roleName, returnType)
-			return projection.NewExprCall(funcSym.SymbolName(), argRoleSubst[roleName], argValues, returnValue), aux
+
+			roleSubs := []projection.ExprCallRoleSubs{}
+			for _, callRole := range callRoles.Participants() {
+				roleSubs = append(roleSubs, projection.ExprCallRoleSubs{
+					From: callRole,
+					To:   argRoleSubst[callRole],
+				})
+			}
+
+			return projection.NewExprCall(funcSym.SymbolName(), argRoleSubst[roleName], argValues, returnValue, roleSubs), aux
 		}
 
 		return nil, aux
