@@ -5,7 +5,7 @@ grammar Tempo;
  */
 
 // source file
-sourceFile: func*;
+sourceFile: func* EOF;
 
 // identifier
 ident: ID;

@@ -7,7 +7,7 @@ import (
 )
 
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
-	exprType := ctx.Expr().Accept(tc).(*types.Type)
+	exprType := tc.visitExpr(ctx.Expr())
 	declType, err := types.ParseValueType(ctx.ValueType())
 	typeFailed := false
 	roleFailed := false
@@ -15,7 +15,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	if err != nil {
 		tc.reportError(err)
 		typeFailed = true
-	} else {
+	} else if !declType.IsInvalid() {
 		if !tc.checkRolesInScope(ctx.ValueType().RoleType()) {
 			roleFailed = true
 		}

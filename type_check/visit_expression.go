@@ -9,14 +9,25 @@ import (
 	"tempo/types"
 )
 
+func (tc *typeChecker) visitExpr(ctx parser.IExprContext) *types.Type {
+	if ctx == nil {
+		return types.Invalid()
+	}
+	exprType := ctx.Accept(tc)
+	if exprType == nil {
+		return types.Invalid()
+	}
+	return exprType.(*types.Type)
+}
+
 func (tc *typeChecker) registerType(expr parser.IExprContext, exprType *types.Type) *types.Type {
 	tc.info.Types[expr] = exprType
 	return exprType
 }
 
 func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
-	lhs := ctx.Expr(0).Accept(tc).(*types.Type)
-	rhs := ctx.Expr(1).Accept(tc).(*types.Type)
+	lhs := tc.visitExpr(ctx.Expr(0))
+	rhs := tc.visitExpr(ctx.Expr(1))
 
 	if lhs.IsInvalid() || rhs.IsInvalid() {
 		return types.Invalid()
@@ -135,7 +146,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 }
 
 func (tc *typeChecker) VisitExprGroup(ctx *parser.ExprGroupContext) any {
-	innerType := ctx.Expr().Accept(tc).(*types.Type)
+	innerType := tc.visitExpr(ctx.Expr())
 	return tc.registerType(ctx, innerType)
 }
 
@@ -166,7 +177,7 @@ func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
 
 func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 
-	exprType := ctx.Expr().Accept(tc).(*types.Type)
+	exprType := tc.visitExpr(ctx.Expr())
 
 	if exprType.IsInvalid() {
 		return tc.registerType(ctx, types.Invalid())
@@ -182,7 +193,7 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 
 func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
-	innerExprType := ctx.Expr().Accept(tc).(*types.Type)
+	innerExprType := tc.visitExpr(ctx.Expr())
 
 	invalidType := false
 	invalidRole := false
@@ -290,7 +301,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	for i, param := range funcSym.Params() {
 		arg := argExprs[i]
 
-		argType := arg.Accept(tc).(*types.Type)
+		argType := tc.visitExpr(arg)
 
 		paramTypeSubst := param.Type().SubstituteRoles(roleSubst)
 

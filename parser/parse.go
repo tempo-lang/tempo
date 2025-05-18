@@ -38,7 +38,8 @@ func RoleTypeAllIdents(ctx IRoleTypeContext) []IIdentContext {
 	case *RoleTypeSharedContext:
 		return ctx.AllIdent()
 	}
-	panic(fmt.Sprintf("unexpected IRoleTypeContext: %#v", ctx))
+	// return nil on parser error
+	return nil
 }
 
 type SyntaxError struct {

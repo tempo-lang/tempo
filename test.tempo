@@ -1,3 +1,4 @@
 func@(A,B) foo() {
-    let x: Bool@A = true && 2;
+    let y: Int@ = 2;
+    let z: Bool@B = y;
 }

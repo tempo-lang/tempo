@@ -22,7 +22,7 @@ func ValuesEqual(a, b Value) bool {
 }
 
 func ValueCoerseTo(thisValue, otherValue Value) bool {
-	if thisValue == Invalid().value {
+	if thisValue == Invalid().Value() || otherValue == Invalid().Value() {
 		return true
 	}
 

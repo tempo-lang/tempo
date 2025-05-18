@@ -69,7 +69,10 @@ func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result an
 
 func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 	// functions are already resolved by addGlobalSymbols
-	sym := tc.info.Symbols[ctx.Ident()].(*sym_table.FuncSymbol)
+	sym, found := tc.info.Symbols[ctx.Ident()].(*sym_table.FuncSymbol)
+	if !found {
+		return nil
+	}
 
 	tc.currentScope = sym.Scope()
 

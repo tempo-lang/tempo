@@ -20,7 +20,6 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 		for _, err := range syntaxErrors {
 			errors = append(errors, err)
 		}
-		return
 	}
 
 	// type check ast
@@ -29,6 +28,9 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 		for _, err := range typeErrors {
 			errors = append(errors, err)
 		}
+	}
+
+	if len(errors) > 0 {
 		return
 	}
 

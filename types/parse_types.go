@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"tempo/parser"
 )
 
@@ -15,12 +14,18 @@ func BuiltinValues() map[string]Value {
 }
 
 func ParseValueType(ctx parser.IValueTypeContext) (*Type, Error) {
+	// parser error
+	if ctx == nil {
+		return Invalid(), nil
+	}
 
 	isAsync := ctx.ASYNC() != nil
 
 	role, err := ParseRoleType(ctx.RoleType())
 	if err != nil {
 		return Invalid(), err
+	} else if role == nil {
+		return Invalid(), nil
 	}
 
 	typeName := ctx.Ident()
@@ -44,10 +49,11 @@ func ParseValueType(ctx parser.IValueTypeContext) (*Type, Error) {
 }
 
 func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
-
 	funcRoles, err := ParseRoleType(ctx.RoleType())
 	if err != nil {
-		return nil, err
+		return Invalid(), err
+	} else if funcRoles == nil {
+		return Invalid(), nil
 	}
 
 	params := []*Type{}
@@ -61,12 +67,7 @@ func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
 			paramErrors[i] = append(paramErrors[i], err)
 		}
 
-		paramRoles, err := ParseRoleType(param.ValueType().RoleType())
-		if err != nil {
-			paramErrors[i] = append(paramErrors[i], err)
-		}
-
-		if unknownRoles := paramRoles.SubtractParticipants(funcRoles.participants); len(unknownRoles) > 0 {
+		if unknownRoles := paramType.Roles().SubtractParticipants(funcRoles.participants); len(unknownRoles) > 0 {
 			paramErrors[i] = append(paramErrors[i], NewRolesNotInScopeError(param.ValueType().RoleType(), unknownRoles))
 		}
 
@@ -77,7 +78,7 @@ func ParseFuncType(ctx parser.IFuncContext) (*Type, Error) {
 	if ctx.ValueType() != nil {
 		returnType, err = ParseValueType(ctx.ValueType())
 		if err != nil {
-			return nil, err
+			return Invalid(), err
 		}
 	}
 
@@ -100,7 +101,8 @@ func ParseRoleType(ctx parser.IRoleTypeContext) (*Roles, Error) {
 		return ParseRoleTypeShared(ctx)
 	}
 
-	panic(fmt.Sprintf("unexpected role type: %#v", ctx))
+	//panic(fmt.Sprintf("unexpected role type: %#v", ctx))
+	return nil, nil
 }
 
 func ParseRoleTypeNormal(ctx *parser.RoleTypeNormalContext) (*Roles, Error) {

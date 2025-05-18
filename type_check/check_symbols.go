@@ -11,6 +11,7 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		fnType, err := types.ParseFuncType(fn)
 		if err != nil {
 			tc.reportError(err)
+			continue
 		}
 
 		funcScope := tc.currentScope.MakeChild(fn.GetStart(), fn.GetStop(), fnType.Roles().Participants())
@@ -20,13 +21,13 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		if fn.ValueType() != nil {
 			fn.ValueType().Accept(tc)
 			if !tc.checkRolesInScope(fn.ValueType().RoleType()) {
-				fnValue := fnType.Value().(*types.FunctionType)
-
-				// make return type invalid
-				fnType = types.New(
-					types.Function(fnValue.Params(), types.Invalid()),
-					fnType.Roles(),
-				)
+				if fnValue, ok := fnType.Value().(*types.FunctionType); ok {
+					// make return type invalid
+					fnType = types.New(
+						types.Function(fnValue.Params(), types.Invalid()),
+						fnType.Roles(),
+					)
+				}
 			}
 		}
 
