@@ -1,5 +1,5 @@
 func@(A) binOps() {
-    let a: Int@A = 1 + 2 - 3 * 4 / 5;
+    let a: Int@A = 1 + 2 - 3 * 4 / 5 % 6;
     let b: Bool@A = true == false;
     let c: Bool@A = true != false;
     let d: Bool@A = 10 < 20;

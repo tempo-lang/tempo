@@ -27,6 +27,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		projection.OpSub,
 		projection.OpMul,
 		projection.OpDiv,
+		projection.OpMod,
 	}
 
 	equalityOps := []projection.Operator{

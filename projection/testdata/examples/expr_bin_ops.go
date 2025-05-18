@@ -5,7 +5,7 @@ import runtime "tempo/runtime"
 
 // Projection of choreography binOps
 func binOps_A(env *runtime.Env) {
-	var a int = 1 + 2 - 3*4/5
+	var a int = 1 + 2 - 3*4/5%6
 	_ = a
 	var b bool = true == false
 	_ = b

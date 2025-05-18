@@ -15,6 +15,9 @@
 			"include": "#funcDeclaration"
 		},
 		{
+			"include": "#operators"
+		},
+		{
 			"include": "#keywords"
 		}
 	],
@@ -59,6 +62,22 @@
 				{
 					"match": "\\b(let)\\b",
 					"name": "storage.type.local.tempo"
+				}
+			]
+		},
+		"operators": {
+			"patterns": [
+				{
+					"match": "(\\+|\\-|\\*|\\/|\\%)",
+					"name": "keyword.operator.arithmetic.tempo"
+				},
+				{
+					"match": "(\\&\\&|\\|\\|)",
+					"name": "keyword.operator.logical.tempo"
+				},
+				{
+					"match": "(\\=\\=|\\>|\\<|\\>\\=|\\<\\=)",
+					"name": "keyword.operator.comparison.tempo"
 				}
 			]
 		},

@@ -33,14 +33,28 @@ scope: LCURLY stmt* RCURLY;
 // statements
 stmt:
 	LET ident COLON valueType IS expr END	# stmtVarDecl
-	| IF expr scope (ELSE scope)?				# stmtIf
-	| RETURN expr END							# stmtReturn
+	| IF expr scope (ELSE scope)?			# stmtIf
+	| RETURN expr END						# stmtReturn
 	| ident IS expr END						# stmtAssign
-	| expr END									# stmtExpr;
+	| expr END								# stmtExpr;
 
 // expressions
 expr:
-	expr (PLUS|MINUS|MULTIPLY|DIVIDE|EQUAL|NOT_EQUAL|LESS|LESS_EQ|GREATER|GREATER_EQ|AND|OR) expr	# exprBinOp
+	expr (
+		PLUS
+		| MINUS
+		| MULTIPLY
+		| DIVIDE
+		| MODULO
+		| EQUAL
+		| NOT_EQUAL
+		| LESS
+		| LESS_EQ
+		| GREATER
+		| GREATER_EQ
+		| AND
+		| OR
+	) expr									# exprBinOp
 	| NUMBER								# exprNum
 	| (TRUE | FALSE)						# exprBool
 	| AWAIT expr							# exprAwait
@@ -82,6 +96,7 @@ PLUS: '+';
 MINUS: '-';
 MULTIPLY: '*';
 DIVIDE: '/';
+MODULO: '%';
 EQUAL: '==';
 NOT_EQUAL: '!=';
 LESS: '<';

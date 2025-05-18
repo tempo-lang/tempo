@@ -108,6 +108,7 @@ const (
 	OpSub       Operator = "-"
 	OpMul       Operator = "*"
 	OpDiv       Operator = "/"
+	OpMod       Operator = "%"
 	OpEq        Operator = "=="
 	OpNotEq     Operator = "!="
 	OpLess      Operator = "<"
@@ -129,6 +130,8 @@ func ParseOperator(binOp *parser.ExprBinOpContext) Operator {
 		operator = OpMul
 	case binOp.DIVIDE() != nil:
 		operator = OpDiv
+	case binOp.MODULO() != nil:
+		operator = OpMod
 	case binOp.EQUAL() != nil:
 		operator = OpEq
 	case binOp.NOT_EQUAL() != nil:
