@@ -15,11 +15,12 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	exprType := epp.info.Types[expr]
 
 	switch expr := expr.(type) {
-	case *parser.ExprAddContext:
+	case *parser.ExprBinOpContext:
 		lhs, aux := epp.eppExpression(roleName, expr.Expr(0))
 		rhs, rhsAux := epp.eppExpression(roleName, expr.Expr(1))
 		aux = append(aux, rhsAux...)
-		return projection.NewExprBinaryOp(projection.OperatorAdd, lhs, rhs, exprType.Value()), aux
+		operator := projection.ParseOperator(expr)
+		return projection.NewExprBinaryOp(operator, lhs, rhs, exprType.Value()), aux
 	case *parser.ExprBoolContext:
 		value := expr.TRUE() != nil
 		return projection.NewExprBool(value), []projection.Statement{}

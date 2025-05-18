@@ -1,8 +1,3 @@
-func@(X,Y) send(value: Int@X) Int@Y {
-    return await X->Y value;
-}
-
 func@(A,B) foo() {
-    let x: Int@A = 10;
-    let Y: Int@B = send(x)@(A,B);
+    let x: Bool@A = true && 2;
 }

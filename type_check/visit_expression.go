@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strconv"
 	"tempo/parser"
+	"tempo/projection"
 	"tempo/sym_table"
 	"tempo/types"
 )
@@ -13,7 +14,7 @@ func (tc *typeChecker) registerType(expr parser.IExprContext, exprType *types.Ty
 	return exprType
 }
 
-func (tc *typeChecker) VisitExprAdd(ctx *parser.ExprAddContext) any {
+func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	lhs := ctx.Expr(0).Accept(tc).(*types.Type)
 	rhs := ctx.Expr(1).Accept(tc).(*types.Type)
 
@@ -21,17 +22,114 @@ func (tc *typeChecker) VisitExprAdd(ctx *parser.ExprAddContext) any {
 		return types.Invalid()
 	}
 
-	if types.ValueCoerseTo(lhs.Value(), types.Int()) && types.ValueCoerseTo(rhs.Value(), types.Int()) {
+	arithmeticOps := []projection.Operator{
+		projection.OpAdd,
+		projection.OpSub,
+		projection.OpMul,
+		projection.OpDiv,
+	}
+
+	equalityOps := []projection.Operator{
+		projection.OpEq,
+		projection.OpNotEq,
+	}
+
+	inequalityOps := []projection.Operator{
+		projection.OpLess,
+		projection.OpLessEq,
+		projection.OpGreater,
+		projection.OpGreaterEq,
+	}
+
+	booleanOps := []projection.Operator{
+		projection.OpAnd,
+		projection.OpOr,
+	}
+
+	typeError := false
+	op := projection.ParseOperator(ctx)
+
+	switch {
+	case slices.Contains(arithmeticOps, op):
+		if !types.ValueCoerseTo(lhs.Value(), types.Int()) {
+			tc.reportError(types.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
+			typeError = true
+		}
+
+		if !types.ValueCoerseTo(rhs.Value(), types.Int()) {
+			tc.reportError(types.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
+			typeError = true
+		}
+
 		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
 		if err != nil {
 			tc.reportError(err)
-			return tc.registerType(ctx, types.Invalid())
-		} else {
+			typeError = true
+		}
+
+		if !typeError {
 			return tc.registerType(ctx, types.New(types.Int(), newRoles))
+		}
+
+	case slices.Contains(equalityOps, op):
+		if !types.ValuesEqual(lhs.Value(), rhs.Value()) {
+			tc.reportError(types.NewValueMismatchError(ctx, lhs.Value(), rhs.Value()))
+			typeError = true
+		}
+
+		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
+		if err != nil {
+			tc.reportError(err)
+			typeError = true
+		}
+
+		if !typeError {
+			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
+		}
+
+	case slices.Contains(inequalityOps, op):
+		if !types.ValueCoerseTo(lhs.Value(), types.Int()) {
+			tc.reportError(types.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
+			typeError = true
+		}
+
+		if !types.ValueCoerseTo(rhs.Value(), types.Int()) {
+			tc.reportError(types.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
+			typeError = true
+		}
+
+		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
+		if err != nil {
+			tc.reportError(err)
+			typeError = true
+		}
+
+		if !typeError {
+			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
+		}
+
+	case slices.Contains(booleanOps, op):
+		if !types.ValueCoerseTo(lhs.Value(), types.Bool()) {
+			tc.reportError(types.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Bool()))
+			typeError = true
+		}
+
+		if !types.ValueCoerseTo(rhs.Value(), types.Bool()) {
+			tc.reportError(types.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Bool()))
+			typeError = true
+		}
+
+		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
+		if err != nil {
+			tc.reportError(err)
+			typeError = true
+		}
+
+		if !typeError {
+			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
 		}
 	}
 
-	tc.reportError(types.NewTypeMismatchError(ctx, lhs, rhs))
 	return tc.registerType(ctx, types.Invalid())
 }
 

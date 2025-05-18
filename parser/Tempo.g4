@@ -32,15 +32,15 @@ scope: LCURLY stmt* RCURLY;
 
 // statements
 stmt:
-	LET ident COLON valueType EQUAL expr END	# stmtVarDecl
+	LET ident COLON valueType IS expr END	# stmtVarDecl
 	| IF expr scope (ELSE scope)?				# stmtIf
 	| RETURN expr END							# stmtReturn
-	| ident EQUAL expr END						# stmtAssign
+	| ident IS expr END						# stmtAssign
 	| expr END									# stmtExpr;
 
 // expressions
 expr:
-	expr PLUS expr							# exprAdd
+	expr (PLUS|MINUS|MULTIPLY|DIVIDE|EQUAL|NOT_EQUAL|LESS|LESS_EQ|GREATER|GREATER_EQ|AND|OR) expr	# exprBinOp
 	| NUMBER								# exprNum
 	| (TRUE | FALSE)						# exprBool
 	| AWAIT expr							# exprAwait
@@ -78,11 +78,23 @@ RCURLY: '}';
 
 // Symbols
 
-EQUAL: '=';
+PLUS: '+';
+MINUS: '-';
+MULTIPLY: '*';
+DIVIDE: '/';
+EQUAL: '==';
+NOT_EQUAL: '!=';
+LESS: '<';
+LESS_EQ: '<=';
+GREATER: '>';
+GREATER_EQ: '>=';
+AND: '&&';
+OR: '||';
+
+IS: '=';
 ROLE_AT: '@';
 COMMA: ',';
 COLON: ':';
-PLUS: '+';
 COM: '->';
 
 ID: ('_' [a-zA-Z_0-9]+ | [a-zA-Z][a-zA-Z_0-9]*);

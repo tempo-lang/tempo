@@ -8,16 +8,16 @@ func Trans_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
 	env.Send(x, "B")
-	var y int = runtime.FixedAsync(x).Get().(int)
+	var y int = x
 	_ = y
-	var z int = runtime.FixedAsync(y).Get().(int)
+	var z int = y
 	_ = z
 }
 func Trans_B(env *runtime.Env) {
 	var y int = env.Recv("A").Get().(int)
 	_ = y
 	env.Send(y, "C")
-	var z int = runtime.FixedAsync(y).Get().(int)
+	var z int = y
 	_ = z
 }
 func Trans_C(env *runtime.Env) {

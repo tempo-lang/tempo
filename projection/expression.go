@@ -2,6 +2,7 @@ package projection
 
 import (
 	"fmt"
+	"tempo/parser"
 	"tempo/types"
 
 	"github.com/dave/jennifer/jen"
@@ -103,8 +104,50 @@ func NewExprBool(value bool) Expression {
 type Operator string
 
 const (
-	OperatorAdd = "+"
+	OpAdd       Operator = "+"
+	OpSub       Operator = "-"
+	OpMul       Operator = "*"
+	OpDiv       Operator = "/"
+	OpEq        Operator = "=="
+	OpNotEq     Operator = "!="
+	OpLess      Operator = "<"
+	OpLessEq    Operator = "<="
+	OpGreater   Operator = ">"
+	OpGreaterEq Operator = ">="
+	OpAnd       Operator = "&&"
+	OpOr        Operator = "||"
 )
+
+func ParseOperator(binOp *parser.ExprBinOpContext) Operator {
+	var operator Operator
+	switch {
+	case binOp.PLUS() != nil:
+		operator = OpAdd
+	case binOp.MINUS() != nil:
+		operator = OpSub
+	case binOp.MULTIPLY() != nil:
+		operator = OpMul
+	case binOp.DIVIDE() != nil:
+		operator = OpDiv
+	case binOp.EQUAL() != nil:
+		operator = OpEq
+	case binOp.NOT_EQUAL() != nil:
+		operator = OpNotEq
+	case binOp.LESS() != nil:
+		operator = OpLess
+	case binOp.LESS_EQ() != nil:
+		operator = OpLessEq
+	case binOp.GREATER() != nil:
+		operator = OpGreater
+	case binOp.GREATER_EQ() != nil:
+		operator = OpGreaterEq
+	case binOp.AND() != nil:
+		operator = OpAnd
+	case binOp.OR() != nil:
+		operator = OpOr
+	}
+	return operator
+}
 
 type ExprBinaryOp struct {
 	operator Operator
@@ -133,7 +176,7 @@ func (e *ExprBinaryOp) IsExpression() {}
 
 func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression, typeVal types.Value) Expression {
 	return &ExprBinaryOp{
-		operator: OperatorAdd,
+		operator: operator,
 		lhs:      lhs,
 		rhs:      rhs,
 		typeVal:  typeVal,

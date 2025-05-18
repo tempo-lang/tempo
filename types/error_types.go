@@ -261,27 +261,27 @@ func NewInvalidAssignTypeError(assign *parser.StmtAssignContext, varType *Type, 
 	}
 }
 
-type TypeMismatchError struct {
-	Expr       parser.IExprContext
-	FirstType  *Type
-	SecondType *Type
+type ValueMismatchError struct {
+	Expr        parser.IExprContext
+	FirstValue  Value
+	SecondValue Value
 }
 
-func (t *TypeMismatchError) Error() string {
-	return fmt.Sprintf("types %s and %s do not match", t.FirstType.ToString(), t.SecondType.ToString())
+func (t *ValueMismatchError) Error() string {
+	return fmt.Sprintf("type values '%s' and '%s' do not match", t.FirstValue.ToString(), t.SecondValue.ToString())
 }
 
-func (t *TypeMismatchError) IsTypeError() {}
+func (t *ValueMismatchError) IsTypeError() {}
 
-func (t *TypeMismatchError) ParserRule() antlr.ParserRuleContext {
+func (t *ValueMismatchError) ParserRule() antlr.ParserRuleContext {
 	return t.Expr
 }
 
-func NewTypeMismatchError(expr parser.IExprContext, firstType *Type, secondType *Type) Error {
-	return &TypeMismatchError{
-		Expr:       expr,
-		FirstType:  firstType,
-		SecondType: secondType,
+func NewValueMismatchError(expr parser.IExprContext, firstValue Value, secondValue Value) Error {
+	return &ValueMismatchError{
+		Expr:        expr,
+		FirstValue:  firstValue,
+		SecondValue: secondValue,
 	}
 }
 
