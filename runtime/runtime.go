@@ -41,10 +41,10 @@ func (e *Env) Role(name string) string {
 // Subst will return a copy of the environment with a new role substitution map.
 func (e *Env) Subst(roles ...string) *Env {
 	newSub := map[string]string{}
-	for i := 0; i < len(roles)/2; i += 2 {
+	for i := 0; i <= len(roles)/2; i += 2 {
 		old := roles[i]
 		new := roles[i+1]
-		newSub[new] = old
+		newSub[new] = e.Role(old)
 	}
 
 	return &Env{

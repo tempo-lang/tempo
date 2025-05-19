@@ -65,7 +65,7 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 }
 
 func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
-	guardType := ctx.Expr().Accept(tc).(*types.Type)
+	guardType := tc.visitExpr(ctx.Expr())
 
 	if !types.ValueCoerseTo(guardType.Value(), types.Bool()) {
 		tc.reportError(types.NewInvalidValueError(ctx.Expr(), guardType.Value(), types.Bool()))

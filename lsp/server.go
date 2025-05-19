@@ -6,6 +6,7 @@ import (
 	"sync"
 	"tempo/parser"
 	"tempo/type_check"
+	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/tliron/commonlog"
@@ -140,17 +141,62 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 	file.lock.RLock()
 	defer file.lock.RUnlock()
 
-	node, nodeRange := astNodeAtPosition(file.ast, params.Position)
+	leaf, nodeRange := astNodeAtPosition(file.ast, params.Position)
+
+	node := leaf
+	for node != nil {
+		switch node := node.(type) {
+		case *parser.StmtVarDeclContext:
+			if sym, ok := file.info.Symbols[node.Ident()]; ok {
+				exprRange := parserRuleToRange(node)
+				return &protocol.Hover{
+					Contents: fmt.Sprintf("let %s: %s", sym.SymbolName(), sym.Type().ToString()),
+					Range:    &exprRange,
+				}, nil
+			}
+		case parser.IExprContext:
+			if exprType, ok := file.info.Types[node]; ok {
+
+				if len(exprType.Roles().Participants()) == 0 {
+					scope := file.info.GlobalScope.Innermost(node.GetStart())
+
+					exprType = types.New(
+						exprType.Value(),
+						types.NewRole(scope.Roles().Participants(), true),
+					)
+				}
+
+				exprRange := parserRuleToRange(node)
+				return &protocol.Hover{
+					Contents: exprType.ToString(),
+					Range:    &exprRange,
+				}, nil
+			}
+		}
+
+		node = node.GetParent()
+	}
+
+	debugNode := "```"
+	node = leaf
+	for node != nil {
+		debugNode = fmt.Sprintf("%s\n\n%#v", debugNode, node)
+		node = node.GetParent()
+	}
+	debugNode = fmt.Sprintf("%s\n```", debugNode)
 
 	return &protocol.Hover{
-		Contents: fmt.Sprintf("Node: %#v", node),
-		Range:    &nodeRange,
+		Contents: &protocol.MarkupContent{
+			Kind:  protocol.MarkupKindMarkdown,
+			Value: debugNode,
+		},
+		Range: &nodeRange,
 	}, nil
 }
 
 func posWithinRange(pos protocol.Position, span protocol.Range) bool {
 	if span.Start.Line <= pos.Line && span.End.Line >= pos.Line {
-		if span.Start.Line == pos.Line && span.Start.Character > pos.Character {
+		if span.Start.Line == pos.Line && pos.Character < span.Start.Character {
 			return false
 		}
 

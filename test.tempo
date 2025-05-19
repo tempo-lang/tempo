@@ -1,4 +1,10 @@
 func@(A,B) foo() {
-    let y: Int@ = 2;
-    let z: Bool@B = y;
+    1000;
+    let y: Int@A = 2000;
+    let z: Bool@B = false;
+
+    let x: Int@A = 6 + 3;
+    if x > 10 {
+        let w: Int@(A) = 6 + 1;
+    }
 }

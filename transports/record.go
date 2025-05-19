@@ -1,6 +1,8 @@
 package transports
 
-import "tempo/runtime"
+import (
+	"tempo/runtime"
+)
 
 type SendValue struct {
 	Value     any
