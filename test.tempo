@@ -1,10 +1,7 @@
-func@(A,B) foo() {
-    1000;
-    let y: Int@A = 2000;
-    let z: Bool@B = false;
-
-    let x: Int@A = 6 + 3;
-    if x > 10 {
-        let w: Int@(A) = 6 + 1;
-    }
+func@(Y) value() Int@Y {
+  let foo: Bool@Y = false;
+  if foo {
+    let x: Int@Y = 10;
+  }
+  return 1+2;
 }

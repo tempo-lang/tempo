@@ -206,6 +206,8 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	fromRoles, err := types.ParseRoleType(ctx.RoleType(0))
 	if err != nil {
 		tc.reportError(err)
+	} else if fromRoles == nil {
+		return tc.registerType(ctx, types.Invalid())
 	} else {
 		if fromRoles.IsSharedRole() {
 			tc.reportError(types.NewComSharedTypeError(ctx, innerExprType))
@@ -228,6 +230,8 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	toRoles, err := types.ParseRoleType(ctx.RoleType(1))
 	if err != nil {
 		tc.reportError(err)
+	} else if toRoles == nil {
+		return tc.registerType(ctx, types.Invalid())
 	} else {
 		if !tc.checkRolesInScope(ctx.RoleType(1)) {
 			invalidRole = true
@@ -278,6 +282,8 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	if err != nil {
 		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
+	} else if callRoles == nil {
+		return tc.registerType(ctx, types.Invalid())
 	}
 
 	funcRoles := parser.RoleTypeAllIdents(funcSym.Func().RoleType())
@@ -296,18 +302,18 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	if len(funcSym.Params()) != len(argExprs) {
 		tc.reportError(types.NewCallWrongArgCountError(ctx))
 		invalidType = true
-	}
+	} else {
+		for i, param := range funcSym.Params() {
+			arg := argExprs[i]
 
-	for i, param := range funcSym.Params() {
-		arg := argExprs[i]
+			argType := tc.visitExpr(arg)
 
-		argType := tc.visitExpr(arg)
+			paramTypeSubst := param.Type().SubstituteRoles(roleSubst)
 
-		paramTypeSubst := param.Type().SubstituteRoles(roleSubst)
-
-		if !argType.CanCoerceTo(paramTypeSubst) {
-			tc.reportError(types.NewIncompatibleTypesError(arg, argType, paramTypeSubst))
-			invalidType = true
+			if !argType.CanCoerceTo(paramTypeSubst) {
+				tc.reportError(types.NewIncompatibleTypesError(arg, argType, paramTypeSubst))
+				invalidType = true
+			}
 		}
 	}
 

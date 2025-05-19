@@ -71,6 +71,7 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 	// functions are already resolved by addGlobalSymbols
 	sym, found := tc.info.Symbols[ctx.Ident()].(*sym_table.FuncSymbol)
 	if !found {
+		// was not found if function has parser errors
 		return nil
 	}
 
@@ -84,6 +85,11 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 
 	ctx.FuncParamList().Accept(tc)
 
+	if ctx.Scope() == nil {
+		// nil if parser error
+		return nil
+	}
+
 	for _, stmt := range ctx.Scope().AllStmt() {
 		stmt.Accept(tc)
 	}
@@ -93,7 +99,7 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 }
 
 func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
-	paramType := ctx.ValueType().Accept(tc).(*types.Type)
+	paramType := tc.visitValueType(ctx.ValueType())
 	paramSym := sym_table.NewFuncParamSymbol(ctx, tc.currentScope, paramType)
 	tc.insertSymbol(paramSym)
 
@@ -114,7 +120,11 @@ func (tc *typeChecker) VisitScope(ctx *parser.ScopeContext) any {
 	return nil
 }
 
-func (tc *typeChecker) VisitValueType(ctx *parser.ValueTypeContext) any {
+func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) *types.Type {
+	if ctx == nil {
+		return types.Invalid()
+	}
+
 	valType, err := types.ParseValueType(ctx)
 	if err != nil {
 		tc.reportError(err)
@@ -122,6 +132,10 @@ func (tc *typeChecker) VisitValueType(ctx *parser.ValueTypeContext) any {
 	}
 
 	return valType
+}
+
+func (tc *typeChecker) VisitValueType(ctx *parser.ValueTypeContext) any {
+	return nil
 }
 
 func (tc *typeChecker) VisitIdent(ctx *parser.IdentContext) any {

@@ -14,6 +14,10 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 			continue
 		}
 
+		if fnType.IsInvalid() {
+			continue
+		}
+
 		funcScope := tc.currentScope.MakeChild(fn.GetStart(), fn.GetStop(), fnType.Roles().Participants())
 		tc.currentScope = funcScope
 

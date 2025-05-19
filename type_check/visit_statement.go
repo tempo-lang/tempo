@@ -52,7 +52,7 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 		if !sym.IsAssignable() {
 			tc.reportError(types.NewUnassignableSymbolError(ctx, sym.Type()))
 		} else {
-			exprType := ctx.Expr().Accept(tc).(*types.Type)
+			exprType := tc.visitExpr(ctx.Expr())
 			if !exprType.CanCoerceTo(sym.Type()) {
 				tc.reportError(types.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
 			}
@@ -96,12 +96,13 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 }
 
 func (tc *typeChecker) VisitStmtExpr(ctx *parser.StmtExprContext) any {
-	ctx.Expr().Accept(tc)
+	tc.visitExpr(ctx.Expr())
 	return nil
 }
 
 func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
-	returnType := ctx.Expr().Accept(tc).(*types.Type)
+
+	returnType := tc.visitExpr(ctx.Expr())
 
 	expectedReturnType := tc.currentScope.GetFunc().FuncValue().ReturnType()
 

@@ -154,6 +154,32 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 					Range:    &exprRange,
 				}, nil
 			}
+		case *parser.StmtReturnContext:
+			if exprType, ok := file.info.Types[node.Expr()]; ok {
+
+				if len(exprType.Roles().Participants()) == 0 {
+					scope := file.info.GlobalScope.Innermost(node.GetStart())
+
+					exprType = types.New(
+						exprType.Value(),
+						types.NewRole(scope.Roles().Participants(), true),
+					)
+				}
+
+				stmtRange := parserRuleToRange(node)
+				return &protocol.Hover{
+					Contents: fmt.Sprintf("return %s", exprType.ToString()),
+					Range:    &stmtRange,
+				}, nil
+			}
+		case parser.IFuncContext:
+			if funcSym, ok := file.info.Symbols[node.Ident()]; ok {
+				exprRange := parserRuleToRange(node)
+				return &protocol.Hover{
+					Contents: funcSym.Type().ToString(),
+					Range:    &exprRange,
+				}, nil
+			}
 		case parser.IExprContext:
 			if exprType, ok := file.info.Types[node]; ok {
 
