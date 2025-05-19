@@ -19,12 +19,12 @@ export function activate(context: ExtensionContext) {
   let serverOptions: ServerOptions = {
     run: {
       command: "go",
-      args: ["run", "./lsp/main.go"],
+      args: ["run", "./main.go", "lsp"],
       options: { cwd: goPath },
     },
     debug: {
       command: "go",
-      args: ["run", "./lsp/main.go"],
+      args: ["run", "./main.go", "lsp"],
       options: { cwd: goPath },
     },
   };

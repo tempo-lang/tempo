@@ -5,12 +5,18 @@ import (
 	"os"
 	"path"
 	"tempo/compiler"
+	"tempo/lsp"
 	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )
 
 func main() {
+	if os.Args[1] == "lsp" {
+		lsp.StartServer()
+		return
+	}
+
 	input, err := antlr.NewFileStream(os.Args[1])
 	if err != nil {
 		fmt.Printf("failed to get file stream: %v\n", err)

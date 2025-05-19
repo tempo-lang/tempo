@@ -1,10 +1,13 @@
-package main
+package lsp
 
 import (
 	"context"
+	"fmt"
 	"sync"
+	"tempo/parser"
 	"tempo/type_check"
 
+	"github.com/antlr4-go/antlr/v4"
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -24,6 +27,7 @@ type tempoFile struct {
 	uri         protocol.DocumentUri
 	source      string
 	info        *type_check.Info
+	ast         parser.ISourceFileContext
 	analysisCtx context.Context
 }
 
@@ -32,6 +36,7 @@ func newTempoFile(document protocol.TextDocumentItem, analysisCtx context.Contex
 		uri:         document.URI,
 		source:      document.Text,
 		info:        nil,
+		ast:         nil,
 		analysisCtx: analysisCtx,
 	}
 }
@@ -48,9 +53,10 @@ func (f *tempoFile) GetUri() protocol.DocumentUri {
 	return f.uri
 }
 
-func (f *tempoFile) SetInfo(info *type_check.Info) {
+func (f *tempoFile) SetInfo(ast parser.ISourceFileContext, info *type_check.Info) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
+	f.ast = ast
 	f.info = info
 }
 
@@ -70,7 +76,7 @@ func newTempoServer() *tempoServer {
 	}
 }
 
-func main() {
+func StartServer() {
 	commonlog.Configure(2, nil)
 
 	logger = commonlog.GetLoggerf("%s.handler", lsName)
@@ -90,6 +96,7 @@ func (s *tempoServer) Handler() *protocol.Handler {
 		TextDocumentDidOpen:    s.textDocumentDidOpen,
 		TextDocumentDidChange:  s.textDocumentDidChange,
 		TextDocumentCompletion: s.textDocumentCompletion,
+		TextDocumentHover:      s.textDocumentHover,
 	}
 }
 
@@ -121,4 +128,56 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 	var completionItems []protocol.CompletionItem
 
 	return completionItems, nil
+}
+
+func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
+
+	file, ok := s.files[params.TextDocument.URI]
+	if !ok {
+		return nil, nil
+	}
+
+	file.lock.RLock()
+	defer file.lock.RUnlock()
+
+	node, nodeRange := astNodeAtPosition(file.ast, params.Position)
+
+	return &protocol.Hover{
+		Contents: fmt.Sprintf("Node: %#v", node),
+		Range:    &nodeRange,
+	}, nil
+}
+
+func posWithinRange(pos protocol.Position, span protocol.Range) bool {
+	if span.Start.Line <= pos.Line && span.End.Line >= pos.Line {
+		if span.Start.Line == pos.Line && span.Start.Character > pos.Character {
+			return false
+		}
+
+		if span.End.Line == pos.Line && span.End.Character < pos.Character {
+			return false
+		}
+
+		return true
+	}
+
+	return false
+}
+
+func astNodeAtPosition(node antlr.ParserRuleContext, pos protocol.Position) (antlr.Tree, protocol.Range) {
+	for _, c := range node.GetChildren() {
+		switch child := c.(type) {
+		case antlr.ParserRuleContext:
+			span := parserRuleToRange(child)
+			if posWithinRange(pos, span) {
+				return astNodeAtPosition(child, pos)
+			}
+		case antlr.TerminalNode:
+			span := tokenToRange(child.GetSymbol())
+			if posWithinRange(pos, span) {
+				return child, span
+			}
+		}
+	}
+	return node, parserRuleToRange(node)
 }
