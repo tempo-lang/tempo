@@ -3,7 +3,6 @@ package types
 import (
 	"slices"
 	"tempo/misc"
-	"tempo/parser"
 )
 
 type Roles struct {
@@ -30,7 +29,7 @@ func EveryoneRole() *Roles {
 	return NewRole(nil, true)
 }
 
-func RoleIntersect(expr parser.IExprContext, roles ...*Roles) (*Roles, Error) {
+func RoleIntersect(roles ...*Roles) (*Roles, bool) {
 	nonEmptyRoles := []*Roles{}
 	for _, role := range roles {
 		if len(role.participants) > 0 {
@@ -40,11 +39,11 @@ func RoleIntersect(expr parser.IExprContext, roles ...*Roles) (*Roles, Error) {
 	roles = nonEmptyRoles
 
 	if len(roles) == 1 {
-		return roles[0], nil
+		return roles[0], true
 	}
 
 	if len(roles) == 0 {
-		return EveryoneRole(), nil
+		return EveryoneRole(), true
 	}
 
 	participants := roles[0].participants
@@ -64,14 +63,15 @@ func RoleIntersect(expr parser.IExprContext, roles ...*Roles) (*Roles, Error) {
 	}
 
 	if len(participants) == 1 {
-		return SingleRole(participants[0]), nil
+		return SingleRole(participants[0]), true
 	}
 
 	if len(participants) > 1 {
-		return NewRole(participants, true), nil
+		return NewRole(participants, true), true
 	}
 
-	return nil, NewUnmergableRolesError(expr, roles)
+	// invalid role
+	return nil, false
 }
 
 func (r *Roles) IsSharedRole() bool {

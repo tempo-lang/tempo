@@ -6,6 +6,7 @@ import (
 	"tempo/parser"
 	"tempo/projection"
 	"tempo/sym_table"
+	"tempo/type_check/type_error"
 	"tempo/types"
 )
 
@@ -64,18 +65,18 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	switch {
 	case slices.Contains(arithmeticOps, op):
 		if !types.ValueCoerseTo(lhs.Value(), types.Int()) {
-			tc.reportError(types.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
 			typeError = true
 		}
 
 		if !types.ValueCoerseTo(rhs.Value(), types.Int()) {
-			tc.reportError(types.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
 			typeError = true
 		}
 
-		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
-		if err != nil {
-			tc.reportError(err)
+		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
+		if !ok {
+			tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
 			typeError = true
 		}
 
@@ -85,13 +86,13 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 
 	case slices.Contains(equalityOps, op):
 		if !types.ValuesEqual(lhs.Value(), rhs.Value()) {
-			tc.reportError(types.NewValueMismatchError(ctx, lhs.Value(), rhs.Value()))
+			tc.reportError(type_error.NewValueMismatchError(ctx, lhs.Value(), rhs.Value()))
 			typeError = true
 		}
 
-		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
-		if err != nil {
-			tc.reportError(err)
+		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
+		if !ok {
+			tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
 			typeError = true
 		}
 
@@ -101,18 +102,18 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 
 	case slices.Contains(inequalityOps, op):
 		if !types.ValueCoerseTo(lhs.Value(), types.Int()) {
-			tc.reportError(types.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
 			typeError = true
 		}
 
 		if !types.ValueCoerseTo(rhs.Value(), types.Int()) {
-			tc.reportError(types.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
 			typeError = true
 		}
 
-		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
-		if err != nil {
-			tc.reportError(err)
+		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
+		if !ok {
+			tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
 			typeError = true
 		}
 
@@ -122,18 +123,18 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 
 	case slices.Contains(booleanOps, op):
 		if !types.ValueCoerseTo(lhs.Value(), types.Bool()) {
-			tc.reportError(types.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Bool()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Bool()))
 			typeError = true
 		}
 
 		if !types.ValueCoerseTo(rhs.Value(), types.Bool()) {
-			tc.reportError(types.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Bool()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Bool()))
 			typeError = true
 		}
 
-		newRoles, err := types.RoleIntersect(ctx, lhs.Roles(), rhs.Roles())
-		if err != nil {
-			tc.reportError(err)
+		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
+		if !ok {
+			tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
 			typeError = true
 		}
 
@@ -155,9 +156,8 @@ func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
 }
 
 func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
-	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
-	if err != nil {
-		tc.reportError(err)
+	sym, ok := tc.lookupSymbol(ctx.Ident())
+	if !ok {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -169,7 +169,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
 	_, err := strconv.Atoi(ctx.GetText())
 	if err != nil {
-		tc.reportError(types.NewInvalidNumberError(ctx))
+		tc.reportError(type_error.NewInvalidNumberError(ctx))
 	}
 
 	return tc.registerType(ctx, types.New(types.Int(), types.NewRole(nil, true)))
@@ -187,7 +187,7 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 		return tc.registerType(ctx, types.New(asyncType.Inner(), exprType.Roles()))
 	}
 
-	tc.reportError(types.NewExpectedAsyncTypeError(ctx, exprType))
+	tc.reportError(type_error.NewExpectedAsyncTypeError(ctx, exprType))
 	return tc.registerType(ctx, types.Invalid())
 }
 
@@ -199,18 +199,18 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	invalidRole := false
 
 	if !innerExprType.Value().IsSendable() {
-		tc.reportError(types.NewUnsendableTypeError(ctx, innerExprType))
+		tc.reportError(type_error.NewUnsendableTypeError(ctx, innerExprType))
 		invalidType = true
 	}
 
-	fromRoles, err := types.ParseRoleType(ctx.RoleType(0))
+	fromRoles, err := ParseRoleType(ctx.RoleType(0))
 	if err != nil {
 		tc.reportError(err)
 	} else if fromRoles == nil {
 		return tc.registerType(ctx, types.Invalid())
 	} else {
 		if fromRoles.IsSharedRole() {
-			tc.reportError(types.NewComSharedTypeError(ctx, innerExprType))
+			tc.reportError(type_error.NewComSharedTypeError(ctx, innerExprType))
 		}
 
 		if tc.checkRolesInScope(ctx.RoleType(0)) {
@@ -218,16 +218,16 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		}
 
 		if len(fromRoles.Participants()) > 1 {
-			tc.reportError(types.NewComDistributedTypeError(ctx, innerExprType))
+			tc.reportError(type_error.NewComDistributedTypeError(ctx, innerExprType))
 		}
 
 		exprHasParticipants := len(innerExprType.Roles().Participants()) > 0
 		if exprHasParticipants && !innerExprType.Roles().Contains(fromRoles.Participants()[0]) {
-			tc.reportError(types.NewComValueNotAtSenderError(ctx, innerExprType))
+			tc.reportError(type_error.NewComValueNotAtSenderError(ctx, innerExprType))
 		}
 	}
 
-	toRoles, err := types.ParseRoleType(ctx.RoleType(1))
+	toRoles, err := ParseRoleType(ctx.RoleType(1))
 	if err != nil {
 		tc.reportError(err)
 	} else if toRoles == nil {
@@ -265,20 +265,19 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
 func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	invalidType := false
-	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
-	if err != nil {
-		tc.reportError(err)
+	sym, ok := tc.lookupSymbol(ctx.Ident())
+	if !ok {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
 	tc.info.Symbols[ctx.Ident()] = sym
 	funcSym, ok := sym.(*sym_table.FuncSymbol)
 	if !ok {
-		tc.reportError(types.NewCallNonFunctionError(ctx, sym.Type()))
+		tc.reportError(type_error.NewCallNonFunctionError(ctx, sym.Type()))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	callRoles, err := types.ParseRoleType(ctx.RoleType())
+	callRoles, err := ParseRoleType(ctx.RoleType())
 	if err != nil {
 		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
@@ -288,7 +287,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 
 	funcRoles := parser.RoleTypeAllIdents(funcSym.Func().RoleType())
 	if len(callRoles.Participants()) != len(funcRoles) {
-		tc.reportError(types.NewCallWrongRoleCountError(ctx))
+		tc.reportError(type_error.NewCallWrongRoleCountError(ctx))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -300,7 +299,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 
 	argExprs := ctx.FuncArgList().AllExpr()
 	if len(funcSym.Params()) != len(argExprs) {
-		tc.reportError(types.NewCallWrongArgCountError(ctx))
+		tc.reportError(type_error.NewCallWrongArgCountError(ctx))
 		invalidType = true
 	} else {
 		for i, param := range funcSym.Params() {
@@ -311,7 +310,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 			paramTypeSubst := param.Type().SubstituteRoles(roleSubst)
 
 			if !argType.CanCoerceTo(paramTypeSubst) {
-				tc.reportError(types.NewIncompatibleTypesError(arg, argType, paramTypeSubst))
+				tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramTypeSubst))
 				invalidType = true
 			}
 		}

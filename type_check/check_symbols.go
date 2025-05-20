@@ -7,10 +7,33 @@ import (
 )
 
 func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
-	for _, fn := range sourceFile.AllFunc_() {
-		fnType, err := types.ParseFuncType(fn)
+	for _, st := range sourceFile.AllStruct_() {
+		stType, err := ParseStructType(st)
 		if err != nil {
 			tc.reportError(err)
+			continue
+		}
+
+		if stType.IsInvalid() {
+			continue
+		}
+
+		structScope := tc.currentScope.MakeChild(st.GetStart(), st.GetStop(), stType.Roles().Participants())
+		tc.currentScope = structScope
+
+		tc.currentScope = tc.currentScope.Parent()
+
+		structSym := sym_table.NewStructSymbol(st, structScope, stType)
+		tc.insertSymbol(structSym)
+	}
+
+	for _, fn := range sourceFile.AllFunc_() {
+		fnType, errors := ParseFuncType(fn)
+		for _, err := range errors {
+			tc.reportError(err)
+		}
+
+		if len(errors) > 0 {
 			continue
 		}
 

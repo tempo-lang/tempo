@@ -140,3 +140,93 @@ func (v *VariableSymbol) IsAssignable() bool {
 func (v *VariableSymbol) VarDecl() *parser.StmtVarDeclContext {
 	return v.decl
 }
+
+type StructSymbol struct {
+	structCtx  parser.IStructContext
+	scope      *Scope
+	structType *types.Type
+	fields     []*StructFieldSymbol
+}
+
+type StructFieldSymbol struct {
+	field     parser.IStructFieldContext
+	scope     *Scope
+	fieldType *types.Type
+}
+
+func NewStructSymbol(structCtx parser.IStructContext, scope *Scope, structType *types.Type) Symbol {
+	return &StructSymbol{
+		structCtx:  structCtx,
+		scope:      scope,
+		structType: structType,
+		fields:     []*StructFieldSymbol{},
+	}
+}
+
+func (s *StructSymbol) SymbolName() string {
+	return s.structCtx.Ident().GetText()
+}
+
+func (s *StructSymbol) Ident() parser.IIdentContext {
+	return s.structCtx.Ident()
+}
+
+func (s *StructSymbol) Type() *types.Type {
+	return s.structType
+}
+
+func (s *StructSymbol) Parent() *Scope {
+	return s.scope.parent
+}
+
+func (s *StructSymbol) IsAssignable() bool {
+	return false
+}
+
+func (s *StructSymbol) Scope() *Scope {
+	return s.scope
+}
+
+func (s *StructSymbol) Fields() []*StructFieldSymbol {
+	return s.fields
+}
+
+func (s *StructSymbol) AddField(field *StructFieldSymbol) {
+	s.fields = append(s.fields, field)
+}
+
+func NewStructFieldSymbol(field parser.IStructFieldContext, scope *Scope, fieldType *types.Type) *StructFieldSymbol {
+	return &StructFieldSymbol{
+		field:     field,
+		scope:     scope,
+		fieldType: fieldType,
+	}
+}
+
+func (f *StructFieldSymbol) SymbolName() string {
+	return f.field.Ident().GetText()
+}
+
+func (f *StructFieldSymbol) Ident() parser.IIdentContext {
+	return f.field.Ident()
+}
+
+func (f *StructFieldSymbol) Type() *types.Type {
+	return f.fieldType
+}
+
+func (f *StructFieldSymbol) Parent() *Scope {
+	return f.scope.parent
+}
+
+func (f *StructFieldSymbol) IsAssignable() bool {
+	return true
+}
+
+func (f *StructFieldSymbol) Scope() *Scope {
+	return f.scope
+}
+
+func (f *StructFieldSymbol) Field() parser.IStructFieldContext {
+	return f.field
+}

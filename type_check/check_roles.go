@@ -2,6 +2,7 @@ package type_check
 
 import (
 	"tempo/parser"
+	"tempo/type_check/type_error"
 	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -18,7 +19,7 @@ func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType 
 	}
 
 	if len(unknownRoles) > 0 {
-		tc.reportError(types.NewValueRoleNotInScopeError(value, roleType, unknownRoles))
+		tc.reportError(type_error.NewValueRoleNotInScopeError(value, roleType, unknownRoles))
 		return false
 	}
 
@@ -37,7 +38,7 @@ func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool 
 	}
 
 	if len(unknownRoles) > 0 {
-		tc.reportError(types.NewRolesNotInScopeError(roleType, unknownRoles))
+		tc.reportError(type_error.NewRolesNotInScopeError(roleType, unknownRoles))
 		return false
 	}
 

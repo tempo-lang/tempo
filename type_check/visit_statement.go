@@ -3,12 +3,13 @@ package type_check
 import (
 	"tempo/parser"
 	"tempo/sym_table"
+	"tempo/type_check/type_error"
 	"tempo/types"
 )
 
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	exprType := tc.visitExpr(ctx.Expr())
-	declType, err := types.ParseValueType(ctx.ValueType())
+	declType, err := ParseValueType(ctx.ValueType())
 	typeFailed := false
 	roleFailed := false
 
@@ -26,7 +27,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	}
 
 	if !typeFailed && !exprType.CanCoerceTo(declType) {
-		tc.reportError(types.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
+		tc.reportError(type_error.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
 		typeFailed = true
 	}
 
@@ -43,18 +44,16 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 }
 
 func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
-	sym, err := tc.currentScope.LookupSymbol(ctx.Ident())
-	if err != nil {
-		tc.reportError(err)
-	} else {
+
+	if sym, ok := tc.lookupSymbol(ctx.Ident()); ok {
 		tc.info.Symbols[ctx.Ident()] = sym
 
 		if !sym.IsAssignable() {
-			tc.reportError(types.NewUnassignableSymbolError(ctx, sym.Type()))
+			tc.reportError(type_error.NewUnassignableSymbolError(ctx, sym.Type()))
 		} else {
 			exprType := tc.visitExpr(ctx.Expr())
 			if !exprType.CanCoerceTo(sym.Type()) {
-				tc.reportError(types.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
+				tc.reportError(type_error.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
 			}
 		}
 
@@ -68,7 +67,7 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 	guardType := tc.visitExpr(ctx.Expr())
 
 	if !types.ValueCoerseTo(guardType.Value(), types.Bool()) {
-		tc.reportError(types.NewInvalidValueError(ctx.Expr(), guardType.Value(), types.Bool()))
+		tc.reportError(type_error.NewInvalidValueError(ctx.Expr(), guardType.Value(), types.Bool()))
 	}
 
 	tc.checkExprInScope(ctx.Expr(), guardType.Roles())
@@ -107,14 +106,14 @@ func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
 	expectedReturnType := tc.currentScope.GetFunc().FuncValue().ReturnType()
 
 	if !returnType.CanCoerceTo(expectedReturnType) {
-		tc.reportError(types.NewIncompatibleTypesError(ctx.Expr(), returnType, expectedReturnType))
+		tc.reportError(type_error.NewIncompatibleTypesError(ctx.Expr(), returnType, expectedReturnType))
 	}
 
 	missingRoles := tc.currentScope.GetFunc().Roles().
 		SubtractParticipants(tc.currentScope.Roles().Participants())
 
 	if len(missingRoles) > 0 {
-		tc.reportError(types.NewReturnNotAllRolesError(ctx, missingRoles))
+		tc.reportError(type_error.NewReturnNotAllRolesError(ctx, missingRoles))
 	}
 
 	return nil

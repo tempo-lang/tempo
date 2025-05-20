@@ -5,7 +5,7 @@ grammar Tempo;
  */
 
 // source file
-sourceFile: func* EOF;
+sourceFile: (func|struct)* EOF;
 
 // identifier
 ident: ID;
@@ -16,6 +16,13 @@ valueType: ASYNC? ident ROLE_AT roleType;
 roleType:
 	(LSQUARE ident (COMMA ident)* RSQUARE)				# roleTypeShared
 	| (ident | (LPAREN ident (COMMA ident)* RPAREN))	# roleTypeNormal;
+
+// struct
+struct: STRUCT ROLE_AT roleType ident structFieldList;
+
+structFieldList: LCURLY (structField (COMMA structField)*)? RCURLY;
+
+structField: ident COLON valueType;
 
 // function
 func:
@@ -69,6 +76,7 @@ expr:
 
 // Keywords
 
+STRUCT: 'struct';
 FUNC: 'func';
 RETURN: 'return';
 LET: 'let';

@@ -13,9 +13,9 @@ func TestRoleIntersect(t *testing.T) {
 		types.NewRole([]string{"B", "C", "D"}, true),
 	}
 
-	intersect, err := types.RoleIntersect(nil, roles...)
-	if err != nil {
-		t.Fatalf("expected roles to be intersectable, got error: %v", err)
+	intersect, ok := types.RoleIntersect(roles...)
+	if !ok {
+		t.Fatalf("expected roles to be intersectable")
 	}
 
 	expected := types.NewRole([]string{"B", "C"}, true)

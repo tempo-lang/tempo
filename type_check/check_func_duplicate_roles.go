@@ -4,7 +4,7 @@ import (
 	"cmp"
 	"slices"
 	"tempo/parser"
-	"tempo/types"
+	"tempo/type_check/type_error"
 )
 
 func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
@@ -21,7 +21,7 @@ func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 			} else {
 				// report collected duplicates error if any
 				if len(duplicateRoles) > 1 {
-					a.errorListener.ReportTypeError(types.NewDuplicateRolesError(ctx, duplicateRoles))
+					a.errorListener.ReportTypeError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
 				}
 				duplicateRoles = roles[i+1 : i+2]
 			}
@@ -29,7 +29,7 @@ func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
 
 		// report last error if present
 		if len(duplicateRoles) > 1 {
-			a.errorListener.ReportTypeError(types.NewDuplicateRolesError(ctx, duplicateRoles))
+			a.errorListener.ReportTypeError(type_error.NewDuplicateRolesError(ctx, duplicateRoles))
 		}
 	}
 }

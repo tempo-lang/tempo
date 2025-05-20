@@ -44,22 +44,22 @@ func (scope *Scope) Lookup(name string) Symbol {
 	return scope.symbols[name]
 }
 
-func (scope *Scope) LookupSymbol(name parser.IIdentContext) (Symbol, types.Error) {
+func (scope *Scope) LookupSymbol(name parser.IIdentContext) (Symbol, bool) {
 	symbol := scope.LookupParent(name.GetText())
 	if symbol != nil {
-		return symbol, nil
+		return symbol, true
 	}
-	return nil, types.NewUnknownSymbolError(name)
+	return nil, false
 }
 
-func (scope *Scope) InsertSymbol(symbol Symbol) types.Error {
-	existing, exists := scope.symbols[symbol.SymbolName()]
+func (scope *Scope) InsertSymbol(symbol Symbol) bool {
+	_, exists := scope.symbols[symbol.SymbolName()]
 	if exists {
-		return types.NewSymbolAlreadyExistsError(existing.Ident(), symbol.Ident())
+		return false
 	}
 
 	scope.symbols[symbol.SymbolName()] = symbol
-	return nil
+	return true
 }
 
 func (scope *Scope) HasParent() bool {

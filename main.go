@@ -6,7 +6,7 @@ import (
 	"path"
 	"tempo/compiler"
 	"tempo/lsp"
-	"tempo/types"
+	"tempo/type_check/type_error"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -31,7 +31,7 @@ func main() {
 	output, errors := compiler.Compile(input, &options)
 	if errors != nil {
 		for _, err := range errors {
-			if typeErr, ok := err.(types.Error); ok {
+			if typeErr, ok := err.(type_error.Error); ok {
 				token := typeErr.ParserRule().GetStart()
 				fmt.Printf("Type error %d:%d: %s\n", token.GetLine(), token.GetColumn()+1, typeErr.Error())
 			} else {

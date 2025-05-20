@@ -7,7 +7,7 @@ import (
 	"strings"
 	"tempo/compiler"
 	"tempo/misc"
-	"tempo/types"
+	"tempo/type_check/type_error"
 	"testing"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -39,7 +39,7 @@ func TestExamples(t *testing.T) {
 			_, compilerErrors := compiler.Compile(input, nil)
 			formattedErrors := []string{}
 			for _, err := range compilerErrors {
-				typeError, ok := err.(types.Error)
+				typeError, ok := err.(type_error.Error)
 				if !ok {
 					t.Error("expected only type errors")
 					continue

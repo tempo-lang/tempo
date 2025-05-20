@@ -1,3 +1,8 @@
+struct@(A,B) Pair {
+  num: Int@A,
+  logic: Bool@B
+}
+
 func@(Y) value() Int@Y {
   let foo: Bool@Y = false;
   if foo {

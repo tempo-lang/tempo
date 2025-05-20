@@ -7,6 +7,7 @@ import (
 	"tempo/parser"
 	"tempo/projection"
 	"tempo/sym_table"
+	"tempo/type_check"
 	"tempo/types"
 )
 
@@ -87,7 +88,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		funcSym := epp.info.Symbols[expr.Ident()].(*sym_table.FuncSymbol)
 
 		funcRoles := parser.RoleTypeAllIdents(funcSym.Func().RoleType())
-		callRoles, _ := types.ParseRoleType(expr.RoleType())
+		callRoles, _ := type_check.ParseRoleType(expr.RoleType())
 
 		argRoleSubst := map[string]string{}
 		paramRoleSubst := map[string]string{}

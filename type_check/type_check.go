@@ -3,6 +3,7 @@ package type_check
 import (
 	"tempo/parser"
 	"tempo/sym_table"
+	"tempo/type_check/type_error"
 	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -16,7 +17,7 @@ type typeChecker struct {
 	info         *Info
 }
 
-func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []types.Error) {
+func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []type_error.Error) {
 	tc := new()
 
 	// check that tc implements visitor
@@ -41,16 +42,8 @@ func new() *typeChecker {
 	}
 }
 
-func (tc *typeChecker) reportError(err types.Error) {
+func (tc *typeChecker) reportError(err type_error.Error) {
 	tc.errorListener.ReportTypeError(err)
-}
-
-func (tc *typeChecker) insertSymbol(sym sym_table.Symbol) {
-	tc.info.Symbols[sym.Ident()] = sym
-	err := tc.currentScope.InsertSymbol(sym)
-	if err != nil {
-		tc.reportError(err)
-	}
 }
 
 func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result any) {
@@ -78,7 +71,7 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 	tc.currentScope = sym.Scope()
 
 	if sym.Type().Roles().IsSharedRole() {
-		tc.reportError(types.NewUnexpectedSharedTypeError(ctx.Ident(), sym.Type()))
+		tc.reportError(type_error.NewUnexpectedSharedTypeError(ctx.Ident(), sym.Type()))
 	}
 
 	tc.checkFuncDuplicateRoles(ctx)
@@ -125,7 +118,7 @@ func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) *types.Type 
 		return types.Invalid()
 	}
 
-	valType, err := types.ParseValueType(ctx)
+	valType, err := ParseValueType(ctx)
 	if err != nil {
 		tc.reportError(err)
 		return types.Invalid()

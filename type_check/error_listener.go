@@ -1,15 +1,17 @@
 package type_check
 
-import "tempo/types"
+import (
+	"tempo/type_check/type_error"
+)
 
 type ErrorListener interface {
-	ReportTypeError(err types.Error)
+	ReportTypeError(err type_error.Error)
 }
 
 type DefaultErrorListener struct {
-	Errors []types.Error
+	Errors []type_error.Error
 }
 
-func (e *DefaultErrorListener) ReportTypeError(err types.Error) {
+func (e *DefaultErrorListener) ReportTypeError(err type_error.Error) {
 	e.Errors = append(e.Errors, err)
 }
