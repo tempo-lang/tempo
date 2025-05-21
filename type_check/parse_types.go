@@ -17,7 +17,7 @@ func BuiltinValues() map[string]types.Value {
 
 func ParseValueType(ctx parser.IValueTypeContext) (*types.Type, type_error.Error) {
 	// parser error
-	if ctx == nil {
+	if ctx == nil || ctx.RoleType() == nil {
 		return types.Invalid(), nil
 	}
 
@@ -120,6 +120,11 @@ func ParseRoleTypeShared(ctx *parser.RoleTypeSharedContext) (*types.Roles, type_
 }
 
 func ParseStructType(ctx parser.IStructContext) (*types.Type, type_error.Error) {
+	// parser error
+	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
+		return types.Invalid(), nil
+	}
+
 	name := ctx.Ident().GetText()
 	roles, err := ParseRoleType(ctx.RoleType())
 	if err != nil {

@@ -52,6 +52,10 @@ func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result an
 
 	tc.addGlobalSymbols(ctx)
 
+	for _, st := range ctx.AllStruct_() {
+		st.Accept(tc)
+	}
+
 	for _, fn := range ctx.AllFunc_() {
 		fn.Accept(tc)
 	}
@@ -99,7 +103,7 @@ func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
 	funcSym := tc.currentScope.GetFunc()
 	funcSym.AddParam(paramSym.(*sym_table.FuncParamSymbol))
 
-	return tc.VisitChildren(ctx)
+	return nil
 }
 
 func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any {

@@ -141,19 +141,11 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 	file.lock.RLock()
 	defer file.lock.RUnlock()
 
-	leaf, nodeRange := astNodeAtPosition(file.ast, params.Position)
+	leaf, _ := astNodeAtPosition(file.ast, params.Position)
 
 	node := leaf
 	for node != nil {
 		switch node := node.(type) {
-		case *parser.StmtVarDeclContext:
-			if sym, ok := file.info.Symbols[node.Ident()]; ok {
-				exprRange := parserRuleToRange(node)
-				return &protocol.Hover{
-					Contents: fmt.Sprintf("let %s: %s", sym.SymbolName(), sym.Type().ToString()),
-					Range:    &exprRange,
-				}, nil
-			}
 		case *parser.StmtReturnContext:
 			if exprType, ok := file.info.Types[node.Expr()]; ok {
 
@@ -172,12 +164,12 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 					Range:    &stmtRange,
 				}, nil
 			}
-		case parser.IFuncContext:
-			if funcSym, ok := file.info.Symbols[node.Ident()]; ok {
-				exprRange := parserRuleToRange(node)
+		case parser.IIdentContext:
+			if identSym, ok := file.info.Symbols[node]; ok {
+				identRange := parserRuleToRange(node)
 				return &protocol.Hover{
-					Contents: funcSym.Type().ToString(),
-					Range:    &exprRange,
+					Contents: identSym.Type().ToString(),
+					Range:    &identRange,
 				}, nil
 			}
 		case parser.IExprContext:
@@ -203,21 +195,23 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 		node = node.GetParent()
 	}
 
-	debugNode := "```"
-	node = leaf
-	for node != nil {
-		debugNode = fmt.Sprintf("%s\n\n%#v", debugNode, node)
-		node = node.GetParent()
-	}
-	debugNode = fmt.Sprintf("%s\n```", debugNode)
+	return nil, nil
 
-	return &protocol.Hover{
-		Contents: &protocol.MarkupContent{
-			Kind:  protocol.MarkupKindMarkdown,
-			Value: debugNode,
-		},
-		Range: &nodeRange,
-	}, nil
+	// debugNode := "```"
+	// node = leaf
+	// for node != nil {
+	// 	debugNode = fmt.Sprintf("%s\n\n%#v", debugNode, node)
+	// 	node = node.GetParent()
+	// }
+	// debugNode = fmt.Sprintf("%s\n```", debugNode)
+
+	// return &protocol.Hover{
+	// 	Contents: &protocol.MarkupContent{
+	// 		Kind:  protocol.MarkupKindMarkdown,
+	// 		Value: debugNode,
+	// 	},
+	// 	Range: &nodeRange,
+	// }, nil
 }
 
 func posWithinRange(pos protocol.Position, span protocol.Range) bool {

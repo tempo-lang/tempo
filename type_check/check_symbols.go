@@ -25,6 +25,7 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 
 		structSym := sym_table.NewStructSymbol(st, structScope, stType)
 		tc.insertSymbol(structSym)
+		tc.currentScope.SetStruct(structSym.(*sym_table.StructSymbol))
 	}
 
 	for _, fn := range sourceFile.AllFunc_() {

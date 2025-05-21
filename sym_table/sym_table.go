@@ -8,24 +8,26 @@ import (
 )
 
 type Scope struct {
-	symbols  map[string]Symbol
-	parent   *Scope
-	children []*Scope
-	pos      antlr.Token
-	end      antlr.Token
-	roles    []string
-	funcSym  *FuncSymbol
+	symbols   map[string]Symbol
+	parent    *Scope
+	children  []*Scope
+	pos       antlr.Token
+	end       antlr.Token
+	roles     []string
+	funcSym   *FuncSymbol
+	structSym *StructSymbol
 }
 
 func NewScope(pos antlr.Token, end antlr.Token, parent *Scope, roles []string) *Scope {
 	return &Scope{
-		symbols:  map[string]Symbol{},
-		parent:   parent,
-		children: []*Scope{},
-		pos:      pos,
-		end:      end,
-		roles:    roles,
-		funcSym:  nil,
+		symbols:   map[string]Symbol{},
+		parent:    parent,
+		children:  []*Scope{},
+		pos:       pos,
+		end:       end,
+		roles:     roles,
+		funcSym:   nil,
+		structSym: nil,
 	}
 }
 
@@ -120,4 +122,16 @@ func (scope *Scope) GetFunc() *FuncSymbol {
 		s = s.parent
 	}
 	return s.funcSym
+}
+
+func (scope *Scope) SetStruct(structSym *StructSymbol) {
+	scope.structSym = structSym
+}
+
+func (scope *Scope) GetStruct() *StructSymbol {
+	s := scope
+	for s.structSym == nil && s.parent != nil {
+		s = s.parent
+	}
+	return s.structSym
 }

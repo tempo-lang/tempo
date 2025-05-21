@@ -195,7 +195,7 @@ func (s *StructSymbol) AddField(field *StructFieldSymbol) {
 	s.fields = append(s.fields, field)
 }
 
-func NewStructFieldSymbol(field parser.IStructFieldContext, scope *Scope, fieldType *types.Type) *StructFieldSymbol {
+func NewStructFieldSymbol(field parser.IStructFieldContext, scope *Scope, fieldType *types.Type) Symbol {
 	return &StructFieldSymbol{
 		field:     field,
 		scope:     scope,

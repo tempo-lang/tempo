@@ -1,0 +1,4 @@
+struct@(A,B) Foo {
+  num: Int@A,
+  logic: Bool@B
+}
