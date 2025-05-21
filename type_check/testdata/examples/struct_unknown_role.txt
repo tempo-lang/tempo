@@ -1,0 +1,5 @@
+struct@(A) Foo {
+  value: Int@B
+}
+---
+2:14: roles 'B' are not in scope

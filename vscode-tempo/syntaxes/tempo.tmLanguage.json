@@ -15,6 +15,9 @@
 			"include": "#funcDeclaration"
 		},
 		{
+			"include": "#structDeclaration"
+		},
+		{
 			"include": "#operators"
 		},
 		{
@@ -62,6 +65,10 @@
 				{
 					"match": "\\b(let)\\b",
 					"name": "storage.type.local.tempo"
+				},
+				{
+					"match": "\\b(struct)\\b",
+					"name": "storage.type.struct.tempo"
 				}
 			]
 		},
@@ -247,6 +254,32 @@
 				}
 			},
 			"patterns": [
+				{
+					"include": "#roleList"
+				},
+				{
+					"include": "#typeDeclaration"
+				}
+			]
+		},
+		"structDeclaration": {
+			"begin": "\\b(struct)\\b",
+			"beginCaptures": {
+				"1": {
+					"name": "storage.type.local.tempo"
+				}
+			},
+			"end": "(\\})",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.end.bracket.curly.tempo"
+				}
+			},
+			"patterns": [
+				{
+					"match": "\\{",
+					"name": "punctuation.definition.begin.bracket.curly.tempo"
+				},
 				{
 					"include": "#roleList"
 				},

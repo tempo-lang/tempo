@@ -38,5 +38,7 @@ func (tc *typeChecker) VisitStructField(ctx *parser.StructFieldContext) any {
 	structSym := tc.currentScope.GetStruct()
 	structSym.AddField(fieldSym.(*sym_table.StructFieldSymbol))
 
+	tc.checkRolesInScope(ctx.ValueType().RoleType())
+
 	return nil
 }
