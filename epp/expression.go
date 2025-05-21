@@ -28,7 +28,22 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	case *parser.ExprGroupContext:
 		return epp.eppExpression(roleName, expr.Expr())
 	case *parser.ExprIdentContext:
-		return projection.NewExprIdent(expr.Ident().GetText(), exprType.Value()), []projection.Statement{}
+		sym := epp.info.Symbols[expr.Ident()]
+
+		appendRole := false
+		switch sym.Type().Value().(type) {
+		case *types.FunctionType:
+			appendRole = true
+		case *types.StructType:
+			appendRole = true
+		}
+
+		name := sym.SymbolName()
+		if appendRole {
+			name += "_" + roleName
+		}
+
+		return projection.NewExprIdent(name, exprType.Value()), []projection.Statement{}
 	case *parser.ExprNumContext:
 		num, err := strconv.Atoi(expr.GetText())
 		if err != nil {

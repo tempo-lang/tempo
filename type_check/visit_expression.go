@@ -161,6 +161,8 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	tc.info.Symbols[ctx.Ident()] = sym
+
 	tc.checkExprInScope(ctx, sym.Type().Roles())
 
 	return tc.registerType(ctx, sym.Type())
@@ -203,12 +205,7 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		invalidType = true
 	}
 
-	fromRoles, err := ParseRoleType(ctx.RoleType(0))
-	if err != nil {
-		tc.reportError(err)
-	} else if fromRoles == nil {
-		return tc.registerType(ctx, types.Invalid())
-	} else {
+	if fromRoles, ok := ParseRoleType(ctx.RoleType(0)); ok {
 		if fromRoles.IsSharedRole() {
 			tc.reportError(type_error.NewComSharedTypeError(ctx, innerExprType))
 		}
@@ -225,14 +222,12 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		if exprHasParticipants && !innerExprType.Roles().Contains(fromRoles.Participants()[0]) {
 			tc.reportError(type_error.NewComValueNotAtSenderError(ctx, innerExprType))
 		}
+	} else {
+		invalidRole = true
 	}
 
-	toRoles, err := ParseRoleType(ctx.RoleType(1))
-	if err != nil {
-		tc.reportError(err)
-	} else if toRoles == nil {
-		return tc.registerType(ctx, types.Invalid())
-	} else {
+	toRoles, ok := ParseRoleType(ctx.RoleType(1))
+	if ok {
 		if !tc.checkRolesInScope(ctx.RoleType(1)) {
 			invalidRole = true
 		} else {
@@ -240,6 +235,8 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 				invalidRole = true
 			}
 		}
+	} else {
+		invalidRole = true
 	}
 
 	recvType := types.Invalid()
@@ -277,11 +274,8 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	callRoles, err := ParseRoleType(ctx.RoleType())
-	if err != nil {
-		tc.reportError(err)
-		return tc.registerType(ctx, types.Invalid())
-	} else if callRoles == nil {
+	callRoles, ok := ParseRoleType(ctx.RoleType())
+	if !ok {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
