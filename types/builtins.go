@@ -16,6 +16,10 @@ func (t *StringType) IsSendable() bool {
 	return true
 }
 
+func (t *StringType) IsEquatable() bool {
+	return true
+}
+
 func (t *StringType) ToString() string {
 	return "String"
 }
@@ -32,6 +36,10 @@ func (t *IntType) IsSendable() bool {
 	return true
 }
 
+func (t *IntType) IsEquatable() bool {
+	return true
+}
+
 func (t *IntType) ToString() string {
 	return "Int"
 }
@@ -43,6 +51,10 @@ func Int() Value {
 }
 
 type FloatType struct{}
+
+func (t *FloatType) IsEquatable() bool {
+	return true
+}
 
 func (t *FloatType) IsSendable() bool {
 	return true
@@ -61,6 +73,10 @@ func Float() Value {
 type BoolType struct{}
 
 func (t *BoolType) IsSendable() bool {
+	return true
+}
+
+func (t *BoolType) IsEquatable() bool {
 	return true
 }
 

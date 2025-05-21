@@ -94,3 +94,45 @@ func NewComValueNotAtSenderError(com *parser.ExprComContext, exprType *types.Typ
 		ExprType: exprType,
 	}
 }
+
+type DivisionByZeroError struct {
+	Expr parser.IExprContext
+}
+
+func (e *DivisionByZeroError) Error() string {
+	return "invalid operation, division by zero"
+}
+
+func (e *DivisionByZeroError) IsTypeError() {}
+
+func (e *DivisionByZeroError) ParserRule() antlr.ParserRuleContext {
+	return e.Expr
+}
+
+func NewDivisionByZeroError(expr parser.IExprContext) Error {
+	return &DivisionByZeroError{
+		Expr: expr,
+	}
+}
+
+type UnequatableTypeError struct {
+	BinOp *parser.ExprBinOpContext
+	Value types.Value
+}
+
+func (e *UnequatableTypeError) Error() string {
+	return fmt.Sprintf("type value '%s' is not equatable", e.Value.ToString())
+}
+
+func (e *UnequatableTypeError) IsTypeError() {}
+
+func (e *UnequatableTypeError) ParserRule() antlr.ParserRuleContext {
+	return e.BinOp
+}
+
+func NewUnequatableTypeError(binOp *parser.ExprBinOpContext, value types.Value) Error {
+	return &UnequatableTypeError{
+		BinOp: binOp,
+		Value: value,
+	}
+}

@@ -11,6 +11,10 @@ func (s *StructType) IsSendable() bool {
 	return true
 }
 
+func (t *StructType) IsEquatable() bool {
+	return true
+}
+
 // IsValue implements Value.
 func (s *StructType) IsValue() {}
 

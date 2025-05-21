@@ -80,14 +80,30 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			typeError = true
 		}
 
+		if op == projection.OpDiv || op == projection.OpMod {
+			if numExpr, ok := ctx.Expr(1).(*parser.ExprNumContext); ok {
+				if num, err := strconv.Atoi(numExpr.NUMBER().GetText()); err == nil {
+					if num == 0 {
+						tc.reportError(type_error.NewDivisionByZeroError(ctx.Expr(1)))
+					}
+				}
+			}
+		}
+
 		if !typeError {
 			return tc.registerType(ctx, types.New(types.Int(), newRoles))
 		}
 
 	case slices.Contains(equalityOps, op):
-		if !types.ValuesEqual(lhs.Value(), rhs.Value()) {
-			tc.reportError(type_error.NewValueMismatchError(ctx, lhs.Value(), rhs.Value()))
-			typeError = true
+		if !lhs.Value().IsEquatable() {
+			tc.reportError(type_error.NewUnequatableTypeError(ctx, lhs.Value()))
+		} else if !rhs.Value().IsEquatable() {
+			tc.reportError(type_error.NewUnequatableTypeError(ctx, rhs.Value()))
+		} else {
+			if !types.ValuesEqual(lhs.Value(), rhs.Value()) {
+				tc.reportError(type_error.NewValueMismatchError(ctx, lhs.Value(), rhs.Value()))
+				typeError = true
+			}
 		}
 
 		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
@@ -99,7 +115,6 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		if !typeError {
 			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
 		}
-
 	case slices.Contains(inequalityOps, op):
 		if !types.ValueCoerseTo(lhs.Value(), types.Int()) {
 			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))

@@ -172,7 +172,7 @@ func (e *ExprBinaryOp) ReturnsValue() bool {
 }
 
 func (e *ExprBinaryOp) HasSideEffects() bool {
-	return e.lhs.HasSideEffects() || e.rhs.HasSideEffects()
+	return e.lhs != nil && e.lhs.HasSideEffects() || e.rhs.HasSideEffects()
 }
 
 func (e *ExprBinaryOp) IsExpression() {}

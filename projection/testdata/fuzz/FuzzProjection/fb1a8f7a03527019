@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A,B,C)A(){let shared:Int@[A]=0;shared;}")

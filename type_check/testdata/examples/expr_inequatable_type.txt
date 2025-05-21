@@ -1,0 +1,5 @@
+func@A foo() {
+  foo == foo;
+}
+---
+2:3: type value 'func()' is not equatable

@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@A A00(){let A:Int@A=10%0;}")

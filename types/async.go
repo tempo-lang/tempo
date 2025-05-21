@@ -10,6 +10,10 @@ func (a *Async) IsSendable() bool {
 	return false
 }
 
+func (t *Async) IsEquatable() bool {
+	return false
+}
+
 func (a *Async) IsValue() {}
 
 func (a *Async) ToString() string {

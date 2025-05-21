@@ -1,0 +1,5 @@
+func@A foo() {
+  let x: Int@A = 10 / 0;
+}
+---
+2:23: invalid operation, division by zero

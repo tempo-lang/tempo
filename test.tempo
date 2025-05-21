@@ -1,1 +1,3 @@
-struct@(A,B) Foo {}
+func@A foo() {
+  let x: Int@A = 2 + 3;
+}

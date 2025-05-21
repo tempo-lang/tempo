@@ -119,6 +119,10 @@ func (r *Roles) Encompass(other *Roles) bool {
 }
 
 func (r *Roles) Contains(role string) bool {
+	if len(r.participants) == 0 {
+		return true
+	}
+
 	return slices.Contains(r.participants, role)
 }
 

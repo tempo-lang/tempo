@@ -20,8 +20,13 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		lhs, aux := epp.eppExpression(roleName, expr.Expr(0))
 		rhs, rhsAux := epp.eppExpression(roleName, expr.Expr(1))
 		aux = append(aux, rhsAux...)
-		operator := projection.ParseOperator(expr)
-		return projection.NewExprBinaryOp(operator, lhs, rhs, exprType.Value()), aux
+
+		if exprType.Roles().Contains(roleName) {
+			operator := projection.ParseOperator(expr)
+			return projection.NewExprBinaryOp(operator, lhs, rhs, exprType.Value()), aux
+		} else {
+			return nil, aux
+		}
 	case *parser.ExprBoolContext:
 		value := expr.TRUE() != nil
 		return projection.NewExprBool(value), []projection.Statement{}
@@ -30,20 +35,24 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	case *parser.ExprIdentContext:
 		sym := epp.info.Symbols[expr.Ident()]
 
-		appendRole := false
-		switch sym.Type().Value().(type) {
-		case *types.FunctionType:
-			appendRole = true
-		case *types.StructType:
-			appendRole = true
-		}
+		if sym.Type().Roles().Contains(roleName) {
+			appendRole := false
+			switch sym.Type().Value().(type) {
+			case *types.FunctionType:
+				appendRole = true
+			case *types.StructType:
+				appendRole = true
+			}
 
-		name := sym.SymbolName()
-		if appendRole {
-			name += "_" + roleName
-		}
+			name := sym.SymbolName()
+			if appendRole {
+				name += "_" + roleName
+			}
 
-		return projection.NewExprIdent(name, exprType.Value()), []projection.Statement{}
+			return projection.NewExprIdent(name, exprType.Value()), []projection.Statement{}
+		} else {
+			return nil, []projection.Statement{}
+		}
 	case *parser.ExprNumContext:
 		num, err := strconv.Atoi(expr.GetText())
 		if err != nil {

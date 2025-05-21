@@ -78,6 +78,7 @@ func (t *Type) IsInvalid() bool {
 
 type Value interface {
 	IsSendable() bool
+	IsEquatable() bool
 	ToString() string
 	IsValue()
 }
@@ -87,6 +88,10 @@ type InvalidValue struct{}
 var invalid_type InvalidValue = InvalidValue{}
 
 func (t *InvalidValue) IsSendable() bool {
+	return true
+}
+
+func (t *InvalidValue) IsEquatable() bool {
 	return true
 }
 
@@ -110,6 +115,10 @@ func (u *UnitValue) ToString() string {
 
 func (u *UnitValue) IsSendable() bool {
 	return true
+}
+
+func (t *UnitValue) IsEquatable() bool {
+	return false
 }
 
 var unit_value UnitValue = UnitValue{}
