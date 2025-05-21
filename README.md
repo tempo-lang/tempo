@@ -9,8 +9,8 @@ The language is under development, here is a brief list of implemented things.
 - [x] Asynchronous values
 - [x] Channels
 - [x] If statements
-- [ ] Function calls
-- [ ] Struct types
+- [x] Function calls
+- [x] Struct types
 - [ ] Closures
 - [ ] Co-routines
 
@@ -59,9 +59,8 @@ All roles can communicate with each other by writing `A->B` where `A` and `B` ar
 // send value from A to B.
 let y@B = await A -> B x@A
 
-// send value from A to A, B and C.
-// Sending to self is useful to obtain a shared variable.
-let y@[A,B,C] = await A->[A,B,C] x@A
+// send value from A to B and C to obtain a shared value.
+let y@[A,B,C] = await A->[B,C] x@A
 ```
 
 ## Shared variables
