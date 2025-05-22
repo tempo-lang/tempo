@@ -3,6 +3,7 @@ package type_error
 import (
 	"fmt"
 	"tempo/parser"
+	"tempo/sym_table"
 	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -69,5 +70,49 @@ func NewUnassignableSymbolError(assign *parser.StmtAssignContext, symType *types
 	return &UnassignableSymbolError{
 		Assign: assign,
 		Type:   symType,
+	}
+}
+
+type ExpectedStructTypeError struct {
+	sym  sym_table.Symbol
+	expr *parser.ExprStructContext
+}
+
+func (e *ExpectedStructTypeError) Error() string {
+	return fmt.Sprintf("type '%s' is not a struct", e.sym.Type().ToString())
+}
+
+func (e *ExpectedStructTypeError) IsTypeError() {}
+
+func (e *ExpectedStructTypeError) ParserRule() antlr.ParserRuleContext {
+	return e.expr
+}
+
+func NewExpectedStructTypeError(sym sym_table.Symbol, expr *parser.ExprStructContext) Error {
+	return &ExpectedStructTypeError{
+		sym:  sym,
+		expr: expr,
+	}
+}
+
+type UnexpectedStructFieldError struct {
+	ident parser.IIdentContext
+	sym   *sym_table.StructSymbol
+}
+
+func (e *UnexpectedStructFieldError) Error() string {
+	return fmt.Sprintf("unexpected field '%s' in struct '%s'", e.ident.GetText(), e.sym.SymbolName())
+}
+
+func (e *UnexpectedStructFieldError) IsTypeError() {}
+
+func (e *UnexpectedStructFieldError) ParserRule() antlr.ParserRuleContext {
+	return e.ident
+}
+
+func NewUnexpectedStructFieldError(ident parser.IIdentContext, sym *sym_table.StructSymbol) Error {
+	return &UnexpectedStructFieldError{
+		ident: ident,
+		sym:   sym,
 	}
 }

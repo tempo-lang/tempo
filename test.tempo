@@ -1,3 +1,8 @@
-func@A foo() {
-  let x: Int@A = 2 + 3;
+struct@(A,B) Pair {
+  num: Int@A,
+  logic: Bool@B
+}
+
+func@(X,Y) foo() {
+  let p: Pair@(A,B) = Pair { num: 1, logic: true };
 }

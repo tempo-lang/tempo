@@ -72,6 +72,13 @@ func (scope *Scope) Parent() *Scope {
 	return scope.parent
 }
 
+func (scope *Scope) Global() *Scope {
+	if scope.Parent() != nil {
+		return scope.Parent().Global()
+	}
+	return scope
+}
+
 func (scope *Scope) Children() []*Scope {
 	return scope.children
 }

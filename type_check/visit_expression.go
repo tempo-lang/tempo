@@ -336,3 +336,81 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 func (tc *typeChecker) VisitFuncArgList(ctx *parser.FuncArgListContext) any {
 	return nil
 }
+
+func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
+	if ctx.ExprStructField() == nil {
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	sym, found := tc.lookupSymbol(ctx.Ident())
+	if !found {
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	structSym, ok := sym.(*sym_table.StructSymbol)
+	if !ok {
+		tc.reportError(type_error.NewExpectedStructTypeError(sym, ctx))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	defFields := map[string]*types.Type{}
+	for _, field := range structSym.Fields() {
+		defFields[field.SymbolName()] = field.Type()
+	}
+
+	fieldIdents := []parser.IIdentContext{}
+	for _, fieldId := range ctx.ExprStructField().AllIdent() {
+		fieldIdents = append(fieldIdents, fieldId)
+	}
+
+	exprFieldsType := map[string]*types.Type{}
+	exprFieldsExpr := map[string]parser.IExprContext{}
+	exprFieldsIdent := map[string]parser.IIdentContext{}
+	for i, field := range ctx.ExprStructField().AllExpr() {
+		fieldType := tc.visitExpr(field)
+		exprFieldsExpr[fieldIdents[i].GetText()] = field
+		exprFieldsType[fieldIdents[i].GetText()] = fieldType
+		exprFieldsIdent[fieldIdents[i].GetText()] = fieldIdents[i]
+	}
+
+	foundError := false
+	roleSubst := map[string]string{}
+
+	for name, exprType := range exprFieldsType {
+		defField, found := defFields[name]
+		if !found {
+			tc.reportError(type_error.NewUnexpectedStructFieldError(exprFieldsIdent[name], structSym))
+			foundError = true
+			continue
+		}
+
+		if !types.ValueCoerseTo(exprType.Value(), defField.Value()) {
+			tc.reportError(type_error.NewValueMismatchError(exprFieldsExpr[name], exprType.Value(), defField.Value()))
+			foundError = true
+			continue
+		}
+
+		for i, exprRole := range exprType.Roles().Participants() {
+			defRole := exprType.Roles().Participants()[i]
+			roleSubst[defRole] = exprRole
+
+			// TODO: Improve this
+		}
+	}
+
+	if foundError {
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	newRoles := []string{}
+	for _, role := range structSym.Type().Roles().Participants() {
+		newRoles = append(newRoles, roleSubst[role])
+	}
+
+	structType := types.New(types.NewStructType(structSym.SymbolName()), types.NewRole(newRoles, false))
+	return tc.registerType(ctx, structType)
+}
+
+func (tc *typeChecker) VisitExprStructField(ctx *parser.ExprStructFieldContext) any {
+	return nil
+}

@@ -66,9 +66,12 @@ expr:
 	| (TRUE | FALSE)						# exprBool
 	| AWAIT expr							# exprAwait
 	| roleType COM roleType expr			# exprCom
+	| ident exprStructField                 # exprStruct
 	| ident funcArgList ROLE_AT roleType	# exprCall
 	| ident									# exprIdent
 	| LPAREN expr RPAREN					# exprGroup;
+
+exprStructField: LCURLY (ident COLON expr (COMMA ident COLON expr)*)? RCURLY;
 
 /*
  * Lexer Rules
