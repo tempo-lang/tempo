@@ -76,7 +76,7 @@ type StructField struct {
 }
 
 func (f *StructField) Codegen() *jen.Statement {
-	return jen.Id(f.Name).Add(CodegenType(f.Type))
+	return jen.Id(f.Name).Add(CodegenType(f.Type)).Tag(map[string]string{"json": f.Name})
 }
 
 type StructType struct {

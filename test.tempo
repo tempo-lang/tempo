@@ -9,6 +9,8 @@ struct@(A,B) Foo {
 
 func@(A,B) foo() {
   let p: Foo@(A,B) = Foo@(A,B) {
-    point: Point@(B,A) {x: 10, y: 20}
+    point: Point@(A,B) {x: 10, y: 20}
   };
+
+  let x: Foo@[A,B] = Foo@(A,B) {};
 }

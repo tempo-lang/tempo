@@ -5,20 +5,20 @@ import runtime "tempo/runtime"
 
 // Projection of struct Foo
 type Foo_A struct {
-	first  Bar_X
-	second Bar_Y
+	first  Bar_X `json:"first"`
+	second Bar_Y `json:"second"`
 }
 type Foo_B struct {
-	first  Bar_Y
-	second Bar_X
+	first  Bar_Y `json:"first"`
+	second Bar_X `json:"second"`
 }
 
 // Projection of struct Bar
 type Bar_X struct {
-	num int
+	num int `json:"num"`
 }
 type Bar_Y struct {
-	logic bool
+	logic bool `json:"logic"`
 }
 
 // Projection of choreography foo

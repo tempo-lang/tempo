@@ -5,10 +5,10 @@ import runtime "tempo/runtime"
 
 // Projection of struct Pair
 type Pair_A struct {
-	num int
+	num int `json:"num"`
 }
 type Pair_B struct {
-	logic bool
+	logic bool `json:"logic"`
 }
 
 // Projection of choreography foo

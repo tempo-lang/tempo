@@ -12,6 +12,8 @@ The language is under development, here is a brief list of implemented things.
 - [x] Function calls
 - [x] Struct types
 - [ ] Closures
+- [ ] Lists
+- [ ] Maps
 - [ ] Co-routines
 
 ## Values and Types
