@@ -171,8 +171,9 @@ func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
 }
 
 func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
-	sym, ok := tc.lookupSymbol(ctx.Ident())
-	if !ok {
+	sym, err := tc.lookupSymbol(ctx.Ident())
+	if err != nil {
+		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -277,8 +278,9 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
 func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	invalidType := false
-	sym, ok := tc.lookupSymbol(ctx.Ident())
-	if !ok {
+	sym, err := tc.lookupSymbol(ctx.Ident())
+	if err != nil {
+		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -342,8 +344,9 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	sym, found := tc.lookupSymbol(ctx.Ident())
-	if !found {
+	sym, err := tc.lookupSymbol(ctx.Ident())
+	if err != nil {
+		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -353,18 +356,33 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	tc.info.Symbols[ctx.Ident()] = sym
+
+	roles, ok := ParseRoleType(ctx.RoleType())
+	if !ok {
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	structRoles := structSym.Type().Roles().Participants()
+	if len(roles.Participants()) != len(structRoles) {
+		tc.reportError(type_error.NewStructWrongRoleCountError(ctx.RoleType(), structSym))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	defRoleSubst := map[string]string{}
+	for i, role := range roles.Participants() {
+		defRoleSubst[structRoles[i]] = role
+	}
+
 	defFields := map[string]*types.Type{}
 	for _, field := range structSym.Fields() {
 		defFields[field.SymbolName()] = field.Type()
 	}
 
-	fieldIdents := []parser.IIdentContext{}
-	for _, fieldId := range ctx.ExprStructField().AllIdent() {
-		fieldIdents = append(fieldIdents, fieldId)
-	}
+	fieldIdents := ctx.ExprStructField().AllIdent()
 
-	exprFieldsType := map[string]*types.Type{}
 	exprFieldsExpr := map[string]parser.IExprContext{}
+	exprFieldsType := map[string]*types.Type{}
 	exprFieldsIdent := map[string]parser.IIdentContext{}
 	for i, field := range ctx.ExprStructField().AllExpr() {
 		fieldType := tc.visitExpr(field)
@@ -374,7 +392,6 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	}
 
 	foundError := false
-	roleSubst := map[string]string{}
 
 	for name, exprType := range exprFieldsType {
 		defField, found := defFields[name]
@@ -384,17 +401,12 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 			continue
 		}
 
-		if !types.ValueCoerseTo(exprType.Value(), defField.Value()) {
+		defSubstType := defField.SubstituteRoles(defRoleSubst)
+
+		if !exprType.CanCoerceTo(defSubstType) {
 			tc.reportError(type_error.NewValueMismatchError(exprFieldsExpr[name], exprType.Value(), defField.Value()))
 			foundError = true
 			continue
-		}
-
-		for i, exprRole := range exprType.Roles().Participants() {
-			defRole := exprType.Roles().Participants()[i]
-			roleSubst[defRole] = exprRole
-
-			// TODO: Improve this
 		}
 	}
 
@@ -402,12 +414,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	newRoles := []string{}
-	for _, role := range structSym.Type().Roles().Participants() {
-		newRoles = append(newRoles, roleSubst[role])
-	}
-
-	structType := types.New(types.NewStructType(structSym.SymbolName()), types.NewRole(newRoles, false))
+	structType := structSym.Type().SubstituteRoles(defRoleSubst)
 	return tc.registerType(ctx, structType)
 }
 

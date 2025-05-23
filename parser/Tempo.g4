@@ -5,7 +5,7 @@ grammar Tempo;
  */
 
 // source file
-sourceFile: (func|struct)* EOF;
+sourceFile: (func | struct)* EOF;
 
 // identifier
 ident: ID;
@@ -20,7 +20,8 @@ roleType:
 // struct
 struct: STRUCT ROLE_AT roleType ident structFieldList;
 
-structFieldList: LCURLY (structField (COMMA structField)*)? RCURLY;
+structFieldList:
+	LCURLY (structField (COMMA structField)*)? RCURLY;
 
 structField: ident COLON valueType;
 
@@ -61,17 +62,18 @@ expr:
 		| GREATER_EQ
 		| AND
 		| OR
-	) expr									# exprBinOp
-	| NUMBER								# exprNum
-	| (TRUE | FALSE)						# exprBool
-	| AWAIT expr							# exprAwait
-	| roleType COM roleType expr			# exprCom
-	| ident exprStructField                 # exprStruct
-	| ident funcArgList ROLE_AT roleType	# exprCall
-	| ident									# exprIdent
-	| LPAREN expr RPAREN					# exprGroup;
+	) expr										# exprBinOp
+	| NUMBER									# exprNum
+	| (TRUE | FALSE)							# exprBool
+	| AWAIT expr								# exprAwait
+	| roleType COM roleType expr				# exprCom
+	| ident ROLE_AT roleType exprStructField	# exprStruct
+	| ident funcArgList ROLE_AT roleType		# exprCall
+	| ident										# exprIdent
+	| LPAREN expr RPAREN						# exprGroup;
 
-exprStructField: LCURLY (ident COLON expr (COMMA ident COLON expr)*)? RCURLY;
+exprStructField:
+	LCURLY (ident COLON expr (COMMA ident COLON expr)*)? RCURLY;
 
 /*
  * Lexer Rules

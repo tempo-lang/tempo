@@ -122,7 +122,7 @@ func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) *types.Type 
 		return types.Invalid()
 	}
 
-	valType, err := ParseValueType(ctx)
+	valType, err := tc.parseValueType(ctx)
 	if err != nil {
 		tc.reportError(err)
 		return types.Invalid()

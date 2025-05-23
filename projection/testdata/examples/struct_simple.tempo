@@ -1,4 +1,9 @@
 struct@(A,B) Foo {
+  first: Bar@(A,B),
+  second: Bar@(B,A)
+}
+
+struct@(A,B) Bar {
   num: Int@A,
   logic: Bool@B
 }

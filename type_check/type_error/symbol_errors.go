@@ -116,3 +116,25 @@ func NewUnexpectedStructFieldError(ident parser.IIdentContext, sym *sym_table.St
 		sym:   sym,
 	}
 }
+
+type StructWrongRoleCountError struct {
+	roleType parser.IRoleTypeContext
+	sym      *sym_table.StructSymbol
+}
+
+func (e *StructWrongRoleCountError) Error() string {
+	return fmt.Sprintf("wrong number of roles for struct '%s'", e.sym.SymbolName())
+}
+
+func (e *StructWrongRoleCountError) IsTypeError() {}
+
+func (e *StructWrongRoleCountError) ParserRule() antlr.ParserRuleContext {
+	return e.roleType
+}
+
+func NewStructWrongRoleCountError(roleType parser.IRoleTypeContext, sym *sym_table.StructSymbol) Error {
+	return &StructWrongRoleCountError{
+		roleType: roleType,
+		sym:      sym,
+	}
+}

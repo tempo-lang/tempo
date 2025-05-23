@@ -126,11 +126,15 @@ func (r *Roles) Contains(role string) bool {
 	return slices.Contains(r.participants, role)
 }
 
-func (t *Type) SubstituteRoles(subst map[string]string) *Type {
-	roleSubst := t.Roles().Participants()
+func (r *Roles) SubstituteRoles(subst map[string]string) *Roles {
+	roleSubst := r.Participants()
 	for i := range roleSubst {
 		roleSubst[i] = subst[roleSubst[i]]
 	}
 
-	return New(t.Value(), NewRole(roleSubst, t.Roles().IsSharedRole()))
+	return NewRole(roleSubst, r.IsSharedRole())
+}
+
+func (t *Type) SubstituteRoles(subst map[string]string) *Type {
+	return New(t.Value(), t.Roles().SubstituteRoles(subst))
 }

@@ -78,3 +78,19 @@ type StructField struct {
 func (f *StructField) Codegen() *jen.Statement {
 	return jen.Id(f.Name).Add(CodegenType(f.Type))
 }
+
+type StructType struct {
+	types.StructType
+	role string
+}
+
+func NewStructType(structType *types.StructType, role string) *StructType {
+	return &StructType{
+		StructType: *structType,
+		role:       role,
+	}
+}
+
+func (s *StructType) Role() string {
+	return s.role
+}

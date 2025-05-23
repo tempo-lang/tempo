@@ -150,6 +150,41 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		}
 
 		return nil, aux
+	case *parser.ExprStructContext:
+		stSym := epp.info.Symbols[expr.Ident()].(*sym_table.StructSymbol)
+
+		defRoleSubst := map[string]string{}
+		exprRoleSubst := map[string]string{}
+		for i, defRole := range stSym.Type().Roles().Participants() {
+			exprRole := exprType.Roles().Participants()[i]
+			defRoleSubst[defRole] = exprRole
+			exprRoleSubst[exprRole] = defRole
+		}
+
+		aux := []projection.Statement{}
+
+		fields := map[string]projection.Expression{}
+		fieldNames := []string{}
+
+		fieldNamesIdents := expr.ExprStructField().AllIdent()
+		for i, fieldExpr := range expr.ExprStructField().AllExpr() {
+			fieldName := fieldNamesIdents[i].GetText()
+
+			field, a := epp.eppExpression(roleName, fieldExpr)
+			aux = append(aux, a...)
+
+			containsRole := stSym.Fields()[i].Type().Roles().
+				SubstituteRoles(defRoleSubst).Contains(roleName)
+
+			if containsRole {
+				fields[fieldName] = field
+				fieldNames = append(fieldNames, fieldName)
+			}
+		}
+
+		structType := projection.NewStructType(exprType.Value().(*types.StructType), exprRoleSubst[roleName])
+
+		return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst[roleName], fieldNames, fields, structType), aux
 	case *parser.ExprContext:
 		panic("expr should never be base type")
 	}

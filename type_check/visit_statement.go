@@ -9,7 +9,7 @@ import (
 
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	exprType := tc.visitExpr(ctx.Expr())
-	declType, err := ParseValueType(ctx.ValueType())
+	declType, err := tc.parseValueType(ctx.ValueType())
 	typeFailed := false
 	roleFailed := false
 
@@ -44,21 +44,24 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 }
 
 func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
-
-	if sym, ok := tc.lookupSymbol(ctx.Ident()); ok {
-		tc.info.Symbols[ctx.Ident()] = sym
-
-		if !sym.IsAssignable() {
-			tc.reportError(type_error.NewUnassignableSymbolError(ctx, sym.Type()))
-		} else {
-			exprType := tc.visitExpr(ctx.Expr())
-			if !exprType.CanCoerceTo(sym.Type()) {
-				tc.reportError(type_error.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
-			}
-		}
-
-		tc.checkExprInScope(ctx.Ident(), sym.Type().Roles())
+	sym, err := tc.lookupSymbol(ctx.Ident())
+	if err != nil {
+		tc.reportError(err)
+		return nil
 	}
+
+	tc.info.Symbols[ctx.Ident()] = sym
+
+	if !sym.IsAssignable() {
+		tc.reportError(type_error.NewUnassignableSymbolError(ctx, sym.Type()))
+	} else {
+		exprType := tc.visitExpr(ctx.Expr())
+		if !exprType.CanCoerceTo(sym.Type()) {
+			tc.reportError(type_error.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
+		}
+	}
+
+	tc.checkExprInScope(ctx.Ident(), sym.Type().Roles())
 
 	return nil
 }

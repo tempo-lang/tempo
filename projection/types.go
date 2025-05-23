@@ -16,7 +16,18 @@ func CodegenType(t types.Value) jen.Code {
 		return CodegenAsyncType(asyncType)
 	}
 
+	if structType, isStruct := t.(*StructType); isStruct {
+		return CodegenStructType(structType)
+	}
+	if _, ok := t.(*types.StructType); ok {
+		panic(fmt.Sprintf("struct %v should be of type projection.StructType instead", t))
+	}
+
 	panic(fmt.Sprintf("failed to generate type: %v", t))
+}
+
+func CodegenStructType(structType *StructType) jen.Code {
+	return jen.Id(fmt.Sprintf("%s_%s", structType.Name(), structType.Role()))
 }
 
 func CodegenBuiltinType(builtinType types.Builtin) jen.Code {

@@ -15,7 +15,7 @@ func BuiltinValues() map[string]types.Value {
 	}
 }
 
-func ParseValueType(ctx parser.IValueTypeContext) (*types.Type, type_error.Error) {
+func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type, type_error.Error) {
 	// parser error
 	if ctx == nil || ctx.RoleType() == nil {
 		return types.Invalid(), nil
@@ -38,6 +38,15 @@ func ParseValueType(ctx parser.IValueTypeContext) (*types.Type, type_error.Error
 		}
 	}
 
+	if typeValue == nil {
+		sym, err := tc.lookupSymbol(typeName)
+		if err != nil {
+			return types.Invalid(), err
+		}
+
+		typeValue = sym.Type().Value()
+	}
+
 	if typeValue != nil {
 		if isAsync {
 			typeValue = types.NewAsync(typeValue)
@@ -48,7 +57,7 @@ func ParseValueType(ctx parser.IValueTypeContext) (*types.Type, type_error.Error
 	}
 }
 
-func ParseFuncType(ctx parser.IFuncContext) (*types.Type, []type_error.Error) {
+func (tc *typeChecker) parseFuncType(ctx parser.IFuncContext) (*types.Type, []type_error.Error) {
 	errors := []type_error.Error{}
 
 	funcRoles, ok := ParseRoleType(ctx.RoleType())
@@ -60,7 +69,7 @@ func ParseFuncType(ctx parser.IFuncContext) (*types.Type, []type_error.Error) {
 
 	for _, param := range ctx.FuncParamList().AllFuncParam() {
 
-		paramType, err := ParseValueType(param.ValueType())
+		paramType, err := tc.parseValueType(param.ValueType())
 		if err != nil {
 			errors = append(errors, err)
 		}
@@ -75,7 +84,7 @@ func ParseFuncType(ctx parser.IFuncContext) (*types.Type, []type_error.Error) {
 	returnType := types.New(types.Unit(), types.EveryoneRole())
 	if ctx.ValueType() != nil {
 		var err type_error.Error
-		returnType, err = ParseValueType(ctx.ValueType())
+		returnType, err = tc.parseValueType(ctx.ValueType())
 		if err != nil {
 			errors = append(errors, err)
 			return types.Invalid(), errors

@@ -21,15 +21,16 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		structScope := tc.currentScope.MakeChild(st.GetStart(), st.GetStop(), stType.Roles().Participants())
 		tc.currentScope = structScope
 
+		structSym := sym_table.NewStructSymbol(st, structScope, stType)
+		tc.currentScope.SetStruct(structSym.(*sym_table.StructSymbol))
+
 		tc.currentScope = tc.currentScope.Parent()
 
-		structSym := sym_table.NewStructSymbol(st, structScope, stType)
 		tc.insertSymbol(structSym)
-		tc.currentScope.SetStruct(structSym.(*sym_table.StructSymbol))
 	}
 
 	for _, fn := range sourceFile.AllFunc_() {
-		fnType, errors := ParseFuncType(fn)
+		fnType, errors := tc.parseFuncType(fn)
 		for _, err := range errors {
 			tc.reportError(err)
 		}

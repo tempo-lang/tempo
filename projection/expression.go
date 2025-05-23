@@ -367,3 +367,54 @@ func NewExprCall(funcName string, funcRole string, args []Expression, returnType
 		RoleSubs:   roleSubs,
 	}
 }
+
+type ExprStruct struct {
+	StructName string
+	StructRole string
+	FieldNames []string
+	Fields     map[string]Expression
+	StructType *StructType
+}
+
+func (e *ExprStruct) Codegen() jen.Code {
+	fields := jen.Dict{}
+
+	for _, fieldName := range e.FieldNames {
+		field := e.Fields[fieldName]
+		expr := field.Codegen()
+		fields[jen.Id(fieldName)] = expr
+	}
+
+	name := fmt.Sprintf("%s_%s", e.StructName, e.StructRole)
+
+	return jen.Id(name).Values(fields)
+}
+
+func (e *ExprStruct) Type() types.Value {
+	return e.StructType
+}
+
+func (e *ExprStruct) ReturnsValue() bool {
+	return true
+}
+
+func (e *ExprStruct) HasSideEffects() bool {
+	for _, expr := range e.Fields {
+		if expr.HasSideEffects() {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *ExprStruct) IsExpression() {}
+
+func NewExprStruct(structName, structRole string, fieldNames []string, fields map[string]Expression, typ *StructType) Expression {
+	return &ExprStruct{
+		StructName: structName,
+		StructRole: structRole,
+		FieldNames: fieldNames,
+		Fields:     fields,
+		StructType: typ,
+	}
+}

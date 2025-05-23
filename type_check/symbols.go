@@ -6,12 +6,12 @@ import (
 	"tempo/type_check/type_error"
 )
 
-func (tc *typeChecker) lookupSymbol(name parser.IIdentContext) (sym_table.Symbol, bool) {
+func (tc *typeChecker) lookupSymbol(name parser.IIdentContext) (sym_table.Symbol, type_error.Error) {
 	sym, ok := tc.currentScope.LookupSymbol(name)
 	if !ok {
-		tc.reportError(type_error.NewUnknownSymbolError(name))
+		return nil, type_error.NewUnknownSymbolError(name)
 	}
-	return sym, ok
+	return sym, nil
 }
 
 func (tc *typeChecker) insertSymbol(symbol sym_table.Symbol) bool {
