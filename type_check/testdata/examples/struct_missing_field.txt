@@ -1,0 +1,10 @@
+struct@(A,B) Pair {
+  fst: Int@A,
+  snd: Int@B
+}
+
+func@(A,B) foo() {
+  let p: Pair@(A,B) = Pair@(A,B) { fst: 10 };
+}
+---
+7:23: missing field 'snd' in struct 'Pair'

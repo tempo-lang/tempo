@@ -1,0 +1,25 @@
+struct@(A,B) Foo {
+  first: Bar@(A,B),
+  second: Bar@(B,A)
+}
+
+struct@(X,Y) Bar {
+  num: Int@X,
+  logic: Bool@Y
+}
+
+func@(P,Q) foo() {
+  let x: Int@P = 10;
+  let y: Int@Q = 20;
+
+  let nested: Foo@(P,Q) = Foo@(P,Q) {
+    first: Bar@(P,Q) {
+      num: x,
+      logic: true
+    },
+    second: Bar@(Q,P) {
+      num: y,
+      logic: false
+    }
+  };
+}

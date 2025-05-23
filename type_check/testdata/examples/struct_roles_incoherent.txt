@@ -12,3 +12,5 @@ func@(A,B) foo() {
     point: Point@(B,A) {x: 10, y: 20}
   };
 }
+---
+12:12: type 'struct Point@(B,A)' is not compatible with type 'struct Point@(A,B)'

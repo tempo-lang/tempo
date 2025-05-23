@@ -149,9 +149,9 @@ type StructSymbol struct {
 }
 
 type StructFieldSymbol struct {
-	field     parser.IStructFieldContext
-	scope     *Scope
-	fieldType *types.Type
+	field        parser.IStructFieldContext
+	parentStruct *StructSymbol
+	fieldType    *types.Type
 }
 
 func NewStructSymbol(structCtx parser.IStructContext, scope *Scope, structType *types.Type) Symbol {
@@ -195,11 +195,11 @@ func (s *StructSymbol) AddField(field *StructFieldSymbol) {
 	s.fields = append(s.fields, field)
 }
 
-func NewStructFieldSymbol(field parser.IStructFieldContext, scope *Scope, fieldType *types.Type) Symbol {
+func NewStructFieldSymbol(field parser.IStructFieldContext, parentStruct *StructSymbol, fieldType *types.Type) Symbol {
 	return &StructFieldSymbol{
-		field:     field,
-		scope:     scope,
-		fieldType: fieldType,
+		field:        field,
+		parentStruct: parentStruct,
+		fieldType:    fieldType,
 	}
 }
 
@@ -216,15 +216,15 @@ func (f *StructFieldSymbol) Type() *types.Type {
 }
 
 func (f *StructFieldSymbol) Parent() *Scope {
-	return f.scope.parent
+	return f.parentStruct.scope.parent
 }
 
 func (f *StructFieldSymbol) IsAssignable() bool {
 	return true
 }
 
-func (f *StructFieldSymbol) Scope() *Scope {
-	return f.scope
+func (f *StructFieldSymbol) Struct() *StructSymbol {
+	return f.parentStruct
 }
 
 func (f *StructFieldSymbol) Field() parser.IStructFieldContext {

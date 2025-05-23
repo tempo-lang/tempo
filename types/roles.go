@@ -126,6 +126,18 @@ func (r *Roles) Contains(role string) bool {
 	return slices.Contains(r.participants, role)
 }
 
+func (r *Roles) SubstituteMap(other *Roles) (map[string]string, bool) {
+	if len(r.participants) != len(other.participants) {
+		return nil, false
+	}
+
+	roleSubst := map[string]string{}
+	for i, role := range r.Participants() {
+		roleSubst[role] = other.participants[i]
+	}
+	return roleSubst, true
+}
+
 func (r *Roles) SubstituteRoles(subst map[string]string) *Roles {
 	roleSubst := r.Participants()
 	for i := range roleSubst {

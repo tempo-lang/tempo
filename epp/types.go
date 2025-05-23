@@ -13,7 +13,12 @@ func (epp *epp) eppType(roleName string, typ *types.Type) types.Value {
 			structSym := epp.info.GlobalScope.LookupParent(structType.Name()).(*sym_table.StructSymbol)
 			structSym.Type().Roles().Participants()
 
-			return projection.NewStructType(structType, "ROLE")
+			roleSubstMap, ok := typ.Roles().SubstituteMap(structSym.Type().Roles())
+			if !ok {
+				panic("role substitution should succeed")
+			}
+
+			return projection.NewStructType(structType, roleSubstMap[roleName])
 		}
 
 		return typ.Value()

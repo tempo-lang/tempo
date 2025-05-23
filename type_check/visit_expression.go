@@ -369,6 +369,20 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	for _, defField := range structSym.Fields() {
+		found := false
+		for _, exprField := range ctx.ExprStructField().AllIdent() {
+			if exprField.GetText() == defField.SymbolName() {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			tc.reportError(type_error.NewMissingStructFieldError(ctx, defField))
+		}
+	}
+
 	defRoleSubst := map[string]string{}
 	for i, role := range roles.Participants() {
 		defRoleSubst[structRoles[i]] = role
@@ -404,7 +418,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		defSubstType := defField.SubstituteRoles(defRoleSubst)
 
 		if !exprType.CanCoerceTo(defSubstType) {
-			tc.reportError(type_error.NewValueMismatchError(exprFieldsExpr[name], exprType.Value(), defField.Value()))
+			tc.reportError(type_error.NewIncompatibleTypesError(exprFieldsExpr[name], exprType, defField))
 			foundError = true
 			continue
 		}

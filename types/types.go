@@ -53,11 +53,21 @@ func (t *Type) CanCoerceTo(other *Type) bool {
 		return false
 	}
 
-	if t.roles.Encompass(other.roles) {
-		return true
+	if t.roles.IsSharedRole() {
+		return t.roles.Encompass(other.roles)
 	}
 
-	return false
+	if len(t.roles.participants) != len(other.roles.participants) {
+		return false
+	}
+
+	for i, role := range t.roles.participants {
+		if role != other.roles.participants[i] {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (t *Type) Roles() *Roles {

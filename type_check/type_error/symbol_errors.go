@@ -117,6 +117,28 @@ func NewUnexpectedStructFieldError(ident parser.IIdentContext, sym *sym_table.St
 	}
 }
 
+type MissingStructFieldError struct {
+	expr  *parser.ExprStructContext
+	field *sym_table.StructFieldSymbol
+}
+
+func (e *MissingStructFieldError) Error() string {
+	return fmt.Sprintf("missing field '%s' in struct '%s'", e.field.SymbolName(), e.field.Struct().SymbolName())
+}
+
+func (e *MissingStructFieldError) IsTypeError() {}
+
+func (e *MissingStructFieldError) ParserRule() antlr.ParserRuleContext {
+	return e.expr
+}
+
+func NewMissingStructFieldError(expr *parser.ExprStructContext, field *sym_table.StructFieldSymbol) Error {
+	return &MissingStructFieldError{
+		expr:  expr,
+		field: field,
+	}
+}
+
 type StructWrongRoleCountError struct {
 	roleType parser.IRoleTypeContext
 	sym      *sym_table.StructSymbol
