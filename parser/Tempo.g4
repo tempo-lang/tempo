@@ -5,7 +5,7 @@ grammar Tempo;
  */
 
 // source file
-sourceFile: (func | struct)* EOF;
+sourceFile: (func | struct | interface)* EOF;
 
 // identifier
 ident: ID;

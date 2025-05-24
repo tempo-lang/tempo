@@ -56,6 +56,10 @@ func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result an
 		st.Accept(tc)
 	}
 
+	for _, inf := range ctx.AllInterface_() {
+		inf.Accept(tc)
+	}
+
 	for _, fn := range ctx.AllFunc_() {
 		fn.Accept(tc)
 	}

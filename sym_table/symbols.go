@@ -14,7 +14,7 @@ type Symbol interface {
 }
 
 type FuncSymbol struct {
-	funcCtx  parser.IFuncContext
+	funcCtx  parser.IFuncSigContext
 	scope    *Scope
 	funcType *types.Type
 	params   []*FuncParamSymbol
@@ -25,18 +25,18 @@ func (f *FuncSymbol) Parent() *Scope {
 }
 
 func (f *FuncSymbol) Ident() parser.IIdentContext {
-	return f.funcCtx.FuncSig().Ident()
+	return f.funcCtx.Ident()
 }
 
 func (f *FuncSymbol) SymbolName() string {
-	return f.funcCtx.FuncSig().Ident().GetText()
+	return f.funcCtx.Ident().GetText()
 }
 
 func (f *FuncSymbol) Type() *types.Type {
 	return f.funcType
 }
 
-func (f *FuncSymbol) Func() parser.IFuncContext {
+func (f *FuncSymbol) FuncSig() parser.IFuncSigContext {
 	return f.funcCtx
 }
 
@@ -64,7 +64,7 @@ func (f *FuncSymbol) Roles() *types.Roles {
 	return f.funcType.Roles()
 }
 
-func NewFuncSymbol(fn parser.IFuncContext, scope *Scope, funcType *types.Type) Symbol {
+func NewFuncSymbol(fn parser.IFuncSigContext, scope *Scope, funcType *types.Type) Symbol {
 	return &FuncSymbol{
 		funcCtx:  fn,
 		scope:    scope,
@@ -229,4 +229,94 @@ func (f *StructFieldSymbol) Struct() *StructSymbol {
 
 func (f *StructFieldSymbol) Field() parser.IStructFieldContext {
 	return f.field
+}
+
+type InterfaceSymbol struct {
+	interfaceCtx  parser.IInterfaceContext
+	scope         *Scope
+	interfaceType *types.Type
+	methods       []*InterfaceMethodSymbol
+}
+
+type InterfaceMethodSymbol struct {
+	method       parser.IInterfaceMethodContext
+	parentStruct *InterfaceSymbol
+	methodType   *types.Type
+}
+
+func NewInterfaceSymbol(interfaceCtx parser.IInterfaceContext, scope *Scope, interfaceType *types.Type) Symbol {
+	return &InterfaceSymbol{
+		interfaceCtx:  interfaceCtx,
+		scope:         scope,
+		interfaceType: interfaceType,
+		methods:       []*InterfaceMethodSymbol{},
+	}
+}
+
+func (i *InterfaceSymbol) SymbolName() string {
+	return i.interfaceCtx.Ident().GetText()
+}
+
+func (i *InterfaceSymbol) Ident() parser.IIdentContext {
+	return i.interfaceCtx.Ident()
+}
+
+func (i *InterfaceSymbol) Type() *types.Type {
+	return i.interfaceType
+}
+
+func (i *InterfaceSymbol) Parent() *Scope {
+	return i.scope.parent
+}
+
+func (i *InterfaceSymbol) IsAssignable() bool {
+	return false
+}
+
+func (i *InterfaceSymbol) Scope() *Scope {
+	return i.scope
+}
+
+func (i *InterfaceSymbol) Methods() []*InterfaceMethodSymbol {
+	return i.methods
+}
+
+func (i *InterfaceSymbol) AddMethod(method *InterfaceMethodSymbol) {
+	i.methods = append(i.methods, method)
+}
+
+func NewInterfaceMethodSymbol(method parser.IInterfaceMethodContext, parentInterface *InterfaceSymbol, methodType *types.Type) Symbol {
+	return &InterfaceMethodSymbol{
+		method:       method,
+		parentStruct: parentInterface,
+		methodType:   methodType,
+	}
+}
+
+func (m *InterfaceMethodSymbol) SymbolName() string {
+	return m.method.FuncSig().Ident().GetText()
+}
+
+func (m *InterfaceMethodSymbol) Ident() parser.IIdentContext {
+	return m.method.FuncSig().Ident()
+}
+
+func (m *InterfaceMethodSymbol) Type() *types.Type {
+	return m.methodType
+}
+
+func (m *InterfaceMethodSymbol) Parent() *Scope {
+	return m.parentStruct.scope.parent
+}
+
+func (m *InterfaceMethodSymbol) IsAssignable() bool {
+	return false
+}
+
+func (m *InterfaceMethodSymbol) Interface() *InterfaceSymbol {
+	return m.parentStruct
+}
+
+func (m *InterfaceMethodSymbol) Method() parser.IInterfaceMethodContext {
+	return m.method
 }

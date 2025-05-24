@@ -3,6 +3,10 @@ struct@(A,B) Point {
   second: Int@B
 }
 
+interface@A Sum {
+  func@A sum(a: Int@A, b: Int@A) Int@A;
+}
+
 func@(A,B) foo(value: Int@B, another: Int@[A,B]) Int@A {
   let p: Point@(A,B) = Point@(A,B) {first: 10, second: 20};
 }

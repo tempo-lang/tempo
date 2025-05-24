@@ -9,26 +9,28 @@ import (
 )
 
 type Scope struct {
-	symbols   map[string]Symbol
-	parent    *Scope
-	children  []*Scope
-	pos       antlr.Token
-	end       antlr.Token
-	roles     []string
-	funcSym   *FuncSymbol
-	structSym *StructSymbol
+	symbols      map[string]Symbol
+	parent       *Scope
+	children     []*Scope
+	pos          antlr.Token
+	end          antlr.Token
+	roles        []string
+	funcSym      *FuncSymbol
+	structSym    *StructSymbol
+	interfaceSym *InterfaceSymbol
 }
 
 func NewScope(pos antlr.Token, end antlr.Token, parent *Scope, roles []string) *Scope {
 	return &Scope{
-		symbols:   map[string]Symbol{},
-		parent:    parent,
-		children:  []*Scope{},
-		pos:       pos,
-		end:       end,
-		roles:     roles,
-		funcSym:   nil,
-		structSym: nil,
+		symbols:      map[string]Symbol{},
+		parent:       parent,
+		children:     []*Scope{},
+		pos:          pos,
+		end:          end,
+		roles:        roles,
+		funcSym:      nil,
+		structSym:    nil,
+		interfaceSym: nil,
 	}
 }
 
@@ -152,4 +154,16 @@ func (scope *Scope) GetStruct() *StructSymbol {
 		s = s.parent
 	}
 	return s.structSym
+}
+
+func (scope *Scope) SetInterface(interfaceSym *InterfaceSymbol) {
+	scope.interfaceSym = interfaceSym
+}
+
+func (scope *Scope) GetInterface() *InterfaceSymbol {
+	s := scope
+	for s.interfaceSym == nil && s.parent != nil {
+		s = s.parent
+	}
+	return s.interfaceSym
 }

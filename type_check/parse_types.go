@@ -57,17 +57,17 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 	}
 }
 
-func (tc *typeChecker) parseFuncType(ctx parser.IFuncContext) (*types.Type, []type_error.Error) {
+func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, []type_error.Error) {
 	errors := []type_error.Error{}
 
-	funcRoles, ok := ParseRoleType(ctx.FuncSig().RoleType())
+	funcRoles, ok := ParseRoleType(ctx.RoleType())
 	if !ok {
 		return types.Invalid(), errors
 	}
 
 	params := []*types.Type{}
 
-	for _, param := range ctx.FuncSig().FuncParamList().AllFuncParam() {
+	for _, param := range ctx.FuncParamList().AllFuncParam() {
 
 		paramType, err := tc.parseValueType(param.ValueType())
 		if err != nil {
@@ -82,9 +82,9 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncContext) (*types.Type, []ty
 	}
 
 	returnType := types.New(types.Unit(), types.EveryoneRole())
-	if ctx.FuncSig().GetReturnType() != nil {
+	if ctx.GetReturnType() != nil {
 		var err type_error.Error
-		returnType, err = tc.parseValueType(ctx.FuncSig().GetReturnType())
+		returnType, err = tc.parseValueType(ctx.GetReturnType())
 		if err != nil {
 			errors = append(errors, err)
 			return types.Invalid(), errors
@@ -125,6 +125,21 @@ func ParseRoleTypeShared(ctx *parser.RoleTypeSharedContext) *types.Roles {
 }
 
 func ParseStructType(ctx parser.IStructContext) (*types.Type, type_error.Error) {
+	// parser error
+	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
+		return types.Invalid(), nil
+	}
+
+	name := ctx.Ident().GetText()
+	roles, ok := ParseRoleType(ctx.RoleType())
+	if !ok {
+		return types.Invalid(), nil
+	}
+
+	return types.New(types.NewStructType(name), roles), nil
+}
+
+func ParseInterfaceType(ctx parser.IInterfaceContext) (*types.Type, type_error.Error) {
 	// parser error
 	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
 		return types.Invalid(), nil

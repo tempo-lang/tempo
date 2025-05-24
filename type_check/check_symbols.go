@@ -3,7 +3,6 @@ package type_check
 import (
 	"tempo/parser"
 	"tempo/sym_table"
-	"tempo/types"
 )
 
 func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
@@ -29,41 +28,29 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		tc.insertSymbol(structSym)
 	}
 
-	for _, fn := range sourceFile.AllFunc_() {
-		fnType, errors := tc.parseFuncType(fn)
-		for _, err := range errors {
+	for _, inf := range sourceFile.AllInterface_() {
+		infType, err := ParseInterfaceType(inf)
+		if err != nil {
 			tc.reportError(err)
-		}
-
-		if len(errors) > 0 {
 			continue
 		}
 
-		if fnType.IsInvalid() {
+		if infType.IsInvalid() {
 			continue
 		}
 
-		funcScope := tc.currentScope.MakeChild(fn.GetStart(), fn.GetStop(), fnType.Roles().Participants())
-		tc.currentScope = funcScope
+		infScope := tc.currentScope.MakeChild(inf.GetStart(), inf.GetStop(), infType.Roles().Participants())
+		tc.currentScope = infScope
 
-		// return type
-		if fn.FuncSig().GetReturnType() != nil {
-			fn.FuncSig().GetReturnType().Accept(tc)
-			if !tc.checkRolesInScope(fn.FuncSig().GetReturnType().RoleType()) {
-				if fnValue, ok := fnType.Value().(*types.FunctionType); ok {
-					// make return type invalid
-					fnType = types.New(
-						types.Function(fnValue.Params(), types.Invalid()),
-						fnType.Roles(),
-					)
-				}
-			}
-		}
+		infSym := sym_table.NewInterfaceSymbol(inf, infScope, infType)
+		tc.currentScope.SetInterface(infSym.(*sym_table.InterfaceSymbol))
 
 		tc.currentScope = tc.currentScope.Parent()
 
-		funcSym := sym_table.NewFuncSymbol(fn, funcScope, fnType)
-		funcScope.SetFunc(funcSym.(*sym_table.FuncSymbol))
-		tc.insertSymbol(funcSym)
+		tc.insertSymbol(infSym)
+	}
+
+	for _, fn := range sourceFile.AllFunc_() {
+		tc.addFuncSymbol(fn.FuncSig(), fn)
 	}
 }

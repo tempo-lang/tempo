@@ -109,7 +109,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	case *parser.ExprCallContext:
 		funcSym := epp.info.Symbols[expr.Ident()].(*sym_table.FuncSymbol)
 
-		funcRoles := parser.RoleTypeAllIdents(funcSym.Func().FuncSig().RoleType())
+		funcRoles := parser.RoleTypeAllIdents(funcSym.FuncSig().RoleType())
 		callRoles, _ := type_check.ParseRoleType(expr.RoleType())
 
 		argRoleSubst := map[string]string{}
