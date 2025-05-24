@@ -60,7 +60,7 @@ type UnmergableRolesError struct {
 
 func (u *UnmergableRolesError) Error() string {
 	roles := misc.JoinStringsFunc(u.Roles, ", ", func(role *types.Roles) string { return role.ToString() })
-	return fmt.Sprintf("can not merge roles %s", roles)
+	return fmt.Sprintf("can not merge roles '%s'", roles)
 }
 
 func (u *UnmergableRolesError) IsTypeError() {}

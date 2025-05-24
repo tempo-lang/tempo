@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"reflect"
+	"tempo/misc"
 )
 
 type Type struct {
@@ -79,6 +80,14 @@ func (t *Type) Value() Value {
 }
 
 func (t *Type) ToString() string {
+	if funcVal, ok := t.value.(*FunctionType); ok {
+		params := misc.JoinStringsFunc(funcVal.params, ", ", func(param *Type) string { return param.ToString() })
+		returnType := ""
+		if funcVal.returnType.Value() != Unit() {
+			returnType = funcVal.returnType.ToString()
+		}
+		return fmt.Sprintf("func@%s(%s)%s", t.roles.ToString(), params, returnType)
+	}
 	return fmt.Sprintf("%s@%s", t.value.ToString(), t.roles.ToString())
 }
 

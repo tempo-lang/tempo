@@ -26,7 +26,7 @@ func NewInvalidDeclTypeError(declToken parser.IValueTypeContext, declType *types
 }
 
 func (e *InvalidDeclTypeError) Error() string {
-	return fmt.Sprintf("invalid declaration type, expected %s found %s", e.DeclType.ToString(), e.ExprType.ToString())
+	return fmt.Sprintf("invalid declaration type, expected '%s' found '%s'", e.DeclType.ToString(), e.ExprType.ToString())
 }
 
 func (e *InvalidDeclTypeError) IsTypeError() {}
@@ -42,7 +42,7 @@ type InvalidAssignTypeError struct {
 }
 
 func (i *InvalidAssignTypeError) Error() string {
-	return fmt.Sprintf("invalid assignment type, expected %s found %s", i.VarType.ToString(), i.ExprType.ToString())
+	return fmt.Sprintf("invalid assignment type, expected '%s' found '%s'", i.VarType.ToString(), i.ExprType.ToString())
 }
 
 func (i *InvalidAssignTypeError) IsTypeError() {}
@@ -72,7 +72,7 @@ func NewReturnNotAllRolesError(ret *parser.StmtReturnContext, missingRoles []str
 }
 
 func (e *ReturnNotAllRolesError) Error() string {
-	return fmt.Sprintf("return statement is missing roles: %s", misc.JoinStrings(e.MissignRoles, ","))
+	return fmt.Sprintf("return statement is missing roles '%s'", misc.JoinStrings(e.MissignRoles, ","))
 }
 
 func (e *ReturnNotAllRolesError) IsTypeError() {}

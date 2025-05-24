@@ -4,4 +4,4 @@ func@(A,B,C) foo(){
   x = shared;
 }
 ---
-4:7: invalid assignment type, expected Int@[A,B,C] found Int@[A,B]
+4:7: invalid assignment type, expected 'Int@[A,B,C]' found 'Int@[A,B]'

@@ -20,7 +20,11 @@ func (t *FunctionType) IsEquatable() bool {
 
 func (f *FunctionType) ToString() string {
 	params := misc.JoinStringsFunc(f.params, ", ", func(param *Type) string { return param.ToString() })
-	return fmt.Sprintf("func(%s)", params)
+	returnType := ""
+	if f.returnType.Value() != Unit() {
+		returnType = f.returnType.ToString()
+	}
+	return fmt.Sprintf("func(%s)%s", params, returnType)
 }
 
 func (f *FunctionType) IsValue()    {}

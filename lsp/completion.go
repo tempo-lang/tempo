@@ -41,9 +41,9 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 			}
 		case *parser.ExprIdentContext:
 			logger.Debugf("Visit Expression (Identifier)")
+			showGlobalSymbols = true
 		case parser.IExprContext:
 			logger.Debugf("Visit Expression")
-			showGlobalSymbols = true
 		case *parser.StmtVarDeclContext:
 			logger.Debugf("Visit Statement (VarDecl)")
 		case parser.IStmtContext:
@@ -108,8 +108,32 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 }
 
 func symbolToCompletionItem(sym sym_table.Symbol) protocol.CompletionItem {
+
+	var kind *protocol.CompletionItemKind = nil
+	switch sym.(type) {
+	case *sym_table.FuncParamSymbol:
+		k := protocol.CompletionItemKindProperty
+		kind = &k
+	case *sym_table.FuncSymbol:
+		k := protocol.CompletionItemKindFunction
+		kind = &k
+	case *sym_table.StructSymbol:
+		k := protocol.CompletionItemKindStruct
+		kind = &k
+	case *sym_table.StructFieldSymbol:
+		k := protocol.CompletionItemKindField
+		kind = &k
+	case *sym_table.VariableSymbol:
+		k := protocol.CompletionItemKindVariable
+		kind = &k
+	}
+
+	symTypeName := sym.Type().ToString()
+
 	return protocol.CompletionItem{
-		Label: sym.SymbolName(),
+		Label:  sym.SymbolName(),
+		Kind:   kind,
+		Detail: &symTypeName,
 	}
 }
 
@@ -153,6 +177,9 @@ func completionItemsForRoleType(file *tempoFile, roleType parser.IRoleTypeContex
 	logger.Infof("Finding completions for RoleType")
 
 	scope := file.info.GlobalScope.Innermost(roleType.GetStart())
+	if scope == nil || scope.GetFunc() == nil {
+		return nil, false
+	}
 
 	funcSym := scope.GetFunc().Roles()
 	if funcSym == nil {

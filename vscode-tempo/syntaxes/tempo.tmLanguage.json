@@ -132,7 +132,7 @@
 					"name": "punctuation.definition.parameters.begin.bracket.round.tempo"
 				}
 			},
-			"end": "(\\))",
+			"end": "(\\{)",
 			"endCaptures": {
 				"1": {
 					"name": "punctuation.definition.parameters.end.bracket.round.tempo"
