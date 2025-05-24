@@ -7,7 +7,7 @@ struct@(A,B) Foo {
   point: Point@(A,B)
 }
 
-func@(A,B) foo() {
+func@(A,B) foo(value: Int@A) {
   let p: Foo@(A,B) = Foo@(A,B) {
     point: Point@(A,B) {x: 10, y: 20}
   };

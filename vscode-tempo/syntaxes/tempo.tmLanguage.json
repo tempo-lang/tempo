@@ -111,16 +111,13 @@
 			"name": "meta.function.signature.tempo",
 			"patterns": [
 				{
-					"include": "#roleList"
-				},
-				{
 					"include": "#funcName"
 				},
 				{
-					"include": "#parameters"
+					"include": "#roleList"
 				},
 				{
-					"include": "#typeDeclaration"
+					"include": "#parameters"
 				}
 			]
 		},
@@ -143,17 +140,29 @@
 			},
 			"patterns": [
 				{
-					"include": "#roleList"
-				},
-				{
-					"include": "#typeDeclaration"
+					"match": "([a-zA-Z][_a-zA-Z0-9]*)\\s*\\:([^\\,\\)]*)",
+					"captures": {
+						"1": {
+							"name": "variable.parameter.tempo"
+						},
+						"2": {
+							"patterns": [
+								{
+									"include": "#roleList"
+								},
+								{
+									"include": "#typeDeclaration"
+								}
+							]
+						}
+					}
 				}
 			]
 		},
 		"roleList": {
 			"patterns": [
 				{
-					"match": "(\\@)([_a-zA-Z0-9\\(\\)\\[\\]\\s,]+)",
+					"match": "(\\@)([\\(\\[]?[_a-zA-Z0-9\\s,]+[\\)\\]]?)",
 					"captures": {
 						"1": {
 							"name": "punctuation.definition.roles.tempo"
@@ -175,7 +184,7 @@
 					"match": "([a-zA-Z][_a-zA-Z0-9]*)",
 					"captures": {
 						"1": {
-							"name": "storage.type.role.tempo"
+							"name": "storage.type.generic.role.tempo"
 						}
 					}
 				},
@@ -195,7 +204,7 @@
 					"patterns": [
 						{
 							"match": "([a-zA-Z][_a-zA-Z0-9]*)",
-							"name": "storage.type.role.tempo"
+							"name": "storage.type.generic.role.tempo"
 						}
 					]
 				},
@@ -215,7 +224,7 @@
 					"patterns": [
 						{
 							"match": "([a-zA-Z][_a-zA-Z0-9]*)",
-							"name": "storage.type.role.tempo"
+							"name": "storage.type.generic.role.tempo"
 						}
 					]
 				}
@@ -258,10 +267,13 @@
 			]
 		},
 		"variableDeclaration": {
-			"begin": "\\b(let)\\b",
+			"begin": "\\b(let)\\s+([a-zA-Z][_a-zA-Z0-9]*)",
 			"beginCaptures": {
 				"1": {
 					"name": "storage.type.local.tempo"
+				},
+				"2": {
+					"name": "variable.other.assignment.tempo"
 				}
 			},
 			"end": "(\\=)",
