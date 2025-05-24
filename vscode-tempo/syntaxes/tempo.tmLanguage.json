@@ -162,7 +162,7 @@
 		"roleList": {
 			"patterns": [
 				{
-					"match": "(\\@)([\\(\\[]?[_a-zA-Z0-9\\s,]+[\\)\\]]?)",
+					"match": "(\\@)([_a-zA-Z0-9]+|[\\(\\[][_a-zA-Z0-9\\s,]+[\\)\\]])",
 					"captures": {
 						"1": {
 							"name": "punctuation.definition.roles.tempo"
@@ -320,7 +320,7 @@
 		"expressions": {
 			"patterns": [
 				{
-					"match": "([\\(\\[]?[_a-zA-Z0-9\\s,]+[\\)\\]]?)\\s*(\\-\\>)\\s*([\\(\\[]?[_a-zA-Z0-9\\s,]+[\\)\\]]?)",
+					"match": "([_a-zA-Z0-9]+|[\\(\\[][_a-zA-Z0-9\\s,]+[\\)\\]])\\s*(\\-\\>)\\s*([_a-zA-Z0-9]+|[\\(\\[][_a-zA-Z0-9\\s,]+[\\)\\]])",
 					"captures": {
 						"1": {
 							"patterns": [

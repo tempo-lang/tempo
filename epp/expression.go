@@ -40,8 +40,6 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			switch sym.Type().Value().(type) {
 			case *types.FunctionType:
 				appendRole = true
-			case *types.StructType:
-				appendRole = true
 			}
 
 			name := sym.SymbolName()
@@ -185,6 +183,11 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		structType := projection.NewStructType(exprType.Value().(*types.StructType), exprRoleSubst[roleName])
 
 		return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst[roleName], fieldNames, fields, structType), aux
+	case *parser.ExprFieldAccessContext:
+		baseExpr, aux := epp.eppExpression(roleName, expr.Expr())
+		fieldName := expr.Ident().GetText()
+
+		return projection.NewExprFieldAccess(baseExpr, fieldName, exprType.Value()), aux
 	case *parser.ExprContext:
 		panic("expr should never be base type")
 	}

@@ -160,3 +160,47 @@ func NewStructWrongRoleCountError(roleType parser.IRoleTypeContext, sym *sym_tab
 		sym:      sym,
 	}
 }
+
+type FieldAccessUnknownField struct {
+	expr *parser.ExprFieldAccessContext
+	sym  sym_table.Symbol
+}
+
+func (e *FieldAccessUnknownField) Error() string {
+	return fmt.Sprintf("unknown field '%s' in '%s'", e.expr.Ident().GetText(), e.sym.SymbolName())
+}
+
+func (e *FieldAccessUnknownField) IsTypeError() {}
+
+func (e *FieldAccessUnknownField) ParserRule() antlr.ParserRuleContext {
+	return e.expr.Ident()
+}
+
+func NewFieldAccessUnknownField(expr *parser.ExprFieldAccessContext, sym sym_table.Symbol) Error {
+	return &FieldAccessUnknownField{
+		expr: expr,
+		sym:  sym,
+	}
+}
+
+type FieldAccessUnexpectedType struct {
+	fieldAccess *parser.ExprFieldAccessContext
+	objectType  *types.Type
+}
+
+func (e *FieldAccessUnexpectedType) Error() string {
+	return fmt.Sprintf("cannot access field of type '%s'", e.objectType.ToString())
+}
+
+func (e *FieldAccessUnexpectedType) IsTypeError() {}
+
+func (e *FieldAccessUnexpectedType) ParserRule() antlr.ParserRuleContext {
+	return e.fieldAccess.Ident()
+}
+
+func NewFieldAccessUnexpectedType(expr *parser.ExprFieldAccessContext, objectType *types.Type) Error {
+	return &FieldAccessUnexpectedType{
+		fieldAccess: expr,
+		objectType:  objectType,
+	}
+}

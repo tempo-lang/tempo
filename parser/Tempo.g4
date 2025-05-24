@@ -69,6 +69,7 @@ expr:
 	| roleType COM roleType expr				# exprCom
 	| ident ROLE_AT roleType exprStructField	# exprStruct
 	| ident funcArgList ROLE_AT roleType		# exprCall
+	| expr DOT ident							# exprFieldAccess
 	| ident										# exprIdent
 	| LPAREN expr RPAREN						# exprGroup;
 
@@ -122,6 +123,7 @@ OR: '||';
 IS: '=';
 ROLE_AT: '@';
 COMMA: ',';
+DOT: '.';
 COLON: ':';
 COM: '->';
 

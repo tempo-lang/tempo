@@ -435,3 +435,39 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 func (tc *typeChecker) VisitExprStructField(ctx *parser.ExprStructFieldContext) any {
 	return nil
 }
+
+func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) any {
+
+	objectType := tc.visitExpr(ctx.Expr())
+	if objectType.IsInvalid() {
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	if structType, ok := objectType.Value().(*types.StructType); ok {
+		structSym := tc.currentScope.LookupParent(structType.Name()).(*sym_table.StructSymbol)
+
+		var field *sym_table.StructFieldSymbol = nil
+		for _, f := range structSym.Fields() {
+			if ctx.Ident().GetText() == f.SymbolName() {
+				field = f
+				break
+			}
+		}
+
+		if field == nil {
+			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, structSym))
+			return tc.registerType(ctx, types.Invalid())
+		}
+
+		substMap, rolesMatch := structSym.Type().Roles().SubstituteMap(objectType.Roles())
+		if !rolesMatch {
+			return tc.registerType(ctx, types.Invalid())
+		}
+
+		fieldType := field.Type().SubstituteRoles(substMap)
+		return tc.registerType(ctx, fieldType)
+	}
+
+	tc.reportError(type_error.NewFieldAccessUnexpectedType(ctx, objectType))
+	return tc.registerType(ctx, types.Invalid())
+}

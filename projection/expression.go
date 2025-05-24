@@ -418,3 +418,35 @@ func NewExprStruct(structName, structRole string, fieldNames []string, fields ma
 		StructType: typ,
 	}
 }
+
+type ExprFieldAccess struct {
+	BaseExpr  Expression
+	FieldName string
+	FieldType types.Value
+}
+
+func (e *ExprFieldAccess) Codegen() jen.Code {
+	return jen.Add(e.BaseExpr.Codegen()).Dot(e.FieldName)
+}
+
+func (e *ExprFieldAccess) Type() types.Value {
+	return e.FieldType
+}
+
+func (e *ExprFieldAccess) ReturnsValue() bool {
+	return true
+}
+
+func (e *ExprFieldAccess) HasSideEffects() bool {
+	return e.BaseExpr.HasSideEffects()
+}
+
+func (e *ExprFieldAccess) IsExpression() {}
+
+func NewExprFieldAccess(structExpr Expression, fieldName string, typ types.Value) Expression {
+	return &ExprFieldAccess{
+		BaseExpr:  structExpr,
+		FieldName: fieldName,
+		FieldType: typ,
+	}
+}

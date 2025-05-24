@@ -7,3 +7,5 @@ func@(A,B) foo() {
   let p: Point@(A,B) = Point@(A,B) {x: 10, y: 20};
   let value: Int@A = p.invalid;
 }
+---
+8:24: unknown field 'invalid' in 'Point'

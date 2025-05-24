@@ -5,4 +5,5 @@ struct@(A,B) Pair {
 
 func@(X,Y) foo() {
   let p: Pair@(X,Y) = Pair@(X,Y) { num: 1, logic: true };
+  let x: Int@X = p.num;
 }
