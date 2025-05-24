@@ -23,7 +23,7 @@ The language is under development, here is a brief list of implemented things.
 Values are statically typed with the addition of roles.
 
 ```
-struct Pair@(A,B) {
+struct@(A,B) Pair {
   left: Int@A
   right: Int@B
 }

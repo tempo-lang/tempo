@@ -47,9 +47,9 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		tc.currentScope = funcScope
 
 		// return type
-		if fn.ValueType() != nil {
-			fn.ValueType().Accept(tc)
-			if !tc.checkRolesInScope(fn.ValueType().RoleType()) {
+		if fn.FuncSig().GetReturnType() != nil {
+			fn.FuncSig().GetReturnType().Accept(tc)
+			if !tc.checkRolesInScope(fn.FuncSig().GetReturnType().RoleType()) {
 				if fnValue, ok := fnType.Value().(*types.FunctionType); ok {
 					// make return type invalid
 					fnType = types.New(

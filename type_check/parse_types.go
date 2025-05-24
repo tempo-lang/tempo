@@ -60,14 +60,14 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 func (tc *typeChecker) parseFuncType(ctx parser.IFuncContext) (*types.Type, []type_error.Error) {
 	errors := []type_error.Error{}
 
-	funcRoles, ok := ParseRoleType(ctx.RoleType())
+	funcRoles, ok := ParseRoleType(ctx.FuncSig().RoleType())
 	if !ok {
 		return types.Invalid(), errors
 	}
 
 	params := []*types.Type{}
 
-	for _, param := range ctx.FuncParamList().AllFuncParam() {
+	for _, param := range ctx.FuncSig().FuncParamList().AllFuncParam() {
 
 		paramType, err := tc.parseValueType(param.ValueType())
 		if err != nil {
@@ -82,9 +82,9 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncContext) (*types.Type, []ty
 	}
 
 	returnType := types.New(types.Unit(), types.EveryoneRole())
-	if ctx.ValueType() != nil {
+	if ctx.FuncSig().GetReturnType() != nil {
 		var err type_error.Error
-		returnType, err = tc.parseValueType(ctx.ValueType())
+		returnType, err = tc.parseValueType(ctx.FuncSig().GetReturnType())
 		if err != nil {
 			errors = append(errors, err)
 			return types.Invalid(), errors

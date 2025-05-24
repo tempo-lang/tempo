@@ -25,9 +25,20 @@ structFieldList:
 
 structField: ident COLON valueType;
 
+// interface
+interface:
+	INTERFACE ROLE_AT roleType ident interfaceMethodsList;
+
+interfaceMethodsList:
+	LCURLY (interfaceMethod (COMMA interfaceMethod)*)? RCURLY;
+
+interfaceMethod: funcSig END;
+
 // function
-func:
-	FUNC ROLE_AT roleType ident funcParamList valueType? scope;
+func: funcSig scope;
+
+funcSig:
+	FUNC ROLE_AT roleType name = ident params = funcParamList returnType = valueType?;
 
 funcParamList: LPAREN (funcParam (COMMA funcParam)*)? RPAREN;
 
@@ -83,6 +94,7 @@ exprStructField:
 // Keywords
 
 STRUCT: 'struct';
+INTERFACE: 'interface';
 FUNC: 'func';
 RETURN: 'return';
 LET: 'let';

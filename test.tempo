@@ -5,5 +5,4 @@ struct@(A,B) Point {
 
 func@(A,B) foo(value: Int@B, another: Int@[A,B]) Int@A {
   let p: Point@(A,B) = Point@(A,B) {first: 10, second: 20};
-  let x: Int@A = foo;
 }

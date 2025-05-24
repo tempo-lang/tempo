@@ -7,7 +7,7 @@ import (
 	"tempo/type_check/type_error"
 )
 
-func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncContext) {
+func (a typeChecker) checkFuncDuplicateRoles(ctx parser.IFuncSigContext) {
 	roles := parser.RoleTypeAllIdents(ctx.RoleType())
 	slices.SortFunc(roles, func(a, b parser.IIdentContext) int {
 		return cmp.Compare(a.GetText(), b.GetText())

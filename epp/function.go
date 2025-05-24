@@ -7,10 +7,10 @@ import (
 )
 
 func (epp *epp) eppFunc(function parser.IFuncContext) *projection.Choreography {
-	sym := epp.info.Symbols[function.Ident()]
+	sym := epp.info.Symbols[function.FuncSig().Ident()]
 	func_role := sym.Type().Roles()
 
-	choreography := projection.NewChoreography(function.Ident().GetText())
+	choreography := projection.NewChoreography(function.FuncSig().Ident().GetText())
 
 	for _, role := range func_role.Participants() {
 		epp.eppFuncRole(choreography, function, role)
@@ -20,14 +20,14 @@ func (epp *epp) eppFunc(function parser.IFuncContext) *projection.Choreography {
 }
 
 func (epp *epp) eppFuncRole(choreography *projection.Choreography, function parser.IFuncContext, roleName string) {
-	funcSym := epp.info.Symbols[function.Ident()]
+	funcSym := epp.info.Symbols[function.FuncSig().Ident()]
 	funcType := funcSym.Type().Value().(*types.FunctionType)
 
 	returnValue := epp.eppType(roleName, funcType.ReturnType())
 	fn := choreography.AddFunc(roleName, function, returnValue)
 
 	// project parameters
-	for i, param := range function.FuncParamList().AllFuncParam() {
+	for i, param := range function.FuncSig().FuncParamList().AllFuncParam() {
 		paramType := funcType.Params()[i]
 		if paramType.Roles().Contains(roleName) {
 			fn.AddParam(param, paramType)

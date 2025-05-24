@@ -66,7 +66,7 @@ func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result an
 
 func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 	// functions are already resolved by addGlobalSymbols
-	sym, found := tc.info.Symbols[ctx.Ident()].(*sym_table.FuncSymbol)
+	sym, found := tc.info.Symbols[ctx.FuncSig().GetName()].(*sym_table.FuncSymbol)
 	if !found {
 		// was not found if function has parser errors
 		return nil
@@ -75,23 +75,27 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 	tc.currentScope = sym.Scope()
 
 	if sym.Type().Roles().IsSharedRole() {
-		tc.reportError(type_error.NewUnexpectedSharedTypeError(ctx.Ident(), sym.Type()))
+		tc.reportError(type_error.NewUnexpectedSharedTypeError(ctx.FuncSig().GetName(), sym.Type()))
 	}
 
-	tc.checkFuncDuplicateRoles(ctx)
+	ctx.FuncSig().Accept(tc)
 
-	ctx.FuncParamList().Accept(tc)
-
-	if ctx.Scope() == nil {
-		// nil if parser error
-		return nil
-	}
-
-	for _, stmt := range ctx.Scope().AllStmt() {
-		stmt.Accept(tc)
+	// nil if parser error
+	if ctx.Scope() != nil {
+		for _, stmt := range ctx.Scope().AllStmt() {
+			stmt.Accept(tc)
+		}
 	}
 
 	tc.currentScope = tc.currentScope.Parent()
+	return nil
+}
+
+func (tc *typeChecker) VisitFuncSig(ctx *parser.FuncSigContext) any {
+
+	tc.checkFuncDuplicateRoles(ctx)
+	ctx.FuncParamList().Accept(tc)
+
 	return nil
 }
 

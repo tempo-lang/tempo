@@ -296,7 +296,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	funcRoles := parser.RoleTypeAllIdents(funcSym.Func().RoleType())
+	funcRoles := parser.RoleTypeAllIdents(funcSym.Func().FuncSig().RoleType())
 	if len(callRoles.Participants()) != len(funcRoles) {
 		tc.reportError(type_error.NewCallWrongRoleCountError(ctx))
 		return tc.registerType(ctx, types.Invalid())

@@ -10,11 +10,11 @@ import (
 )
 
 type DuplicateRolesError struct {
-	Func           parser.IFuncContext
+	Func           parser.IFuncSigContext
 	DuplicateRoles []parser.IIdentContext
 }
 
-func NewDuplicateRolesError(function parser.IFuncContext, duplicateRoles []parser.IIdentContext) Error {
+func NewDuplicateRolesError(function parser.IFuncSigContext, duplicateRoles []parser.IIdentContext) Error {
 	return &DuplicateRolesError{
 		Func:           function,
 		DuplicateRoles: duplicateRoles,

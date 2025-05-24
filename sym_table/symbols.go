@@ -25,11 +25,11 @@ func (f *FuncSymbol) Parent() *Scope {
 }
 
 func (f *FuncSymbol) Ident() parser.IIdentContext {
-	return f.funcCtx.Ident()
+	return f.funcCtx.FuncSig().Ident()
 }
 
 func (f *FuncSymbol) SymbolName() string {
-	return f.funcCtx.Ident().GetText()
+	return f.funcCtx.FuncSig().Ident().GetText()
 }
 
 func (f *FuncSymbol) Type() *types.Type {
