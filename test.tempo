@@ -12,5 +12,5 @@ func@(A,B) foo() {
     point: Point@(A,B) {x: 10, y: 20}
   };
 
-  let x: Foo@[A,B] = Foo@(A,B) {};
+  let x: Int@A = await B -> [A,B] 10;
 }

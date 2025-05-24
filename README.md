@@ -14,6 +14,8 @@ The language is under development, here is a brief list of implemented things.
 - [ ] Closures
 - [ ] Lists
 - [ ] Maps
+- [ ] Methods
+- [ ] Interfaces
 - [ ] Co-routines
 
 ## Values and Types

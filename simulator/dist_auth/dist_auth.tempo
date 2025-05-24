@@ -1,0 +1,42 @@
+struct Credentials {
+  username: String,
+  password: String
+}
+
+enum@(Client, Service) AuthResult {
+  success { token: String@[Client, Service] },
+  failure
+}
+
+interface ClientRegistry {
+  func getSalt(username: String) String;
+  func check(hash: String) Bool;
+}
+
+interface TokenGenerator {
+  func generateToken() String;
+}
+
+func calcHash(salt: String, password: String) String {
+  return username + salt;
+}
+
+func@(Client, Service, IP) Authenticate(
+  credentials: Credentials@Client,
+  registry: ClientRegistry@IP,
+  tokenGen: TokenGenerator@IP
+) AuthResult@(Client, Service) {
+
+  let username: String@IP = Client -> IP credentials.username;
+  let salt: String@Client = IP -> Client registry.getSalt(username);
+
+  let hash: String@IP = Client -> IP calcHash(salt, credentials.username)@Client;
+  let valid: Bool@[Client, Service, IP] = IP -> [Client, Service] registry.check(hash);
+
+  if valid {
+    let token: String@[Client, Service] = IP -> [Client, Service] tokenGen.generateToken()
+    return AuthResult@(Client, Service).success { token };
+  } else {
+    return AuthResult@(Client, Service).failure;
+  }
+}

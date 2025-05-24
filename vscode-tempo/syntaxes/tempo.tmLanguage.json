@@ -18,6 +18,9 @@
 			"include": "#structDeclaration"
 		},
 		{
+			"include": "#expressions"
+		},
+		{
 			"include": "#operators"
 		},
 		{
@@ -74,6 +77,10 @@
 		},
 		"operators": {
 			"patterns": [
+				{
+					"match": "(\\-\\>)",
+					"name": "keyword.operator.communicate.tempo"
+				},
 				{
 					"match": "(\\+|\\-|\\*|\\/|\\%)",
 					"name": "keyword.operator.arithmetic.tempo"
@@ -146,23 +153,36 @@
 		"roleList": {
 			"patterns": [
 				{
-					"match": "(\\@)([a-zA-Z][_a-zA-Z0-9]*)",
+					"match": "(\\@)([_a-zA-Z0-9\\(\\)\\[\\]\\s,]+)",
 					"captures": {
 						"1": {
 							"name": "punctuation.definition.roles.tempo"
 						},
 						"2": {
+							"patterns": [
+								{
+									"include": "#roleListWithoutAt"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		"roleListWithoutAt": {
+			"patterns": [
+				{
+					"match": "([a-zA-Z][_a-zA-Z0-9]*)",
+					"captures": {
+						"1": {
 							"name": "storage.type.role.tempo"
 						}
 					}
 				},
 				{
-					"begin": "(\\@)(\\()",
+					"begin": "(\\()",
 					"beginCaptures": {
 						"1": {
-							"name": "punctuation.definition.roles.tempo"
-						},
-						"2": {
 							"name": "punctuation.bracket.round.tempo"
 						}
 					},
@@ -180,12 +200,9 @@
 					]
 				},
 				{
-					"begin": "(\\@)(\\[)",
+					"begin": "(\\[)",
 					"beginCaptures": {
 						"1": {
-							"name": "punctuation.definition.roles.tempo"
-						},
-						"2": {
 							"name": "punctuation.bracket.round.tempo"
 						}
 					},
@@ -285,6 +302,32 @@
 				},
 				{
 					"include": "#typeDeclaration"
+				}
+			]
+		},
+		"expressions": {
+			"patterns": [
+				{
+					"match": "([\\(\\[]?[_a-zA-Z0-9\\s,]+[\\)\\]]?)\\s*(\\-\\>)\\s*([\\(\\[]?[_a-zA-Z0-9\\s,]+[\\)\\]]?)",
+					"captures": {
+						"1": {
+							"patterns": [
+								{
+									"include": "#roleListWithoutAt"
+								}
+							]
+						},
+						"2": {
+							"name": "keyword.operator.communicate.tempo"
+						},
+						"3": {
+							"patterns": [
+								{
+									"include": "#roleListWithoutAt"
+								}
+							]
+						}
+					}
 				}
 			]
 		}
