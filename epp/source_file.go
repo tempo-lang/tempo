@@ -8,6 +8,11 @@ import (
 func (epp *epp) eppSourceFile(sourceFile parser.ISourceFileContext) *projection.SourceFile {
 	result := projection.NewSourceFile()
 
+	for _, inf := range sourceFile.AllInterface_() {
+		eppInf := epp.eppInterface(inf)
+		result.AddInterface(eppInf)
+	}
+
 	for _, st := range sourceFile.AllStruct_() {
 		eppSt := epp.eppStruct(st)
 		result.AddStruct(eppSt)

@@ -2,7 +2,6 @@ package projection
 
 import (
 	"tempo/parser"
-	"tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -21,17 +20,15 @@ func NewChoreography(name string) *Choreography {
 	}
 }
 
-func (c *Choreography) AddFunc(role string, funcCtx parser.IFuncContext, returnValue types.Value) *Func {
-	c.Roles = append(c.Roles, role)
-	c.Funcs[role] = &Func{
+func (c *Choreography) AddFunc(sig *FuncSig, funcCtx parser.IFuncContext) *Func {
+	c.Roles = append(c.Roles, sig.Role)
+	c.Funcs[sig.Role] = &Func{
+		FuncSig:      sig,
 		Choreography: c,
 		FuncCtx:      funcCtx,
-		Name:         funcCtx.FuncSig().Ident().GetText(),
-		Role:         role,
-		ReturnValue:  returnValue,
 		Body:         []Statement{},
 	}
-	return c.Funcs[role]
+	return c.Funcs[sig.Role]
 }
 
 func (c *Choreography) Codegen(file *jen.File) {
