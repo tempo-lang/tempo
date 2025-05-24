@@ -34,11 +34,12 @@ func (s *tempoServer) textDocumentDidChange(ctx *glsp.Context, params *protocol.
 	}
 
 	source := file.GetSource()
+	newSource := file.GetSource()
 
 	for _, change := range params.ContentChanges {
 		switch change := change.(type) {
 		case protocol.TextDocumentContentChangeEventWhole:
-			source = change.Text
+			newSource = change.Text
 		case protocol.TextDocumentContentChangeEvent:
 			line := 0
 			col := 0
@@ -67,13 +68,13 @@ func (s *tempoServer) textDocumentDidChange(ctx *glsp.Context, params *protocol.
 				}
 			}
 
-			source = source[0:startIdx] + change.Text + source[endIdx:]
+			newSource = source[0:startIdx] + change.Text + source[endIdx:]
 		default:
 			logger.Errorf("unexpected type: %#v", change)
 		}
 	}
 
-	file.ReplaceSource(source)
+	file.ReplaceSource(newSource)
 
 	go s.analyzeFile(ctx, file)
 

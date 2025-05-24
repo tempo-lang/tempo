@@ -9,36 +9,7 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func parserRuleToRange(rule antlr.ParserRuleContext) protocol.Range {
-	endTokenLength := rule.GetStop().GetStop() - rule.GetStop().GetStart()
-	return protocol.Range{
-		Start: protocol.Position{
-			Line:      uint32(rule.GetStart().GetLine() - 1),
-			Character: uint32(rule.GetStart().GetColumn()),
-		},
-		End: protocol.Position{
-			Line:      uint32(rule.GetStop().GetLine() - 1),
-			Character: uint32(rule.GetStop().GetColumn() + endTokenLength + 1),
-		},
-	}
-}
-
-func tokenToRange(token antlr.Token) protocol.Range {
-	endTokenLength := token.GetStop() - token.GetStart()
-	return protocol.Range{
-		Start: protocol.Position{
-			Line:      uint32(token.GetLine() - 1),
-			Character: uint32(token.GetColumn()),
-		},
-		End: protocol.Position{
-			Line:      uint32(token.GetLine() - 1),
-			Character: uint32(token.GetColumn() + endTokenLength + 1),
-		},
-	}
-}
-
 func (s *tempoServer) analyzeFile(ctx *glsp.Context, file *tempoFile) {
-
 	logger.Infof("Analyzing file: %s", file.GetUri())
 
 	diagnostics := []protocol.Diagnostic{}

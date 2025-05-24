@@ -1,6 +1,7 @@
 package sym_table
 
 import (
+	"iter"
 	"tempo/parser"
 	"tempo/types"
 
@@ -81,6 +82,16 @@ func (scope *Scope) Global() *Scope {
 
 func (scope *Scope) Children() []*Scope {
 	return scope.children
+}
+
+func (scope *Scope) Symbols() iter.Seq[Symbol] {
+	return func(yield func(Symbol) bool) {
+		for _, sym := range scope.symbols {
+			if !yield(sym) {
+				return
+			}
+		}
+	}
 }
 
 func (scope *Scope) Roles() *types.Roles {
