@@ -126,6 +126,12 @@ func symbolToCompletionItem(sym sym_table.Symbol) protocol.CompletionItem {
 	case *sym_table.VariableSymbol:
 		k := protocol.CompletionItemKindVariable
 		kind = &k
+	case *sym_table.InterfaceMethodSymbol:
+		k := protocol.CompletionItemKindMethod
+		kind = &k
+	case *sym_table.InterfaceSymbol:
+		k := protocol.CompletionItemKindInterface
+		kind = &k
 	}
 
 	symTypeName := sym.Type().ToString()
@@ -158,14 +164,23 @@ func completionItemsForFieldAccess(file *tempoFile, fieldAccess *parser.ExprFiel
 		return nil, false
 	}
 
-	if structType, ok := fieldType.Value().(*types.StructType); ok {
+	switch fieldType := fieldType.Value().(type) {
+	case *types.StructType:
 		scope := file.info.GlobalScope.Innermost(fieldAccess.GetStart())
 
-		structSym := scope.LookupParent(structType.Name()).(*sym_table.StructSymbol)
+		structSym := scope.LookupParent(fieldType.Name()).(*sym_table.StructSymbol)
 
 		completionItems := []protocol.CompletionItem{}
 		for _, field := range structSym.Fields() {
 			completionItems = append(completionItems, symbolToCompletionItem(field))
+		}
+		return completionItems, true
+	case *types.InterfaceType:
+		infSym := file.info.Symbols[fieldType.Ident()].(*sym_table.InterfaceSymbol)
+
+		completionItems := []protocol.CompletionItem{}
+		for _, method := range infSym.Methods() {
+			completionItems = append(completionItems, symbolToCompletionItem(method))
 		}
 		return completionItems, true
 	}

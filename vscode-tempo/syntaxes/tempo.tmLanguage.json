@@ -18,6 +18,9 @@
 			"include": "#structDeclaration"
 		},
 		{
+			"include": "#interfaceDeclaration"
+		},
+		{
 			"include": "#expressions"
 		},
 		{
@@ -102,7 +105,7 @@
 					"name": "storage.type.func.tempo"
 				}
 			},
-			"end": "(\\{)",
+			"end": "(\\{|\\;)",
 			"endCaptures": {
 				"1": {
 					"name": "punctuation.definition.block.begin.tempo"
@@ -126,18 +129,6 @@
 			"name": "entity.name.function.tempo"
 		},
 		"parameters": {
-			"begin": "(\\()",
-			"beginCaptures": {
-				"1": {
-					"name": "punctuation.definition.parameters.begin.bracket.round.tempo"
-				}
-			},
-			"end": "(\\{)",
-			"endCaptures": {
-				"1": {
-					"name": "punctuation.definition.parameters.end.bracket.round.tempo"
-				}
-			},
 			"patterns": [
 				{
 					"match": "([a-zA-Z][_a-zA-Z0-9]*)\\s*\\:([^\\,\\)]*)",
@@ -305,6 +296,35 @@
 				}
 			},
 			"patterns": [
+				{
+					"match": "\\{",
+					"name": "punctuation.definition.begin.bracket.curly.tempo"
+				},
+				{
+					"include": "#roleList"
+				},
+				{
+					"include": "#typeDeclaration"
+				}
+			]
+		},
+		"interfaceDeclaration": {
+			"begin": "\\b(interface)\\b",
+			"beginCaptures": {
+				"1": {
+					"name": "storage.type.local.tempo"
+				}
+			},
+			"end": "(\\})",
+			"endCaptures": {
+				"1": {
+					"name": "punctuation.definition.end.bracket.curly.tempo"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#funcDeclaration"
+				},
 				{
 					"match": "\\{",
 					"name": "punctuation.definition.begin.bracket.curly.tempo"

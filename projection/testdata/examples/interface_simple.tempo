@@ -1,5 +1,5 @@
-interface@A Sum {
-  func@A sum(a: Int@A, b: Int@A) Int@A;
+interface@X Sum {
+  func@X sum(a: Int@X, b: Int@X) Int@X;
 }
 
 func@A foo(x: Sum@A) {

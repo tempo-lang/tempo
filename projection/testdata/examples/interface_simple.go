@@ -4,12 +4,12 @@ package choreography
 import runtime "tempo/runtime"
 
 // Projection of interface Sum
-type Sum_A interface {
+type Sum_X interface {
 	sum(env *runtime.Env, a int, b int) int
 }
 
 // Projection of choreography foo
-func foo_A(env *runtime.Env, x Sum_A) {
-	var value int = x.sum(env.Subst("A", "A"), 10, 20)
+func foo_A(env *runtime.Env, x Sum_X) {
+	var value int = x.sum(env.Subst("A", "X"), 10, 20)
 	_ = value
 }
