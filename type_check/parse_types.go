@@ -91,7 +91,7 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, [
 		}
 	}
 
-	fn := types.New(types.Function(params, returnType), funcRoles)
+	fn := types.New(types.Function(ctx.Ident(), params, returnType), funcRoles)
 
 	return fn, errors
 }
@@ -145,11 +145,11 @@ func ParseInterfaceType(ctx parser.IInterfaceContext) (*types.Type, type_error.E
 		return types.Invalid(), nil
 	}
 
-	name := ctx.Ident().GetText()
+	// name := ctx.Ident().GetText()
 	roles, ok := ParseRoleType(ctx.RoleType())
 	if !ok {
 		return types.Invalid(), nil
 	}
 
-	return types.New(types.NewStructType(name), roles), nil
+	return types.New(types.NewInterfaceType(ctx.Ident()), roles), nil
 }

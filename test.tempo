@@ -1,12 +1,8 @@
-struct@(A,B) Point {
-  first: Int@A,
-  second: Int@B
+func@(X,Y) send(value: Int@X) Int@Y {
+    return await X->Y value;
 }
 
-interface@A Sum {
-  func@A sum(a: Int@A, b: Int@A) Int@A;
-}
-
-func@(A,B) foo(value: Int@B, another: Int@[A,B]) Int@A {
-  let p: Point@(A,B) = Point@(A,B) {first: 10, second: 20};
+func@(A,B) foo() {
+    let x: Int@A = 10;
+    let Y: Int@B = send(x)@(A,B);
 }

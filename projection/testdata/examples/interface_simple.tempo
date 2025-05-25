@@ -1,0 +1,7 @@
+interface@A Sum {
+  func@A sum(a: Int@A, b: Int@A) Int@A;
+}
+
+func@A foo(x: Sum@A) {
+  let value: Int@A = x.sum(10, 20)@A;
+}

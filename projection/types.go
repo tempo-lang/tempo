@@ -20,14 +20,25 @@ func CodegenType(t types.Value) jen.Code {
 		return CodegenStructType(structType)
 	}
 	if _, ok := t.(*types.StructType); ok {
-		panic(fmt.Sprintf("struct %v should be of type projection.StructType instead", t))
+		panic(fmt.Sprintf("struct %#v should be of type projection.StructType instead", t))
 	}
 
-	panic(fmt.Sprintf("failed to generate type: %v", t))
+	if infType, isInf := t.(*InterfaceType); isInf {
+		return CodegenInterfaceType(infType)
+	}
+	if _, ok := t.(*types.InterfaceType); ok {
+		panic(fmt.Sprintf("struct %#v should be of type projection.InterfaceType instead", t))
+	}
+
+	panic(fmt.Sprintf("failed to generate type: %#v", t))
 }
 
 func CodegenStructType(structType *StructType) jen.Code {
 	return jen.Id(fmt.Sprintf("%s_%s", structType.Name(), structType.Role()))
+}
+
+func CodegenInterfaceType(infType *InterfaceType) jen.Code {
+	return jen.Id(fmt.Sprintf("%s_%s", infType.Name(), infType.Role()))
 }
 
 func CodegenBuiltinType(builtinType types.Builtin) jen.Code {

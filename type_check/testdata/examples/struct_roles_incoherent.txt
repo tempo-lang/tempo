@@ -13,4 +13,4 @@ func@(A,B) foo() {
   };
 }
 ---
-12:12: type 'struct Point@(B,A)' is not compatible with type 'struct Point@(A,B)'
+12:12: type 'struct@(B,A) Point' is not compatible with type 'struct@(A,B) Point'

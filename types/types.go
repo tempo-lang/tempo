@@ -80,14 +80,21 @@ func (t *Type) Value() Value {
 }
 
 func (t *Type) ToString() string {
-	if funcVal, ok := t.value.(*FunctionType); ok {
-		params := misc.JoinStringsFunc(funcVal.params, ", ", func(param *Type) string { return param.ToString() })
+
+	switch value := t.value.(type) {
+	case *FunctionType:
+		params := misc.JoinStringsFunc(value.params, ", ", func(param *Type) string { return param.ToString() })
 		returnType := ""
-		if funcVal.returnType.Value() != Unit() {
-			returnType = funcVal.returnType.ToString()
+		if value.returnType.Value() != Unit() {
+			returnType = value.returnType.ToString()
 		}
 		return fmt.Sprintf("func@%s(%s)%s", t.roles.ToString(), params, returnType)
+	case *StructType:
+		return fmt.Sprintf("struct@%s %s", t.roles.ToString(), value.Name())
+	case *InterfaceType:
+		return fmt.Sprintf("interface@%s %s", t.roles.ToString(), value.Name())
 	}
+
 	return fmt.Sprintf("%s@%s", t.value.ToString(), t.roles.ToString())
 }
 

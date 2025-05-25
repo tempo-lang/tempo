@@ -3,6 +3,7 @@ package projection
 import (
 	"fmt"
 	"tempo/parser"
+	"tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -70,8 +71,24 @@ func (inf *Interface) Codegen() *jen.Statement {
 	methods := []jen.Code{}
 
 	for _, method := range inf.Methods {
-		methods = append(methods, method.Codegen(false))
+		methods = append(methods, method.Codegen(true))
 	}
 
 	return jen.Type().Id(fmt.Sprintf("%s_%s", inf.Name, inf.Role)).Interface(methods...)
+}
+
+type InterfaceType struct {
+	types.InterfaceType
+	role string
+}
+
+func NewInterfaceType(interfaceType *types.InterfaceType, role string) *InterfaceType {
+	return &InterfaceType{
+		InterfaceType: *interfaceType,
+		role:          role,
+	}
+}
+
+func (i *InterfaceType) Role() string {
+	return i.role
 }

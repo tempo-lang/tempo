@@ -321,7 +321,7 @@ type ExprCallRoleSubs struct {
 }
 
 type ExprCall struct {
-	FuncName   string
+	FuncExpr   Expression
 	FuncRole   string
 	Args       []Expression
 	ReturnType types.Value
@@ -341,7 +341,9 @@ func (e *ExprCall) Codegen() jen.Code {
 	for _, arg := range e.Args {
 		args = append(args, arg.Codegen())
 	}
-	return jen.Id(fmt.Sprintf("%s_%s", e.FuncName, e.FuncRole)).Call(args...)
+
+	return jen.Add(e.FuncExpr.Codegen()).Call(args...)
+	// return jen.Id(fmt.Sprintf("%s_%s", e.FuncName, e.FuncRole)).Call(args...)
 }
 
 func (e *ExprCall) Type() types.Value {
@@ -358,9 +360,9 @@ func (e *ExprCall) HasSideEffects() bool {
 
 func (e *ExprCall) IsExpression() {}
 
-func NewExprCall(funcName string, funcRole string, args []Expression, returnType types.Value, roleSubs []ExprCallRoleSubs) Expression {
+func NewExprCall(funcExpr Expression, funcRole string, args []Expression, returnType types.Value, roleSubs []ExprCallRoleSubs) Expression {
 	return &ExprCall{
-		FuncName:   funcName,
+		FuncExpr:   funcExpr,
 		FuncRole:   funcRole,
 		Args:       args,
 		ReturnType: returnType,

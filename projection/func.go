@@ -24,10 +24,10 @@ type Func struct {
 }
 
 type FuncParam struct {
-	FuncSig  *FuncSig
-	ParamCtx parser.IFuncParamContext
-	Name     string
-	Type     *types.Type
+	FuncSig   *FuncSig
+	ParamCtx  parser.IFuncParamContext
+	Name      string
+	TypeValue types.Value
 }
 
 func NewFuncSig(role string, funcSigCtx parser.IFuncSigContext, returnValue types.Value) *FuncSig {
@@ -40,12 +40,12 @@ func NewFuncSig(role string, funcSigCtx parser.IFuncSigContext, returnValue type
 	}
 }
 
-func (f *FuncSig) AddParam(param parser.IFuncParamContext, paramType *types.Type) *FuncSig {
+func (f *FuncSig) AddParam(param parser.IFuncParamContext, paramType types.Value) *FuncSig {
 	f.Params = append(f.Params, FuncParam{
-		FuncSig:  f,
-		ParamCtx: param,
-		Name:     param.Ident().GetText(),
-		Type:     paramType,
+		FuncSig:   f,
+		ParamCtx:  param,
+		Name:      param.Ident().GetText(),
+		TypeValue: paramType,
 	})
 	return f
 }
@@ -56,7 +56,7 @@ func (f *Func) AddStmt(stmt ...Statement) *Func {
 }
 
 func (f *Func) Codegen() *jen.Statement {
-	result := f.FuncSig.Codegen(true)
+	result := f.FuncSig.Codegen(false)
 
 	result = result.BlockFunc(func(block *jen.Group) {
 		for _, bodyStmt := range f.Body {
@@ -69,17 +69,19 @@ func (f *Func) Codegen() *jen.Statement {
 	return result
 }
 
-func (f *FuncSig) Codegen(printFuncKeyword bool) *jen.Statement {
-	result := jen.Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).
-		ParamsFunc(func(params *jen.Group) {
-			params.Id("env").Add(jen.Op("*").Qual("tempo/runtime", "Env"))
-			for _, param := range f.Params {
-				params.Id(param.Name).Add(CodegenType(param.Type.Value()))
-			}
-		})
+func (f *FuncSig) Codegen(isInterfaceMethod bool) *jen.Statement {
+	params := []jen.Code{
+		jen.Id("env").Add(jen.Op("*").Qual("tempo/runtime", "Env")),
+	}
+	for _, param := range f.Params {
+		params = append(params, jen.Id(param.Name).Add(CodegenType(param.TypeValue)))
+	}
 
-	if printFuncKeyword {
-		result = jen.Func().Add(result)
+	var result *jen.Statement
+	if isInterfaceMethod {
+		result = jen.Id(f.Name).Params(params...)
+	} else {
+		result = jen.Func().Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).Params(params...)
 	}
 
 	if f.ReturnValue != types.Unit() {

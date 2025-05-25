@@ -3,9 +3,11 @@ package types
 import (
 	"fmt"
 	"tempo/misc"
+	"tempo/parser"
 )
 
 type FunctionType struct {
+	funcIdent  parser.IIdentContext
 	params     []*Type
 	returnType *Type
 }
@@ -38,8 +40,13 @@ func (f *FunctionType) ReturnType() *Type {
 	return f.returnType
 }
 
-func Function(params []*Type, returnType *Type) Value {
+func (f *FunctionType) FuncIdent() parser.IIdentContext {
+	return f.funcIdent
+}
+
+func Function(funcIdent parser.IIdentContext, params []*Type, returnType *Type) Value {
 	return &FunctionType{
+		funcIdent:  funcIdent,
 		params:     params,
 		returnType: returnType,
 	}

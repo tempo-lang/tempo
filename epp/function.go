@@ -31,7 +31,8 @@ func (epp *epp) eppFuncSig(role string, ctx parser.IFuncSigContext) *projection.
 	for i, param := range ctx.FuncParamList().AllFuncParam() {
 		paramType := funcType.Params()[i]
 		if paramType.Roles().Contains(role) {
-			funcSig.AddParam(param, paramType)
+			paramValue := epp.eppType(role, paramType)
+			funcSig.AddParam(param, paramValue)
 		}
 	}
 
@@ -39,19 +40,8 @@ func (epp *epp) eppFuncSig(role string, ctx parser.IFuncSigContext) *projection.
 }
 
 func (epp *epp) eppFuncRole(choreography *projection.Choreography, function parser.IFuncContext, roleName string) {
-	funcSym := epp.info.Symbols[function.FuncSig().Ident()]
-	funcType := funcSym.Type().Value().(*types.FunctionType)
-
 	funcSig := epp.eppFuncSig(roleName, function.FuncSig())
 	fn := choreography.AddFunc(funcSig, function)
-
-	// project parameters
-	for i, param := range function.FuncSig().FuncParamList().AllFuncParam() {
-		paramType := funcType.Params()[i]
-		if paramType.Roles().Contains(roleName) {
-			fn.AddParam(param, paramType)
-		}
-	}
 
 	// project body
 	for _, stmt := range function.Scope().AllStmt() {

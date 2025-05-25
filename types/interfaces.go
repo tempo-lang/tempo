@@ -1,9 +1,12 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"tempo/parser"
+)
 
 type InterfaceType struct {
-	name string
+	ident parser.IIdentContext
 }
 
 func (s *InterfaceType) IsSendable() bool {
@@ -17,13 +20,17 @@ func (t *InterfaceType) IsEquatable() bool {
 func (s *InterfaceType) IsValue() {}
 
 func (s *InterfaceType) ToString() string {
-	return fmt.Sprintf("interface %s", s.name)
+	return fmt.Sprintf("interface %s", s.ident.GetText())
 }
 
-func NewInterfaceType(name string) Value {
-	return &InterfaceType{name: name}
+func NewInterfaceType(ident parser.IIdentContext) Value {
+	return &InterfaceType{ident: ident}
 }
 
 func (s *InterfaceType) Name() string {
-	return s.name
+	return s.ident.GetText()
+}
+
+func (s *InterfaceType) Ident() parser.IIdentContext {
+	return s.ident
 }
