@@ -1,0 +1,7 @@
+
+func@(A,B,C,D) ShiftRoles(count: Int@[A,B,C,D]) {
+  if count > 0 {
+    await A->B count;
+    ShiftRoles(count - 1)@(B,C,D,A);
+  }
+}
