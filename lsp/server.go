@@ -39,13 +39,14 @@ func StartServer() {
 
 func (s *tempoServer) Handler() *protocol.Handler {
 	return &protocol.Handler{
-		Initialize:             s.initialize,
-		Initialized:            s.initialized,
-		Shutdown:               s.shutdown,
-		TextDocumentDidOpen:    s.textDocumentDidOpen,
-		TextDocumentDidChange:  s.textDocumentDidChange,
-		TextDocumentCompletion: s.textDocumentCompletion,
-		TextDocumentHover:      s.textDocumentHover,
+		Initialize:                s.initialize,
+		Initialized:               s.initialized,
+		Shutdown:                  s.shutdown,
+		TextDocumentDidOpen:       s.textDocumentDidOpen,
+		TextDocumentDidChange:     s.textDocumentDidChange,
+		TextDocumentCompletion:    s.textDocumentCompletion,
+		TextDocumentHover:         s.textDocumentHover,
+		TextDocumentSignatureHelp: s.signatureHelp,
 	}
 }
 
@@ -55,6 +56,10 @@ func (s *tempoServer) initialize(context *glsp.Context, params *protocol.Initial
 	capabilities := s.Handler().CreateServerCapabilities()
 	capabilities.CompletionProvider = &protocol.CompletionOptions{
 		TriggerCharacters: []string{".", "@"},
+	}
+
+	capabilities.SignatureHelpProvider = &protocol.SignatureHelpOptions{
+		TriggerCharacters: []string{"("},
 	}
 
 	logger.Infof("Capabilities: %#v", capabilities)

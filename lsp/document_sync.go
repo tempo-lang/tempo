@@ -2,6 +2,7 @@ package lsp
 
 import (
 	"context"
+	"slices"
 
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -36,6 +37,25 @@ func (s *tempoServer) textDocumentDidChange(ctx *glsp.Context, params *protocol.
 	source := file.GetSource()
 	newSource := file.GetSource()
 
+	// sort edits to be in reverse order
+	slices.SortFunc(params.ContentChanges, func(a, b any) int {
+		aa, ok := a.(protocol.TextDocumentContentChangeEvent)
+		if !ok {
+			return 0
+		}
+
+		bb, ok := b.(protocol.TextDocumentContentChangeEvent)
+		if !ok {
+			return 0
+		}
+
+		if aa.Range.Start.Line != bb.Range.Start.Line {
+			return int(bb.Range.Start.Line) - int(aa.Range.Start.Line)
+		}
+
+		return int(bb.Range.Start.Character) - int(aa.Range.Start.Character)
+	})
+
 	for _, change := range params.ContentChanges {
 		switch change := change.(type) {
 		case protocol.TextDocumentContentChangeEventWhole:
@@ -68,7 +88,7 @@ func (s *tempoServer) textDocumentDidChange(ctx *glsp.Context, params *protocol.
 				}
 			}
 
-			newSource = source[0:startIdx] + change.Text + source[endIdx:]
+			newSource = source[0:startIdx] + change.Text + newSource[endIdx:]
 		default:
 			logger.Errorf("unexpected type: %#v", change)
 		}

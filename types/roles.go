@@ -141,7 +141,10 @@ func (r *Roles) SubstituteMap(other *Roles) (map[string]string, bool) {
 func (r *Roles) SubstituteRoles(subst map[string]string) *Roles {
 	roleSubst := r.Participants()
 	for i := range roleSubst {
-		roleSubst[i] = subst[roleSubst[i]]
+		newRole, found := subst[roleSubst[i]]
+		if found {
+			roleSubst[i] = newRole
+		}
 	}
 
 	return NewRole(roleSubst, r.IsSharedRole())
