@@ -1,24 +1,24 @@
-struct Credentials {
-  username: String,
-  password: String
+struct@A Credentials {
+  Username: Int@A,
+  Password: Int@A
 }
 
-enum@(Client, Service) AuthResult {
-  success { token: String@[Client, Service] },
-  failure
+struct@(C,S) AuthResult {
+  Success: Bool@[C,S],
+  Token: Int@[C,S]
 }
 
-interface ClientRegistry {
-  func getSalt(username: String) String;
-  func check(hash: String) Bool;
+interface@A ClientRegistry {
+  func@A GetSalt(username: Int@A) Int@A;
+  func@A Check(hash: Int@A) Bool@A;
 }
 
-interface TokenGenerator {
-  func generateToken() String;
+interface@A TokenGenerator {
+  func@A GenerateToken() Int@A;
 }
 
-func calcHash(salt: String, password: String) String {
-  return username + salt;
+func@A calcHash(salt: Int@A, password: Int@A) Int@A {
+  return password + salt;
 }
 
 func@(Client, Service, IP) Authenticate(
@@ -26,17 +26,16 @@ func@(Client, Service, IP) Authenticate(
   registry: ClientRegistry@IP,
   tokenGen: TokenGenerator@IP
 ) AuthResult@(Client, Service) {
+  let username: async Int@IP = Client -> IP credentials.Username;
+  let salt: async Int@Client = IP -> Client registry.GetSalt(await username)@(IP);
 
-  let username: String@IP = Client -> IP credentials.username;
-  let salt: String@Client = IP -> Client registry.getSalt(username);
+  let hash: async Int@IP = Client -> IP calcHash(await salt, credentials.Password)@Client;
+  let valid: async Bool@[Client, Service, IP] = IP -> [Client, Service] registry.Check(await hash)@(IP);
 
-  let hash: String@IP = Client -> IP calcHash(salt, credentials.username)@Client;
-  let valid: Bool@[Client, Service, IP] = IP -> [Client, Service] registry.check(hash);
-
-  if valid {
-    let token: String@[Client, Service] = IP -> [Client, Service] tokenGen.generateToken()
-    return AuthResult@(Client, Service).success { token };
+  if await valid {
+    let token: async Int@[Client, Service] = IP -> [Client, Service] tokenGen.GenerateToken()@(IP);
+    return AuthResult@(Client, Service) { Success: true, Token: await token };
   } else {
-    return AuthResult@(Client, Service).failure;
+    return AuthResult@(Client, Service) { Success: false, Token: 0 };
   }
 }

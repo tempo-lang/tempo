@@ -29,8 +29,7 @@ structField: ident COLON valueType;
 interface:
 	INTERFACE ROLE_AT roleType ident interfaceMethodsList;
 
-interfaceMethodsList:
-	LCURLY (interfaceMethod (COMMA interfaceMethod)*)? RCURLY;
+interfaceMethodsList: LCURLY interfaceMethod* RCURLY;
 
 interfaceMethod: funcSig END;
 
@@ -77,11 +76,11 @@ expr:
 	| NUMBER									# exprNum
 	| (TRUE | FALSE)							# exprBool
 	| AWAIT expr								# exprAwait
-	| roleType COM roleType expr				# exprCom
 	| ident ROLE_AT roleType exprStructField	# exprStruct
 	| expr funcArgList ROLE_AT roleType			# exprCall
 	| expr DOT ident							# exprFieldAccess
 	| ident										# exprIdent
+	| roleType COM roleType expr				# exprCom
 	| LPAREN expr RPAREN						# exprGroup;
 
 exprStructField:
