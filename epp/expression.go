@@ -47,7 +47,11 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			}
 			name := sym.SymbolName()
 			if appendRole {
-				name += "_" + epp.callArgRoleSubst[roleName]
+				roleSubst := roleName
+				if subst, ok := epp.callArgRoleSubst[roleName]; ok {
+					roleSubst = subst
+				}
+				name += "_" + roleSubst
 			}
 
 			return projection.NewExprIdent(name, exprType.Value()), []projection.Statement{}
