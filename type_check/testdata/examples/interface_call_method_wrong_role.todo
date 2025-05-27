@@ -1,0 +1,9 @@
+interface@(A) Action {
+  func@(A) foo();
+}
+
+func@(X,Y) start(action: Action@X) {
+  action.foo()@(Y);
+}
+---
+Role X and Y do not match

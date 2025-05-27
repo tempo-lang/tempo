@@ -1,0 +1,5 @@
+interface@(A,B) Action {
+  func@(A,X) foo();
+}
+---
+2:8: roles 'X' are not in scope

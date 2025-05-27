@@ -38,6 +38,8 @@ func (tc *typeChecker) VisitInterfaceMethod(ctx *parser.InterfaceMethodContext) 
 
 	funcSym := sym.(*sym_table.FuncSymbol)
 
+	tc.checkRolesInScope(ctx.FuncSig().RoleType())
+
 	tc.currentScope = funcSym.Scope()
 	ctx.FuncSig().Accept(tc)
 	tc.currentScope = tc.currentScope.Parent()
