@@ -51,21 +51,27 @@ func posWithinRange(pos protocol.Position, span protocol.Range) bool {
 	return false
 }
 
-func astNodeAtPosition(node antlr.ParserRuleContext, pos protocol.Position) (antlr.TerminalNode, protocol.Range) {
+func astNodeAtPosition(node antlr.ParserRuleContext, pos protocol.Position) (antlr.ParserRuleContext, protocol.Range) {
 	for _, c := range node.GetChildren() {
 		switch child := c.(type) {
 		case antlr.ParserRuleContext:
 			span := parserRuleToRange(child)
 			if posWithinRange(pos, span) {
-				return astNodeAtPosition(child, pos)
+				if result, resultSpan := astNodeAtPosition(child, pos); result != nil {
+					return result, resultSpan
+				} else {
+					logger.Debugf("AST Node at pos (result) %T", child)
+					return child, span
+				}
 			}
 		case antlr.TerminalNode:
 			span := tokenToRange(child.GetSymbol())
 			if posWithinRange(pos, span) {
-				return child, span
+				logger.Debugf("AST Node at pos (terminal) %T", child)
+				return nil, protocol.Range{}
 			}
 		}
 	}
 
-	return nil, parserRuleToRange(node)
+	return node, parserRuleToRange(node)
 }

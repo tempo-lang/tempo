@@ -23,7 +23,7 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 		return nil, nil
 	}
 
-	scope := file.info.GlobalScope.Innermost(leaf.GetSymbol())
+	scope := file.info.GlobalScope.Innermost(leaf.GetStart())
 
 	var completionItems []protocol.CompletionItem
 	foundItems := false
@@ -43,17 +43,15 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 			logger.Debugf("Visit Expression (Identifier)")
 			showGlobalSymbols = true
 		case parser.IExprContext:
-			logger.Debugf("Visit Expression")
-		case *parser.StmtVarDeclContext:
-			logger.Debugf("Visit Statement (VarDecl)")
+			logger.Debugf("Visit Expression: %T", node)
 		case parser.IStmtContext:
-			logger.Debugf("Visit Statement")
+			logger.Debugf("Visit Statement: %T", node)
 		case *parser.ScopeContext:
 			logger.Debugf("Visit Scope")
 		case *parser.FuncContext:
 			logger.Debugf("Visit Function")
 		case parser.IRoleTypeContext:
-			logger.Debugf("Visit Role Type")
+			logger.Debugf("Visit Role Type: %T", node)
 			items, ok := completionItemsForRoleType(file, node)
 			if ok {
 				completionItems = items
@@ -88,7 +86,7 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 
 			logger.Debugf("Visit Base: %#v", node)
 		default:
-			logger.Debugf("Visit Other: %#v", node)
+			logger.Debugf("Visit Other: %T", node)
 		}
 
 		node = node.GetParent()
