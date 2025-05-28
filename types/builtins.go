@@ -12,6 +12,10 @@ var builtin_bool BoolType = BoolType{}
 
 type StringType struct{}
 
+func (t *StringType) SubstituteRoles(substMap map[string]string) Value {
+	return t
+}
+
 func (t *StringType) IsSendable() bool {
 	return true
 }
@@ -31,6 +35,10 @@ func String() Value {
 }
 
 type IntType struct{}
+
+func (t *IntType) SubstituteRoles(substMap map[string]string) Value {
+	return t
+}
 
 func (t *IntType) IsSendable() bool {
 	return true
@@ -52,6 +60,10 @@ func Int() Value {
 
 type FloatType struct{}
 
+func (t *FloatType) SubstituteRoles(substMap map[string]string) Value {
+	return t
+}
+
 func (t *FloatType) IsEquatable() bool {
 	return true
 }
@@ -71,6 +83,10 @@ func Float() Value {
 }
 
 type BoolType struct{}
+
+func (t *BoolType) SubstituteRoles(substMap map[string]string) Value {
+	return t
+}
 
 func (t *BoolType) IsSendable() bool {
 	return true

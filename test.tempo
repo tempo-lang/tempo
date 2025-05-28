@@ -1,26 +1,17 @@
-interface@A Math {
-  func@A Exp(base: Int@A, exp: Int@A) Int@A;
+interface@X Sum {
+  func@X sum(a: Int@X, b: Int@X) Int@X;
 }
 
-struct@(A,B) Secret {
-  a: Int@A,
-  b: Int@B
-}
+func@B bar() {}
 
-func@(A,B) DiffieHellman(mathA: Math@A, mathB: Math@B) Secret@(A,B) {
-  let p: Int@[A,B] = 23;
-  let g: Int@[A,B] = 5;
+func@A foo(x: Sum@A) {
+  let value: Int@A = x.sum(10, 20);
+  
+  bar@A();
+  bar()@A;  
 
-  let a: Int@A = 4;
-  let b: Int@B = 3;
+  let myFunc = bar@A;
+  myFunc();
 
-  let A: Int@B = await A->B mathA.Exp(g, a)@A % p;
-  let B: Int@A = await B->A mathB.Exp(g, b)@B % p;
-
-  let sA: Int@A = mathA.Exp(B, a)@A % p;
-  let sB: Int@B = mathB.Exp(A, b)@B % p;
-
-  return Secret@(A,B) {
-    a: sA, b: sB
-  };
+  return myFunc;
 }

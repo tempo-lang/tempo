@@ -171,27 +171,54 @@ func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
 }
 
 func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
-	sym, err := tc.lookupSymbol(ctx.Ident())
+	sym, err := tc.lookupSymbol(ctx.IdentAccess().Ident())
 	if err != nil {
 		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	tc.info.Symbols[ctx.Ident()] = sym
+	tc.info.Symbols[ctx.IdentAccess().Ident()] = sym
+
+	identType := sym.Type()
+	_, isFunc := sym.Type().Value().(*types.FunctionType)
+
+	if ctx.IdentAccess().RoleType() != nil {
+		roles, ok := ParseRoleType(ctx.IdentAccess().RoleType())
+		if !ok {
+			return tc.registerType(ctx, types.Invalid())
+		}
+
+		if isFunc {
+			roleSubst, ok := identType.Roles().SubstituteMap(roles)
+			if !ok {
+				tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{identType.Roles(), roles}))
+				return tc.registerType(ctx, types.Invalid())
+			}
+
+			identType = identType.SubstituteRoles(roleSubst)
+
+		} else {
+			tc.reportError(type_error.NewInstantiateNonFunction(ctx.IdentAccess(), sym))
+			return tc.registerType(ctx, types.Invalid())
+		}
+	} else if isFunc {
+		tc.reportError(type_error.NewFunctionNotInstantiated(ctx.IdentAccess(), sym))
+		return tc.registerType(ctx, types.Invalid())
+	}
 
 	checkRolesInScope := true
-	switch sym.Type().Value().(type) {
-	case *types.FunctionType:
-		checkRolesInScope = false
-	case *types.StructType:
-		checkRolesInScope = false
-	}
+	// switch identType.Value().(type) {
+	// case *types.FunctionType:
+	// 	checkRolesInScope = false
+	// case *types.StructType:
+	// 	checkRolesInScope = false
+	// }
 
 	if checkRolesInScope {
-		tc.checkExprInScope(ctx, sym.Type().Roles())
+		tc.checkExprInScope(ctx, identType.Roles())
 	}
 
-	return tc.registerType(ctx, sym.Type())
+	return tc.registerType(ctx, identType)
 }
 
 func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
@@ -299,57 +326,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	sym := tc.info.Symbols[callFuncValue.FuncIdent()]
-	funcSym, ok := sym.(*sym_table.FuncSymbol)
-	if !ok {
-		tc.reportError(type_error.NewCallNonFunctionError(ctx, callType))
-		return tc.registerType(ctx, types.Invalid())
-	}
-
-	callRoles, ok := ParseRoleType(ctx.RoleType())
-	if !ok {
-		return tc.registerType(ctx, types.Invalid())
-	}
-
-	funcRoles := funcSym.Type().Roles().Participants()
-	if len(callRoles.Participants()) != len(funcRoles) {
-		tc.reportError(type_error.NewCallWrongRoleCountError(ctx))
-		return tc.registerType(ctx, types.Invalid())
-	}
-
-	roleSubst := map[string]string{}
-	for i, callRole := range callRoles.Participants() {
-		funcRole := funcRoles[i]
-		roleSubst[funcRole] = callRole
-	}
-
-	invalidType := false
-
-	argExprs := ctx.FuncArgList().AllExpr()
-	if len(funcSym.Params()) != len(argExprs) {
-		tc.reportError(type_error.NewCallWrongArgCountError(ctx))
-		invalidType = true
-	} else {
-		for i, param := range funcSym.Params() {
-			arg := argExprs[i]
-
-			argType := tc.visitExpr(arg)
-
-			paramTypeSubst := param.Type().SubstituteRoles(roleSubst)
-
-			if !argType.CanCoerceTo(paramTypeSubst) {
-				tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramTypeSubst))
-				invalidType = true
-			}
-		}
-	}
-
-	returnType := types.Invalid()
-	if !invalidType {
-		returnType = funcSym.FuncValue().ReturnType().SubstituteRoles(roleSubst)
-	}
-
-	return tc.registerType(ctx, returnType)
+	return tc.registerType(ctx, callFuncValue.ReturnType())
 }
 
 func (tc *typeChecker) VisitFuncArgList(ctx *parser.FuncArgListContext) any {
@@ -464,7 +441,7 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 	case *types.StructType:
 		structSym := tc.currentScope.LookupParent(value.Name()).(*sym_table.StructSymbol)
 
-		field := structSym.Scope().Lookup(ctx.Ident().GetText())
+		field := structSym.Scope().Lookup(ctx.IdentAccess().Ident().GetText())
 		if field == nil {
 			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, structSym))
 			return tc.registerType(ctx, types.Invalid())
@@ -481,7 +458,7 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 	case *types.InterfaceType:
 		infSym := tc.currentScope.LookupParent(value.Name()).(*sym_table.InterfaceSymbol)
 
-		field := infSym.Scope().Lookup(ctx.Ident().GetText())
+		field := infSym.Scope().Lookup(ctx.IdentAccess().Ident().GetText())
 		if field == nil {
 			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, infSym))
 			return tc.registerType(ctx, types.Invalid())
@@ -498,4 +475,8 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 
 	tc.reportError(type_error.NewFieldAccessUnexpectedType(ctx, objectType))
 	return tc.registerType(ctx, types.Invalid())
+}
+
+func (tc *typeChecker) VisitIdentAccess(ctx *parser.IdentAccessContext) any {
+	return nil
 }

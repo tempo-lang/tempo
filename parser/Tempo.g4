@@ -77,14 +77,16 @@ expr:
 	| (TRUE | FALSE)							# exprBool
 	| AWAIT expr								# exprAwait
 	| ident ROLE_AT roleType exprStructField	# exprStruct
-	| expr funcArgList ROLE_AT roleType			# exprCall
-	| expr DOT ident							# exprFieldAccess
-	| ident										# exprIdent
+	| expr funcArgList							# exprCall
+	| expr DOT identAccess						# exprFieldAccess
+	| identAccess								# exprIdent
 	| roleType COM roleType expr				# exprCom
 	| LPAREN expr RPAREN						# exprGroup;
 
 exprStructField:
 	LCURLY (ident COLON expr (COMMA ident COLON expr)*)? RCURLY;
+
+identAccess: ident (ROLE_AT roleType)?;
 
 /*
  * Lexer Rules

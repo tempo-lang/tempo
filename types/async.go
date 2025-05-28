@@ -6,6 +6,10 @@ type Async struct {
 	inner Value
 }
 
+func (a *Async) SubstituteRoles(substMap map[string]string) Value {
+	return NewAsync(a.inner.SubstituteRoles(substMap))
+}
+
 func (a *Async) IsSendable() bool {
 	return false
 }

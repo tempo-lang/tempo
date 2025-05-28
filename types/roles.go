@@ -151,5 +151,5 @@ func (r *Roles) SubstituteRoles(subst map[string]string) *Roles {
 }
 
 func (t *Type) SubstituteRoles(subst map[string]string) *Type {
-	return New(t.Value(), t.Roles().SubstituteRoles(subst))
+	return New(t.Value().SubstituteRoles(subst), t.Roles().SubstituteRoles(subst))
 }

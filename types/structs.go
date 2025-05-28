@@ -6,7 +6,10 @@ type StructType struct {
 	name string
 }
 
-// IsSendable implements Value.
+func (s *StructType) SubstituteRoles(substMap map[string]string) Value {
+	return s
+}
+
 func (s *StructType) IsSendable() bool {
 	return true
 }
@@ -15,10 +18,8 @@ func (t *StructType) IsEquatable() bool {
 	return true
 }
 
-// IsValue implements Value.
 func (s *StructType) IsValue() {}
 
-// ToString implements Value.
 func (s *StructType) ToString() string {
 	return fmt.Sprintf("struct %s", s.name)
 }

@@ -21,7 +21,6 @@ func@(A,B) DiffieHellman(mathA: Math@A, mathB: Math@B) Secret@(A,B) {
   let sB: Int@B = mathB.Exp(await A, b)@B % p;
 
   let x: Secret@(A,B) = Secret@(A,B) { A: 10, B: 10 };
-  x.B;
 
   return Secret@(A,B) {
     A: sA, B: sB

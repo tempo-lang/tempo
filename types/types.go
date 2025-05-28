@@ -107,9 +107,14 @@ type Value interface {
 	IsEquatable() bool
 	ToString() string
 	IsValue()
+	SubstituteRoles(substMap map[string]string) Value
 }
 
 type InvalidValue struct{}
+
+func (t *InvalidValue) SubstituteRoles(substMap map[string]string) Value {
+	return t
+}
 
 var invalid_type InvalidValue = InvalidValue{}
 
@@ -132,6 +137,10 @@ func Invalid() *Type {
 }
 
 type UnitValue struct{}
+
+func (u *UnitValue) SubstituteRoles(substMap map[string]string) Value {
+	return u
+}
 
 func (u *UnitValue) IsValue() {}
 

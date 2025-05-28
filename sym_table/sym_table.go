@@ -123,7 +123,7 @@ func (scope *Scope) Innermost(pos antlr.Token) *Scope {
 			}
 		}
 	}
-	return nil
+	return scope
 }
 
 func (scope *Scope) MakeChild(pos antlr.Token, end antlr.Token, roles []string) *Scope {

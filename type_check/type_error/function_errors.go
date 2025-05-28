@@ -3,6 +3,7 @@ package type_error
 import (
 	"fmt"
 	"tempo/parser"
+	"tempo/sym_table"
 	"tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -68,4 +69,48 @@ func (e *CallWrongRoleCountError) IsTypeError() {}
 
 func (e *CallWrongRoleCountError) ParserRule() antlr.ParserRuleContext {
 	return e.callExpr
+}
+
+type InstantiateNonFunction struct {
+	identAccess parser.IIdentAccessContext
+	sym         sym_table.Symbol
+}
+
+func NewInstantiateNonFunction(identAccess parser.IIdentAccessContext, sym sym_table.Symbol) Error {
+	return &InstantiateNonFunction{
+		identAccess: identAccess,
+		sym:         sym,
+	}
+}
+
+func (e *InstantiateNonFunction) Error() string {
+	return fmt.Sprintf("can not instantiate roles of '%s' with type '%s', since it is not a function", e.sym.SymbolName(), e.sym.Type().ToString())
+}
+
+func (e *InstantiateNonFunction) IsTypeError() {}
+
+func (e *InstantiateNonFunction) ParserRule() antlr.ParserRuleContext {
+	return e.identAccess.RoleType()
+}
+
+type FunctionNotInstantiated struct {
+	identAccess parser.IIdentAccessContext
+	sym         sym_table.Symbol
+}
+
+func NewFunctionNotInstantiated(identAccess parser.IIdentAccessContext, sym sym_table.Symbol) Error {
+	return &FunctionNotInstantiated{
+		identAccess: identAccess,
+		sym:         sym,
+	}
+}
+
+func (e *FunctionNotInstantiated) Error() string {
+	return "roles of function must be instantiated"
+}
+
+func (e *FunctionNotInstantiated) IsTypeError() {}
+
+func (e *FunctionNotInstantiated) ParserRule() antlr.ParserRuleContext {
+	return e.identAccess
 }

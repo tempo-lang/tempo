@@ -8,18 +8,18 @@ import (
 )
 
 type epp struct {
-	info               *type_check.Info
-	tmpValue           int
-	callParamRoleSubst map[string]string
-	callArgRoleSubst   map[string]string
+	info     *type_check.Info
+	tmpValue int
+	// callParamRoleSubst map[string]string
+	// callArgRoleSubst   map[string]string
 }
 
 func newEpp(info *type_check.Info) *epp {
 	return &epp{
-		info:               info,
-		tmpValue:           0,
-		callParamRoleSubst: map[string]string{},
-		callArgRoleSubst:   map[string]string{},
+		info:     info,
+		tmpValue: 0,
+		// callParamRoleSubst: map[string]string{},
+		// callArgRoleSubst:   map[string]string{},
 	}
 }
 

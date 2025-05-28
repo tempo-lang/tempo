@@ -9,6 +9,10 @@ type InterfaceType struct {
 	ident parser.IIdentContext
 }
 
+func (s *InterfaceType) SubstituteRoles(substMap map[string]string) Value {
+	return s
+}
+
 func (s *InterfaceType) IsSendable() bool {
 	return false
 }
