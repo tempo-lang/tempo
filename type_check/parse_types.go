@@ -130,13 +130,12 @@ func ParseStructType(ctx parser.IStructContext) (*types.Type, type_error.Error) 
 		return types.Invalid(), nil
 	}
 
-	name := ctx.Ident().GetText()
 	roles, ok := ParseRoleType(ctx.RoleType())
 	if !ok {
 		return types.Invalid(), nil
 	}
 
-	return types.New(types.NewStructType(name), roles), nil
+	return types.New(types.NewStructType(ctx.Ident(), roles.Participants()), roles), nil
 }
 
 func ParseInterfaceType(ctx parser.IInterfaceContext) (*types.Type, type_error.Error) {

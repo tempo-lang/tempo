@@ -167,13 +167,13 @@ type FieldAccessUnknownField struct {
 }
 
 func (e *FieldAccessUnknownField) Error() string {
-	return fmt.Sprintf("unknown field '%s' in '%s'", e.expr.IdentAccess().Ident().GetText(), e.sym.SymbolName())
+	return fmt.Sprintf("unknown field '%s' in '%s'", e.expr.Ident().GetText(), e.sym.SymbolName())
 }
 
 func (e *FieldAccessUnknownField) IsTypeError() {}
 
 func (e *FieldAccessUnknownField) ParserRule() antlr.ParserRuleContext {
-	return e.expr.IdentAccess().Ident()
+	return e.expr.Ident()
 }
 
 func NewFieldAccessUnknownField(expr *parser.ExprFieldAccessContext, sym sym_table.Symbol) Error {
@@ -195,7 +195,7 @@ func (e *FieldAccessUnexpectedType) Error() string {
 func (e *FieldAccessUnexpectedType) IsTypeError() {}
 
 func (e *FieldAccessUnexpectedType) ParserRule() antlr.ParserRuleContext {
-	return e.fieldAccess.IdentAccess().Ident()
+	return e.fieldAccess.Ident()
 }
 
 func NewFieldAccessUnexpectedType(expr *parser.ExprFieldAccessContext, objectType *types.Type) Error {

@@ -1,9 +1,0 @@
-interface@(A) Action {
-  func@(A) foo();
-}
-
-func@(X,Y) start(action: Action@X) {
-  action.foo@Y();
-}
----
-6:3: function is already instantiated

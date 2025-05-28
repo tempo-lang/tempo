@@ -158,7 +158,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst.Subst(roleName), fieldNames, fields, structType), aux
 	case *parser.ExprFieldAccessContext:
 		baseExpr, aux := epp.eppExpression(roleName, expr.Expr())
-		fieldName := expr.IdentAccess().Ident().GetText()
+		fieldName := expr.Ident().GetText()
 
 		return projection.NewExprFieldAccess(baseExpr, fieldName, exprType.Value()), aux
 	case *parser.ExprContext:

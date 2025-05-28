@@ -375,7 +375,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	}
 
 	structRoles := structSym.Type().Roles()
-	defRoleSubst, ok := roles.SubstituteMap(structRoles)
+	defRoleSubst, ok := structRoles.SubstituteMap(roles)
 	if !ok {
 		tc.reportError(type_error.NewStructWrongRoleCountError(ctx.RoleType(), structSym))
 		return tc.registerType(ctx, types.Invalid())
@@ -440,7 +440,7 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 	case *types.StructType:
 		structSym := tc.currentScope.LookupParent(value.Name()).(*sym_table.StructSymbol)
 
-		field := structSym.Scope().Lookup(ctx.IdentAccess().Ident().GetText())
+		field := structSym.Scope().Lookup(ctx.Ident().GetText())
 		if field == nil {
 			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, structSym))
 			return tc.registerType(ctx, types.Invalid())
@@ -457,7 +457,7 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 	case *types.InterfaceType:
 		infSym := tc.currentScope.LookupParent(value.Name()).(*sym_table.InterfaceSymbol)
 
-		field := infSym.Scope().Lookup(ctx.IdentAccess().Ident().GetText())
+		field := infSym.Scope().Lookup(ctx.Ident().GetText())
 		if field == nil {
 			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, infSym))
 			return tc.registerType(ctx, types.Invalid())

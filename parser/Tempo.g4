@@ -78,7 +78,7 @@ expr:
 	| AWAIT expr								# exprAwait
 	| ident ROLE_AT roleType exprStructField	# exprStruct
 	| expr funcArgList							# exprCall
-	| expr DOT identAccess						# exprFieldAccess
+	| expr DOT ident							# exprFieldAccess
 	| identAccess								# exprIdent
 	| roleType COM roleType expr				# exprCom
 	| LPAREN expr RPAREN						# exprGroup;
