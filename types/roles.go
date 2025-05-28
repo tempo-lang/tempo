@@ -24,7 +24,7 @@ func NewRoleSubst() *RoleSubst {
 
 func (r *RoleSubst) AddRole(from, to string) {
 	if _, found := r.Map[from]; found {
-		panic("attempt to add existing role to RoleSubst")
+		return
 	}
 
 	r.Roles = append(r.Roles, from)

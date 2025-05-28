@@ -1,5 +1,5 @@
 func@A foo() {
-  foo == foo;
+  foo@A == foo@A;
 }
 ---
 2:3: type value 'func()' is not equatable

@@ -4,5 +4,5 @@ func@(X,Y) send(value: Int@X) Int@Y {
 
 func@(A,B) foo() {
     let x: Int@A = 10;
-    let Y: Int@B = send(x)@(A,B);
+    let Y: Int@B = send@(A,B)(x);
 }

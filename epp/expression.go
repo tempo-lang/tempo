@@ -39,7 +39,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			switch value := exprType.Value().(type) {
 			case *types.FunctionType:
 				roleSubst := value.RoleSubstitution().Inverse().Subst(roleName)
-				name += name + "_" + roleSubst
+				name += "_" + roleSubst
 			}
 
 			return projection.NewExprIdent(name, exprType.Value()), []projection.Statement{}
@@ -104,7 +104,6 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	case *parser.ExprCallContext:
 		callType := epp.info.Types[expr.Expr()]
 		callFuncValue := epp.info.Types[expr.Expr()].Value().(*types.FunctionType)
-		funcSym := epp.info.Symbols[callFuncValue.FuncIdent()].(*sym_table.FuncSymbol)
 
 		callExpr, aux := epp.eppExpression(roleName, expr.Expr())
 
@@ -114,7 +113,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			argVal, extra := epp.eppExpression(roleName, arg)
 			aux = append(aux, extra...)
 
-			if funcSym.Params()[i].Type().Roles().Contains(roleName) {
+			if callFuncValue.Params()[i].Roles().Contains(roleName) {
 				argValues = append(argValues, argVal)
 			}
 		}

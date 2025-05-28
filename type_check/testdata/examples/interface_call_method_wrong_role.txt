@@ -3,7 +3,7 @@ interface@(A) Action {
 }
 
 func@(X,Y) start(action: Action@X) {
-  action.foo()@(Y);
+  action.foo@Y();
 }
 ---
 6:3: function is already instantiated

@@ -206,17 +206,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	checkRolesInScope := true
-	// switch identType.Value().(type) {
-	// case *types.FunctionType:
-	// 	checkRolesInScope = false
-	// case *types.StructType:
-	// 	checkRolesInScope = false
-	// }
-
-	if checkRolesInScope {
-		tc.checkExprInScope(ctx, identType.Roles())
-	}
+	tc.checkExprInScope(ctx, identType.Roles())
 
 	return tc.registerType(ctx, identType)
 }
@@ -324,6 +314,19 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	if !ok {
 		tc.reportError(type_error.NewCallNonFunctionError(ctx, callType))
 		return tc.registerType(ctx, types.Invalid())
+	}
+
+	if len(ctx.FuncArgList().AllExpr()) != len(callFuncValue.Params()) {
+		tc.reportError(type_error.NewCallWrongArgCountError(ctx))
+	} else {
+		for i, arg := range ctx.FuncArgList().AllExpr() {
+			argType := tc.visitExpr(arg)
+			paramType := callFuncValue.Params()[i]
+
+			if !argType.CanCoerceTo(paramType) {
+				tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramType))
+			}
+		}
 	}
 
 	return tc.registerType(ctx, callFuncValue.ReturnType())

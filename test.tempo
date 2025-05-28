@@ -1,5 +1,9 @@
-func@B bar() {}
+struct@(A,B) Pair {
+  num: Int@A,
+  logic: Bool@B
+}
 
-func@A foo() {
-  bar@A();
+func@(X,Y) foo() {
+  let p: Pair@(X,Y) = Pair@(X,Y) { num: 1, logic: true };
+  let x: Int@X = p.num;
 }
