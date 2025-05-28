@@ -6,7 +6,7 @@ type StructType struct {
 	name string
 }
 
-func (s *StructType) SubstituteRoles(substMap map[string]string) Value {
+func (s *StructType) SubstituteRoles(substMap *RoleSubst) Value {
 	return s
 }
 

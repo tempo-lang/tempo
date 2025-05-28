@@ -12,7 +12,7 @@ var builtin_bool BoolType = BoolType{}
 
 type StringType struct{}
 
-func (t *StringType) SubstituteRoles(substMap map[string]string) Value {
+func (t *StringType) SubstituteRoles(substMap *RoleSubst) Value {
 	return t
 }
 
@@ -36,7 +36,7 @@ func String() Value {
 
 type IntType struct{}
 
-func (t *IntType) SubstituteRoles(substMap map[string]string) Value {
+func (t *IntType) SubstituteRoles(substMap *RoleSubst) Value {
 	return t
 }
 
@@ -60,7 +60,7 @@ func Int() Value {
 
 type FloatType struct{}
 
-func (t *FloatType) SubstituteRoles(substMap map[string]string) Value {
+func (t *FloatType) SubstituteRoles(substMap *RoleSubst) Value {
 	return t
 }
 
@@ -84,7 +84,7 @@ func Float() Value {
 
 type BoolType struct{}
 
-func (t *BoolType) SubstituteRoles(substMap map[string]string) Value {
+func (t *BoolType) SubstituteRoles(substMap *RoleSubst) Value {
 	return t
 }
 

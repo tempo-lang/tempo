@@ -34,24 +34,12 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	case *parser.ExprIdentContext:
 		sym := epp.info.Symbols[expr.IdentAccess().Ident()]
 
-		// symType := sym.Type()
-		// if _, isFunc := sym.Type().Value().(*types.FunctionType); isFunc {
-		// 	symType = sym.Type().SubstituteRoles(epp.callParamRoleSubst)
-		// }
-
 		if exprType.Roles().Contains(roleName) {
-			appendRole := false
-			switch exprType.Value().(type) {
-			case *types.FunctionType:
-				appendRole = true
-			}
 			name := sym.SymbolName()
-			if appendRole {
-				roleSubst := roleName
-				// if subst, ok := epp.callArgRoleSubst[roleName]; ok {
-				// 	roleSubst = subst
-				// }
-				name += "_" + roleSubst
+			switch value := exprType.Value().(type) {
+			case *types.FunctionType:
+				roleSubst := value.RoleSubstitution().Inverse().Subst(roleName)
+				name += name + "_" + roleSubst
 			}
 
 			return projection.NewExprIdent(name, exprType.Value()), []projection.Statement{}
@@ -118,29 +106,8 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		callFuncValue := epp.info.Types[expr.Expr()].Value().(*types.FunctionType)
 		funcSym := epp.info.Symbols[callFuncValue.FuncIdent()].(*sym_table.FuncSymbol)
 
-		// callRoleIdents := parser.RoleTypeAllIdents(expr.RoleType())
-		// callRoles := []string{}
-
-		// argRoleSubst := map[string]string{}
-		// paramRoleSubst := map[string]string{}
-		// for i, callRole := range callRoleIdents {
-		// 	callRoles = append(callRoles, callRole.GetText())
-		// 	funcRole := funcSym.Type().Roles().Participants()[i]
-		// 	argRoleSubst[callRole.GetText()] = funcRole
-		// 	paramRoleSubst[funcRole] = callRole.GetText()
-		// }
-
-		// prevParamSubst := epp.callParamRoleSubst
-		// prevArgSubst := epp.callArgRoleSubst
-		// epp.callParamRoleSubst = paramRoleSubst
-		// epp.callArgRoleSubst = argRoleSubst
-
 		callExpr, aux := epp.eppExpression(roleName, expr.Expr())
 
-		// epp.callParamRoleSubst = prevParamSubst
-		// epp.callArgRoleSubst = prevArgSubst
-
-		// aux := []projection.Statement{}
 		argValues := []projection.Expression{}
 
 		for i, arg := range expr.FuncArgList().AllExpr() {
@@ -153,15 +120,6 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		}
 
 		if callType.Roles().Contains(roleName) {
-			// returnType := funcSym.FuncValue().ReturnType().SubstituteRoles(paramRoleSubst)
-			// roleSubs := []projection.ExprCallRoleSubs{}
-			// for _, callRole := range callRoles {
-			// 	roleSubs = append(roleSubs, projection.ExprCallRoleSubs{
-			// 		From: callRole,
-			// 		To:   argRoleSubst[callRole],
-			// 	})
-			// }
-
 			returnValue := epp.eppType(roleName, callFuncValue.ReturnType())
 			roleSubst := callFuncValue.RoleSubstitution()
 
@@ -172,13 +130,8 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	case *parser.ExprStructContext:
 		stSym := epp.info.Symbols[expr.Ident()].(*sym_table.StructSymbol)
 
-		defRoleSubst := map[string]string{}
-		exprRoleSubst := map[string]string{}
-		for i, defRole := range stSym.Type().Roles().Participants() {
-			exprRole := exprType.Roles().Participants()[i]
-			defRoleSubst[defRole] = exprRole
-			exprRoleSubst[exprRole] = defRole
-		}
+		defRoleSubst, _ := stSym.Type().Roles().SubstituteMap(exprType.Roles())
+		exprRoleSubst, _ := exprType.Roles().SubstituteMap(stSym.Type().Roles())
 
 		aux := []projection.Statement{}
 
@@ -201,9 +154,9 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			}
 		}
 
-		structType := projection.NewStructType(exprType.Value().(*types.StructType), exprRoleSubst[roleName])
+		structType := projection.NewStructType(exprType.Value().(*types.StructType), exprRoleSubst.Subst(roleName))
 
-		return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst[roleName], fieldNames, fields, structType), aux
+		return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst.Subst(roleName), fieldNames, fields, structType), aux
 	case *parser.ExprFieldAccessContext:
 		baseExpr, aux := epp.eppExpression(roleName, expr.Expr())
 		fieldName := expr.IdentAccess().Ident().GetText()

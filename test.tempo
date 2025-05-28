@@ -1,17 +1,5 @@
-interface@X Sum {
-  func@X sum(a: Int@X, b: Int@X) Int@X;
-}
-
 func@B bar() {}
 
-func@A foo(x: Sum@A) {
-  let value: Int@A = x.sum(10, 20);
-  
+func@A foo() {
   bar@A();
-  bar()@A;  
-
-  let myFunc = bar@A;
-  myFunc();
-
-  return myFunc;
 }

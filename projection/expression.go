@@ -315,25 +315,21 @@ func NewExprRecv(recvType types.Value, sender string) Expression {
 	}
 }
 
-type ExprCallRoleSubs struct {
-	From string
-	To   string
-}
-
 type ExprCall struct {
 	FuncExpr   Expression
 	FuncRole   string
 	Args       []Expression
 	ReturnType types.Value
-	RoleSubs   []ExprCallRoleSubs
+	RoleSubs   *types.RoleSubst
 }
 
 func (e *ExprCall) Codegen() jen.Code {
 	args := []jen.Code{}
 
 	roleSub := []jen.Code{}
-	for _, sub := range e.RoleSubs {
-		roleSub = append(roleSub, jen.Lit(sub.From), jen.Lit(sub.To))
+	for _, to := range e.RoleSubs.Roles {
+		from := e.RoleSubs.Subst(to)
+		roleSub = append(roleSub, jen.Lit(from), jen.Lit(to))
 	}
 
 	args = append(args, jen.Id("env").Dot("Subst").Call(roleSub...))
@@ -360,7 +356,7 @@ func (e *ExprCall) HasSideEffects() bool {
 
 func (e *ExprCall) IsExpression() {}
 
-func NewExprCall(funcExpr Expression, funcRole string, args []Expression, returnType types.Value, roleSubs []ExprCallRoleSubs) Expression {
+func NewExprCall(funcExpr Expression, funcRole string, args []Expression, returnType types.Value, roleSubs *types.RoleSubst) Expression {
 	return &ExprCall{
 		FuncExpr:   funcExpr,
 		FuncRole:   funcRole,

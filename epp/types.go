@@ -18,7 +18,7 @@ func (epp *epp) eppType(roleName string, typ *types.Type) types.Value {
 				panic("role substitution should succeed")
 			}
 
-			return projection.NewStructType(structType, roleSubstMap[roleName])
+			return projection.NewStructType(structType, roleSubstMap.Subst(roleName))
 		}
 
 		if interfaceType, ok := typ.Value().(*types.InterfaceType); ok {
@@ -30,7 +30,7 @@ func (epp *epp) eppType(roleName string, typ *types.Type) types.Value {
 				panic("role substitution should succeed")
 			}
 
-			return projection.NewInterfaceType(interfaceType, roleSubstMap[roleName])
+			return projection.NewInterfaceType(interfaceType, roleSubstMap.Subst(roleName))
 		}
 
 		return typ.Value()

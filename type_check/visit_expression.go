@@ -357,12 +357,6 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	structRoles := structSym.Type().Roles().Participants()
-	if len(roles.Participants()) != len(structRoles) {
-		tc.reportError(type_error.NewStructWrongRoleCountError(ctx.RoleType(), structSym))
-		return tc.registerType(ctx, types.Invalid())
-	}
-
 	for _, defField := range structSym.Fields() {
 		found := false
 		for _, exprField := range ctx.ExprStructField().AllIdent() {
@@ -377,9 +371,11 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		}
 	}
 
-	defRoleSubst := map[string]string{}
-	for i, role := range roles.Participants() {
-		defRoleSubst[structRoles[i]] = role
+	structRoles := structSym.Type().Roles()
+	defRoleSubst, ok := roles.SubstituteMap(structRoles)
+	if !ok {
+		tc.reportError(type_error.NewStructWrongRoleCountError(ctx.RoleType(), structSym))
+		return tc.registerType(ctx, types.Invalid())
 	}
 
 	defFields := map[string]*types.Type{}

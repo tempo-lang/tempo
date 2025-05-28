@@ -10,18 +10,18 @@ type FunctionType struct {
 	funcIdent  parser.IIdentContext
 	params     []*Type
 	returnType *Type
-	roleSubst  map[string]string
+	roleSubst  *RoleSubst
 }
 
-func (f *FunctionType) SubstituteRoles(substMap map[string]string) Value {
+func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Value {
 	substParams := []*Type{}
 	for _, p := range f.params {
 		substParams = append(substParams, p.SubstituteRoles(substMap))
 	}
 
-	newRoleSubst := map[string]string{}
-	for from, to := range f.roleSubst {
-		newRoleSubst[from] = substMap[to]
+	newRoleSubst := NewRoleSubst()
+	for _, from := range f.roleSubst.Roles {
+		newRoleSubst.AddRole(from, substMap.Map[from])
 	}
 
 	return &FunctionType{
@@ -64,14 +64,14 @@ func (f *FunctionType) FuncIdent() parser.IIdentContext {
 	return f.funcIdent
 }
 
-func (f *FunctionType) RoleSubstitution() map[string]string {
+func (f *FunctionType) RoleSubstitution() *RoleSubst {
 	return f.roleSubst
 }
 
 func Function(funcIdent parser.IIdentContext, params []*Type, returnType *Type, roles []string) Value {
-	roleSubst := map[string]string{}
+	roleSubst := NewRoleSubst()
 	for _, role := range roles {
-		roleSubst[role] = role
+		roleSubst.AddRole(role, role)
 	}
 
 	return &FunctionType{

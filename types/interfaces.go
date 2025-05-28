@@ -9,7 +9,7 @@ type InterfaceType struct {
 	ident parser.IIdentContext
 }
 
-func (s *InterfaceType) SubstituteRoles(substMap map[string]string) Value {
+func (s *InterfaceType) SubstituteRoles(substMap *RoleSubst) Value {
 	return s
 }
 

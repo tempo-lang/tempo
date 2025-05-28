@@ -10,6 +10,42 @@ type Roles struct {
 	participants []string
 }
 
+type RoleSubst struct {
+	Roles []string
+	Map   map[string]string
+}
+
+func NewRoleSubst() *RoleSubst {
+	return &RoleSubst{
+		Roles: []string{},
+		Map:   map[string]string{},
+	}
+}
+
+func (r *RoleSubst) AddRole(from, to string) {
+	if _, found := r.Map[from]; found {
+		panic("attempt to add existing role to RoleSubst")
+	}
+
+	r.Roles = append(r.Roles, from)
+	r.Map[from] = to
+}
+
+func (r *RoleSubst) Subst(from string) string {
+	if to, ok := r.Map[from]; ok {
+		return to
+	}
+	return from
+}
+
+func (r *RoleSubst) Inverse() *RoleSubst {
+	inv := NewRoleSubst()
+	for _, role := range r.Roles {
+		inv.AddRole(r.Subst(role), role)
+	}
+	return inv
+}
+
 func NewRole(participants []string, isShared bool) *Roles {
 	if len(participants) == 0 {
 		participants = nil
@@ -126,22 +162,22 @@ func (r *Roles) Contains(role string) bool {
 	return slices.Contains(r.participants, role)
 }
 
-func (r *Roles) SubstituteMap(other *Roles) (map[string]string, bool) {
+func (r *Roles) SubstituteMap(other *Roles) (*RoleSubst, bool) {
 	if len(r.participants) != len(other.participants) {
 		return nil, false
 	}
 
-	roleSubst := map[string]string{}
+	roleSubst := NewRoleSubst()
 	for i, role := range r.Participants() {
-		roleSubst[role] = other.participants[i]
+		roleSubst.AddRole(role, other.participants[i])
 	}
 	return roleSubst, true
 }
 
-func (r *Roles) SubstituteRoles(subst map[string]string) *Roles {
+func (r *Roles) SubstituteRoles(subst *RoleSubst) *Roles {
 	roleSubst := r.Participants()
 	for i := range roleSubst {
-		newRole, found := subst[roleSubst[i]]
+		newRole, found := subst.Map[roleSubst[i]]
 		if found {
 			roleSubst[i] = newRole
 		}
@@ -150,6 +186,6 @@ func (r *Roles) SubstituteRoles(subst map[string]string) *Roles {
 	return NewRole(roleSubst, r.IsSharedRole())
 }
 
-func (t *Type) SubstituteRoles(subst map[string]string) *Type {
+func (t *Type) SubstituteRoles(subst *RoleSubst) *Type {
 	return New(t.Value().SubstituteRoles(subst), t.Roles().SubstituteRoles(subst))
 }
