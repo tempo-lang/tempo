@@ -3,4 +3,4 @@ func@(A,B) foo(){
   let y:Int@B = x + 10;
 }
 ---
-3:17: invalid declaration type, expected 'Int@(B)' found 'Int@(A)'
+3:17: invalid declaration type, expected 'Int@B' found 'Int@A'

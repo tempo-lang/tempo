@@ -121,6 +121,10 @@ func (r *Roles) Participants() []string {
 func (r *Roles) ToString() string {
 	roles := misc.JoinStrings(r.participants, ",")
 
+	if len(r.participants) == 1 {
+		return r.participants[0]
+	}
+
 	if r.isSharedRole {
 		return "[" + roles + "]"
 	} else {

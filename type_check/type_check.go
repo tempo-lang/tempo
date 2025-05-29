@@ -69,7 +69,12 @@ func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result an
 }
 
 func (tc *typeChecker) VisitScope(ctx *parser.ScopeContext) any {
-	return nil
+	returnsValue := false
+	for _, stmt := range ctx.AllStmt() {
+		result := stmt.Accept(tc)
+		returnsValue = returnsValue || result == true
+	}
+	return returnsValue
 }
 
 func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) *types.Type {

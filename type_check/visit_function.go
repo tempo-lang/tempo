@@ -27,8 +27,9 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 
 	// nil if parser error
 	if ctx.Scope() != nil {
-		for _, stmt := range ctx.Scope().AllStmt() {
-			stmt.Accept(tc)
+		returnsValue := ctx.Scope().Accept(tc) == true
+		if !returnsValue && sym.FuncValue().ReturnType().Value() != types.Unit() {
+			tc.reportError(type_error.NewFunctionMissingReturn(sym))
 		}
 	}
 

@@ -40,7 +40,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 
 	tc.insertSymbol(sym_table.NewVariableSymbol(ctx, tc.currentScope, stmtType))
 
-	return nil
+	return false
 }
 
 func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
@@ -63,7 +63,7 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 
 	tc.checkExprInScope(ctx.Ident(), sym.Type().Roles())
 
-	return nil
+	return false
 }
 
 func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
@@ -78,46 +78,53 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 	scopeRoles := guardType.Roles().Participants()
 
 	// Then branch
-	thenBranch := ctx.Scope(0)
+	thenBranch := ctx.GetThenScope()
 	tc.currentScope = tc.currentScope.MakeChild(thenBranch.GetStart(), thenBranch.GetStop(), scopeRoles)
-	for _, stmt := range thenBranch.AllStmt() {
-		stmt.Accept(tc)
-	}
+	thenReturn := thenBranch.Accept(tc)
 	tc.currentScope = tc.currentScope.Parent()
 
-	if elseBranch := ctx.Scope(1); elseBranch != nil {
+	if elseBranch := ctx.GetElseScope(); elseBranch != nil {
 		// Else branch
 		tc.currentScope = tc.currentScope.MakeChild(elseBranch.GetStart(), elseBranch.GetStop(), scopeRoles)
-		for _, stmt := range elseBranch.AllStmt() {
-			stmt.Accept(tc)
-		}
+		elseReturn := elseBranch.Accept(tc)
 		tc.currentScope = tc.currentScope.Parent()
+
+		if elseReturn == false || thenReturn == false {
+			return false
+		}
 	}
 
-	return nil
+	return thenReturn == true
 }
 
 func (tc *typeChecker) VisitStmtExpr(ctx *parser.StmtExprContext) any {
 	tc.visitExpr(ctx.Expr())
-	return nil
+	return false
 }
 
 func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
 
-	returnType := tc.visitExpr(ctx.Expr())
+	funcSym := tc.currentScope.GetFunc()
+	expectedReturnType := funcSym.FuncValue().ReturnType()
 
-	expectedReturnType := tc.currentScope.GetFunc().FuncValue().ReturnType()
+	missingRoles := funcSym.Roles().
+		SubtractParticipants(tc.currentScope.Roles().Participants())
+	if len(missingRoles) > 0 {
+		tc.reportError(type_error.NewReturnNotAllRolesError(ctx, missingRoles))
+	}
+
+	if ctx.Expr() == nil {
+		if expectedReturnType.Value() != types.Unit() {
+			tc.reportError(type_error.NewReturnValueMissing(funcSym, ctx))
+		}
+		return true
+	}
+
+	returnType := tc.visitExpr(ctx.Expr())
 
 	if !returnType.CanCoerceTo(expectedReturnType) {
 		tc.reportError(type_error.NewIncompatibleTypesError(ctx.Expr(), returnType, expectedReturnType))
 	}
 
-	missingRoles := tc.currentScope.GetFunc().Roles().
-		SubtractParticipants(tc.currentScope.Roles().Participants())
-
-	if len(missingRoles) > 0 {
-		tc.reportError(type_error.NewReturnNotAllRolesError(ctx, missingRoles))
-	}
-
-	return nil
+	return true
 }

@@ -1,1 +1,3 @@
-func@(A,B) foo() Bool@A {}
+func@(A,B) foo() Bool@A {
+  return;
+}

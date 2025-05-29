@@ -114,3 +114,45 @@ func (e *FunctionNotInstantiated) IsTypeError() {}
 func (e *FunctionNotInstantiated) ParserRule() antlr.ParserRuleContext {
 	return e.identAccess
 }
+
+type FunctionMissingReturn struct {
+	funcSym *sym_table.FuncSymbol
+}
+
+func NewFunctionMissingReturn(funcSym *sym_table.FuncSymbol) Error {
+	return &FunctionMissingReturn{
+		funcSym: funcSym,
+	}
+}
+
+func (e *FunctionMissingReturn) Error() string {
+	return fmt.Sprintf("function '%s' is missing return statement", e.funcSym.SymbolName())
+}
+
+func (e *FunctionMissingReturn) IsTypeError() {}
+
+func (e *FunctionMissingReturn) ParserRule() antlr.ParserRuleContext {
+	return e.funcSym.FuncSig().GetReturnType()
+}
+
+type ReturnValueMissing struct {
+	funcSym   *sym_table.FuncSymbol
+	returnCtx *parser.StmtReturnContext
+}
+
+func NewReturnValueMissing(funcSym *sym_table.FuncSymbol, returnCtx *parser.StmtReturnContext) Error {
+	return &ReturnValueMissing{
+		funcSym:   funcSym,
+		returnCtx: returnCtx,
+	}
+}
+
+func (e *ReturnValueMissing) Error() string {
+	return fmt.Sprintf("return is missing value of type '%s'", e.funcSym.FuncValue().ReturnType().ToString())
+}
+
+func (e *ReturnValueMissing) IsTypeError() {}
+
+func (e *ReturnValueMissing) ParserRule() antlr.ParserRuleContext {
+	return e.returnCtx
+}

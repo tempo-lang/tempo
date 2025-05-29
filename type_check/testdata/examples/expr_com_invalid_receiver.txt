@@ -2,4 +2,4 @@ func@(A,B) foo() {
   let x: Int@B = await A -> B true;
 }
 ---
-2:18: invalid declaration type, expected 'Int@(B)' found 'Bool@(B)'
+2:18: invalid declaration type, expected 'Int@B' found 'Bool@B'

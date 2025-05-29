@@ -50,15 +50,15 @@ scope: LCURLY stmt* RCURLY;
 
 // statements
 stmt:
-	LET ident COLON valueType IS expr END	# stmtVarDecl
-	| IF expr scope (ELSE scope)?			# stmtIf
-	| RETURN expr? END						# stmtReturn
-	| ident IS expr END						# stmtAssign
-	| expr END								# stmtExpr;
+	LET ident COLON valueType IS expr END					# stmtVarDecl
+	| IF expr thenScope = scope (ELSE elseScope = scope)?	# stmtIf
+	| RETURN expr? END										# stmtReturn
+	| ident IS expr END										# stmtAssign
+	| expr END												# stmtExpr;
 
 // expressions
 expr:
-	expr (
+	lhs = expr (
 		PLUS
 		| MINUS
 		| MULTIPLY
@@ -72,7 +72,7 @@ expr:
 		| GREATER_EQ
 		| AND
 		| OR
-	) expr										# exprBinOp
+	) rhs = expr								# exprBinOp
 	| NUMBER									# exprNum
 	| (TRUE | FALSE)							# exprBool
 	| AWAIT expr								# exprAwait
