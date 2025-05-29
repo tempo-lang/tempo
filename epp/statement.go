@@ -74,8 +74,10 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 			result = append(result, projection.NewStmtExpr(expr))
 		}
 	case *parser.StmtReturnContext:
-		expr, aux := epp.eppExpression(roleName, stmt.Expr())
-		result = aux
+		var expr projection.Expression = nil
+		if stmt.Expr() != nil {
+			expr, result = epp.eppExpression(roleName, stmt.Expr())
+		}
 
 		scope := epp.info.GlobalScope.Innermost(stmt.GetStart())
 		funcReturnRoles := scope.GetFunc().FuncValue().ReturnType().Roles()

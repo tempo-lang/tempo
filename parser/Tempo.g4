@@ -52,7 +52,7 @@ scope: LCURLY stmt* RCURLY;
 stmt:
 	LET ident COLON valueType IS expr END	# stmtVarDecl
 	| IF expr scope (ELSE scope)?			# stmtIf
-	| RETURN expr END						# stmtReturn
+	| RETURN expr? END						# stmtReturn
 	| ident IS expr END						# stmtAssign
 	| expr END								# stmtExpr;
 

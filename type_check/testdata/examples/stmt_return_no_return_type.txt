@@ -1,0 +1,5 @@
+func@(A,B) foo() {
+  return true;
+}
+---
+2:10: type 'Bool@[]' is not compatible with type '()@[]'

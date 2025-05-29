@@ -116,7 +116,11 @@ func NewStmtReturn(expr Expression) Statement {
 }
 
 func (s *StmtReturn) Codegen() jen.Statement {
-	return []jen.Code{jen.Return(s.Expr.Codegen())}
+	if s.Expr != nil {
+		return []jen.Code{jen.Return(s.Expr.Codegen())}
+	} else {
+		return []jen.Code{jen.Return()}
+	}
 }
 
 func (s *StmtReturn) IsStatement() {}

@@ -1,1 +1,3 @@
 func@(A,B) foo() Bool@A {}
+---
+Return is missing

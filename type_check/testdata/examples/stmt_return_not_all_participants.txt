@@ -1,0 +1,8 @@
+func@(A,B) foo() {
+  let x: Bool@A = true;
+  if x {
+    return;
+  }
+}
+---
+4:5: return statement is missing roles 'B'

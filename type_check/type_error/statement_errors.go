@@ -78,5 +78,5 @@ func (e *ReturnNotAllRolesError) Error() string {
 func (e *ReturnNotAllRolesError) IsTypeError() {}
 
 func (e *ReturnNotAllRolesError) ParserRule() antlr.ParserRuleContext {
-	return e.Return.Expr()
+	return e.Return
 }
