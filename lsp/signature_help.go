@@ -45,14 +45,20 @@ func (s *tempoServer) signatureHelp(context *glsp.Context, params *protocol.Sign
 		return nil, nil
 	}
 
-	callType := file.info.Types[exprCall]
+	// callType := file.info.Types[exprCall]
 	funcType := file.info.Types[exprCall.Expr()]
-	funcValue := funcType.Value().(*types.FunctionType)
+	funcValue, ok := funcType.Value().(*types.FunctionType)
+	if !ok {
+		logger.Debugf("can not give type hint for non-function: %T", funcType.Value())
+		return nil, nil
+	}
+
 	funcSym := file.info.Symbols[funcValue.FuncIdent()].(*sym_table.FuncSymbol)
 
 	parameters := []protocol.ParameterInformation{}
 
-	roleSubst, _ := funcSym.Type().Roles().SubstituteMap(callType.Roles())
+	// roleSubst, _ := funcSym.Type().Roles().SubstituteMap(callType.Roles())
+	roleSubst := funcValue.RoleSubstitution().Inverse()
 
 	paramLabels := []string{}
 	for _, param := range funcSym.Params() {

@@ -40,18 +40,12 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 				}
 
 				stmtRange := parserRuleToRange(node)
-				return &protocol.Hover{
-					Contents: fmt.Sprintf("return %s", exprType.ToString()),
-					Range:    &stmtRange,
-				}, nil
+				return hoverCode(fmt.Sprintf("return %s", exprType.ToString()), &stmtRange), nil
 			}
 		case *parser.IdentContext:
 			if identSym, ok := file.info.Symbols[node]; ok {
 				identRange := parserRuleToRange(node)
-				return &protocol.Hover{
-					Contents: identSym.Type().ToString(),
-					Range:    &identRange,
-				}, nil
+				return hoverCode(identSym.Type().ToString(), &identRange), nil
 			}
 		case parser.IExprContext:
 			if exprType, ok := file.info.Types[node]; ok {
@@ -66,10 +60,7 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 				}
 
 				exprRange := parserRuleToRange(node)
-				return &protocol.Hover{
-					Contents: exprType.ToString(),
-					Range:    &exprRange,
-				}, nil
+				return hoverCode(exprType.ToString(), &exprRange), nil
 			}
 		}
 
@@ -77,20 +68,14 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 	}
 
 	return nil, nil
+}
 
-	// debugNode := "```"
-	// node = leaf
-	// for node != nil {
-	// 	debugNode = fmt.Sprintf("%s\n\n%#v", debugNode, node)
-	// 	node = node.GetParent()
-	// }
-	// debugNode = fmt.Sprintf("%s\n```", debugNode)
-
-	// return &protocol.Hover{
-	// 	Contents: &protocol.MarkupContent{
-	// 		Kind:  protocol.MarkupKindMarkdown,
-	// 		Value: debugNode,
-	// 	},
-	// 	Range: &nodeRange,
-	// }, nil
+func hoverCode(code string, highlightRange *protocol.Range) *protocol.Hover {
+	return &protocol.Hover{
+		Contents: protocol.MarkedStringStruct{
+			Language: "tempo",
+			Value:    code,
+		},
+		Range: highlightRange,
+	}
 }
