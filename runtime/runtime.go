@@ -27,7 +27,7 @@ func Send[T any](env *Env, value T, roles ...string) {
 func Recv[T any](env *Env, role string) *Async[T] {
 	role = env.Role(role)
 	var value T
-	return DowncastAsync[T](env.trans.Recv(role, &value))
+	return DowncastAsync[T](env.trans.Recv(role, value))
 }
 
 // Role maps a static role name to the name substituted in the invocation of the current function.
@@ -105,6 +105,22 @@ func DowncastAsync[T any](async *Async[any]) *Async[T] {
 	} else {
 		return NewAsync(func() T {
 			return GetAsync(async).(T)
+		})
+	}
+}
+
+func DynAsync[T any](async *Async[T]) *Async[any] {
+	return MapAsync(async, func(value T) any {
+		return value
+	})
+}
+
+func MapAsync[T any, U any](async *Async[T], mapper func(value T) U) *Async[U] {
+	if async.called {
+		return FixedAsync(mapper(async.value))
+	} else {
+		return NewAsync(func() U {
+			return mapper(GetAsync(async))
 		})
 	}
 }
