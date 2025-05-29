@@ -1,0 +1,5 @@
+func@(A) foo() {
+  let x: Int@[A] = 10;
+}
+---
+2:14: shared role must have more than one participant

@@ -23,7 +23,7 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 
 	isAsync := ctx.ASYNC() != nil
 
-	role, ok := ParseRoleType(ctx.RoleType())
+	role, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
 		return types.Invalid(), nil
 	}
@@ -60,7 +60,7 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, []type_error.Error) {
 	errors := []type_error.Error{}
 
-	funcRoles, ok := ParseRoleType(ctx.RoleType())
+	funcRoles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
 		return types.Invalid(), errors
 	}
@@ -96,19 +96,19 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, [
 	return fn, errors
 }
 
-func ParseRoleType(ctx parser.IRoleTypeContext) (*types.Roles, bool) {
+func (tc *typeChecker) parseRoleType(ctx parser.IRoleTypeContext) (*types.Roles, bool) {
 	switch ctx := ctx.(type) {
 	case *parser.RoleTypeNormalContext:
-		return ParseRoleTypeNormal(ctx), true
+		return tc.parseRoleTypeNormal(ctx), true
 	case *parser.RoleTypeSharedContext:
-		return ParseRoleTypeShared(ctx), true
+		return tc.parseRoleTypeShared(ctx), true
 	}
 
 	//panic(fmt.Sprintf("unexpected role type: %#v", ctx))
 	return types.EveryoneRole(), false
 }
 
-func ParseRoleTypeNormal(ctx *parser.RoleTypeNormalContext) *types.Roles {
+func (tc *typeChecker) parseRoleTypeNormal(ctx *parser.RoleTypeNormalContext) *types.Roles {
 	participants := []string{}
 	for _, role := range ctx.AllIdent() {
 		participants = append(participants, role.GetText())
@@ -116,21 +116,26 @@ func ParseRoleTypeNormal(ctx *parser.RoleTypeNormalContext) *types.Roles {
 	return types.NewRole(participants, false)
 }
 
-func ParseRoleTypeShared(ctx *parser.RoleTypeSharedContext) *types.Roles {
+func (tc *typeChecker) parseRoleTypeShared(ctx *parser.RoleTypeSharedContext) *types.Roles {
 	participants := []string{}
 	for _, role := range ctx.AllIdent() {
 		participants = append(participants, role.GetText())
 	}
+
+	if len(participants) == 1 {
+		tc.reportError(type_error.NewSharedRoleSingleParticipant(ctx))
+	}
+
 	return types.NewRole(participants, true)
 }
 
-func ParseStructType(ctx parser.IStructContext) (*types.Type, type_error.Error) {
+func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (*types.Type, type_error.Error) {
 	// parser error
 	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
 		return types.Invalid(), nil
 	}
 
-	roles, ok := ParseRoleType(ctx.RoleType())
+	roles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
 		return types.Invalid(), nil
 	}
@@ -138,14 +143,14 @@ func ParseStructType(ctx parser.IStructContext) (*types.Type, type_error.Error) 
 	return types.New(types.NewStructType(ctx.Ident(), roles.Participants()), roles), nil
 }
 
-func ParseInterfaceType(ctx parser.IInterfaceContext) (*types.Type, type_error.Error) {
+func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (*types.Type, type_error.Error) {
 	// parser error
 	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
 		return types.Invalid(), nil
 	}
 
 	// name := ctx.Ident().GetText()
-	roles, ok := ParseRoleType(ctx.RoleType())
+	roles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
 		return types.Invalid(), nil
 	}

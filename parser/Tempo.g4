@@ -72,16 +72,16 @@ expr:
 		| GREATER_EQ
 		| AND
 		| OR
-	) rhs = expr								# exprBinOp
-	| NUMBER									# exprNum
-	| (TRUE | FALSE)							# exprBool
-	| AWAIT expr								# exprAwait
-	| ident ROLE_AT roleType exprStructField	# exprStruct
-	| expr funcArgList							# exprCall
-	| expr DOT ident							# exprFieldAccess
-	| identAccess								# exprIdent
-	| roleType COM roleType expr				# exprCom
-	| LPAREN expr RPAREN						# exprGroup;
+	) rhs = expr										# exprBinOp
+	| NUMBER											# exprNum
+	| (TRUE | FALSE)									# exprBool
+	| AWAIT expr										# exprAwait
+	| ident ROLE_AT roleType exprStructField			# exprStruct
+	| expr funcArgList									# exprCall
+	| expr DOT ident									# exprFieldAccess
+	| identAccess										# exprIdent
+	| sender = roleType COM receiver = roleType expr	# exprCom
+	| LPAREN expr RPAREN								# exprGroup;
 
 exprStructField:
 	LCURLY (ident COLON expr (COMMA ident COLON expr)*)? RCURLY;

@@ -28,47 +28,27 @@ func (i *InvalidNumberError) ParserRule() antlr.ParserRuleContext {
 	return i.Num
 }
 
-type ComSharedTypeError struct {
-	Com       *parser.ExprComContext
-	InnerType *types.Type
+type ComNonLocalSender struct {
+	Com *parser.ExprComContext
 }
 
-func (e *ComSharedTypeError) Error() string {
-	return fmt.Sprintf("can not communicate shared type '%s'", e.InnerType.ToString())
+type ComNonLocalSenderError struct {
+	Com *parser.ExprComContext
 }
 
-func (e *ComSharedTypeError) IsTypeError() {}
-
-func (e *ComSharedTypeError) ParserRule() antlr.ParserRuleContext {
-	return e.Com
+func (e *ComNonLocalSenderError) Error() string {
+	return "only a single sender is allowed"
 }
 
-func NewComSharedTypeError(com *parser.ExprComContext, innerType *types.Type) Error {
-	return &ComSharedTypeError{
-		Com:       com,
-		InnerType: innerType,
-	}
+func (e *ComNonLocalSenderError) IsTypeError() {}
+
+func (e *ComNonLocalSenderError) ParserRule() antlr.ParserRuleContext {
+	return e.Com.GetSender()
 }
 
-type ComDistributedTypeError struct {
-	Com       *parser.ExprComContext
-	InnerType *types.Type
-}
-
-func (e *ComDistributedTypeError) Error() string {
-	return fmt.Sprintf("can not communicate distributed type '%s'", e.InnerType.ToString())
-}
-
-func (e *ComDistributedTypeError) IsTypeError() {}
-
-func (e *ComDistributedTypeError) ParserRule() antlr.ParserRuleContext {
-	return e.Com
-}
-
-func NewComDistributedTypeError(com *parser.ExprComContext, innerType *types.Type) Error {
-	return &ComDistributedTypeError{
-		Com:       com,
-		InnerType: innerType,
+func NewComNonLocalSenderError(com *parser.ExprComContext) Error {
+	return &ComNonLocalSenderError{
+		Com: com,
 	}
 }
 

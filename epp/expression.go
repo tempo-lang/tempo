@@ -66,7 +66,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			return nil, aux
 		}
 	case *parser.ExprComContext:
-		sender := expr.RoleType(0).(*parser.RoleTypeNormalContext)
+		sender := expr.GetSender().(*parser.RoleTypeNormalContext)
 		senderRole := sender.Ident(0).GetText()
 
 		receivers := parser.RoleTypeAllIdents(expr.RoleType(1))

@@ -183,7 +183,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	_, isFunc := sym.Type().Value().(*types.FunctionType)
 
 	if ctx.IdentAccess().RoleType() != nil {
-		roles, ok := ParseRoleType(ctx.IdentAccess().RoleType())
+		roles, ok := tc.parseRoleType(ctx.IdentAccess().RoleType())
 		if !ok {
 			return tc.registerType(ctx, types.Invalid())
 		}
@@ -248,17 +248,13 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		invalidType = true
 	}
 
-	if fromRoles, ok := ParseRoleType(ctx.RoleType(0)); ok {
-		if fromRoles.IsSharedRole() {
-			tc.reportError(type_error.NewComSharedTypeError(ctx, innerExprType))
+	if fromRoles, ok := tc.parseRoleType(ctx.RoleType(0)); ok {
+		if !fromRoles.IsLocalRole() {
+			tc.reportError(type_error.NewComNonLocalSenderError(ctx))
 		}
 
 		if tc.checkRolesInScope(ctx.RoleType(0)) {
 			tc.checkExprInScope(ctx, fromRoles)
-		}
-
-		if len(fromRoles.Participants()) > 1 {
-			tc.reportError(type_error.NewComDistributedTypeError(ctx, innerExprType))
 		}
 
 		exprHasParticipants := len(innerExprType.Roles().Participants()) > 0
@@ -269,7 +265,7 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		invalidRole = true
 	}
 
-	toRoles, ok := ParseRoleType(ctx.RoleType(1))
+	toRoles, ok := tc.parseRoleType(ctx.RoleType(1))
 	if ok {
 		if !tc.checkRolesInScope(ctx.RoleType(1)) {
 			invalidRole = true
@@ -355,7 +351,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 
 	tc.info.Symbols[ctx.Ident()] = sym
 
-	roles, ok := ParseRoleType(ctx.RoleType())
+	roles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
 		return tc.registerType(ctx, types.Invalid())
 	}

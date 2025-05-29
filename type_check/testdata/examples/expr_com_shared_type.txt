@@ -1,5 +1,5 @@
 func@(A,B) foo() {
-  let x: Int@B = await [A] -> B 10;
+  let x: Int@B = await [A,B] -> B 10;
 }
 ---
-2:24: can not communicate shared type 'Int@[]'
+2:24: only a single sender is allowed

@@ -75,3 +75,23 @@ func NewUnmergableRolesError(expr parser.IExprContext, roles []*types.Roles) Err
 		Roles: roles,
 	}
 }
+
+type SharedRoleSingleParticipant struct {
+	roleType *parser.RoleTypeSharedContext
+}
+
+func NewSharedRoleSingleParticipant(roleType *parser.RoleTypeSharedContext) Error {
+	return &SharedRoleSingleParticipant{
+		roleType: roleType,
+	}
+}
+
+func (e *SharedRoleSingleParticipant) Error() string {
+	return "shared role must have more than one participant"
+}
+
+func (e *SharedRoleSingleParticipant) IsTypeError() {}
+
+func (e *SharedRoleSingleParticipant) ParserRule() antlr.ParserRuleContext {
+	return e.roleType
+}

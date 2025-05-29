@@ -1,3 +1,3 @@
-func@(A,B) foo() Bool@A {
-  return;
+func@(A,B) foo() {
+  let result: Int@A = await B->A (await A->B 10);
 }

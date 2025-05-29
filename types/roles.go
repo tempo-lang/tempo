@@ -1,12 +1,21 @@
 package types
 
 import (
+	"fmt"
 	"slices"
 	"tempo/misc"
 )
 
+type RoleType int
+
+const (
+	ROLE_LOCAL       RoleType = 0
+	ROLE_SHARED      RoleType = 1
+	ROLE_DISTRIBUTED RoleType = 2
+)
+
 type Roles struct {
-	isSharedRole bool
+	roleType     RoleType
 	participants []string
 }
 
@@ -47,12 +56,20 @@ func (r *RoleSubst) Inverse() *RoleSubst {
 }
 
 func NewRole(participants []string, isShared bool) *Roles {
+	var roleType RoleType
 	if len(participants) == 0 {
 		participants = nil
+		roleType = ROLE_SHARED
+	} else if len(participants) == 1 {
+		roleType = ROLE_LOCAL
+	} else if isShared {
+		roleType = ROLE_SHARED
+	} else {
+		roleType = ROLE_DISTRIBUTED
 	}
 
 	return &Roles{
-		isSharedRole: isShared,
+		roleType:     roleType,
 		participants: participants,
 	}
 }
@@ -110,8 +127,16 @@ func RoleIntersect(roles ...*Roles) (*Roles, bool) {
 	return nil, false
 }
 
+func (r *Roles) IsLocalRole() bool {
+	return r.roleType == ROLE_LOCAL
+}
+
 func (r *Roles) IsSharedRole() bool {
-	return r.isSharedRole
+	return r.roleType == ROLE_SHARED
+}
+
+func (r *Roles) IsDistributedRole() bool {
+	return r.roleType == ROLE_DISTRIBUTED
 }
 
 func (r *Roles) Participants() []string {
@@ -125,10 +150,15 @@ func (r *Roles) ToString() string {
 		return r.participants[0]
 	}
 
-	if r.isSharedRole {
+	switch r.roleType {
+	case ROLE_LOCAL:
+		return r.participants[0]
+	case ROLE_SHARED:
 		return "[" + roles + "]"
-	} else {
+	case ROLE_DISTRIBUTED:
 		return "(" + roles + ")"
+	default:
+		panic(fmt.Sprintf("invalid role type: %d", r.roleType))
 	}
 }
 
@@ -145,7 +175,16 @@ func (r *Roles) SubtractParticipants(other []string) []string {
 }
 
 func (r *Roles) Encompass(other *Roles) bool {
-	if len(other.participants) > 1 && r.isSharedRole != other.isSharedRole {
+	if (r.IsLocalRole() || r.IsSharedRole()) && other.IsLocalRole() {
+		for _, role := range r.participants {
+			if other.participants[0] == role {
+				return true
+			}
+		}
+		return false
+	}
+
+	if !r.IsSharedRole() || !other.IsSharedRole() {
 		return false
 	}
 
