@@ -116,3 +116,23 @@ func NewUnequatableTypeError(binOp *parser.ExprBinOpContext, value types.Value) 
 		Value: value,
 	}
 }
+
+type StructNotInitialized struct {
+	Ident *parser.ExprIdentContext
+}
+
+func (e *StructNotInitialized) Error() string {
+	return fmt.Sprintf("struct '%s' is not initialized", e.Ident.GetText())
+}
+
+func (e *StructNotInitialized) IsTypeError() {}
+
+func (e *StructNotInitialized) ParserRule() antlr.ParserRuleContext {
+	return e.Ident
+}
+
+func NewStructNotInitialized(ident *parser.ExprIdentContext) Error {
+	return &StructNotInitialized{
+		Ident: ident,
+	}
+}

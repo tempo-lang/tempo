@@ -182,6 +182,11 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	identType := sym.Type()
 	_, isFunc := sym.Type().Value().(*types.FunctionType)
 
+	if _, isStructDef := sym.(*sym_table.StructSymbol); isStructDef {
+		tc.reportError(type_error.NewStructNotInitialized(ctx))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
 	if ctx.IdentAccess().RoleType() != nil {
 		roles, ok := tc.parseRoleType(ctx.IdentAccess().RoleType())
 		if !ok {

@@ -1,0 +1,7 @@
+struct@(A,B) Point {}
+
+func@(A,B) foo() {
+  let p: Point@(A,B) = Point;
+}
+---
+4:24: struct 'Point' is not initialized

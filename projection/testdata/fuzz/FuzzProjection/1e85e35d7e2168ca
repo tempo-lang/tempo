@@ -1,0 +1,2 @@
+go test fuzz v1
+string("struct@(A,B) Point {\n  x: Int@A,\n  y: Int@B\n}\n\nfunc@(A,B) foo() {\n  let p: Point@(A,B) = Point;\n} ")
