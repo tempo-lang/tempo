@@ -57,5 +57,6 @@ func CodegenBuiltinType(builtinType types.Builtin) jen.Code {
 }
 
 func CodegenAsyncType(asyncType *types.Async) jen.Code {
-	return jen.Op("*").Qual("tempo/runtime", "Async")
+	innerType := CodegenType(asyncType.Inner())
+	return jen.Op("*").Qual("tempo/runtime", "Async").Types(innerType)
 }

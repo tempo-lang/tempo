@@ -7,7 +7,7 @@ type Env struct {
 
 type Transport interface {
 	Send(value any, roles ...string)
-	Recv(role string) *Async
+	Recv(role string, value any) *Async[any]
 }
 
 func New(trans Transport) *Env {
@@ -16,17 +16,18 @@ func New(trans Transport) *Env {
 	}
 }
 
-func (e *Env) Send(value any, roles ...string) {
+func Send[T any](env *Env, value T, roles ...string) {
 	subRoles := make([]string, len(roles))
 	for i, role := range roles {
-		subRoles[i] = e.Role(role)
+		subRoles[i] = env.Role(role)
 	}
-	e.trans.Send(value, subRoles...)
+	env.trans.Send(value, subRoles...)
 }
 
-func (e *Env) Recv(role string) *Async {
-	role = e.Role(role)
-	return e.trans.Recv(role)
+func Recv[T any](env *Env, role string) *Async[T] {
+	role = env.Role(role)
+	var value T
+	return DowncastAsync[T](env.trans.Recv(role, &value))
 }
 
 // Role maps a static role name to the name substituted in the invocation of the current function.
@@ -68,13 +69,13 @@ func (e *Env) Clone() *Env {
 
 // Async
 
-type Async struct {
-	value    any
-	callback func() any
+type Async[T any] struct {
+	value    T
+	callback func() T
 	called   bool
 }
 
-func (a *Async) Get() any {
+func GetAsync[T any](a *Async[T]) T {
 	if a.called {
 		return a.value
 	}
@@ -83,18 +84,27 @@ func (a *Async) Get() any {
 	return a.value
 }
 
-func FixedAsync(value any) *Async {
-	return &Async{
+func FixedAsync[T any](value T) *Async[T] {
+	return &Async[T]{
 		value:    value,
 		callback: nil,
 		called:   true,
 	}
 }
 
-func NewAsync(callback func() any) *Async {
-	return &Async{
-		value:    nil,
+func NewAsync[T any](callback func() T) *Async[T] {
+	return &Async[T]{
 		callback: callback,
 		called:   false,
+	}
+}
+
+func DowncastAsync[T any](async *Async[any]) *Async[T] {
+	if async.called {
+		return FixedAsync(async.value.(T))
+	} else {
+		return NewAsync(func() T {
+			return GetAsync(async).(T)
+		})
 	}
 }

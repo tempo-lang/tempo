@@ -6,13 +6,13 @@ import runtime "tempo/runtime"
 // Projection of choreography pingPong
 func pingPong_A(env *runtime.Env, count int) {
 	if count > 0 {
-		env.Send(count, "B")
+		runtime.Send(env, count, "B")
 		pingPong_B(env.Subst("B", "A", "A", "B"), count-1)
 	}
 }
 func pingPong_B(env *runtime.Env, count int) {
 	if count > 0 {
-		var result int = env.Recv("A").Get().(int)
+		var result int = runtime.GetAsync(runtime.Recv[int](env, "A"))
 		_ = result
 		pingPong_A(env.Subst("B", "A", "A", "B"), count-1)
 	}

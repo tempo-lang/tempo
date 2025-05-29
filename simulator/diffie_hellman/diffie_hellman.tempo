@@ -14,11 +14,11 @@ func@(A,B) DiffieHellman(mathA: Math@A, mathB: Math@B) Secret@(A,B) {
   let a: Int@A = 4;
   let b: Int@B = 3;
 
-  let A: async Int@B = A->B mathA.Exp(g, a)@A % p;
-  let B: async Int@A = B->A mathB.Exp(g, b)@B % p;
+  let A: async Int@B = A->B mathA.Exp(g, a) % p;
+  let B: async Int@A = B->A mathB.Exp(g, b) % p;
 
-  let sA: Int@A = mathA.Exp(await B, a)@A % p;
-  let sB: Int@B = mathB.Exp(await A, b)@B % p;
+  let sA: Int@A = mathA.Exp(await B, a) % p;
+  let sB: Int@B = mathB.Exp(await A, b) % p;
 
   let x: Secret@(A,B) = Secret@(A,B) { A: 10, B: 10 };
 

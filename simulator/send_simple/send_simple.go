@@ -7,9 +7,9 @@ import runtime "tempo/runtime"
 func SimpleSend_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
-	env.Send(x, "B")
+	runtime.Send(env, x, "B")
 }
 func SimpleSend_B(env *runtime.Env) {
-	var y int = env.Recv("A").Get().(int)
+	var y int = runtime.GetAsync(runtime.Recv[int](env, "A"))
 	_ = y
 }

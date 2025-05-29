@@ -226,7 +226,7 @@ func (e *ExprAwait) Inner() Expression {
 }
 
 func (e *ExprAwait) Codegen() jen.Code {
-	return jen.Add(e.Inner().Codegen()).Dot("Get").Params().Assert(CodegenType(e.typeVal))
+	return jen.Qual("tempo/runtime", "GetAsync").Call(e.Inner().Codegen())
 }
 
 func (e *ExprAwait) Type() types.Value {
@@ -254,6 +254,7 @@ type ExprSend struct {
 
 func (e *ExprSend) Codegen() jen.Code {
 	args := []jen.Code{
+		jen.Id("env"),
 		e.expr.Codegen(),
 	}
 
@@ -261,7 +262,7 @@ func (e *ExprSend) Codegen() jen.Code {
 		args = append(args, jen.Lit(role))
 	}
 
-	return jen.Id("env").Dot("Send").Call(args...)
+	return jen.Qual("tempo/runtime", "Send").Call(args...)
 }
 
 func (e *ExprSend) ReturnsValue() bool {
@@ -291,7 +292,8 @@ type ExprRecv struct {
 }
 
 func (e *ExprRecv) Codegen() jen.Code {
-	return jen.Id("env").Dot("Recv").Call(jen.Lit(e.sender))
+	recvType := CodegenType(e.recvType)
+	return jen.Qual("tempo/runtime", "Recv").Types(recvType).Call(jen.Id("env"), jen.Lit(e.sender))
 }
 
 func (e *ExprRecv) ReturnsValue() bool {

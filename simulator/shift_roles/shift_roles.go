@@ -6,14 +6,14 @@ import runtime "tempo/runtime"
 // Projection of choreography ShiftRoles
 func ShiftRoles_A(env *runtime.Env, count int) {
 	if count > 0 {
-		env.Send(count, "B")
+		runtime.Send(env, count, "B")
 		_ = count
 		ShiftRoles_D(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
 	}
 }
 func ShiftRoles_B(env *runtime.Env, count int) {
 	if count > 0 {
-		_ = env.Recv("A").Get().(int)
+		_ = runtime.GetAsync(runtime.Recv[int](env, "A"))
 		ShiftRoles_A(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
 	}
 }

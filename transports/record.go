@@ -35,9 +35,9 @@ func (r *Recorder) SendValues() []SendValue {
 func (r *Recorder) ReceivedValues() []RecvValue {
 	result := []RecvValue{}
 	for _, val := range r.receives {
-		async := val.Value.(*runtime.Async)
+		async := val.Value.(*runtime.Async[any])
 		result = append(result, RecvValue{
-			Value:  async.Get(),
+			Value:  runtime.GetAsync(async),
 			Sender: val.Sender,
 		})
 	}
@@ -45,15 +45,15 @@ func (r *Recorder) ReceivedValues() []RecvValue {
 }
 
 // Recv implements runtime.Transport.
-func (r *Recorder) Recv(role string) *runtime.Async {
-	value := r.inner.Recv(role)
+func (r *Recorder) Recv(role string, value any) *runtime.Async[any] {
+	result := r.inner.Recv(role, value)
 
 	r.receives = append(r.receives, RecvValue{
-		Value:  value,
+		Value:  result,
 		Sender: role,
 	})
 
-	return value
+	return result
 }
 
 // Send implements runtime.Transport.

@@ -5,10 +5,10 @@ import runtime "tempo/runtime"
 
 // Projection of choreography send
 func send_X(env *runtime.Env, value int) {
-	env.Send(value, "Y")
+	runtime.Send(env, value, "Y")
 }
 func send_Y(env *runtime.Env) int {
-	return env.Recv("X").Get().(int)
+	return runtime.GetAsync(runtime.Recv[int](env, "X"))
 }
 
 // Projection of choreography foo

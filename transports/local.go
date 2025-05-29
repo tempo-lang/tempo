@@ -31,7 +31,7 @@ func (l *localChan) Send(value any) {
 	}
 }
 
-func (l *localChan) Recv() *runtime.Async {
+func (l *localChan) Recv() *runtime.Async[any] {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
@@ -40,7 +40,7 @@ func (l *localChan) Recv() *runtime.Async {
 		l.send = l.send[1:]
 		return runtime.FixedAsync(value)
 	} else {
-		value := make(chan any)
+		value := make(chan any, 1)
 		l.recv = append(l.recv, value)
 		return runtime.NewAsync(func() any {
 			return <-value
@@ -85,7 +85,7 @@ type localTransport struct {
 }
 
 // Recv implements runtime.Transport.
-func (l *localTransport) Recv(role string) *runtime.Async {
+func (l *localTransport) Recv(role string, value any) *runtime.Async[any] {
 	channel := l.queue.get(role, l.role)
 	return channel.Recv()
 }

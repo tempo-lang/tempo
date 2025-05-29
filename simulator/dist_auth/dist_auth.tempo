@@ -27,13 +27,13 @@ func@(Client, Service, IP) Authenticate(
   tokenGen: TokenGenerator@IP
 ) AuthResult@(Client, Service) {
   let username: async Int@IP = Client -> IP credentials.Username;
-  let salt: async Int@Client = IP -> Client registry.GetSalt(await username)@(IP);
+  let salt: async Int@Client = IP -> Client registry.GetSalt(await username);
 
-  let hash: async Int@IP = Client -> IP calcHash(await salt, credentials.Password)@Client;
-  let valid: async Bool@[Client, Service, IP] = IP -> [Client, Service] registry.Check(await hash)@(IP);
+  let hash: async Int@IP = Client -> IP calcHash@Client(await salt, credentials.Password);
+  let valid: async Bool@[Client, Service, IP] = IP -> [Client, Service] registry.Check(await hash);
 
   if await valid {
-    let token: async Int@[Client, Service] = IP -> [Client, Service] tokenGen.GenerateToken()@(IP);
+    let token: async Int@[Client, Service] = IP -> [Client, Service] tokenGen.GenerateToken();
     return AuthResult@(Client, Service) { Success: true, Token: await token };
   } else {
     return AuthResult@(Client, Service) { Success: false, Token: 0 };

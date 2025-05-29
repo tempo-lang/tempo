@@ -37,20 +37,20 @@ func calcHash_A(env *runtime.Env, salt int, password int) int {
 
 // Projection of choreography Authenticate
 func Authenticate_Client(env *runtime.Env, credentials Credentials_A) AuthResult_C {
-	env.Send(credentials.Username, "IP")
-	var salt *runtime.Async = env.Recv("IP")
+	runtime.Send(env, credentials.Username, "IP")
+	var salt *runtime.Async[int] = runtime.Recv[int](env, "IP")
 	_ = salt
-	var tmp0 *runtime.Async = runtime.FixedAsync(calcHash_A(env.Subst("Client", "A"), salt.Get().(int), credentials.Password))
+	var tmp0 *runtime.Async[int] = runtime.FixedAsync(calcHash_A(env.Subst("Client", "A"), runtime.GetAsync(salt), credentials.Password))
 	_ = tmp0
-	env.Send(tmp0.Get().(int), "IP")
-	var valid *runtime.Async = env.Recv("IP")
+	runtime.Send(env, runtime.GetAsync(tmp0), "IP")
+	var valid *runtime.Async[bool] = runtime.Recv[bool](env, "IP")
 	_ = valid
-	if valid.Get().(bool) {
-		var token *runtime.Async = env.Recv("IP")
+	if runtime.GetAsync(valid) {
+		var token *runtime.Async[int] = runtime.Recv[int](env, "IP")
 		_ = token
 		return AuthResult_C{
 			Success: true,
-			Token:   token.Get().(int),
+			Token:   runtime.GetAsync(token),
 		}
 	} else {
 		return AuthResult_C{
@@ -60,14 +60,14 @@ func Authenticate_Client(env *runtime.Env, credentials Credentials_A) AuthResult
 	}
 }
 func Authenticate_Service(env *runtime.Env) AuthResult_S {
-	var valid *runtime.Async = env.Recv("IP")
+	var valid *runtime.Async[bool] = runtime.Recv[bool](env, "IP")
 	_ = valid
-	if valid.Get().(bool) {
-		var token *runtime.Async = env.Recv("IP")
+	if runtime.GetAsync(valid) {
+		var token *runtime.Async[int] = runtime.Recv[int](env, "IP")
 		_ = token
 		return AuthResult_S{
 			Success: true,
-			Token:   token.Get().(int),
+			Token:   runtime.GetAsync(token),
 		}
 	} else {
 		return AuthResult_S{
@@ -77,21 +77,21 @@ func Authenticate_Service(env *runtime.Env) AuthResult_S {
 	}
 }
 func Authenticate_IP(env *runtime.Env, registry ClientRegistry_A, tokenGen TokenGenerator_A) {
-	var username *runtime.Async = env.Recv("Client")
+	var username *runtime.Async[int] = runtime.Recv[int](env, "Client")
 	_ = username
-	var tmp1 *runtime.Async = runtime.FixedAsync(registry.GetSalt(env.Subst("IP", "A"), username.Get().(int)))
+	var tmp1 *runtime.Async[int] = runtime.FixedAsync(registry.GetSalt(env.Subst("IP", "A"), runtime.GetAsync(username)))
 	_ = tmp1
-	env.Send(tmp1.Get().(int), "Client")
-	var hash *runtime.Async = env.Recv("Client")
+	runtime.Send(env, runtime.GetAsync(tmp1), "Client")
+	var hash *runtime.Async[int] = runtime.Recv[int](env, "Client")
 	_ = hash
-	var tmp2 *runtime.Async = runtime.FixedAsync(registry.Check(env.Subst("IP", "A"), hash.Get().(int)))
+	var tmp2 *runtime.Async[bool] = runtime.FixedAsync(registry.Check(env.Subst("IP", "A"), runtime.GetAsync(hash)))
 	_ = tmp2
-	env.Send(tmp2.Get().(bool), "Client", "Service")
-	var valid *runtime.Async = tmp2
+	runtime.Send(env, runtime.GetAsync(tmp2), "Client", "Service")
+	var valid *runtime.Async[bool] = tmp2
 	_ = valid
-	if valid.Get().(bool) {
-		var tmp3 *runtime.Async = runtime.FixedAsync(tokenGen.GenerateToken(env.Subst("IP", "A")))
+	if runtime.GetAsync(valid) {
+		var tmp3 *runtime.Async[int] = runtime.FixedAsync(tokenGen.GenerateToken(env.Subst("IP", "A")))
 		_ = tmp3
-		env.Send(tmp3.Get().(int), "Client", "Service")
+		runtime.Send(env, runtime.GetAsync(tmp3), "Client", "Service")
 	}
 }

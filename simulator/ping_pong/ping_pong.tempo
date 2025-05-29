@@ -1,10 +1,10 @@
-func@(A,B) pingPong(count: Int@[A,B]) Int@A {
+func@(A,B) pingPong(count: Int@[A,B]) {
   if count > 0 {
     let result: Int@B = await A->B count;
-    pingPong(count - 1)@(B,A);
+    pingPong@(B,A)(count - 1);
   }
 }
 
 func@(A,B) Start() {
-  let x: async Int@A = pingPong(4)@(A,B);
+  pingPong@(A,B)(4);
 }

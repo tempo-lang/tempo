@@ -7,20 +7,20 @@ import runtime "tempo/runtime"
 func foo_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
-	env.Send(x, "B")
+	runtime.Send(env, x, "B")
 	var y int = x
 	_ = y
 	var z int = y
 	_ = z
 }
 func foo_B(env *runtime.Env) {
-	var y int = env.Recv("A").Get().(int)
+	var y int = runtime.GetAsync(runtime.Recv[int](env, "A"))
 	_ = y
-	env.Send(y, "C")
+	runtime.Send(env, y, "C")
 	var z int = y
 	_ = z
 }
 func foo_C(env *runtime.Env) {
-	var z int = env.Recv("B").Get().(int)
+	var z int = runtime.GetAsync(runtime.Recv[int](env, "B"))
 	_ = z
 }
