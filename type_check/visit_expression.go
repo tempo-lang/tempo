@@ -168,7 +168,11 @@ func (tc *typeChecker) VisitExprGroup(ctx *parser.ExprGroupContext) any {
 }
 
 func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
-	return tc.registerType(ctx, types.New(types.Bool(), types.NewRole(nil, true)))
+	return tc.registerType(ctx, types.New(types.Bool(), types.EveryoneRole()))
+}
+
+func (tc *typeChecker) VisitExprString(ctx *parser.ExprStringContext) any {
+	return tc.registerType(ctx, types.New(types.String(), types.EveryoneRole()))
 }
 
 func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
@@ -227,7 +231,7 @@ func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
 		tc.reportError(type_error.NewInvalidNumberError(ctx))
 	}
 
-	return tc.registerType(ctx, types.New(types.Int(), types.NewRole(nil, true)))
+	return tc.registerType(ctx, types.New(types.Int(), types.EveryoneRole()))
 }
 
 func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {

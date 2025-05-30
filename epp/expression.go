@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/projection"
@@ -53,6 +54,23 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			panic(fmt.Sprintf("expected NUMBER to be convertible to int: %s", expr.GetText()))
 		}
 		return projection.NewExprInt(num), []projection.Statement{}
+	case *parser.ExprStringContext:
+		str := expr.STRING().GetText()
+		str = str[1 : len(str)-1] // remote quotes
+
+		escapes := map[string]string{
+			`\\`: `\`,
+			`\"`: `"`,
+			`\n`: "\n",
+			`\r`: "\r",
+			`\t`: "\t",
+		}
+
+		for from, to := range escapes {
+			str = strings.ReplaceAll(str, from, to)
+		}
+
+		return projection.NewExprString(str), []projection.Statement{}
 	case *parser.ExprAwaitContext:
 		inner, aux := epp.eppExpression(roleName, expr.Expr())
 		if inner != nil {

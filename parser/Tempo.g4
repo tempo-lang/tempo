@@ -74,6 +74,7 @@ expr:
 		| OR
 	) rhs = expr										# exprBinOp
 	| NUMBER											# exprNum
+	| STRING											# exprString
 	| (TRUE | FALSE)									# exprBool
 	| AWAIT expr										# exprAwait
 	| ident ROLE_AT roleType exprStructField			# exprStruct
@@ -93,7 +94,6 @@ identAccess: ident (ROLE_AT roleType)?;
  */
 
 // Keywords
-
 STRUCT: 'struct';
 INTERFACE: 'interface';
 FUNC: 'func';
@@ -139,6 +139,10 @@ COMMA: ',';
 DOT: '.';
 COLON: ':';
 COM: '->';
+
+STRING: '"' (ESC | SAFECODEPOINT)* '"';
+fragment ESC: '\\' (["\\nrt]);
+fragment SAFECODEPOINT: ~ ["\\\u0000-\u001F];
 
 ID: ('_' [a-zA-Z_0-9]+ | [a-zA-Z][a-zA-Z_0-9]*);
 NUMBER: [0-9]+;

@@ -1,6 +1,8 @@
 module github.com/tempo-lang/tempo
 
-go 1.23.2
+go 1.23.0
+
+toolchain go1.24.3
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883

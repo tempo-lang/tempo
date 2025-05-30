@@ -1,41 +1,42 @@
 struct@A Credentials {
-  Username: Int@A,
-  Password: Int@A
+  Username: String@A,
+  Password: String@A
 }
 
 struct@(C,S) AuthResult {
   Success: Bool@[C,S],
-  Token: Int@[C,S]
+  Token: String@[C,S]
 }
 
 interface@A ClientRegistry {
-  func@A GetSalt(username: Int@A) Int@A;
-  func@A Check(hash: Int@A) Bool@A;
+  func@A GetSalt(username: String@A) String@A;
+  func@A Check(hash: String@A) Bool@A;
 }
 
 interface@A TokenGenerator {
-  func@A GenerateToken() Int@A;
+  func@A GenerateToken() String@A;
 }
 
-func@A calcHash(salt: Int@A, password: Int@A) Int@A {
-  return password + salt;
+interface@A Hasher {
+  func@A CalcHash(salt: String@A, password: String@A) String@A;
 }
 
 func@(Client, Service, IP) Authenticate(
   credentials: Credentials@Client,
   registry: ClientRegistry@IP,
-  tokenGen: TokenGenerator@IP
+  tokenGen: TokenGenerator@IP,
+  hasher: Hasher@Client
 ) AuthResult@(Client, Service) {
-  let username: async Int@IP = Client -> IP credentials.Username;
-  let salt: async Int@Client = IP -> Client registry.GetSalt(await username);
+  let username: async String@IP = Client -> IP credentials.Username;
+  let salt: async String@Client = IP -> Client registry.GetSalt(await username);
 
-  let hash: async Int@IP = Client -> IP calcHash@Client(await salt, credentials.Password);
+  let hash: async String@IP = Client -> IP hasher.CalcHash(await salt, credentials.Password);
   let valid: async Bool@[Client, Service, IP] = IP -> [Client, Service] registry.Check(await hash);
 
   if await valid {
-    let token: async Int@[Client, Service] = IP -> [Client, Service] tokenGen.GenerateToken();
+    let token: async String@[Client, Service] = IP -> [Client, Service] tokenGen.GenerateToken();
     return AuthResult@(Client, Service) { Success: true, Token: await token };
   } else {
-    return AuthResult@(Client, Service) { Success: false, Token: 0 };
+    return AuthResult@(Client, Service) { Success: false, Token: "" };
   }
 }

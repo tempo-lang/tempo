@@ -45,6 +45,34 @@ func NewExprInt(value int) Expression {
 	}
 }
 
+type ExprString struct {
+	Value string
+}
+
+func (e *ExprString) Codegen() jen.Code {
+	return jen.Lit(e.Value)
+}
+
+func (e *ExprString) Type() types.Value {
+	return types.String()
+}
+
+func (e *ExprString) ReturnsValue() bool {
+	return true
+}
+
+func (e *ExprString) HasSideEffects() bool {
+	return false
+}
+
+func (e *ExprString) IsExpression() {}
+
+func NewExprString(value string) Expression {
+	return &ExprString{
+		Value: value,
+	}
+}
+
 type ExprIdent struct {
 	Name    string
 	typeVal types.Value

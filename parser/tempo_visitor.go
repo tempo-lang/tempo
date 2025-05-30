@@ -85,6 +85,9 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#exprCom.
 	VisitExprCom(ctx *ExprComContext) interface{}
 
+	// Visit a parse tree produced by TempoParser#exprString.
+	VisitExprString(ctx *ExprStringContext) interface{}
+
 	// Visit a parse tree produced by TempoParser#exprGroup.
 	VisitExprGroup(ctx *ExprGroupContext) interface{}
 

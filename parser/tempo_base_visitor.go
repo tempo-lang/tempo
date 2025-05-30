@@ -111,6 +111,10 @@ func (v *BaseTempoVisitor) VisitExprCom(ctx *ExprComContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitExprString(ctx *ExprStringContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitExprGroup(ctx *ExprGroupContext) interface{} {
 	return v.VisitChildren(ctx)
 }

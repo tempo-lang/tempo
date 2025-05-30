@@ -176,6 +176,12 @@ func (s *BaseTempoListener) EnterExprCom(ctx *ExprComContext) {}
 // ExitExprCom is called when production exprCom is exited.
 func (s *BaseTempoListener) ExitExprCom(ctx *ExprComContext) {}
 
+// EnterExprString is called when production exprString is entered.
+func (s *BaseTempoListener) EnterExprString(ctx *ExprStringContext) {}
+
+// ExitExprString is called when production exprString is exited.
+func (s *BaseTempoListener) ExitExprString(ctx *ExprStringContext) {}
+
 // EnterExprGroup is called when production exprGroup is entered.
 func (s *BaseTempoListener) EnterExprGroup(ctx *ExprGroupContext) {}
 

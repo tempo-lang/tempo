@@ -85,6 +85,9 @@ type TempoListener interface {
 	// EnterExprCom is called when entering the exprCom production.
 	EnterExprCom(c *ExprComContext)
 
+	// EnterExprString is called when entering the exprString production.
+	EnterExprString(c *ExprStringContext)
+
 	// EnterExprGroup is called when entering the exprGroup production.
 	EnterExprGroup(c *ExprGroupContext)
 
@@ -186,6 +189,9 @@ type TempoListener interface {
 
 	// ExitExprCom is called when exiting the exprCom production.
 	ExitExprCom(c *ExprComContext)
+
+	// ExitExprString is called when exiting the exprString production.
+	ExitExprString(c *ExprStringContext)
 
 	// ExitExprGroup is called when exiting the exprGroup production.
 	ExitExprGroup(c *ExprGroupContext)
