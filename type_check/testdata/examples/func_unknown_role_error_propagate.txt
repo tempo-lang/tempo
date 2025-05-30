@@ -5,4 +5,4 @@ func@(A) foo() {
 }
 ---
 2:16: roles 'B' are not in scope
-4:20: expected async type 'Int@[]'
+4:20: expected async type 'Int@A'

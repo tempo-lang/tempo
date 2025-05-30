@@ -7,13 +7,13 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func pingPong_A(env *runtime.Env, count int) {
 	if count > 0 {
 		runtime.Send(env, count, "B")
+		_ = count
 		pingPong_B(env.Subst("B", "A", "A", "B"), count-1)
 	}
 }
 func pingPong_B(env *runtime.Env, count int) {
 	if count > 0 {
-		var result int = runtime.GetAsync(runtime.Recv[int](env, "A"))
-		_ = result
+		_ = runtime.GetAsync(runtime.Recv[int](env, "A"))
 		pingPong_A(env.Subst("B", "A", "A", "B"), count-1)
 	}
 }

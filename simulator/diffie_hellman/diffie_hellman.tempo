@@ -8,19 +8,17 @@ struct@(A,B) Secret {
 }
 
 func@(A,B) DiffieHellman(mathA: Math@A, mathB: Math@B) Secret@(A,B) {
-  let p: Int@[A,B] = 23;
-  let g: Int@[A,B] = 5;
+  let p = 23;
+  let g = 5;
 
-  let a: Int@A = 4;
-  let b: Int@B = 3;
+  let a = 4@A;
+  let b = 3@B;
 
   let A: async Int@B = A->B mathA.Exp(g, a) % p;
   let B: async Int@A = B->A mathB.Exp(g, b) % p;
 
-  let sA: Int@A = mathA.Exp(await B, a) % p;
-  let sB: Int@B = mathB.Exp(await A, b) % p;
-
-  let x: Secret@(A,B) = Secret@(A,B) { A: 10, B: 10 };
+  let sA = mathA.Exp(await B, a) % p;
+  let sB = mathB.Exp(await A, b) % p;
 
   return Secret@(A,B) {
     A: sA, B: sB

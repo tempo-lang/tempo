@@ -30,8 +30,8 @@ func@(Client, Service, IP) Authenticate(
   let username: async String@IP = Client -> IP credentials.Username;
   let salt: async String@Client = IP -> Client registry.GetSalt(await username);
 
-  let hash: async String@IP = Client -> IP hasher.CalcHash(await salt, credentials.Password);
-  let valid: async Bool@[Client, Service, IP] = IP -> [Client, Service] registry.Check(await hash);
+  let hash: async String@IP = Client->IP hasher.CalcHash(await salt, credentials.Password);
+  let valid = IP -> [Client, Service] registry.Check(await hash);
 
   if await valid {
     let token: async String@[Client, Service] = IP -> [Client, Service] tokenGen.GenerateToken();

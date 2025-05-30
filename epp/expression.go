@@ -49,7 +49,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			return nil, []projection.Statement{}
 		}
 	case *parser.ExprNumContext:
-		num, err := strconv.Atoi(expr.GetText())
+		num, err := strconv.Atoi(expr.NUMBER().GetText())
 		if err != nil {
 			panic(fmt.Sprintf("expected NUMBER to be convertible to int: %s", expr.GetText()))
 		}

@@ -199,21 +199,21 @@ func NewUnsendableTypeError(com *parser.ExprComContext, unsendableType *types.Ty
 }
 
 type NotDistributedTypeError struct {
-	valueType parser.IValueTypeContext
+	typeCtx antlr.ParserRuleContext
 }
 
-func NewNotDistributedTypeError(valueType parser.IValueTypeContext) Error {
+func NewNotDistributedTypeError(typeCtx antlr.ParserRuleContext) Error {
 	return &NotDistributedTypeError{
-		valueType: valueType,
+		typeCtx: typeCtx,
 	}
 }
 
 func (e *NotDistributedTypeError) Error() string {
-	return fmt.Sprintf("type '%s' is not distributed", e.valueType.GetText())
+	return fmt.Sprintf("type '%s' is not distributed", e.typeCtx.GetText())
 }
 
 func (e *NotDistributedTypeError) IsTypeError() {}
 
 func (e *NotDistributedTypeError) ParserRule() antlr.ParserRuleContext {
-	return e.valueType
+	return e.typeCtx
 }

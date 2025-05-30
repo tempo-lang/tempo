@@ -50,7 +50,7 @@ scope: LCURLY stmt* RCURLY;
 
 // statements
 stmt:
-	LET ident COLON valueType IS expr END					# stmtVarDecl
+	LET ident (COLON valueType)? IS expr END				# stmtVarDecl
 	| IF expr thenScope = scope (ELSE elseScope = scope)?	# stmtIf
 	| RETURN expr? END										# stmtReturn
 	| ident IS expr END										# stmtAssign
@@ -73,9 +73,9 @@ expr:
 		| AND
 		| OR
 	) rhs = expr										# exprBinOp
-	| NUMBER											# exprNum
-	| STRING											# exprString
-	| (TRUE | FALSE)									# exprBool
+	| NUMBER (ROLE_AT roleType)?						# exprNum
+	| STRING (ROLE_AT roleType)?						# exprString
+	| (TRUE | FALSE) (ROLE_AT roleType)?				# exprBool
 	| AWAIT expr										# exprAwait
 	| ident ROLE_AT roleType exprStructField			# exprStruct
 	| expr funcArgList									# exprCall

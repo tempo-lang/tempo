@@ -168,11 +168,40 @@ func (tc *typeChecker) VisitExprGroup(ctx *parser.ExprGroupContext) any {
 }
 
 func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
-	return tc.registerType(ctx, types.New(types.Bool(), types.EveryoneRole()))
+	roleType := tc.checkLiteralRoles(ctx.RoleType())
+	return tc.registerType(ctx, types.New(types.Bool(), roleType))
+}
+
+func (tc *typeChecker) checkLiteralRoles(roleTypeCtx parser.IRoleTypeContext) *types.Roles {
+	if roleTypeCtx == nil {
+		return types.EveryoneRole()
+	}
+
+	roleType, ok := tc.parseRoleType(roleTypeCtx)
+	if !ok {
+		return types.EveryoneRole()
+	}
+
+	hasError := false
+	if roleType.IsDistributedRole() {
+		tc.reportError(type_error.NewNotDistributedTypeError(roleTypeCtx))
+		hasError = true
+	}
+
+	if !tc.checkRolesInScope(roleTypeCtx) {
+		hasError = true
+	}
+
+	if hasError {
+		return types.EveryoneRole()
+	}
+
+	return roleType
 }
 
 func (tc *typeChecker) VisitExprString(ctx *parser.ExprStringContext) any {
-	return tc.registerType(ctx, types.New(types.String(), types.EveryoneRole()))
+	roleType := tc.checkLiteralRoles(ctx.RoleType())
+	return tc.registerType(ctx, types.New(types.String(), roleType))
 }
 
 func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
@@ -226,12 +255,13 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 }
 
 func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
-	_, err := strconv.Atoi(ctx.GetText())
+	_, err := strconv.Atoi(ctx.NUMBER().GetText())
 	if err != nil {
 		tc.reportError(type_error.NewInvalidNumberError(ctx))
 	}
 
-	return tc.registerType(ctx, types.New(types.Int(), types.EveryoneRole()))
+	roleType := tc.checkLiteralRoles(ctx.RoleType())
+	return tc.registerType(ctx, types.New(types.Int(), roleType))
 }
 
 func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {

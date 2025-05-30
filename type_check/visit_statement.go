@@ -8,34 +8,48 @@ import (
 )
 
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
-	exprType := tc.visitExpr(ctx.Expr())
-	declType, err := tc.parseValueType(ctx.ValueType())
-	typeFailed := false
-	roleFailed := false
+	hasExplicitType := ctx.ValueType() != nil
 
-	if err != nil {
-		tc.reportError(err)
-		typeFailed = true
-	} else if !declType.IsInvalid() {
-		if !tc.checkRolesInScope(ctx.ValueType().RoleType()) {
-			roleFailed = true
-		}
-	}
+	exprType := tc.visitExpr(ctx.Expr())
+	stmtType := exprType
+
+	roleFailed := false
 
 	if !tc.checkExprInScope(ctx.Expr(), exprType.Roles()) {
 		roleFailed = true
 	}
 
-	if !typeFailed && !exprType.CanCoerceTo(declType) {
-		tc.reportError(type_error.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
-		typeFailed = true
+	if hasExplicitType {
+		typeFailed := false
+		declType, err := tc.parseValueType(ctx.ValueType())
+		if err != nil {
+			tc.reportError(err)
+			typeFailed = true
+		} else if !declType.IsInvalid() {
+			if !tc.checkRolesInScope(ctx.ValueType().RoleType()) {
+				roleFailed = true
+			}
+		}
+
+		if !typeFailed && !exprType.CanCoerceTo(declType) {
+			tc.reportError(type_error.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
+			typeFailed = true
+		}
+
+		stmtType = declType
+		if typeFailed {
+			stmtType = types.Invalid()
+		} else if roleFailed {
+			stmtType = types.New(declType.Value(), types.EveryoneRole())
+		}
 	}
 
-	stmtType := declType
-	if typeFailed {
-		stmtType = types.Invalid()
-	} else if roleFailed {
-		stmtType = types.New(declType.Value(), types.EveryoneRole())
+	if len(stmtType.Roles().Participants()) == 0 {
+		newParticipants := tc.currentScope.GetFunc().Roles().Participants()
+		stmtType = types.New(
+			stmtType.Value(),
+			types.NewRole(newParticipants, true),
+		)
 	}
 
 	tc.insertSymbol(sym_table.NewVariableSymbol(ctx, tc.currentScope, stmtType))

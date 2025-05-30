@@ -1,4 +1,4 @@
 func@(A,B) SimpleSend() {
-  let x: Int@A = 10;
+  let x = 10@A;
   let y: Int@B = await A->B x;
 }
