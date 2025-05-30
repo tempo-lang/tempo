@@ -88,6 +88,10 @@ func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) *types.Type 
 		return types.Invalid()
 	}
 
+	if err := tc.checkDuplicateRoles(ctx.RoleType(), valType.Roles()); err != nil {
+		tc.reportError(err)
+	}
+
 	return valType
 }
 

@@ -39,7 +39,12 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 
 func (tc *typeChecker) VisitFuncSig(ctx *parser.FuncSigContext) any {
 
-	tc.checkFuncDuplicateRoles(ctx)
+	if sym, ok := tc.info.Symbols[ctx.GetName()].(*sym_table.FuncSymbol); ok {
+		if err := tc.checkDuplicateRoles(ctx.RoleType(), sym.Type().Roles()); err != nil {
+			tc.reportError(err)
+		}
+	}
+
 	ctx.FuncParamList().Accept(tc)
 
 	return nil

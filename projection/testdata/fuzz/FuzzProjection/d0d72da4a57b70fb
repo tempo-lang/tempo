@@ -1,0 +1,2 @@
+go test fuzz v1
+string("interface A Action 00func(0,Y A Action Action Y{Action.")

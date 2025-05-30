@@ -1,0 +1,7 @@
+func@(A,B) bar() {}
+
+func@A foo() {
+  bar@(A,A)();
+}
+---
+4:7: duplicate roles 'A'

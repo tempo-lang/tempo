@@ -10,13 +10,13 @@ import (
 )
 
 type DuplicateRolesError struct {
-	Func           parser.IFuncSigContext
-	DuplicateRoles []parser.IIdentContext
+	Ctx            antlr.ParserRuleContext
+	DuplicateRoles []string
 }
 
-func NewDuplicateRolesError(function parser.IFuncSigContext, duplicateRoles []parser.IIdentContext) Error {
+func NewDuplicateRolesError(ctx antlr.ParserRuleContext, duplicateRoles []string) Error {
 	return &DuplicateRolesError{
-		Func:           function,
+		Ctx:            ctx,
 		DuplicateRoles: duplicateRoles,
 	}
 }
@@ -24,11 +24,12 @@ func NewDuplicateRolesError(function parser.IFuncSigContext, duplicateRoles []pa
 func (e *DuplicateRolesError) IsTypeError() {}
 
 func (e *DuplicateRolesError) Error() string {
-	return fmt.Sprintf("function '%s' has duplicate role '%s'", e.Func.Ident().GetText(), e.DuplicateRoles[0].GetText())
+	dupRoles := misc.JoinStrings(e.DuplicateRoles, ",")
+	return fmt.Sprintf("duplicate roles '%s'", dupRoles)
 }
 
 func (e *DuplicateRolesError) ParserRule() antlr.ParserRuleContext {
-	return e.Func
+	return e.Ctx
 }
 
 type RolesNotInScopeError struct {

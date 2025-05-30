@@ -193,6 +193,10 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 			return tc.registerType(ctx, types.Invalid())
 		}
 
+		if err := tc.checkDuplicateRoles(ctx.IdentAccess().RoleType(), roles); err != nil {
+			tc.reportError(err)
+		}
+
 		if isFunc {
 			roleSubst, ok := identType.Roles().SubstituteMap(roles)
 			if !ok {
@@ -361,6 +365,10 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	if err := tc.checkDuplicateRoles(ctx.RoleType(), roles); err != nil {
+		tc.reportError(err)
+	}
+
 	for _, defField := range structSym.Fields() {
 		found := false
 		for _, exprField := range ctx.ExprStructField().AllIdent() {
@@ -439,7 +447,10 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 
 	switch value := objectType.Value().(type) {
 	case *types.StructType:
-		structSym := tc.currentScope.LookupParent(value.Name()).(*sym_table.StructSymbol)
+		structSym, ok := tc.currentScope.LookupParent(value.Name()).(*sym_table.StructSymbol)
+		if !ok {
+			return tc.registerType(ctx, types.Invalid())
+		}
 
 		field := structSym.Scope().Lookup(ctx.Ident().GetText())
 		if field == nil {
@@ -456,7 +467,10 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 		return tc.registerType(ctx, fieldType)
 
 	case *types.InterfaceType:
-		infSym := tc.currentScope.LookupParent(value.Name()).(*sym_table.InterfaceSymbol)
+		infSym, ok := tc.currentScope.LookupParent(value.Name()).(*sym_table.InterfaceSymbol)
+		if !ok {
+			return tc.registerType(ctx, types.Invalid())
+		}
 
 		field := infSym.Scope().Lookup(ctx.Ident().GetText())
 		if field == nil {

@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(X,Y) send(value: Int@X)Int@Y{  return await X->Y value;}\nfunc@(A,B)B0() { let x: Int@A=01;  send@(A,A)(0); } ")

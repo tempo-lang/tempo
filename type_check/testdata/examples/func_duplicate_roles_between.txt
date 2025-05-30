@@ -1,3 +1,3 @@
 func@(B,A,B) foo(){}
 ---
-1:1: function 'foo' has duplicate role 'B'
+1:6: duplicate roles 'B'

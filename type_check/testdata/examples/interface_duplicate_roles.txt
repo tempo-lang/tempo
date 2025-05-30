@@ -1,0 +1,9 @@
+interface@(A,B) runnable {
+  func@(A,B) run(value: Int@A) Int@B;
+}
+
+func@A foo(action: runnable@(A,A)) {
+  action.run(10);
+}
+---
+5:29: duplicate roles 'A'

@@ -140,6 +140,10 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (*types.Type, 
 		return types.Invalid(), nil
 	}
 
+	if err := tc.checkDuplicateRoles(ctx.RoleType(), roles); err != nil {
+		tc.reportError(err)
+	}
+
 	return types.New(types.NewStructType(ctx.Ident(), roles.Participants()), roles), nil
 }
 
@@ -153,6 +157,10 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (*types.
 	roles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
 		return types.Invalid(), nil
+	}
+
+	if err := tc.checkDuplicateRoles(ctx.RoleType(), roles); err != nil {
+		tc.reportError(err)
 	}
 
 	return types.New(types.NewInterfaceType(ctx.Ident()), roles), nil

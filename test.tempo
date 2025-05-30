@@ -1,3 +1,7 @@
-func@(A,B) foo() {
-  let result: Int@A = await B->A (await A->B 10);
+interface@(A,B) Runnable {
+  func@(A,B) run(value: Int@A) Int@B;
+}
+
+func@A foo(action: Runnable@(A,A)) {
+  action.run(10);
 }

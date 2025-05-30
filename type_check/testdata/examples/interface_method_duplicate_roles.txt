@@ -1,0 +1,5 @@
+interface@(A,B) Point {
+  func@(A,A) foo();
+}
+---
+2:8: duplicate roles 'A'
