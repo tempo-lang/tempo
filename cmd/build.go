@@ -1,0 +1,66 @@
+package cmd
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"path"
+
+	"github.com/antlr4-go/antlr/v4"
+	"github.com/spf13/cobra"
+	"github.com/tempo-lang/tempo/compiler"
+	"github.com/tempo-lang/tempo/type_check/type_error"
+)
+
+var packageName string
+
+var buildCmd = &cobra.Command{
+	Use:     "build [flags] file",
+	Example: "  tempo build choreography.tempo",
+	Short:   "Compile tempo source code",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return errors.New("missing source file")
+		}
+
+		if len(args) > 1 {
+			return fmt.Errorf("accepts 1 arg, received %d", len(args))
+		}
+
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		inputFile := args[0]
+
+		input, err := antlr.NewFileStream(inputFile)
+		if err != nil {
+			fmt.Printf("failed to get file stream: %v\n", err)
+			os.Exit(1)
+		}
+
+		filename := path.Base(inputFile)
+		options := compiler.Options{
+			PackageName: filename[0 : len(filename)-len(path.Ext(filename))],
+		}
+
+		output, errors := compiler.Compile(input, &options)
+		if errors != nil {
+			for _, err := range errors {
+				if typeErr, ok := err.(type_error.Error); ok {
+					token := typeErr.ParserRule().GetStart()
+					fmt.Printf("Type error %d:%d: %s\n", token.GetLine(), token.GetColumn()+1, typeErr.Error())
+				} else {
+					fmt.Printf("%v\n", err)
+				}
+			}
+			os.Exit(1)
+		}
+
+		fmt.Printf("%s", output)
+	},
+}
+
+func init() {
+	buildCmd.Flags().StringVarP(&packageName, "package", "p", "", "The Go package name for the generated code")
+	rootCmd.AddCommand(buildCmd)
+}

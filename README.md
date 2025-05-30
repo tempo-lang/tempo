@@ -11,12 +11,23 @@ The language is under development, here is a brief list of implemented things.
 - [x] If statements
 - [x] Function calls
 - [x] Struct types
+- [x] Interfaces
 - [ ] Closures
 - [ ] Lists
 - [ ] Maps
 - [ ] Methods
-- [x] Interfaces
 - [ ] Co-routines
+
+## Installation
+
+Make sure you have the latest version of Go installed.
+Then run the following command to install the tempo compiler.
+
+```sh
+$ go install github.com/tempo-lang/tempo@latest
+```
+
+If everything went well, you can now run the compiler by executing the `tempo` command.
 
 ## Values and Types
 

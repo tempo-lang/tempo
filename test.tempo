@@ -2,6 +2,6 @@ interface@(A,B) Runnable {
   func@(A,B) run(value: Int@A) Int@B;
 }
 
-func@A foo(action: Runnable@(A,A)) {
+func@(A,B) foo(action: Runnable@(A,B)) {
   action.run(10);
 }
