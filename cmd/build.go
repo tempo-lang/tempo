@@ -39,8 +39,11 @@ var buildCmd = &cobra.Command{
 		}
 
 		filename := path.Base(inputFile)
+		if packageName == "" {
+			packageName = filename[0 : len(filename)-len(path.Ext(filename))]
+		}
 		options := compiler.Options{
-			PackageName: filename[0 : len(filename)-len(path.Ext(filename))],
+			PackageName: packageName,
 		}
 
 		output, errors := compiler.Compile(input, &options)

@@ -1,7 +1,11 @@
+struct@(A,B) Foo {
+  runner: Runnable@(A,B)
+}
+
 interface@(A,B) Runnable {
   func@(A,B) run(value: Int@A) Int@B;
 }
 
-func@(A,B) foo(action: Runnable@(A,B)) {
-  action.run(10);
+func@(A,B) foo(action: Foo@(A,B)) {
+  action.runner.run(10);
 }
