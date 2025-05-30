@@ -2,8 +2,9 @@ package simulator
 
 import (
 	"sync"
-	"tempo/runtime"
-	"tempo/transports"
+
+	"github.com/tempo-lang/tempo/runtime"
+	"github.com/tempo-lang/tempo/transports"
 )
 
 type Process struct {

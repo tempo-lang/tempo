@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
-	"tempo/runtime"
+
+	"github.com/tempo-lang/tempo/runtime"
 )
 
 type jsonData []byte

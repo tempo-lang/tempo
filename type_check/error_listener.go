@@ -1,7 +1,7 @@
 package type_check
 
 import (
-	"tempo/type_check/type_error"
+	"github.com/tempo-lang/tempo/type_check/type_error"
 )
 
 type ErrorListener interface {

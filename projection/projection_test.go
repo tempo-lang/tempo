@@ -6,8 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"tempo/compiler"
 	"testing"
+
+	"github.com/tempo-lang/tempo/compiler"
 
 	"github.com/andreyvit/diff"
 	"github.com/antlr4-go/antlr/v4"

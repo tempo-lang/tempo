@@ -2,8 +2,9 @@ package projection
 
 import (
 	"fmt"
-	"tempo/parser"
-	"tempo/types"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -191,7 +192,7 @@ type ExprAsync struct {
 }
 
 func (e *ExprAsync) Codegen() jen.Code {
-	return jen.Qual("tempo/runtime", "FixedAsync").Call(e.inner.Codegen())
+	return RuntimeFunc("FixedAsync").Call(e.inner.Codegen())
 }
 
 func (e *ExprAsync) Type() types.Value {
@@ -226,7 +227,7 @@ func (e *ExprAwait) Inner() Expression {
 }
 
 func (e *ExprAwait) Codegen() jen.Code {
-	return jen.Qual("tempo/runtime", "GetAsync").Call(e.Inner().Codegen())
+	return RuntimeFunc("GetAsync").Call(e.Inner().Codegen())
 }
 
 func (e *ExprAwait) Type() types.Value {
@@ -262,7 +263,7 @@ func (e *ExprSend) Codegen() jen.Code {
 		args = append(args, jen.Lit(role))
 	}
 
-	return jen.Qual("tempo/runtime", "Send").Call(args...)
+	return RuntimeFunc("Send").Call(args...)
 }
 
 func (e *ExprSend) ReturnsValue() bool {
@@ -293,7 +294,7 @@ type ExprRecv struct {
 
 func (e *ExprRecv) Codegen() jen.Code {
 	recvType := CodegenType(e.recvType)
-	return jen.Qual("tempo/runtime", "Recv").Types(recvType).Call(jen.Id("env"), jen.Lit(e.sender))
+	return RuntimeFunc("Recv").Types(recvType).Call(jen.Id("env"), jen.Lit(e.sender))
 }
 
 func (e *ExprRecv) ReturnsValue() bool {

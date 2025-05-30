@@ -1,8 +1,8 @@
 package type_check
 
 import (
-	"tempo/type_check/type_error"
-	"tempo/types"
+	"github.com/tempo-lang/tempo/type_check/type_error"
+	"github.com/tempo-lang/tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )

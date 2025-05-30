@@ -2,7 +2,8 @@ package types
 
 import (
 	"fmt"
-	"tempo/parser"
+
+	"github.com/tempo-lang/tempo/parser"
 )
 
 type InterfaceType struct {

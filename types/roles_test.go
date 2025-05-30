@@ -2,8 +2,9 @@ package types_test
 
 import (
 	"slices"
-	"tempo/types"
 	"testing"
+
+	"github.com/tempo-lang/tempo/types"
 )
 
 func TestRoleIntersect(t *testing.T) {

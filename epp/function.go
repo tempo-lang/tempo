@@ -1,9 +1,9 @@
 package epp
 
 import (
-	"tempo/parser"
-	"tempo/projection"
-	"tempo/types"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (epp *epp) eppFunc(function parser.IFuncContext) *projection.Choreography {

@@ -5,10 +5,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"tempo/compiler"
-	"tempo/misc"
-	"tempo/type_check/type_error"
 	"testing"
+
+	"github.com/tempo-lang/tempo/compiler"
+	"github.com/tempo-lang/tempo/misc"
+	"github.com/tempo-lang/tempo/type_check/type_error"
 
 	"github.com/antlr4-go/antlr/v4"
 )

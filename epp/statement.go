@@ -2,9 +2,10 @@ package epp
 
 import (
 	"fmt"
-	"tempo/parser"
-	"tempo/projection"
-	"tempo/types"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []projection.Statement) {

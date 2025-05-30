@@ -1,8 +1,8 @@
 package type_check
 
 import (
-	"tempo/parser"
-	"tempo/sym_table"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/sym_table"
 )
 
 func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {

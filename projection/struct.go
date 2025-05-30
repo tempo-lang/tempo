@@ -2,8 +2,9 @@ package projection
 
 import (
 	"fmt"
-	"tempo/parser"
-	"tempo/types"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )

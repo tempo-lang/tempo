@@ -2,8 +2,9 @@ package projection
 
 import (
 	"fmt"
-	"tempo/parser"
-	"tempo/types"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -71,7 +72,7 @@ func (f *Func) Codegen() *jen.Statement {
 
 func (f *FuncSig) Codegen(isInterfaceMethod bool) *jen.Statement {
 	params := []jen.Code{
-		jen.Id("env").Add(jen.Op("*").Qual("tempo/runtime", "Env")),
+		jen.Id("env").Add(jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Env")),
 	}
 	for _, param := range f.Params {
 		params = append(params, jen.Id(param.Name).Add(CodegenType(param.TypeValue)))

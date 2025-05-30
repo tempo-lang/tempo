@@ -1,9 +1,9 @@
 package epp
 
 import (
-	"tempo/projection"
-	"tempo/sym_table"
-	"tempo/types"
+	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/sym_table"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (epp *epp) eppType(roleName string, typ *types.Type) types.Value {

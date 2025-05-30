@@ -1,9 +1,9 @@
 package epp
 
 import (
-	"tempo/parser"
-	"tempo/projection"
-	"tempo/sym_table"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/sym_table"
 )
 
 func (epp *epp) eppInterface(ctx parser.IInterfaceContext) *projection.ChoreographyInterface {

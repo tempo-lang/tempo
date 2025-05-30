@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
-	"tempo/parser"
-	"tempo/projection"
-	"tempo/sym_table"
-	"tempo/types"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/sym_table"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projection.Expression, []projection.Statement) {

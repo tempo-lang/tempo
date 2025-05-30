@@ -2,11 +2,12 @@ package simulator_test
 
 import (
 	"math"
-	"tempo/runtime"
-	"tempo/simulator"
-	"tempo/simulator/diffie_hellman"
-	"tempo/transports"
 	"testing"
+
+	"github.com/tempo-lang/tempo/runtime"
+	"github.com/tempo-lang/tempo/simulator"
+	"github.com/tempo-lang/tempo/simulator/diffie_hellman"
+	"github.com/tempo-lang/tempo/transports"
 
 	"github.com/google/go-cmp/cmp"
 )

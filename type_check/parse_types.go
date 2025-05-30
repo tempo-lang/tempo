@@ -1,9 +1,9 @@
 package type_check
 
 import (
-	"tempo/parser"
-	"tempo/type_check/type_error"
-	"tempo/types"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/type_check/type_error"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func BuiltinValues() map[string]types.Value {

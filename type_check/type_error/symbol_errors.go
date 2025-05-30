@@ -2,9 +2,10 @@ package type_error
 
 import (
 	"fmt"
-	"tempo/parser"
-	"tempo/sym_table"
-	"tempo/types"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/sym_table"
+	"github.com/tempo-lang/tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )

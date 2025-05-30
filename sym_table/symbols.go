@@ -1,8 +1,8 @@
 package sym_table
 
 import (
-	"tempo/parser"
-	"tempo/types"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/types"
 )
 
 type Symbol interface {

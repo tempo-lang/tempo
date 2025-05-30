@@ -2,8 +2,9 @@ package types
 
 import (
 	"fmt"
-	"tempo/misc"
-	"tempo/parser"
+
+	"github.com/tempo-lang/tempo/misc"
+	"github.com/tempo-lang/tempo/parser"
 )
 
 type FunctionType struct {

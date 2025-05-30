@@ -1,7 +1,7 @@
 package transports
 
 import (
-	"tempo/runtime"
+	"github.com/tempo-lang/tempo/runtime"
 )
 
 type SendValue struct {

@@ -3,11 +3,12 @@ package type_check
 import (
 	"slices"
 	"strconv"
-	"tempo/parser"
-	"tempo/projection"
-	"tempo/sym_table"
-	"tempo/type_check/type_error"
-	"tempo/types"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/sym_table"
+	"github.com/tempo-lang/tempo/type_check/type_error"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (tc *typeChecker) visitExpr(ctx parser.IExprContext) *types.Type {

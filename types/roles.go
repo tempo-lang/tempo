@@ -3,7 +3,8 @@ package types
 import (
 	"fmt"
 	"slices"
-	"tempo/misc"
+
+	"github.com/tempo-lang/tempo/misc"
 )
 
 type RoleType int

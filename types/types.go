@@ -3,7 +3,8 @@ package types
 import (
 	"fmt"
 	"reflect"
-	"tempo/misc"
+
+	"github.com/tempo-lang/tempo/misc"
 )
 
 type Type struct {

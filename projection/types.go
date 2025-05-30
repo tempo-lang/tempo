@@ -2,7 +2,8 @@ package projection
 
 import (
 	"fmt"
-	"tempo/types"
+
+	"github.com/tempo-lang/tempo/types"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -58,5 +59,5 @@ func CodegenBuiltinType(builtinType types.Builtin) jen.Code {
 
 func CodegenAsyncType(asyncType *types.Async) jen.Code {
 	innerType := CodegenType(asyncType.Inner())
-	return jen.Op("*").Qual("tempo/runtime", "Async").Types(innerType)
+	return jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Async").Types(innerType)
 }

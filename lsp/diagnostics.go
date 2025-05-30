@@ -1,8 +1,8 @@
 package lsp
 
 import (
-	"tempo/parser"
-	"tempo/type_check"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/type_check"
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/tliron/glsp"

@@ -2,9 +2,10 @@ package epp
 
 import (
 	"fmt"
-	"tempo/parser"
-	"tempo/projection"
-	"tempo/type_check"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/type_check"
 )
 
 type epp struct {

@@ -1,11 +1,12 @@
 package simulator_test
 
 import (
-	"tempo/runtime"
-	"tempo/simulator"
-	"tempo/simulator/send_trans"
-	"tempo/transports"
 	"testing"
+
+	"github.com/tempo-lang/tempo/runtime"
+	"github.com/tempo-lang/tempo/simulator"
+	"github.com/tempo-lang/tempo/simulator/send_trans"
+	"github.com/tempo-lang/tempo/transports"
 
 	"github.com/google/go-cmp/cmp"
 )

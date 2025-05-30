@@ -3,8 +3,9 @@ package lsp
 import (
 	"context"
 	"sync"
-	"tempo/parser"
-	"tempo/type_check"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/type_check"
 
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )

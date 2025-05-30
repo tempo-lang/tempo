@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"tempo/compiler"
-	"tempo/lsp"
-	"tempo/type_check/type_error"
+
+	"github.com/tempo-lang/tempo/compiler"
+	"github.com/tempo-lang/tempo/lsp"
+	"github.com/tempo-lang/tempo/type_check/type_error"
 
 	"github.com/antlr4-go/antlr/v4"
 )

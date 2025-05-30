@@ -1,11 +1,12 @@
 package simulator_test
 
 import (
-	"tempo/runtime"
-	"tempo/simulator"
-	"tempo/simulator/shift_roles"
-	"tempo/transports"
 	"testing"
+
+	"github.com/tempo-lang/tempo/runtime"
+	"github.com/tempo-lang/tempo/simulator"
+	"github.com/tempo-lang/tempo/simulator/shift_roles"
+	"github.com/tempo-lang/tempo/transports"
 
 	"github.com/google/go-cmp/cmp"
 )

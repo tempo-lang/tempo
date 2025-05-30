@@ -1,7 +1,7 @@
 package projection
 
 import (
-	"tempo/parser"
+	"github.com/tempo-lang/tempo/parser"
 
 	"github.com/dave/jennifer/jen"
 )

@@ -1,8 +1,9 @@
 package types_test
 
 import (
-	"tempo/types"
 	"testing"
+
+	"github.com/tempo-lang/tempo/types"
 )
 
 type coerceTestCase struct {

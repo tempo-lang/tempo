@@ -5,9 +5,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"tempo/compiler"
 	"testing"
 	"time"
+
+	"github.com/tempo-lang/tempo/compiler"
+	"github.com/tempo-lang/tempo/projection"
 
 	"github.com/antlr4-go/antlr/v4"
 
@@ -23,7 +25,7 @@ type runtimeImporter struct {
 
 // Import implements types.Importer.
 func (r *runtimeImporter) Import(path string) (*types.Package, error) {
-	if path == "tempo/runtime" {
+	if path == projection.RUNTIME_PATH {
 		return r.pkg, nil
 	}
 	return nil, fmt.Errorf("failed to import %s", path)
@@ -43,7 +45,7 @@ func newRuntimeImporter() (*runtimeImporter, error) {
 	}
 
 	conf := types.Config{}
-	pkg, err := conf.Check("tempo/runtime", fset, []*ast.File{parsedAST}, nil)
+	pkg, err := conf.Check(projection.RUNTIME_PATH, fset, []*ast.File{parsedAST}, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -1,8 +1,8 @@
 package epp
 
 import (
-	"tempo/parser"
-	"tempo/projection"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection"
 )
 
 func (epp *epp) eppStruct(st parser.IStructContext) *projection.ChoreographyStruct {
