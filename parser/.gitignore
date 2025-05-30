@@ -1,4 +1,3 @@
 .antlr/
 *.interp
 *.tokens
-tempo_*.go
