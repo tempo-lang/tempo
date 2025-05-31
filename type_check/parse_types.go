@@ -99,7 +99,7 @@ func (tc *typeChecker) parseValueTypeFuncSig(ctx parser.IFuncTypeSigContext) (*t
 		returnType = ret
 	}
 
-	funcValue := types.Function(params, returnType, roles.Participants())
+	funcValue := types.Function(params, returnType, roles.Participants(), true)
 	funcType := types.New(funcValue, roles)
 
 	return funcType, nil
@@ -139,7 +139,7 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, [
 		}
 	}
 
-	fn := types.New(types.Function(params, returnType, funcRoles.Participants()), funcRoles)
+	fn := types.New(types.Function(params, returnType, funcRoles.Participants(), false), funcRoles)
 
 	return fn, errors
 }

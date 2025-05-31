@@ -1,4 +1,4 @@
-func@(A,B) foo(value: func@(A)()) Int@B {
-  value();
+func@(A,B) foo(value: func@(A,B)(Int@A)Int@B) Int@B {
+  value(10);
   return 10;
 }

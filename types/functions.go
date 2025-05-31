@@ -8,12 +8,17 @@ import (
 
 type FunctionType struct {
 	// funcIdent  parser.IIdentContext
-	params     []*Type
-	returnType *Type
-	roleSubst  *RoleSubst
+	params       []*Type
+	returnType   *Type
+	roleSubst    *RoleSubst
+	instantiated bool
 }
 
 func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Value {
+	if f.instantiated {
+		panic("function already instantiated")
+	}
+
 	substParams := []*Type{}
 	for _, p := range f.params {
 		substParams = append(substParams, p.SubstituteRoles(substMap))
@@ -25,10 +30,10 @@ func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Value {
 	}
 
 	return &FunctionType{
-		// funcIdent:  f.funcIdent,
-		params:     substParams,
-		returnType: f.returnType.SubstituteRoles(substMap),
-		roleSubst:  newRoleSubst,
+		params:       substParams,
+		returnType:   f.returnType.SubstituteRoles(substMap),
+		roleSubst:    newRoleSubst,
+		instantiated: true,
 	}
 }
 
@@ -60,24 +65,24 @@ func (f *FunctionType) ReturnType() *Type {
 	return f.returnType
 }
 
-// func (f *FunctionType) FuncIdent() parser.IIdentContext {
-// 	return f.funcIdent
-// }
+func (f *FunctionType) IsInstantiated() bool {
+	return f.instantiated
+}
 
 func (f *FunctionType) RoleSubstitution() *RoleSubst {
 	return f.roleSubst
 }
 
-func Function( /*funcIdent parser.IIdentContext,*/ params []*Type, returnType *Type, roles []string) Value {
+func Function(params []*Type, returnType *Type, roles []string, instantiated bool) Value {
 	roleSubst := NewRoleSubst()
 	for _, role := range roles {
 		roleSubst.AddRole(role, role)
 	}
 
 	return &FunctionType{
-		// funcIdent:  funcIdent,
-		params:     params,
-		returnType: returnType,
-		roleSubst:  roleSubst,
+		params:       params,
+		returnType:   returnType,
+		roleSubst:    roleSubst,
+		instantiated: instantiated,
 	}
 }

@@ -31,7 +31,29 @@ func CodegenType(t types.Value) jen.Code {
 		panic(fmt.Sprintf("struct %#v should be of type projection.InterfaceType instead", t))
 	}
 
+	if funcType, isFunc := t.(*FunctionType); isFunc {
+		return CodegenFuncType(funcType)
+	}
+	if _, ok := t.(*types.FunctionType); ok {
+		panic(fmt.Sprintf("function %#v should be of type projection.FunctionType instead", t))
+	}
+
 	panic(fmt.Sprintf("failed to generate type: %#v", t))
+}
+
+func CodegenFuncType(funcType *FunctionType) jen.Code {
+	params := []jen.Code{}
+	for _, param := range funcType.Params {
+		params = append(params, CodegenType(param))
+	}
+
+	result := jen.Func().Params(params...)
+
+	if funcType.ReturnType != types.Unit() {
+		result = result.Add(CodegenType(funcType.ReturnType))
+	}
+
+	return result
 }
 
 func CodegenStructType(structType *StructType) jen.Code {

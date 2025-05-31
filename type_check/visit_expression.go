@@ -214,7 +214,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	tc.info.Symbols[ctx.IdentAccess().Ident()] = sym
 
 	identType := sym.Type()
-	_, isFunc := sym.Type().Value().(*types.FunctionType)
+	funcValue, isFunc := sym.Type().Value().(*types.FunctionType)
 
 	if _, isStructDef := sym.(*sym_table.StructSymbol); isStructDef {
 		tc.reportError(type_error.NewStructNotInitialized(ctx))
@@ -239,12 +239,11 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 			}
 
 			identType = identType.SubstituteRoles(roleSubst)
-
 		} else {
 			tc.reportError(type_error.NewInstantiateNonFunction(ctx.IdentAccess(), sym))
 			return tc.registerType(ctx, types.Invalid())
 		}
-	} else if isFunc {
+	} else if isFunc && !funcValue.IsInstantiated() {
 		tc.reportError(type_error.NewFunctionNotInstantiated(ctx.IdentAccess(), sym))
 		return tc.registerType(ctx, types.Invalid())
 	}

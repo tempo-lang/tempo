@@ -91,3 +91,17 @@ func (f *FuncSig) Codegen(isInterfaceMethod bool) *jen.Statement {
 
 	return result
 }
+
+type FunctionType struct {
+	types.FunctionType
+	Params     []types.Value
+	ReturnType types.Value
+}
+
+func NewFunctionType(funcType *types.FunctionType, params []types.Value, returnType types.Value) *FunctionType {
+	return &FunctionType{
+		FunctionType: *funcType,
+		Params:       params,
+		ReturnType:   returnType,
+	}
+}
