@@ -1,4 +1,9 @@
-func@(A,B) foo(value: func@(A,B)(Int@A)Int@B) Int@B {
-  value(10);
-  return 10;
+func@X call() {}
+
+func@(A,B) foo() {
+  let x: func@A() = call@A;
+  let y: func@B() = call@B;
+
+  x();
+  y();
 }

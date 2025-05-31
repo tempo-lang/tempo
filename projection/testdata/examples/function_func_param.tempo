@@ -1,0 +1,3 @@
+func@(A,B) foo(value: Int@A, fn: func@(A,B)(Int@A)Int@B) Int@B {
+  return fn(value);
+}

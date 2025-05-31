@@ -42,7 +42,10 @@ func CodegenType(t types.Value) jen.Code {
 }
 
 func CodegenFuncType(funcType *FunctionType) jen.Code {
-	params := []jen.Code{}
+	params := []jen.Code{
+		jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Env"),
+	}
+
 	for _, param := range funcType.Params {
 		params = append(params, CodegenType(param))
 	}

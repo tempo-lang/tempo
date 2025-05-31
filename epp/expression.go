@@ -38,9 +38,10 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		if exprType.Roles().Contains(roleName) {
 			name := sym.SymbolName()
-			switch value := exprType.Value().(type) {
-			case *types.FunctionType:
-				roleSubst := value.RoleSubstitution().Inverse().Subst(roleName)
+			switch sym.(type) {
+			case *sym_table.FuncSymbol:
+				funcType := exprType.Value().(*types.FunctionType)
+				roleSubst := funcType.RoleSubstitution().Inverse().Subst(roleName)
 				name += "_" + roleSubst
 			}
 
