@@ -47,136 +47,148 @@ func tempoParserInit() {
 		"NUMBER", "END", "WHITESPACE",
 	}
 	staticData.RuleNames = []string{
-		"sourceFile", "ident", "valueType", "roleType", "struct", "structFieldList",
-		"structField", "interface", "interfaceMethodsList", "interfaceMethod",
-		"func", "funcSig", "funcParamList", "funcParam", "funcArgList", "scope",
-		"stmt", "expr", "exprStructField", "identAccess",
+		"sourceFile", "ident", "valueType", "roleType", "funcTypeSig", "funcTypeParamList",
+		"struct", "structFieldList", "structField", "interface", "interfaceMethodsList",
+		"interfaceMethod", "func", "funcSig", "funcParamList", "funcParam",
+		"funcArgList", "scope", "stmt", "expr", "exprStructField", "identAccess",
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 41, 281, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 1, 41, 308, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7,
 		10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14, 7, 14, 2, 15, 7, 15,
-		2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 1, 0, 1, 0, 1,
-		0, 5, 0, 44, 8, 0, 10, 0, 12, 0, 47, 9, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 2,
-		3, 2, 54, 8, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 3, 1, 3, 1, 3, 1, 3, 5, 3, 64,
-		8, 3, 10, 3, 12, 3, 67, 9, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3,
-		5, 3, 76, 8, 3, 10, 3, 12, 3, 79, 9, 3, 1, 3, 1, 3, 3, 3, 83, 8, 3, 3,
-		3, 85, 8, 3, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 4, 1, 5, 1, 5, 1, 5, 1, 5,
-		5, 5, 97, 8, 5, 10, 5, 12, 5, 100, 9, 5, 3, 5, 102, 8, 5, 1, 5, 1, 5, 1,
-		6, 1, 6, 1, 6, 1, 6, 1, 7, 1, 7, 1, 7, 1, 7, 1, 7, 1, 7, 1, 8, 1, 8, 5,
-		8, 118, 8, 8, 10, 8, 12, 8, 121, 9, 8, 1, 8, 1, 8, 1, 9, 1, 9, 1, 9, 1,
-		10, 1, 10, 1, 10, 1, 11, 1, 11, 1, 11, 1, 11, 1, 11, 1, 11, 3, 11, 137,
-		8, 11, 1, 12, 1, 12, 1, 12, 1, 12, 5, 12, 143, 8, 12, 10, 12, 12, 12, 146,
-		9, 12, 3, 12, 148, 8, 12, 1, 12, 1, 12, 1, 13, 1, 13, 1, 13, 1, 13, 1,
-		14, 1, 14, 1, 14, 1, 14, 5, 14, 160, 8, 14, 10, 14, 12, 14, 163, 9, 14,
-		3, 14, 165, 8, 14, 1, 14, 1, 14, 1, 15, 1, 15, 5, 15, 171, 8, 15, 10, 15,
-		12, 15, 174, 9, 15, 1, 15, 1, 15, 1, 16, 1, 16, 1, 16, 1, 16, 3, 16, 182,
-		8, 16, 1, 16, 1, 16, 1, 16, 1, 16, 1, 16, 1, 16, 1, 16, 1, 16, 1, 16, 3,
-		16, 193, 8, 16, 1, 16, 1, 16, 3, 16, 197, 8, 16, 1, 16, 1, 16, 1, 16, 1,
-		16, 1, 16, 1, 16, 1, 16, 1, 16, 1, 16, 3, 16, 208, 8, 16, 1, 17, 1, 17,
-		1, 17, 1, 17, 3, 17, 214, 8, 17, 1, 17, 1, 17, 1, 17, 3, 17, 219, 8, 17,
-		1, 17, 1, 17, 1, 17, 3, 17, 224, 8, 17, 1, 17, 1, 17, 1, 17, 1, 17, 1,
-		17, 1, 17, 1, 17, 1, 17, 1, 17, 1, 17, 1, 17, 1, 17, 1, 17, 1, 17, 1, 17,
-		1, 17, 1, 17, 3, 17, 243, 8, 17, 1, 17, 1, 17, 1, 17, 1, 17, 1, 17, 1,
-		17, 1, 17, 1, 17, 5, 17, 253, 8, 17, 10, 17, 12, 17, 256, 9, 17, 1, 18,
-		1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 5, 18, 267, 8,
-		18, 10, 18, 12, 18, 270, 9, 18, 3, 18, 272, 8, 18, 1, 18, 1, 18, 1, 19,
-		1, 19, 1, 19, 3, 19, 279, 8, 19, 1, 19, 0, 1, 34, 20, 0, 2, 4, 6, 8, 10,
-		12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 0, 2, 1, 0, 10,
-		11, 1, 0, 18, 30, 300, 0, 45, 1, 0, 0, 0, 2, 50, 1, 0, 0, 0, 4, 53, 1,
-		0, 0, 0, 6, 84, 1, 0, 0, 0, 8, 86, 1, 0, 0, 0, 10, 92, 1, 0, 0, 0, 12,
-		105, 1, 0, 0, 0, 14, 109, 1, 0, 0, 0, 16, 115, 1, 0, 0, 0, 18, 124, 1,
-		0, 0, 0, 20, 127, 1, 0, 0, 0, 22, 130, 1, 0, 0, 0, 24, 138, 1, 0, 0, 0,
-		26, 151, 1, 0, 0, 0, 28, 155, 1, 0, 0, 0, 30, 168, 1, 0, 0, 0, 32, 207,
-		1, 0, 0, 0, 34, 242, 1, 0, 0, 0, 36, 257, 1, 0, 0, 0, 38, 275, 1, 0, 0,
-		0, 40, 44, 3, 20, 10, 0, 41, 44, 3, 8, 4, 0, 42, 44, 3, 14, 7, 0, 43, 40,
-		1, 0, 0, 0, 43, 41, 1, 0, 0, 0, 43, 42, 1, 0, 0, 0, 44, 47, 1, 0, 0, 0,
-		45, 43, 1, 0, 0, 0, 45, 46, 1, 0, 0, 0, 46, 48, 1, 0, 0, 0, 47, 45, 1,
-		0, 0, 0, 48, 49, 5, 0, 0, 1, 49, 1, 1, 0, 0, 0, 50, 51, 5, 38, 0, 0, 51,
-		3, 1, 0, 0, 0, 52, 54, 5, 6, 0, 0, 53, 52, 1, 0, 0, 0, 53, 54, 1, 0, 0,
-		0, 54, 55, 1, 0, 0, 0, 55, 56, 3, 2, 1, 0, 56, 57, 5, 32, 0, 0, 57, 58,
-		3, 6, 3, 0, 58, 5, 1, 0, 0, 0, 59, 60, 5, 13, 0, 0, 60, 65, 3, 2, 1, 0,
-		61, 62, 5, 33, 0, 0, 62, 64, 3, 2, 1, 0, 63, 61, 1, 0, 0, 0, 64, 67, 1,
-		0, 0, 0, 65, 63, 1, 0, 0, 0, 65, 66, 1, 0, 0, 0, 66, 68, 1, 0, 0, 0, 67,
-		65, 1, 0, 0, 0, 68, 69, 5, 16, 0, 0, 69, 85, 1, 0, 0, 0, 70, 83, 3, 2,
-		1, 0, 71, 72, 5, 12, 0, 0, 72, 77, 3, 2, 1, 0, 73, 74, 5, 33, 0, 0, 74,
-		76, 3, 2, 1, 0, 75, 73, 1, 0, 0, 0, 76, 79, 1, 0, 0, 0, 77, 75, 1, 0, 0,
-		0, 77, 78, 1, 0, 0, 0, 78, 80, 1, 0, 0, 0, 79, 77, 1, 0, 0, 0, 80, 81,
-		5, 15, 0, 0, 81, 83, 1, 0, 0, 0, 82, 70, 1, 0, 0, 0, 82, 71, 1, 0, 0, 0,
-		83, 85, 1, 0, 0, 0, 84, 59, 1, 0, 0, 0, 84, 82, 1, 0, 0, 0, 85, 7, 1, 0,
-		0, 0, 86, 87, 5, 1, 0, 0, 87, 88, 5, 32, 0, 0, 88, 89, 3, 6, 3, 0, 89,
-		90, 3, 2, 1, 0, 90, 91, 3, 10, 5, 0, 91, 9, 1, 0, 0, 0, 92, 101, 5, 14,
-		0, 0, 93, 98, 3, 12, 6, 0, 94, 95, 5, 33, 0, 0, 95, 97, 3, 12, 6, 0, 96,
-		94, 1, 0, 0, 0, 97, 100, 1, 0, 0, 0, 98, 96, 1, 0, 0, 0, 98, 99, 1, 0,
-		0, 0, 99, 102, 1, 0, 0, 0, 100, 98, 1, 0, 0, 0, 101, 93, 1, 0, 0, 0, 101,
-		102, 1, 0, 0, 0, 102, 103, 1, 0, 0, 0, 103, 104, 5, 17, 0, 0, 104, 11,
-		1, 0, 0, 0, 105, 106, 3, 2, 1, 0, 106, 107, 5, 35, 0, 0, 107, 108, 3, 4,
-		2, 0, 108, 13, 1, 0, 0, 0, 109, 110, 5, 2, 0, 0, 110, 111, 5, 32, 0, 0,
-		111, 112, 3, 6, 3, 0, 112, 113, 3, 2, 1, 0, 113, 114, 3, 16, 8, 0, 114,
-		15, 1, 0, 0, 0, 115, 119, 5, 14, 0, 0, 116, 118, 3, 18, 9, 0, 117, 116,
-		1, 0, 0, 0, 118, 121, 1, 0, 0, 0, 119, 117, 1, 0, 0, 0, 119, 120, 1, 0,
-		0, 0, 120, 122, 1, 0, 0, 0, 121, 119, 1, 0, 0, 0, 122, 123, 5, 17, 0, 0,
-		123, 17, 1, 0, 0, 0, 124, 125, 3, 22, 11, 0, 125, 126, 5, 40, 0, 0, 126,
-		19, 1, 0, 0, 0, 127, 128, 3, 22, 11, 0, 128, 129, 3, 30, 15, 0, 129, 21,
-		1, 0, 0, 0, 130, 131, 5, 3, 0, 0, 131, 132, 5, 32, 0, 0, 132, 133, 3, 6,
-		3, 0, 133, 134, 3, 2, 1, 0, 134, 136, 3, 24, 12, 0, 135, 137, 3, 4, 2,
-		0, 136, 135, 1, 0, 0, 0, 136, 137, 1, 0, 0, 0, 137, 23, 1, 0, 0, 0, 138,
-		147, 5, 12, 0, 0, 139, 144, 3, 26, 13, 0, 140, 141, 5, 33, 0, 0, 141, 143,
-		3, 26, 13, 0, 142, 140, 1, 0, 0, 0, 143, 146, 1, 0, 0, 0, 144, 142, 1,
-		0, 0, 0, 144, 145, 1, 0, 0, 0, 145, 148, 1, 0, 0, 0, 146, 144, 1, 0, 0,
-		0, 147, 139, 1, 0, 0, 0, 147, 148, 1, 0, 0, 0, 148, 149, 1, 0, 0, 0, 149,
-		150, 5, 15, 0, 0, 150, 25, 1, 0, 0, 0, 151, 152, 3, 2, 1, 0, 152, 153,
-		5, 35, 0, 0, 153, 154, 3, 4, 2, 0, 154, 27, 1, 0, 0, 0, 155, 164, 5, 12,
-		0, 0, 156, 161, 3, 34, 17, 0, 157, 158, 5, 33, 0, 0, 158, 160, 3, 34, 17,
-		0, 159, 157, 1, 0, 0, 0, 160, 163, 1, 0, 0, 0, 161, 159, 1, 0, 0, 0, 161,
-		162, 1, 0, 0, 0, 162, 165, 1, 0, 0, 0, 163, 161, 1, 0, 0, 0, 164, 156,
-		1, 0, 0, 0, 164, 165, 1, 0, 0, 0, 165, 166, 1, 0, 0, 0, 166, 167, 5, 15,
-		0, 0, 167, 29, 1, 0, 0, 0, 168, 172, 5, 14, 0, 0, 169, 171, 3, 32, 16,
-		0, 170, 169, 1, 0, 0, 0, 171, 174, 1, 0, 0, 0, 172, 170, 1, 0, 0, 0, 172,
-		173, 1, 0, 0, 0, 173, 175, 1, 0, 0, 0, 174, 172, 1, 0, 0, 0, 175, 176,
-		5, 17, 0, 0, 176, 31, 1, 0, 0, 0, 177, 178, 5, 5, 0, 0, 178, 181, 3, 2,
-		1, 0, 179, 180, 5, 35, 0, 0, 180, 182, 3, 4, 2, 0, 181, 179, 1, 0, 0, 0,
-		181, 182, 1, 0, 0, 0, 182, 183, 1, 0, 0, 0, 183, 184, 5, 31, 0, 0, 184,
-		185, 3, 34, 17, 0, 185, 186, 5, 40, 0, 0, 186, 208, 1, 0, 0, 0, 187, 188,
-		5, 8, 0, 0, 188, 189, 3, 34, 17, 0, 189, 192, 3, 30, 15, 0, 190, 191, 5,
-		9, 0, 0, 191, 193, 3, 30, 15, 0, 192, 190, 1, 0, 0, 0, 192, 193, 1, 0,
-		0, 0, 193, 208, 1, 0, 0, 0, 194, 196, 5, 4, 0, 0, 195, 197, 3, 34, 17,
-		0, 196, 195, 1, 0, 0, 0, 196, 197, 1, 0, 0, 0, 197, 198, 1, 0, 0, 0, 198,
-		208, 5, 40, 0, 0, 199, 200, 3, 2, 1, 0, 200, 201, 5, 31, 0, 0, 201, 202,
-		3, 34, 17, 0, 202, 203, 5, 40, 0, 0, 203, 208, 1, 0, 0, 0, 204, 205, 3,
-		34, 17, 0, 205, 206, 5, 40, 0, 0, 206, 208, 1, 0, 0, 0, 207, 177, 1, 0,
-		0, 0, 207, 187, 1, 0, 0, 0, 207, 194, 1, 0, 0, 0, 207, 199, 1, 0, 0, 0,
-		207, 204, 1, 0, 0, 0, 208, 33, 1, 0, 0, 0, 209, 210, 6, 17, -1, 0, 210,
-		213, 5, 39, 0, 0, 211, 212, 5, 32, 0, 0, 212, 214, 3, 6, 3, 0, 213, 211,
-		1, 0, 0, 0, 213, 214, 1, 0, 0, 0, 214, 243, 1, 0, 0, 0, 215, 218, 5, 37,
-		0, 0, 216, 217, 5, 32, 0, 0, 217, 219, 3, 6, 3, 0, 218, 216, 1, 0, 0, 0,
-		218, 219, 1, 0, 0, 0, 219, 243, 1, 0, 0, 0, 220, 223, 7, 0, 0, 0, 221,
-		222, 5, 32, 0, 0, 222, 224, 3, 6, 3, 0, 223, 221, 1, 0, 0, 0, 223, 224,
-		1, 0, 0, 0, 224, 243, 1, 0, 0, 0, 225, 226, 5, 7, 0, 0, 226, 243, 3, 34,
-		17, 7, 227, 228, 3, 2, 1, 0, 228, 229, 5, 32, 0, 0, 229, 230, 3, 6, 3,
-		0, 230, 231, 3, 36, 18, 0, 231, 243, 1, 0, 0, 0, 232, 243, 3, 38, 19, 0,
-		233, 234, 3, 6, 3, 0, 234, 235, 5, 36, 0, 0, 235, 236, 3, 6, 3, 0, 236,
-		237, 3, 34, 17, 2, 237, 243, 1, 0, 0, 0, 238, 239, 5, 12, 0, 0, 239, 240,
-		3, 34, 17, 0, 240, 241, 5, 15, 0, 0, 241, 243, 1, 0, 0, 0, 242, 209, 1,
-		0, 0, 0, 242, 215, 1, 0, 0, 0, 242, 220, 1, 0, 0, 0, 242, 225, 1, 0, 0,
-		0, 242, 227, 1, 0, 0, 0, 242, 232, 1, 0, 0, 0, 242, 233, 1, 0, 0, 0, 242,
-		238, 1, 0, 0, 0, 243, 254, 1, 0, 0, 0, 244, 245, 10, 11, 0, 0, 245, 246,
-		7, 1, 0, 0, 246, 253, 3, 34, 17, 12, 247, 248, 10, 5, 0, 0, 248, 253, 3,
-		28, 14, 0, 249, 250, 10, 4, 0, 0, 250, 251, 5, 34, 0, 0, 251, 253, 3, 2,
-		1, 0, 252, 244, 1, 0, 0, 0, 252, 247, 1, 0, 0, 0, 252, 249, 1, 0, 0, 0,
-		253, 256, 1, 0, 0, 0, 254, 252, 1, 0, 0, 0, 254, 255, 1, 0, 0, 0, 255,
-		35, 1, 0, 0, 0, 256, 254, 1, 0, 0, 0, 257, 271, 5, 14, 0, 0, 258, 259,
-		3, 2, 1, 0, 259, 260, 5, 35, 0, 0, 260, 268, 3, 34, 17, 0, 261, 262, 5,
-		33, 0, 0, 262, 263, 3, 2, 1, 0, 263, 264, 5, 35, 0, 0, 264, 265, 3, 34,
-		17, 0, 265, 267, 1, 0, 0, 0, 266, 261, 1, 0, 0, 0, 267, 270, 1, 0, 0, 0,
-		268, 266, 1, 0, 0, 0, 268, 269, 1, 0, 0, 0, 269, 272, 1, 0, 0, 0, 270,
-		268, 1, 0, 0, 0, 271, 258, 1, 0, 0, 0, 271, 272, 1, 0, 0, 0, 272, 273,
-		1, 0, 0, 0, 273, 274, 5, 17, 0, 0, 274, 37, 1, 0, 0, 0, 275, 278, 3, 2,
-		1, 0, 276, 277, 5, 32, 0, 0, 277, 279, 3, 6, 3, 0, 278, 276, 1, 0, 0, 0,
-		278, 279, 1, 0, 0, 0, 279, 39, 1, 0, 0, 0, 29, 43, 45, 53, 65, 77, 82,
-		84, 98, 101, 119, 136, 144, 147, 161, 164, 172, 181, 192, 196, 207, 213,
-		218, 223, 242, 252, 254, 268, 271, 278,
+		2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 2, 20, 7, 20, 2,
+		21, 7, 21, 1, 0, 1, 0, 1, 0, 5, 0, 48, 8, 0, 10, 0, 12, 0, 51, 9, 0, 1,
+		0, 1, 0, 1, 1, 1, 1, 1, 2, 3, 2, 58, 8, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
+		3, 2, 65, 8, 2, 1, 3, 1, 3, 1, 3, 1, 3, 5, 3, 71, 8, 3, 10, 3, 12, 3, 74,
+		9, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 5, 3, 83, 8, 3, 10, 3,
+		12, 3, 86, 9, 3, 1, 3, 1, 3, 3, 3, 90, 8, 3, 3, 3, 92, 8, 3, 1, 4, 1, 4,
+		1, 4, 1, 4, 1, 4, 3, 4, 99, 8, 4, 1, 5, 1, 5, 1, 5, 1, 5, 5, 5, 105, 8,
+		5, 10, 5, 12, 5, 108, 9, 5, 3, 5, 110, 8, 5, 1, 5, 1, 5, 1, 6, 1, 6, 1,
+		6, 1, 6, 1, 6, 1, 6, 1, 7, 1, 7, 1, 7, 1, 7, 5, 7, 124, 8, 7, 10, 7, 12,
+		7, 127, 9, 7, 3, 7, 129, 8, 7, 1, 7, 1, 7, 1, 8, 1, 8, 1, 8, 1, 8, 1, 9,
+		1, 9, 1, 9, 1, 9, 1, 9, 1, 9, 1, 10, 1, 10, 5, 10, 145, 8, 10, 10, 10,
+		12, 10, 148, 9, 10, 1, 10, 1, 10, 1, 11, 1, 11, 1, 11, 1, 12, 1, 12, 1,
+		12, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 3, 13, 164, 8, 13, 1, 14,
+		1, 14, 1, 14, 1, 14, 5, 14, 170, 8, 14, 10, 14, 12, 14, 173, 9, 14, 3,
+		14, 175, 8, 14, 1, 14, 1, 14, 1, 15, 1, 15, 1, 15, 1, 15, 1, 16, 1, 16,
+		1, 16, 1, 16, 5, 16, 187, 8, 16, 10, 16, 12, 16, 190, 9, 16, 3, 16, 192,
+		8, 16, 1, 16, 1, 16, 1, 17, 1, 17, 5, 17, 198, 8, 17, 10, 17, 12, 17, 201,
+		9, 17, 1, 17, 1, 17, 1, 18, 1, 18, 1, 18, 1, 18, 3, 18, 209, 8, 18, 1,
+		18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1, 18, 3, 18, 220,
+		8, 18, 1, 18, 1, 18, 3, 18, 224, 8, 18, 1, 18, 1, 18, 1, 18, 1, 18, 1,
+		18, 1, 18, 1, 18, 1, 18, 1, 18, 3, 18, 235, 8, 18, 1, 19, 1, 19, 1, 19,
+		1, 19, 3, 19, 241, 8, 19, 1, 19, 1, 19, 1, 19, 3, 19, 246, 8, 19, 1, 19,
+		1, 19, 1, 19, 3, 19, 251, 8, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1,
+		19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19,
+		1, 19, 3, 19, 270, 8, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1, 19, 1,
+		19, 1, 19, 5, 19, 280, 8, 19, 10, 19, 12, 19, 283, 9, 19, 1, 20, 1, 20,
+		1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 1, 20, 5, 20, 294, 8, 20, 10,
+		20, 12, 20, 297, 9, 20, 3, 20, 299, 8, 20, 1, 20, 1, 20, 1, 21, 1, 21,
+		1, 21, 3, 21, 306, 8, 21, 1, 21, 0, 1, 38, 22, 0, 2, 4, 6, 8, 10, 12, 14,
+		16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 0, 2, 1, 0, 10,
+		11, 1, 0, 18, 30, 329, 0, 49, 1, 0, 0, 0, 2, 54, 1, 0, 0, 0, 4, 57, 1,
+		0, 0, 0, 6, 91, 1, 0, 0, 0, 8, 93, 1, 0, 0, 0, 10, 100, 1, 0, 0, 0, 12,
+		113, 1, 0, 0, 0, 14, 119, 1, 0, 0, 0, 16, 132, 1, 0, 0, 0, 18, 136, 1,
+		0, 0, 0, 20, 142, 1, 0, 0, 0, 22, 151, 1, 0, 0, 0, 24, 154, 1, 0, 0, 0,
+		26, 157, 1, 0, 0, 0, 28, 165, 1, 0, 0, 0, 30, 178, 1, 0, 0, 0, 32, 182,
+		1, 0, 0, 0, 34, 195, 1, 0, 0, 0, 36, 234, 1, 0, 0, 0, 38, 269, 1, 0, 0,
+		0, 40, 284, 1, 0, 0, 0, 42, 302, 1, 0, 0, 0, 44, 48, 3, 24, 12, 0, 45,
+		48, 3, 12, 6, 0, 46, 48, 3, 18, 9, 0, 47, 44, 1, 0, 0, 0, 47, 45, 1, 0,
+		0, 0, 47, 46, 1, 0, 0, 0, 48, 51, 1, 0, 0, 0, 49, 47, 1, 0, 0, 0, 49, 50,
+		1, 0, 0, 0, 50, 52, 1, 0, 0, 0, 51, 49, 1, 0, 0, 0, 52, 53, 5, 0, 0, 1,
+		53, 1, 1, 0, 0, 0, 54, 55, 5, 38, 0, 0, 55, 3, 1, 0, 0, 0, 56, 58, 5, 6,
+		0, 0, 57, 56, 1, 0, 0, 0, 57, 58, 1, 0, 0, 0, 58, 64, 1, 0, 0, 0, 59, 60,
+		3, 2, 1, 0, 60, 61, 5, 32, 0, 0, 61, 62, 3, 6, 3, 0, 62, 65, 1, 0, 0, 0,
+		63, 65, 3, 8, 4, 0, 64, 59, 1, 0, 0, 0, 64, 63, 1, 0, 0, 0, 65, 5, 1, 0,
+		0, 0, 66, 67, 5, 13, 0, 0, 67, 72, 3, 2, 1, 0, 68, 69, 5, 33, 0, 0, 69,
+		71, 3, 2, 1, 0, 70, 68, 1, 0, 0, 0, 71, 74, 1, 0, 0, 0, 72, 70, 1, 0, 0,
+		0, 72, 73, 1, 0, 0, 0, 73, 75, 1, 0, 0, 0, 74, 72, 1, 0, 0, 0, 75, 76,
+		5, 16, 0, 0, 76, 92, 1, 0, 0, 0, 77, 90, 3, 2, 1, 0, 78, 79, 5, 12, 0,
+		0, 79, 84, 3, 2, 1, 0, 80, 81, 5, 33, 0, 0, 81, 83, 3, 2, 1, 0, 82, 80,
+		1, 0, 0, 0, 83, 86, 1, 0, 0, 0, 84, 82, 1, 0, 0, 0, 84, 85, 1, 0, 0, 0,
+		85, 87, 1, 0, 0, 0, 86, 84, 1, 0, 0, 0, 87, 88, 5, 15, 0, 0, 88, 90, 1,
+		0, 0, 0, 89, 77, 1, 0, 0, 0, 89, 78, 1, 0, 0, 0, 90, 92, 1, 0, 0, 0, 91,
+		66, 1, 0, 0, 0, 91, 89, 1, 0, 0, 0, 92, 7, 1, 0, 0, 0, 93, 94, 5, 3, 0,
+		0, 94, 95, 5, 32, 0, 0, 95, 96, 3, 6, 3, 0, 96, 98, 3, 10, 5, 0, 97, 99,
+		3, 4, 2, 0, 98, 97, 1, 0, 0, 0, 98, 99, 1, 0, 0, 0, 99, 9, 1, 0, 0, 0,
+		100, 109, 5, 12, 0, 0, 101, 106, 3, 4, 2, 0, 102, 103, 5, 33, 0, 0, 103,
+		105, 3, 4, 2, 0, 104, 102, 1, 0, 0, 0, 105, 108, 1, 0, 0, 0, 106, 104,
+		1, 0, 0, 0, 106, 107, 1, 0, 0, 0, 107, 110, 1, 0, 0, 0, 108, 106, 1, 0,
+		0, 0, 109, 101, 1, 0, 0, 0, 109, 110, 1, 0, 0, 0, 110, 111, 1, 0, 0, 0,
+		111, 112, 5, 15, 0, 0, 112, 11, 1, 0, 0, 0, 113, 114, 5, 1, 0, 0, 114,
+		115, 5, 32, 0, 0, 115, 116, 3, 6, 3, 0, 116, 117, 3, 2, 1, 0, 117, 118,
+		3, 14, 7, 0, 118, 13, 1, 0, 0, 0, 119, 128, 5, 14, 0, 0, 120, 125, 3, 16,
+		8, 0, 121, 122, 5, 33, 0, 0, 122, 124, 3, 16, 8, 0, 123, 121, 1, 0, 0,
+		0, 124, 127, 1, 0, 0, 0, 125, 123, 1, 0, 0, 0, 125, 126, 1, 0, 0, 0, 126,
+		129, 1, 0, 0, 0, 127, 125, 1, 0, 0, 0, 128, 120, 1, 0, 0, 0, 128, 129,
+		1, 0, 0, 0, 129, 130, 1, 0, 0, 0, 130, 131, 5, 17, 0, 0, 131, 15, 1, 0,
+		0, 0, 132, 133, 3, 2, 1, 0, 133, 134, 5, 35, 0, 0, 134, 135, 3, 4, 2, 0,
+		135, 17, 1, 0, 0, 0, 136, 137, 5, 2, 0, 0, 137, 138, 5, 32, 0, 0, 138,
+		139, 3, 6, 3, 0, 139, 140, 3, 2, 1, 0, 140, 141, 3, 20, 10, 0, 141, 19,
+		1, 0, 0, 0, 142, 146, 5, 14, 0, 0, 143, 145, 3, 22, 11, 0, 144, 143, 1,
+		0, 0, 0, 145, 148, 1, 0, 0, 0, 146, 144, 1, 0, 0, 0, 146, 147, 1, 0, 0,
+		0, 147, 149, 1, 0, 0, 0, 148, 146, 1, 0, 0, 0, 149, 150, 5, 17, 0, 0, 150,
+		21, 1, 0, 0, 0, 151, 152, 3, 26, 13, 0, 152, 153, 5, 40, 0, 0, 153, 23,
+		1, 0, 0, 0, 154, 155, 3, 26, 13, 0, 155, 156, 3, 34, 17, 0, 156, 25, 1,
+		0, 0, 0, 157, 158, 5, 3, 0, 0, 158, 159, 5, 32, 0, 0, 159, 160, 3, 6, 3,
+		0, 160, 161, 3, 2, 1, 0, 161, 163, 3, 28, 14, 0, 162, 164, 3, 4, 2, 0,
+		163, 162, 1, 0, 0, 0, 163, 164, 1, 0, 0, 0, 164, 27, 1, 0, 0, 0, 165, 174,
+		5, 12, 0, 0, 166, 171, 3, 30, 15, 0, 167, 168, 5, 33, 0, 0, 168, 170, 3,
+		30, 15, 0, 169, 167, 1, 0, 0, 0, 170, 173, 1, 0, 0, 0, 171, 169, 1, 0,
+		0, 0, 171, 172, 1, 0, 0, 0, 172, 175, 1, 0, 0, 0, 173, 171, 1, 0, 0, 0,
+		174, 166, 1, 0, 0, 0, 174, 175, 1, 0, 0, 0, 175, 176, 1, 0, 0, 0, 176,
+		177, 5, 15, 0, 0, 177, 29, 1, 0, 0, 0, 178, 179, 3, 2, 1, 0, 179, 180,
+		5, 35, 0, 0, 180, 181, 3, 4, 2, 0, 181, 31, 1, 0, 0, 0, 182, 191, 5, 12,
+		0, 0, 183, 188, 3, 38, 19, 0, 184, 185, 5, 33, 0, 0, 185, 187, 3, 38, 19,
+		0, 186, 184, 1, 0, 0, 0, 187, 190, 1, 0, 0, 0, 188, 186, 1, 0, 0, 0, 188,
+		189, 1, 0, 0, 0, 189, 192, 1, 0, 0, 0, 190, 188, 1, 0, 0, 0, 191, 183,
+		1, 0, 0, 0, 191, 192, 1, 0, 0, 0, 192, 193, 1, 0, 0, 0, 193, 194, 5, 15,
+		0, 0, 194, 33, 1, 0, 0, 0, 195, 199, 5, 14, 0, 0, 196, 198, 3, 36, 18,
+		0, 197, 196, 1, 0, 0, 0, 198, 201, 1, 0, 0, 0, 199, 197, 1, 0, 0, 0, 199,
+		200, 1, 0, 0, 0, 200, 202, 1, 0, 0, 0, 201, 199, 1, 0, 0, 0, 202, 203,
+		5, 17, 0, 0, 203, 35, 1, 0, 0, 0, 204, 205, 5, 5, 0, 0, 205, 208, 3, 2,
+		1, 0, 206, 207, 5, 35, 0, 0, 207, 209, 3, 4, 2, 0, 208, 206, 1, 0, 0, 0,
+		208, 209, 1, 0, 0, 0, 209, 210, 1, 0, 0, 0, 210, 211, 5, 31, 0, 0, 211,
+		212, 3, 38, 19, 0, 212, 213, 5, 40, 0, 0, 213, 235, 1, 0, 0, 0, 214, 215,
+		5, 8, 0, 0, 215, 216, 3, 38, 19, 0, 216, 219, 3, 34, 17, 0, 217, 218, 5,
+		9, 0, 0, 218, 220, 3, 34, 17, 0, 219, 217, 1, 0, 0, 0, 219, 220, 1, 0,
+		0, 0, 220, 235, 1, 0, 0, 0, 221, 223, 5, 4, 0, 0, 222, 224, 3, 38, 19,
+		0, 223, 222, 1, 0, 0, 0, 223, 224, 1, 0, 0, 0, 224, 225, 1, 0, 0, 0, 225,
+		235, 5, 40, 0, 0, 226, 227, 3, 2, 1, 0, 227, 228, 5, 31, 0, 0, 228, 229,
+		3, 38, 19, 0, 229, 230, 5, 40, 0, 0, 230, 235, 1, 0, 0, 0, 231, 232, 3,
+		38, 19, 0, 232, 233, 5, 40, 0, 0, 233, 235, 1, 0, 0, 0, 234, 204, 1, 0,
+		0, 0, 234, 214, 1, 0, 0, 0, 234, 221, 1, 0, 0, 0, 234, 226, 1, 0, 0, 0,
+		234, 231, 1, 0, 0, 0, 235, 37, 1, 0, 0, 0, 236, 237, 6, 19, -1, 0, 237,
+		240, 5, 39, 0, 0, 238, 239, 5, 32, 0, 0, 239, 241, 3, 6, 3, 0, 240, 238,
+		1, 0, 0, 0, 240, 241, 1, 0, 0, 0, 241, 270, 1, 0, 0, 0, 242, 245, 5, 37,
+		0, 0, 243, 244, 5, 32, 0, 0, 244, 246, 3, 6, 3, 0, 245, 243, 1, 0, 0, 0,
+		245, 246, 1, 0, 0, 0, 246, 270, 1, 0, 0, 0, 247, 250, 7, 0, 0, 0, 248,
+		249, 5, 32, 0, 0, 249, 251, 3, 6, 3, 0, 250, 248, 1, 0, 0, 0, 250, 251,
+		1, 0, 0, 0, 251, 270, 1, 0, 0, 0, 252, 253, 5, 7, 0, 0, 253, 270, 3, 38,
+		19, 7, 254, 255, 3, 2, 1, 0, 255, 256, 5, 32, 0, 0, 256, 257, 3, 6, 3,
+		0, 257, 258, 3, 40, 20, 0, 258, 270, 1, 0, 0, 0, 259, 270, 3, 42, 21, 0,
+		260, 261, 3, 6, 3, 0, 261, 262, 5, 36, 0, 0, 262, 263, 3, 6, 3, 0, 263,
+		264, 3, 38, 19, 2, 264, 270, 1, 0, 0, 0, 265, 266, 5, 12, 0, 0, 266, 267,
+		3, 38, 19, 0, 267, 268, 5, 15, 0, 0, 268, 270, 1, 0, 0, 0, 269, 236, 1,
+		0, 0, 0, 269, 242, 1, 0, 0, 0, 269, 247, 1, 0, 0, 0, 269, 252, 1, 0, 0,
+		0, 269, 254, 1, 0, 0, 0, 269, 259, 1, 0, 0, 0, 269, 260, 1, 0, 0, 0, 269,
+		265, 1, 0, 0, 0, 270, 281, 1, 0, 0, 0, 271, 272, 10, 11, 0, 0, 272, 273,
+		7, 1, 0, 0, 273, 280, 3, 38, 19, 12, 274, 275, 10, 5, 0, 0, 275, 280, 3,
+		32, 16, 0, 276, 277, 10, 4, 0, 0, 277, 278, 5, 34, 0, 0, 278, 280, 3, 2,
+		1, 0, 279, 271, 1, 0, 0, 0, 279, 274, 1, 0, 0, 0, 279, 276, 1, 0, 0, 0,
+		280, 283, 1, 0, 0, 0, 281, 279, 1, 0, 0, 0, 281, 282, 1, 0, 0, 0, 282,
+		39, 1, 0, 0, 0, 283, 281, 1, 0, 0, 0, 284, 298, 5, 14, 0, 0, 285, 286,
+		3, 2, 1, 0, 286, 287, 5, 35, 0, 0, 287, 295, 3, 38, 19, 0, 288, 289, 5,
+		33, 0, 0, 289, 290, 3, 2, 1, 0, 290, 291, 5, 35, 0, 0, 291, 292, 3, 38,
+		19, 0, 292, 294, 1, 0, 0, 0, 293, 288, 1, 0, 0, 0, 294, 297, 1, 0, 0, 0,
+		295, 293, 1, 0, 0, 0, 295, 296, 1, 0, 0, 0, 296, 299, 1, 0, 0, 0, 297,
+		295, 1, 0, 0, 0, 298, 285, 1, 0, 0, 0, 298, 299, 1, 0, 0, 0, 299, 300,
+		1, 0, 0, 0, 300, 301, 5, 17, 0, 0, 301, 41, 1, 0, 0, 0, 302, 305, 3, 2,
+		1, 0, 303, 304, 5, 32, 0, 0, 304, 306, 3, 6, 3, 0, 305, 303, 1, 0, 0, 0,
+		305, 306, 1, 0, 0, 0, 306, 43, 1, 0, 0, 0, 33, 47, 49, 57, 64, 72, 84,
+		89, 91, 98, 106, 109, 125, 128, 146, 163, 171, 174, 188, 191, 199, 208,
+		219, 223, 234, 240, 245, 250, 269, 279, 281, 295, 298, 305,
 	}
 	deserializer := antlr.NewATNDeserializer(nil)
 	staticData.atn = deserializer.Deserialize(staticData.serializedATN)
@@ -264,22 +276,24 @@ const (
 	TempoParserRULE_ident                = 1
 	TempoParserRULE_valueType            = 2
 	TempoParserRULE_roleType             = 3
-	TempoParserRULE_struct               = 4
-	TempoParserRULE_structFieldList      = 5
-	TempoParserRULE_structField          = 6
-	TempoParserRULE_interface            = 7
-	TempoParserRULE_interfaceMethodsList = 8
-	TempoParserRULE_interfaceMethod      = 9
-	TempoParserRULE_func                 = 10
-	TempoParserRULE_funcSig              = 11
-	TempoParserRULE_funcParamList        = 12
-	TempoParserRULE_funcParam            = 13
-	TempoParserRULE_funcArgList          = 14
-	TempoParserRULE_scope                = 15
-	TempoParserRULE_stmt                 = 16
-	TempoParserRULE_expr                 = 17
-	TempoParserRULE_exprStructField      = 18
-	TempoParserRULE_identAccess          = 19
+	TempoParserRULE_funcTypeSig          = 4
+	TempoParserRULE_funcTypeParamList    = 5
+	TempoParserRULE_struct               = 6
+	TempoParserRULE_structFieldList      = 7
+	TempoParserRULE_structField          = 8
+	TempoParserRULE_interface            = 9
+	TempoParserRULE_interfaceMethodsList = 10
+	TempoParserRULE_interfaceMethod      = 11
+	TempoParserRULE_func                 = 12
+	TempoParserRULE_funcSig              = 13
+	TempoParserRULE_funcParamList        = 14
+	TempoParserRULE_funcParam            = 15
+	TempoParserRULE_funcArgList          = 16
+	TempoParserRULE_scope                = 17
+	TempoParserRULE_stmt                 = 18
+	TempoParserRULE_expr                 = 19
+	TempoParserRULE_exprStructField      = 20
+	TempoParserRULE_identAccess          = 21
 )
 
 // ISourceFileContext is an interface to support dynamic dispatch.
@@ -497,7 +511,7 @@ func (p *TempoParser) SourceFile() (localctx ISourceFileContext) {
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(45)
+	p.SetState(49)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -505,7 +519,7 @@ func (p *TempoParser) SourceFile() (localctx ISourceFileContext) {
 	_la = p.GetTokenStream().LA(1)
 
 	for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&14) != 0 {
-		p.SetState(43)
+		p.SetState(47)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -514,19 +528,19 @@ func (p *TempoParser) SourceFile() (localctx ISourceFileContext) {
 		switch p.GetTokenStream().LA(1) {
 		case TempoParserFUNC:
 			{
-				p.SetState(40)
+				p.SetState(44)
 				p.Func_()
 			}
 
 		case TempoParserSTRUCT:
 			{
-				p.SetState(41)
+				p.SetState(45)
 				p.Struct_()
 			}
 
 		case TempoParserINTERFACE:
 			{
-				p.SetState(42)
+				p.SetState(46)
 				p.Interface_()
 			}
 
@@ -535,7 +549,7 @@ func (p *TempoParser) SourceFile() (localctx ISourceFileContext) {
 			goto errorExit
 		}
 
-		p.SetState(47)
+		p.SetState(51)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -543,7 +557,7 @@ func (p *TempoParser) SourceFile() (localctx ISourceFileContext) {
 		_la = p.GetTokenStream().LA(1)
 	}
 	{
-		p.SetState(48)
+		p.SetState(52)
 		p.Match(TempoParserEOF)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -649,7 +663,7 @@ func (p *TempoParser) Ident() (localctx IIdentContext) {
 	p.EnterRule(localctx, 2, TempoParserRULE_ident)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(50)
+		p.SetState(54)
 		p.Match(TempoParserID)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -681,6 +695,7 @@ type IValueTypeContext interface {
 	Ident() IIdentContext
 	ROLE_AT() antlr.TerminalNode
 	RoleType() IRoleTypeContext
+	FuncTypeSig() IFuncTypeSigContext
 	ASYNC() antlr.TerminalNode
 
 	// IsValueTypeContext differentiates from other interfaces.
@@ -755,6 +770,22 @@ func (s *ValueTypeContext) RoleType() IRoleTypeContext {
 	return t.(IRoleTypeContext)
 }
 
+func (s *ValueTypeContext) FuncTypeSig() IFuncTypeSigContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IFuncTypeSigContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IFuncTypeSigContext)
+}
+
 func (s *ValueTypeContext) ASYNC() antlr.TerminalNode {
 	return s.GetToken(TempoParserASYNC, 0)
 }
@@ -795,7 +826,7 @@ func (p *TempoParser) ValueType() (localctx IValueTypeContext) {
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(53)
+	p.SetState(57)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -804,7 +835,7 @@ func (p *TempoParser) ValueType() (localctx IValueTypeContext) {
 
 	if _la == TempoParserASYNC {
 		{
-			p.SetState(52)
+			p.SetState(56)
 			p.Match(TempoParserASYNC)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -813,21 +844,40 @@ func (p *TempoParser) ValueType() (localctx IValueTypeContext) {
 		}
 
 	}
-	{
-		p.SetState(55)
-		p.Ident()
+	p.SetState(64)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
 	}
-	{
-		p.SetState(56)
-		p.Match(TempoParserROLE_AT)
-		if p.HasError() {
-			// Recognition error - abort rule
-			goto errorExit
+
+	switch p.GetTokenStream().LA(1) {
+	case TempoParserID:
+		{
+			p.SetState(59)
+			p.Ident()
 		}
-	}
-	{
-		p.SetState(57)
-		p.RoleType()
+		{
+			p.SetState(60)
+			p.Match(TempoParserROLE_AT)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
+		}
+		{
+			p.SetState(61)
+			p.RoleType()
+		}
+
+	case TempoParserFUNC:
+		{
+			p.SetState(63)
+			p.FuncTypeSig()
+		}
+
+	default:
+		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
+		goto errorExit
 	}
 
 errorExit:
@@ -1096,7 +1146,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 	p.EnterRule(localctx, 6, TempoParserRULE_roleType)
 	var _la int
 
-	p.SetState(84)
+	p.SetState(91)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1107,7 +1157,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 		localctx = NewRoleTypeSharedContext(p, localctx)
 		p.EnterOuterAlt(localctx, 1)
 		{
-			p.SetState(59)
+			p.SetState(66)
 			p.Match(TempoParserLSQUARE)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -1115,10 +1165,10 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 			}
 		}
 		{
-			p.SetState(60)
+			p.SetState(67)
 			p.Ident()
 		}
-		p.SetState(65)
+		p.SetState(72)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1127,7 +1177,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 
 		for _la == TempoParserCOMMA {
 			{
-				p.SetState(61)
+				p.SetState(68)
 				p.Match(TempoParserCOMMA)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -1135,11 +1185,11 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 				}
 			}
 			{
-				p.SetState(62)
+				p.SetState(69)
 				p.Ident()
 			}
 
-			p.SetState(67)
+			p.SetState(74)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -1147,7 +1197,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 			_la = p.GetTokenStream().LA(1)
 		}
 		{
-			p.SetState(68)
+			p.SetState(75)
 			p.Match(TempoParserRSQUARE)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -1158,7 +1208,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 	case TempoParserLPAREN, TempoParserID:
 		localctx = NewRoleTypeNormalContext(p, localctx)
 		p.EnterOuterAlt(localctx, 2)
-		p.SetState(82)
+		p.SetState(89)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1167,13 +1217,13 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 		switch p.GetTokenStream().LA(1) {
 		case TempoParserID:
 			{
-				p.SetState(70)
+				p.SetState(77)
 				p.Ident()
 			}
 
 		case TempoParserLPAREN:
 			{
-				p.SetState(71)
+				p.SetState(78)
 				p.Match(TempoParserLPAREN)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -1181,10 +1231,10 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 				}
 			}
 			{
-				p.SetState(72)
+				p.SetState(79)
 				p.Ident()
 			}
-			p.SetState(77)
+			p.SetState(84)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -1193,7 +1243,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 
 			for _la == TempoParserCOMMA {
 				{
-					p.SetState(73)
+					p.SetState(80)
 					p.Match(TempoParserCOMMA)
 					if p.HasError() {
 						// Recognition error - abort rule
@@ -1201,11 +1251,11 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 					}
 				}
 				{
-					p.SetState(74)
+					p.SetState(81)
 					p.Ident()
 				}
 
-				p.SetState(79)
+				p.SetState(86)
 				p.GetErrorHandler().Sync(p)
 				if p.HasError() {
 					goto errorExit
@@ -1213,7 +1263,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 				_la = p.GetTokenStream().LA(1)
 			}
 			{
-				p.SetState(80)
+				p.SetState(87)
 				p.Match(TempoParserRPAREN)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -1229,6 +1279,444 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 	default:
 		p.SetError(antlr.NewNoViableAltException(p, nil, nil, nil, nil, nil))
 		goto errorExit
+	}
+
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
+	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
+}
+
+// IFuncTypeSigContext is an interface to support dynamic dispatch.
+type IFuncTypeSigContext interface {
+	antlr.ParserRuleContext
+
+	// GetParser returns the parser.
+	GetParser() antlr.Parser
+
+	// GetParams returns the params rule contexts.
+	GetParams() IFuncTypeParamListContext
+
+	// GetReturnType returns the returnType rule contexts.
+	GetReturnType() IValueTypeContext
+
+	// SetParams sets the params rule contexts.
+	SetParams(IFuncTypeParamListContext)
+
+	// SetReturnType sets the returnType rule contexts.
+	SetReturnType(IValueTypeContext)
+
+	// Getter signatures
+	FUNC() antlr.TerminalNode
+	ROLE_AT() antlr.TerminalNode
+	RoleType() IRoleTypeContext
+	FuncTypeParamList() IFuncTypeParamListContext
+	ValueType() IValueTypeContext
+
+	// IsFuncTypeSigContext differentiates from other interfaces.
+	IsFuncTypeSigContext()
+}
+
+type FuncTypeSigContext struct {
+	antlr.BaseParserRuleContext
+	parser     antlr.Parser
+	params     IFuncTypeParamListContext
+	returnType IValueTypeContext
+}
+
+func NewEmptyFuncTypeSigContext() *FuncTypeSigContext {
+	var p = new(FuncTypeSigContext)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = TempoParserRULE_funcTypeSig
+	return p
+}
+
+func InitEmptyFuncTypeSigContext(p *FuncTypeSigContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = TempoParserRULE_funcTypeSig
+}
+
+func (*FuncTypeSigContext) IsFuncTypeSigContext() {}
+
+func NewFuncTypeSigContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FuncTypeSigContext {
+	var p = new(FuncTypeSigContext)
+
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
+
+	p.parser = parser
+	p.RuleIndex = TempoParserRULE_funcTypeSig
+
+	return p
+}
+
+func (s *FuncTypeSigContext) GetParser() antlr.Parser { return s.parser }
+
+func (s *FuncTypeSigContext) GetParams() IFuncTypeParamListContext { return s.params }
+
+func (s *FuncTypeSigContext) GetReturnType() IValueTypeContext { return s.returnType }
+
+func (s *FuncTypeSigContext) SetParams(v IFuncTypeParamListContext) { s.params = v }
+
+func (s *FuncTypeSigContext) SetReturnType(v IValueTypeContext) { s.returnType = v }
+
+func (s *FuncTypeSigContext) FUNC() antlr.TerminalNode {
+	return s.GetToken(TempoParserFUNC, 0)
+}
+
+func (s *FuncTypeSigContext) ROLE_AT() antlr.TerminalNode {
+	return s.GetToken(TempoParserROLE_AT, 0)
+}
+
+func (s *FuncTypeSigContext) RoleType() IRoleTypeContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IRoleTypeContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IRoleTypeContext)
+}
+
+func (s *FuncTypeSigContext) FuncTypeParamList() IFuncTypeParamListContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IFuncTypeParamListContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IFuncTypeParamListContext)
+}
+
+func (s *FuncTypeSigContext) ValueType() IValueTypeContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IValueTypeContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IValueTypeContext)
+}
+
+func (s *FuncTypeSigContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *FuncTypeSigContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+	return antlr.TreesStringTree(s, ruleNames, recog)
+}
+
+func (s *FuncTypeSigContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(TempoListener); ok {
+		listenerT.EnterFuncTypeSig(s)
+	}
+}
+
+func (s *FuncTypeSigContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(TempoListener); ok {
+		listenerT.ExitFuncTypeSig(s)
+	}
+}
+
+func (s *FuncTypeSigContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case TempoVisitor:
+		return t.VisitFuncTypeSig(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+func (p *TempoParser) FuncTypeSig() (localctx IFuncTypeSigContext) {
+	localctx = NewFuncTypeSigContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 8, TempoParserRULE_funcTypeSig)
+	var _la int
+
+	p.EnterOuterAlt(localctx, 1)
+	{
+		p.SetState(93)
+		p.Match(TempoParserFUNC)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
+	}
+	{
+		p.SetState(94)
+		p.Match(TempoParserROLE_AT)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
+	}
+	{
+		p.SetState(95)
+		p.RoleType()
+	}
+	{
+		p.SetState(96)
+
+		var _x = p.FuncTypeParamList()
+
+		localctx.(*FuncTypeSigContext).params = _x
+	}
+	p.SetState(98)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
+	_la = p.GetTokenStream().LA(1)
+
+	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&274877907016) != 0 {
+		{
+			p.SetState(97)
+
+			var _x = p.ValueType()
+
+			localctx.(*FuncTypeSigContext).returnType = _x
+		}
+
+	}
+
+errorExit:
+	if p.HasError() {
+		v := p.GetError()
+		localctx.SetException(v)
+		p.GetErrorHandler().ReportError(p, v)
+		p.GetErrorHandler().Recover(p, v)
+		p.SetError(nil)
+	}
+	p.ExitRule()
+	return localctx
+	goto errorExit // Trick to prevent compiler error if the label is not used
+}
+
+// IFuncTypeParamListContext is an interface to support dynamic dispatch.
+type IFuncTypeParamListContext interface {
+	antlr.ParserRuleContext
+
+	// GetParser returns the parser.
+	GetParser() antlr.Parser
+
+	// Getter signatures
+	LPAREN() antlr.TerminalNode
+	RPAREN() antlr.TerminalNode
+	AllValueType() []IValueTypeContext
+	ValueType(i int) IValueTypeContext
+	AllCOMMA() []antlr.TerminalNode
+	COMMA(i int) antlr.TerminalNode
+
+	// IsFuncTypeParamListContext differentiates from other interfaces.
+	IsFuncTypeParamListContext()
+}
+
+type FuncTypeParamListContext struct {
+	antlr.BaseParserRuleContext
+	parser antlr.Parser
+}
+
+func NewEmptyFuncTypeParamListContext() *FuncTypeParamListContext {
+	var p = new(FuncTypeParamListContext)
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = TempoParserRULE_funcTypeParamList
+	return p
+}
+
+func InitEmptyFuncTypeParamListContext(p *FuncTypeParamListContext) {
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
+	p.RuleIndex = TempoParserRULE_funcTypeParamList
+}
+
+func (*FuncTypeParamListContext) IsFuncTypeParamListContext() {}
+
+func NewFuncTypeParamListContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FuncTypeParamListContext {
+	var p = new(FuncTypeParamListContext)
+
+	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
+
+	p.parser = parser
+	p.RuleIndex = TempoParserRULE_funcTypeParamList
+
+	return p
+}
+
+func (s *FuncTypeParamListContext) GetParser() antlr.Parser { return s.parser }
+
+func (s *FuncTypeParamListContext) LPAREN() antlr.TerminalNode {
+	return s.GetToken(TempoParserLPAREN, 0)
+}
+
+func (s *FuncTypeParamListContext) RPAREN() antlr.TerminalNode {
+	return s.GetToken(TempoParserRPAREN, 0)
+}
+
+func (s *FuncTypeParamListContext) AllValueType() []IValueTypeContext {
+	children := s.GetChildren()
+	len := 0
+	for _, ctx := range children {
+		if _, ok := ctx.(IValueTypeContext); ok {
+			len++
+		}
+	}
+
+	tst := make([]IValueTypeContext, len)
+	i := 0
+	for _, ctx := range children {
+		if t, ok := ctx.(IValueTypeContext); ok {
+			tst[i] = t.(IValueTypeContext)
+			i++
+		}
+	}
+
+	return tst
+}
+
+func (s *FuncTypeParamListContext) ValueType(i int) IValueTypeContext {
+	var t antlr.RuleContext
+	j := 0
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IValueTypeContext); ok {
+			if j == i {
+				t = ctx.(antlr.RuleContext)
+				break
+			}
+			j++
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IValueTypeContext)
+}
+
+func (s *FuncTypeParamListContext) AllCOMMA() []antlr.TerminalNode {
+	return s.GetTokens(TempoParserCOMMA)
+}
+
+func (s *FuncTypeParamListContext) COMMA(i int) antlr.TerminalNode {
+	return s.GetToken(TempoParserCOMMA, i)
+}
+
+func (s *FuncTypeParamListContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *FuncTypeParamListContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+	return antlr.TreesStringTree(s, ruleNames, recog)
+}
+
+func (s *FuncTypeParamListContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(TempoListener); ok {
+		listenerT.EnterFuncTypeParamList(s)
+	}
+}
+
+func (s *FuncTypeParamListContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(TempoListener); ok {
+		listenerT.ExitFuncTypeParamList(s)
+	}
+}
+
+func (s *FuncTypeParamListContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case TempoVisitor:
+		return t.VisitFuncTypeParamList(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+func (p *TempoParser) FuncTypeParamList() (localctx IFuncTypeParamListContext) {
+	localctx = NewFuncTypeParamListContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 10, TempoParserRULE_funcTypeParamList)
+	var _la int
+
+	p.EnterOuterAlt(localctx, 1)
+	{
+		p.SetState(100)
+		p.Match(TempoParserLPAREN)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
+	}
+	p.SetState(109)
+	p.GetErrorHandler().Sync(p)
+	if p.HasError() {
+		goto errorExit
+	}
+	_la = p.GetTokenStream().LA(1)
+
+	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&274877907016) != 0 {
+		{
+			p.SetState(101)
+			p.ValueType()
+		}
+		p.SetState(106)
+		p.GetErrorHandler().Sync(p)
+		if p.HasError() {
+			goto errorExit
+		}
+		_la = p.GetTokenStream().LA(1)
+
+		for _la == TempoParserCOMMA {
+			{
+				p.SetState(102)
+				p.Match(TempoParserCOMMA)
+				if p.HasError() {
+					// Recognition error - abort rule
+					goto errorExit
+				}
+			}
+			{
+				p.SetState(103)
+				p.ValueType()
+			}
+
+			p.SetState(108)
+			p.GetErrorHandler().Sync(p)
+			if p.HasError() {
+				goto errorExit
+			}
+			_la = p.GetTokenStream().LA(1)
+		}
+
+	}
+	{
+		p.SetState(111)
+		p.Match(TempoParserRPAREN)
+		if p.HasError() {
+			// Recognition error - abort rule
+			goto errorExit
+		}
 	}
 
 errorExit:
@@ -1382,10 +1870,10 @@ func (s *StructContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *TempoParser) Struct_() (localctx IStructContext) {
 	localctx = NewStructContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 8, TempoParserRULE_struct)
+	p.EnterRule(localctx, 12, TempoParserRULE_struct)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(86)
+		p.SetState(113)
 		p.Match(TempoParserSTRUCT)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1393,7 +1881,7 @@ func (p *TempoParser) Struct_() (localctx IStructContext) {
 		}
 	}
 	{
-		p.SetState(87)
+		p.SetState(114)
 		p.Match(TempoParserROLE_AT)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1401,15 +1889,15 @@ func (p *TempoParser) Struct_() (localctx IStructContext) {
 		}
 	}
 	{
-		p.SetState(88)
+		p.SetState(115)
 		p.RoleType()
 	}
 	{
-		p.SetState(89)
+		p.SetState(116)
 		p.Ident()
 	}
 	{
-		p.SetState(90)
+		p.SetState(117)
 		p.StructFieldList()
 	}
 
@@ -1566,19 +2054,19 @@ func (s *StructFieldListContext) Accept(visitor antlr.ParseTreeVisitor) interfac
 
 func (p *TempoParser) StructFieldList() (localctx IStructFieldListContext) {
 	localctx = NewStructFieldListContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 10, TempoParserRULE_structFieldList)
+	p.EnterRule(localctx, 14, TempoParserRULE_structFieldList)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(92)
+		p.SetState(119)
 		p.Match(TempoParserLCURLY)
 		if p.HasError() {
 			// Recognition error - abort rule
 			goto errorExit
 		}
 	}
-	p.SetState(101)
+	p.SetState(128)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -1587,10 +2075,10 @@ func (p *TempoParser) StructFieldList() (localctx IStructFieldListContext) {
 
 	if _la == TempoParserID {
 		{
-			p.SetState(93)
+			p.SetState(120)
 			p.StructField()
 		}
-		p.SetState(98)
+		p.SetState(125)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -1599,7 +2087,7 @@ func (p *TempoParser) StructFieldList() (localctx IStructFieldListContext) {
 
 		for _la == TempoParserCOMMA {
 			{
-				p.SetState(94)
+				p.SetState(121)
 				p.Match(TempoParserCOMMA)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -1607,11 +2095,11 @@ func (p *TempoParser) StructFieldList() (localctx IStructFieldListContext) {
 				}
 			}
 			{
-				p.SetState(95)
+				p.SetState(122)
 				p.StructField()
 			}
 
-			p.SetState(100)
+			p.SetState(127)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -1621,7 +2109,7 @@ func (p *TempoParser) StructFieldList() (localctx IStructFieldListContext) {
 
 	}
 	{
-		p.SetState(103)
+		p.SetState(130)
 		p.Match(TempoParserRCURLY)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1758,14 +2246,14 @@ func (s *StructFieldContext) Accept(visitor antlr.ParseTreeVisitor) interface{} 
 
 func (p *TempoParser) StructField() (localctx IStructFieldContext) {
 	localctx = NewStructFieldContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 12, TempoParserRULE_structField)
+	p.EnterRule(localctx, 16, TempoParserRULE_structField)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(105)
+		p.SetState(132)
 		p.Ident()
 	}
 	{
-		p.SetState(106)
+		p.SetState(133)
 		p.Match(TempoParserCOLON)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1773,7 +2261,7 @@ func (p *TempoParser) StructField() (localctx IStructFieldContext) {
 		}
 	}
 	{
-		p.SetState(107)
+		p.SetState(134)
 		p.ValueType()
 	}
 
@@ -1928,10 +2416,10 @@ func (s *InterfaceContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *TempoParser) Interface_() (localctx IInterfaceContext) {
 	localctx = NewInterfaceContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 14, TempoParserRULE_interface)
+	p.EnterRule(localctx, 18, TempoParserRULE_interface)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(109)
+		p.SetState(136)
 		p.Match(TempoParserINTERFACE)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1939,7 +2427,7 @@ func (p *TempoParser) Interface_() (localctx IInterfaceContext) {
 		}
 	}
 	{
-		p.SetState(110)
+		p.SetState(137)
 		p.Match(TempoParserROLE_AT)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -1947,15 +2435,15 @@ func (p *TempoParser) Interface_() (localctx IInterfaceContext) {
 		}
 	}
 	{
-		p.SetState(111)
+		p.SetState(138)
 		p.RoleType()
 	}
 	{
-		p.SetState(112)
+		p.SetState(139)
 		p.Ident()
 	}
 	{
-		p.SetState(113)
+		p.SetState(140)
 		p.InterfaceMethodsList()
 	}
 
@@ -2102,19 +2590,19 @@ func (s *InterfaceMethodsListContext) Accept(visitor antlr.ParseTreeVisitor) int
 
 func (p *TempoParser) InterfaceMethodsList() (localctx IInterfaceMethodsListContext) {
 	localctx = NewInterfaceMethodsListContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 16, TempoParserRULE_interfaceMethodsList)
+	p.EnterRule(localctx, 20, TempoParserRULE_interfaceMethodsList)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(115)
+		p.SetState(142)
 		p.Match(TempoParserLCURLY)
 		if p.HasError() {
 			// Recognition error - abort rule
 			goto errorExit
 		}
 	}
-	p.SetState(119)
+	p.SetState(146)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -2123,11 +2611,11 @@ func (p *TempoParser) InterfaceMethodsList() (localctx IInterfaceMethodsListCont
 
 	for _la == TempoParserFUNC {
 		{
-			p.SetState(116)
+			p.SetState(143)
 			p.InterfaceMethod()
 		}
 
-		p.SetState(121)
+		p.SetState(148)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -2135,7 +2623,7 @@ func (p *TempoParser) InterfaceMethodsList() (localctx IInterfaceMethodsListCont
 		_la = p.GetTokenStream().LA(1)
 	}
 	{
-		p.SetState(122)
+		p.SetState(149)
 		p.Match(TempoParserRCURLY)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -2255,14 +2743,14 @@ func (s *InterfaceMethodContext) Accept(visitor antlr.ParseTreeVisitor) interfac
 
 func (p *TempoParser) InterfaceMethod() (localctx IInterfaceMethodContext) {
 	localctx = NewInterfaceMethodContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 18, TempoParserRULE_interfaceMethod)
+	p.EnterRule(localctx, 22, TempoParserRULE_interfaceMethod)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(124)
+		p.SetState(151)
 		p.FuncSig()
 	}
 	{
-		p.SetState(125)
+		p.SetState(152)
 		p.Match(TempoParserEND)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -2394,14 +2882,14 @@ func (s *FuncContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *TempoParser) Func_() (localctx IFuncContext) {
 	localctx = NewFuncContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 20, TempoParserRULE_func)
+	p.EnterRule(localctx, 24, TempoParserRULE_func)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(127)
+		p.SetState(154)
 		p.FuncSig()
 	}
 	{
-		p.SetState(128)
+		p.SetState(155)
 		p.Scope()
 	}
 
@@ -2606,12 +3094,12 @@ func (s *FuncSigContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *TempoParser) FuncSig() (localctx IFuncSigContext) {
 	localctx = NewFuncSigContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 22, TempoParserRULE_funcSig)
+	p.EnterRule(localctx, 26, TempoParserRULE_funcSig)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(130)
+		p.SetState(157)
 		p.Match(TempoParserFUNC)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -2619,7 +3107,7 @@ func (p *TempoParser) FuncSig() (localctx IFuncSigContext) {
 		}
 	}
 	{
-		p.SetState(131)
+		p.SetState(158)
 		p.Match(TempoParserROLE_AT)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -2627,33 +3115,33 @@ func (p *TempoParser) FuncSig() (localctx IFuncSigContext) {
 		}
 	}
 	{
-		p.SetState(132)
+		p.SetState(159)
 		p.RoleType()
 	}
 	{
-		p.SetState(133)
+		p.SetState(160)
 
 		var _x = p.Ident()
 
 		localctx.(*FuncSigContext).name = _x
 	}
 	{
-		p.SetState(134)
+		p.SetState(161)
 
 		var _x = p.FuncParamList()
 
 		localctx.(*FuncSigContext).params = _x
 	}
-	p.SetState(136)
+	p.SetState(163)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	if _la == TempoParserASYNC || _la == TempoParserID {
+	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&274877907016) != 0 {
 		{
-			p.SetState(135)
+			p.SetState(162)
 
 			var _x = p.ValueType()
 
@@ -2815,19 +3303,19 @@ func (s *FuncParamListContext) Accept(visitor antlr.ParseTreeVisitor) interface{
 
 func (p *TempoParser) FuncParamList() (localctx IFuncParamListContext) {
 	localctx = NewFuncParamListContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 24, TempoParserRULE_funcParamList)
+	p.EnterRule(localctx, 28, TempoParserRULE_funcParamList)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(138)
+		p.SetState(165)
 		p.Match(TempoParserLPAREN)
 		if p.HasError() {
 			// Recognition error - abort rule
 			goto errorExit
 		}
 	}
-	p.SetState(147)
+	p.SetState(174)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -2836,10 +3324,10 @@ func (p *TempoParser) FuncParamList() (localctx IFuncParamListContext) {
 
 	if _la == TempoParserID {
 		{
-			p.SetState(139)
+			p.SetState(166)
 			p.FuncParam()
 		}
-		p.SetState(144)
+		p.SetState(171)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -2848,7 +3336,7 @@ func (p *TempoParser) FuncParamList() (localctx IFuncParamListContext) {
 
 		for _la == TempoParserCOMMA {
 			{
-				p.SetState(140)
+				p.SetState(167)
 				p.Match(TempoParserCOMMA)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -2856,11 +3344,11 @@ func (p *TempoParser) FuncParamList() (localctx IFuncParamListContext) {
 				}
 			}
 			{
-				p.SetState(141)
+				p.SetState(168)
 				p.FuncParam()
 			}
 
-			p.SetState(146)
+			p.SetState(173)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -2870,7 +3358,7 @@ func (p *TempoParser) FuncParamList() (localctx IFuncParamListContext) {
 
 	}
 	{
-		p.SetState(149)
+		p.SetState(176)
 		p.Match(TempoParserRPAREN)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -3007,14 +3495,14 @@ func (s *FuncParamContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *TempoParser) FuncParam() (localctx IFuncParamContext) {
 	localctx = NewFuncParamContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 26, TempoParserRULE_funcParam)
+	p.EnterRule(localctx, 30, TempoParserRULE_funcParam)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(151)
+		p.SetState(178)
 		p.Ident()
 	}
 	{
-		p.SetState(152)
+		p.SetState(179)
 		p.Match(TempoParserCOLON)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -3022,7 +3510,7 @@ func (p *TempoParser) FuncParam() (localctx IFuncParamContext) {
 		}
 	}
 	{
-		p.SetState(153)
+		p.SetState(180)
 		p.ValueType()
 	}
 
@@ -3179,19 +3667,19 @@ func (s *FuncArgListContext) Accept(visitor antlr.ParseTreeVisitor) interface{} 
 
 func (p *TempoParser) FuncArgList() (localctx IFuncArgListContext) {
 	localctx = NewFuncArgListContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 28, TempoParserRULE_funcArgList)
+	p.EnterRule(localctx, 32, TempoParserRULE_funcArgList)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(155)
+		p.SetState(182)
 		p.Match(TempoParserLPAREN)
 		if p.HasError() {
 			// Recognition error - abort rule
 			goto errorExit
 		}
 	}
-	p.SetState(164)
+	p.SetState(191)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -3200,10 +3688,10 @@ func (p *TempoParser) FuncArgList() (localctx IFuncArgListContext) {
 
 	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&962072689792) != 0 {
 		{
-			p.SetState(156)
+			p.SetState(183)
 			p.expr(0)
 		}
-		p.SetState(161)
+		p.SetState(188)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -3212,7 +3700,7 @@ func (p *TempoParser) FuncArgList() (localctx IFuncArgListContext) {
 
 		for _la == TempoParserCOMMA {
 			{
-				p.SetState(157)
+				p.SetState(184)
 				p.Match(TempoParserCOMMA)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -3220,11 +3708,11 @@ func (p *TempoParser) FuncArgList() (localctx IFuncArgListContext) {
 				}
 			}
 			{
-				p.SetState(158)
+				p.SetState(185)
 				p.expr(0)
 			}
 
-			p.SetState(163)
+			p.SetState(190)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -3234,7 +3722,7 @@ func (p *TempoParser) FuncArgList() (localctx IFuncArgListContext) {
 
 	}
 	{
-		p.SetState(166)
+		p.SetState(193)
 		p.Match(TempoParserRPAREN)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -3385,19 +3873,19 @@ func (s *ScopeContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *TempoParser) Scope() (localctx IScopeContext) {
 	localctx = NewScopeContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 30, TempoParserRULE_scope)
+	p.EnterRule(localctx, 34, TempoParserRULE_scope)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(168)
+		p.SetState(195)
 		p.Match(TempoParserLCURLY)
 		if p.HasError() {
 			// Recognition error - abort rule
 			goto errorExit
 		}
 	}
-	p.SetState(172)
+	p.SetState(199)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -3406,11 +3894,11 @@ func (p *TempoParser) Scope() (localctx IScopeContext) {
 
 	for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&962072690096) != 0 {
 		{
-			p.SetState(169)
+			p.SetState(196)
 			p.Stmt()
 		}
 
-		p.SetState(174)
+		p.SetState(201)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -3418,7 +3906,7 @@ func (p *TempoParser) Scope() (localctx IScopeContext) {
 		_la = p.GetTokenStream().LA(1)
 	}
 	{
-		p.SetState(175)
+		p.SetState(202)
 		p.Match(TempoParserRCURLY)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -3918,21 +4406,21 @@ func (s *StmtAssignContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 
 func (p *TempoParser) Stmt() (localctx IStmtContext) {
 	localctx = NewStmtContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 32, TempoParserRULE_stmt)
+	p.EnterRule(localctx, 36, TempoParserRULE_stmt)
 	var _la int
 
-	p.SetState(207)
+	p.SetState(234)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
 	}
 
-	switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 19, p.GetParserRuleContext()) {
+	switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 23, p.GetParserRuleContext()) {
 	case 1:
 		localctx = NewStmtVarDeclContext(p, localctx)
 		p.EnterOuterAlt(localctx, 1)
 		{
-			p.SetState(177)
+			p.SetState(204)
 			p.Match(TempoParserLET)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -3940,10 +4428,10 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 			}
 		}
 		{
-			p.SetState(178)
+			p.SetState(205)
 			p.Ident()
 		}
-		p.SetState(181)
+		p.SetState(208)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -3952,7 +4440,7 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 
 		if _la == TempoParserCOLON {
 			{
-				p.SetState(179)
+				p.SetState(206)
 				p.Match(TempoParserCOLON)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -3960,13 +4448,13 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 				}
 			}
 			{
-				p.SetState(180)
+				p.SetState(207)
 				p.ValueType()
 			}
 
 		}
 		{
-			p.SetState(183)
+			p.SetState(210)
 			p.Match(TempoParserIS)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -3974,11 +4462,11 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 			}
 		}
 		{
-			p.SetState(184)
+			p.SetState(211)
 			p.expr(0)
 		}
 		{
-			p.SetState(185)
+			p.SetState(212)
 			p.Match(TempoParserEND)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -3990,7 +4478,7 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 		localctx = NewStmtIfContext(p, localctx)
 		p.EnterOuterAlt(localctx, 2)
 		{
-			p.SetState(187)
+			p.SetState(214)
 			p.Match(TempoParserIF)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -3998,17 +4486,17 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 			}
 		}
 		{
-			p.SetState(188)
+			p.SetState(215)
 			p.expr(0)
 		}
 		{
-			p.SetState(189)
+			p.SetState(216)
 
 			var _x = p.Scope()
 
 			localctx.(*StmtIfContext).thenScope = _x
 		}
-		p.SetState(192)
+		p.SetState(219)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -4017,7 +4505,7 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 
 		if _la == TempoParserELSE {
 			{
-				p.SetState(190)
+				p.SetState(217)
 				p.Match(TempoParserELSE)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -4025,7 +4513,7 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 				}
 			}
 			{
-				p.SetState(191)
+				p.SetState(218)
 
 				var _x = p.Scope()
 
@@ -4038,14 +4526,14 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 		localctx = NewStmtReturnContext(p, localctx)
 		p.EnterOuterAlt(localctx, 3)
 		{
-			p.SetState(194)
+			p.SetState(221)
 			p.Match(TempoParserRETURN)
 			if p.HasError() {
 				// Recognition error - abort rule
 				goto errorExit
 			}
 		}
-		p.SetState(196)
+		p.SetState(223)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -4054,13 +4542,13 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 
 		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&962072689792) != 0 {
 			{
-				p.SetState(195)
+				p.SetState(222)
 				p.expr(0)
 			}
 
 		}
 		{
-			p.SetState(198)
+			p.SetState(225)
 			p.Match(TempoParserEND)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -4072,11 +4560,11 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 		localctx = NewStmtAssignContext(p, localctx)
 		p.EnterOuterAlt(localctx, 4)
 		{
-			p.SetState(199)
+			p.SetState(226)
 			p.Ident()
 		}
 		{
-			p.SetState(200)
+			p.SetState(227)
 			p.Match(TempoParserIS)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -4084,11 +4572,11 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 			}
 		}
 		{
-			p.SetState(201)
+			p.SetState(228)
 			p.expr(0)
 		}
 		{
-			p.SetState(202)
+			p.SetState(229)
 			p.Match(TempoParserEND)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -4100,11 +4588,11 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 		localctx = NewStmtExprContext(p, localctx)
 		p.EnterOuterAlt(localctx, 5)
 		{
-			p.SetState(204)
+			p.SetState(231)
 			p.expr(0)
 		}
 		{
-			p.SetState(205)
+			p.SetState(232)
 			p.Match(TempoParserEND)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -5064,39 +5552,39 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 	localctx = NewExprContext(p, p.GetParserRuleContext(), _parentState)
 	var _prevctx IExprContext = localctx
 	var _ antlr.ParserRuleContext = _prevctx // TODO: To prevent unused variable warning.
-	_startState := 34
-	p.EnterRecursionRule(localctx, 34, TempoParserRULE_expr, _p)
+	_startState := 38
+	p.EnterRecursionRule(localctx, 38, TempoParserRULE_expr, _p)
 	var _la int
 
 	var _alt int
 
 	p.EnterOuterAlt(localctx, 1)
-	p.SetState(242)
+	p.SetState(269)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
 	}
 
-	switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 23, p.GetParserRuleContext()) {
+	switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 27, p.GetParserRuleContext()) {
 	case 1:
 		localctx = NewExprNumContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 
 		{
-			p.SetState(210)
+			p.SetState(237)
 			p.Match(TempoParserNUMBER)
 			if p.HasError() {
 				// Recognition error - abort rule
 				goto errorExit
 			}
 		}
-		p.SetState(213)
+		p.SetState(240)
 		p.GetErrorHandler().Sync(p)
 
-		if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 20, p.GetParserRuleContext()) == 1 {
+		if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 24, p.GetParserRuleContext()) == 1 {
 			{
-				p.SetState(211)
+				p.SetState(238)
 				p.Match(TempoParserROLE_AT)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -5104,7 +5592,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 				}
 			}
 			{
-				p.SetState(212)
+				p.SetState(239)
 				p.RoleType()
 			}
 
@@ -5117,19 +5605,19 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(215)
+			p.SetState(242)
 			p.Match(TempoParserSTRING)
 			if p.HasError() {
 				// Recognition error - abort rule
 				goto errorExit
 			}
 		}
-		p.SetState(218)
+		p.SetState(245)
 		p.GetErrorHandler().Sync(p)
 
-		if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 21, p.GetParserRuleContext()) == 1 {
+		if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 25, p.GetParserRuleContext()) == 1 {
 			{
-				p.SetState(216)
+				p.SetState(243)
 				p.Match(TempoParserROLE_AT)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -5137,7 +5625,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 				}
 			}
 			{
-				p.SetState(217)
+				p.SetState(244)
 				p.RoleType()
 			}
 
@@ -5150,7 +5638,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(220)
+			p.SetState(247)
 			_la = p.GetTokenStream().LA(1)
 
 			if !(_la == TempoParserTRUE || _la == TempoParserFALSE) {
@@ -5160,12 +5648,12 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 				p.Consume()
 			}
 		}
-		p.SetState(223)
+		p.SetState(250)
 		p.GetErrorHandler().Sync(p)
 
-		if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 22, p.GetParserRuleContext()) == 1 {
+		if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 26, p.GetParserRuleContext()) == 1 {
 			{
-				p.SetState(221)
+				p.SetState(248)
 				p.Match(TempoParserROLE_AT)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -5173,7 +5661,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 				}
 			}
 			{
-				p.SetState(222)
+				p.SetState(249)
 				p.RoleType()
 			}
 
@@ -5186,7 +5674,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(225)
+			p.SetState(252)
 			p.Match(TempoParserAWAIT)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -5194,7 +5682,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 			}
 		}
 		{
-			p.SetState(226)
+			p.SetState(253)
 			p.expr(7)
 		}
 
@@ -5203,11 +5691,11 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(227)
+			p.SetState(254)
 			p.Ident()
 		}
 		{
-			p.SetState(228)
+			p.SetState(255)
 			p.Match(TempoParserROLE_AT)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -5215,11 +5703,11 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 			}
 		}
 		{
-			p.SetState(229)
+			p.SetState(256)
 			p.RoleType()
 		}
 		{
-			p.SetState(230)
+			p.SetState(257)
 			p.ExprStructField()
 		}
 
@@ -5228,7 +5716,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(232)
+			p.SetState(259)
 			p.IdentAccess()
 		}
 
@@ -5237,14 +5725,14 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(233)
+			p.SetState(260)
 
 			var _x = p.RoleType()
 
 			localctx.(*ExprComContext).sender = _x
 		}
 		{
-			p.SetState(234)
+			p.SetState(261)
 			p.Match(TempoParserCOM)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -5252,14 +5740,14 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 			}
 		}
 		{
-			p.SetState(235)
+			p.SetState(262)
 
 			var _x = p.RoleType()
 
 			localctx.(*ExprComContext).receiver = _x
 		}
 		{
-			p.SetState(236)
+			p.SetState(263)
 			p.expr(2)
 		}
 
@@ -5268,7 +5756,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(238)
+			p.SetState(265)
 			p.Match(TempoParserLPAREN)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -5276,11 +5764,11 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 			}
 		}
 		{
-			p.SetState(239)
+			p.SetState(266)
 			p.expr(0)
 		}
 		{
-			p.SetState(240)
+			p.SetState(267)
 			p.Match(TempoParserRPAREN)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -5292,12 +5780,12 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		goto errorExit
 	}
 	p.GetParserRuleContext().SetStop(p.GetTokenStream().LT(-1))
-	p.SetState(254)
+	p.SetState(281)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
 	}
-	_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 25, p.GetParserRuleContext())
+	_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 29, p.GetParserRuleContext())
 	if p.HasError() {
 		goto errorExit
 	}
@@ -5307,26 +5795,26 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 				p.TriggerExitRuleEvent()
 			}
 			_prevctx = localctx
-			p.SetState(252)
+			p.SetState(279)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
 			}
 
-			switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 24, p.GetParserRuleContext()) {
+			switch p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 28, p.GetParserRuleContext()) {
 			case 1:
 				localctx = NewExprBinOpContext(p, NewExprContext(p, _parentctx, _parentState))
 				localctx.(*ExprBinOpContext).lhs = _prevctx
 
 				p.PushNewRecursionContext(localctx, _startState, TempoParserRULE_expr)
-				p.SetState(244)
+				p.SetState(271)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 11)) {
 					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 11)", ""))
 					goto errorExit
 				}
 				{
-					p.SetState(245)
+					p.SetState(272)
 					_la = p.GetTokenStream().LA(1)
 
 					if !((int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&2147221504) != 0) {
@@ -5337,7 +5825,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(246)
+					p.SetState(273)
 
 					var _x = p.expr(12)
 
@@ -5347,28 +5835,28 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 			case 2:
 				localctx = NewExprCallContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, TempoParserRULE_expr)
-				p.SetState(247)
+				p.SetState(274)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 5)) {
 					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 5)", ""))
 					goto errorExit
 				}
 				{
-					p.SetState(248)
+					p.SetState(275)
 					p.FuncArgList()
 				}
 
 			case 3:
 				localctx = NewExprFieldAccessContext(p, NewExprContext(p, _parentctx, _parentState))
 				p.PushNewRecursionContext(localctx, _startState, TempoParserRULE_expr)
-				p.SetState(249)
+				p.SetState(276)
 
 				if !(p.Precpred(p.GetParserRuleContext(), 4)) {
 					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 4)", ""))
 					goto errorExit
 				}
 				{
-					p.SetState(250)
+					p.SetState(277)
 					p.Match(TempoParserDOT)
 					if p.HasError() {
 						// Recognition error - abort rule
@@ -5376,7 +5864,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(251)
+					p.SetState(278)
 					p.Ident()
 				}
 
@@ -5385,12 +5873,12 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 			}
 
 		}
-		p.SetState(256)
+		p.SetState(283)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
 		}
-		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 25, p.GetParserRuleContext())
+		_alt = p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 29, p.GetParserRuleContext())
 		if p.HasError() {
 			goto errorExit
 		}
@@ -5602,19 +6090,19 @@ func (s *ExprStructFieldContext) Accept(visitor antlr.ParseTreeVisitor) interfac
 
 func (p *TempoParser) ExprStructField() (localctx IExprStructFieldContext) {
 	localctx = NewExprStructFieldContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 36, TempoParserRULE_exprStructField)
+	p.EnterRule(localctx, 40, TempoParserRULE_exprStructField)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(257)
+		p.SetState(284)
 		p.Match(TempoParserLCURLY)
 		if p.HasError() {
 			// Recognition error - abort rule
 			goto errorExit
 		}
 	}
-	p.SetState(271)
+	p.SetState(298)
 	p.GetErrorHandler().Sync(p)
 	if p.HasError() {
 		goto errorExit
@@ -5623,11 +6111,11 @@ func (p *TempoParser) ExprStructField() (localctx IExprStructFieldContext) {
 
 	if _la == TempoParserID {
 		{
-			p.SetState(258)
+			p.SetState(285)
 			p.Ident()
 		}
 		{
-			p.SetState(259)
+			p.SetState(286)
 			p.Match(TempoParserCOLON)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -5635,10 +6123,10 @@ func (p *TempoParser) ExprStructField() (localctx IExprStructFieldContext) {
 			}
 		}
 		{
-			p.SetState(260)
+			p.SetState(287)
 			p.expr(0)
 		}
-		p.SetState(268)
+		p.SetState(295)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -5647,7 +6135,7 @@ func (p *TempoParser) ExprStructField() (localctx IExprStructFieldContext) {
 
 		for _la == TempoParserCOMMA {
 			{
-				p.SetState(261)
+				p.SetState(288)
 				p.Match(TempoParserCOMMA)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -5655,11 +6143,11 @@ func (p *TempoParser) ExprStructField() (localctx IExprStructFieldContext) {
 				}
 			}
 			{
-				p.SetState(262)
+				p.SetState(289)
 				p.Ident()
 			}
 			{
-				p.SetState(263)
+				p.SetState(290)
 				p.Match(TempoParserCOLON)
 				if p.HasError() {
 					// Recognition error - abort rule
@@ -5667,11 +6155,11 @@ func (p *TempoParser) ExprStructField() (localctx IExprStructFieldContext) {
 				}
 			}
 			{
-				p.SetState(264)
+				p.SetState(291)
 				p.expr(0)
 			}
 
-			p.SetState(270)
+			p.SetState(297)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -5681,7 +6169,7 @@ func (p *TempoParser) ExprStructField() (localctx IExprStructFieldContext) {
 
 	}
 	{
-		p.SetState(273)
+		p.SetState(300)
 		p.Match(TempoParserRCURLY)
 		if p.HasError() {
 			// Recognition error - abort rule
@@ -5818,18 +6306,18 @@ func (s *IdentAccessContext) Accept(visitor antlr.ParseTreeVisitor) interface{} 
 
 func (p *TempoParser) IdentAccess() (localctx IIdentAccessContext) {
 	localctx = NewIdentAccessContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 38, TempoParserRULE_identAccess)
+	p.EnterRule(localctx, 42, TempoParserRULE_identAccess)
 	p.EnterOuterAlt(localctx, 1)
 	{
-		p.SetState(275)
+		p.SetState(302)
 		p.Ident()
 	}
-	p.SetState(278)
+	p.SetState(305)
 	p.GetErrorHandler().Sync(p)
 
-	if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 28, p.GetParserRuleContext()) == 1 {
+	if p.GetInterpreter().AdaptivePredict(p.BaseParser, p.GetTokenStream(), 32, p.GetParserRuleContext()) == 1 {
 		{
-			p.SetState(276)
+			p.SetState(303)
 			p.Match(TempoParserROLE_AT)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -5837,7 +6325,7 @@ func (p *TempoParser) IdentAccess() (localctx IIdentAccessContext) {
 			}
 		}
 		{
-			p.SetState(277)
+			p.SetState(304)
 			p.RoleType()
 		}
 
@@ -5860,7 +6348,7 @@ errorExit:
 
 func (p *TempoParser) Sempred(localctx antlr.RuleContext, ruleIndex, predIndex int) bool {
 	switch ruleIndex {
-	case 17:
+	case 19:
 		var t *ExprContext = nil
 		if localctx != nil {
 			t = localctx.(*ExprContext)

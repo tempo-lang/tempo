@@ -11,11 +11,17 @@ sourceFile: (func | struct | interface)* EOF;
 ident: ID;
 
 // type declaration
-valueType: ASYNC? ident ROLE_AT roleType;
+valueType: ASYNC? (ident ROLE_AT roleType | funcTypeSig);
 
 roleType:
 	(LSQUARE ident (COMMA ident)* RSQUARE)				# roleTypeShared
 	| (ident | (LPAREN ident (COMMA ident)* RPAREN))	# roleTypeNormal;
+
+funcTypeSig:
+	FUNC ROLE_AT roleType params = funcTypeParamList returnType = valueType?;
+
+funcTypeParamList:
+	LPAREN (valueType (COMMA valueType)*)? RPAREN;
 
 // struct
 struct: STRUCT ROLE_AT roleType ident structFieldList;

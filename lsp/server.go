@@ -39,14 +39,14 @@ func StartServer() {
 
 func (s *tempoServer) Handler() *protocol.Handler {
 	return &protocol.Handler{
-		Initialize:                s.initialize,
-		Initialized:               s.initialized,
-		Shutdown:                  s.shutdown,
-		TextDocumentDidOpen:       s.textDocumentDidOpen,
-		TextDocumentDidChange:     s.textDocumentDidChange,
-		TextDocumentCompletion:    s.textDocumentCompletion,
-		TextDocumentHover:         s.textDocumentHover,
-		TextDocumentSignatureHelp: s.signatureHelp,
+		Initialize:             s.initialize,
+		Initialized:            s.initialized,
+		Shutdown:               s.shutdown,
+		TextDocumentDidOpen:    s.textDocumentDidOpen,
+		TextDocumentDidChange:  s.textDocumentDidChange,
+		TextDocumentCompletion: s.textDocumentCompletion,
+		TextDocumentHover:      s.textDocumentHover,
+		// TextDocumentSignatureHelp: s.signatureHelp,
 	}
 }
 

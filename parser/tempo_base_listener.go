@@ -50,6 +50,18 @@ func (s *BaseTempoListener) EnterRoleTypeNormal(ctx *RoleTypeNormalContext) {}
 // ExitRoleTypeNormal is called when production roleTypeNormal is exited.
 func (s *BaseTempoListener) ExitRoleTypeNormal(ctx *RoleTypeNormalContext) {}
 
+// EnterFuncTypeSig is called when production funcTypeSig is entered.
+func (s *BaseTempoListener) EnterFuncTypeSig(ctx *FuncTypeSigContext) {}
+
+// ExitFuncTypeSig is called when production funcTypeSig is exited.
+func (s *BaseTempoListener) ExitFuncTypeSig(ctx *FuncTypeSigContext) {}
+
+// EnterFuncTypeParamList is called when production funcTypeParamList is entered.
+func (s *BaseTempoListener) EnterFuncTypeParamList(ctx *FuncTypeParamListContext) {}
+
+// ExitFuncTypeParamList is called when production funcTypeParamList is exited.
+func (s *BaseTempoListener) ExitFuncTypeParamList(ctx *FuncTypeParamListContext) {}
+
 // EnterStruct is called when production struct is entered.
 func (s *BaseTempoListener) EnterStruct(ctx *StructContext) {}
 

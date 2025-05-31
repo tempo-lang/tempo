@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/tempo-lang/tempo/misc"
-	"github.com/tempo-lang/tempo/parser"
 )
 
 type FunctionType struct {
-	funcIdent  parser.IIdentContext
+	// funcIdent  parser.IIdentContext
 	params     []*Type
 	returnType *Type
 	roleSubst  *RoleSubst
@@ -26,7 +25,7 @@ func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Value {
 	}
 
 	return &FunctionType{
-		funcIdent:  f.funcIdent,
+		// funcIdent:  f.funcIdent,
 		params:     substParams,
 		returnType: f.returnType.SubstituteRoles(substMap),
 		roleSubst:  newRoleSubst,
@@ -61,22 +60,22 @@ func (f *FunctionType) ReturnType() *Type {
 	return f.returnType
 }
 
-func (f *FunctionType) FuncIdent() parser.IIdentContext {
-	return f.funcIdent
-}
+// func (f *FunctionType) FuncIdent() parser.IIdentContext {
+// 	return f.funcIdent
+// }
 
 func (f *FunctionType) RoleSubstitution() *RoleSubst {
 	return f.roleSubst
 }
 
-func Function(funcIdent parser.IIdentContext, params []*Type, returnType *Type, roles []string) Value {
+func Function( /*funcIdent parser.IIdentContext,*/ params []*Type, returnType *Type, roles []string) Value {
 	roleSubst := NewRoleSubst()
 	for _, role := range roles {
 		roleSubst.AddRole(role, role)
 	}
 
 	return &FunctionType{
-		funcIdent:  funcIdent,
+		// funcIdent:  funcIdent,
 		params:     params,
 		returnType: returnType,
 		roleSubst:  roleSubst,

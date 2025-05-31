@@ -1,3 +1,4 @@
-func@(A,B) foo() {
-  let a: Int@A = 4@A;
+func@(A,B) foo(value: func@(A)()) Int@B {
+  value();
+  return 10;
 }
