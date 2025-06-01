@@ -14,7 +14,7 @@ type FuncSig struct {
 	Name        string
 	Role        string
 	Params      []FuncParam
-	ReturnValue types.Value
+	ReturnValue Type
 }
 
 type Func struct {
@@ -28,10 +28,10 @@ type FuncParam struct {
 	FuncSig   *FuncSig
 	ParamCtx  parser.IFuncParamContext
 	Name      string
-	TypeValue types.Value
+	TypeValue Type
 }
 
-func NewFuncSig(role string, funcSigCtx parser.IFuncSigContext, returnValue types.Value) *FuncSig {
+func NewFuncSig(role string, funcSigCtx parser.IFuncSigContext, returnValue Type) *FuncSig {
 	return &FuncSig{
 		FuncSigCtx:  funcSigCtx,
 		Name:        funcSigCtx.Ident().GetText(),
@@ -41,7 +41,7 @@ func NewFuncSig(role string, funcSigCtx parser.IFuncSigContext, returnValue type
 	}
 }
 
-func (f *FuncSig) AddParam(param parser.IFuncParamContext, paramType types.Value) *FuncSig {
+func (f *FuncSig) AddParam(param parser.IFuncParamContext, paramType Type) *FuncSig {
 	f.Params = append(f.Params, FuncParam{
 		FuncSig:   f,
 		ParamCtx:  param,
@@ -75,7 +75,7 @@ func (f *FuncSig) Codegen(isInterfaceMethod bool) *jen.Statement {
 		jen.Id("env").Add(jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Env")),
 	}
 	for _, param := range f.Params {
-		params = append(params, jen.Id(param.Name).Add(CodegenType(param.TypeValue)))
+		params = append(params, jen.Id(param.Name).Add(param.TypeValue.Codegen()))
 	}
 
 	var result *jen.Statement
@@ -85,8 +85,8 @@ func (f *FuncSig) Codegen(isInterfaceMethod bool) *jen.Statement {
 		result = jen.Func().Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).Params(params...)
 	}
 
-	if f.ReturnValue != types.Unit() {
-		result = result.Add(CodegenType(f.ReturnValue))
+	if f.ReturnValue != UnitType() {
+		result = result.Add(f.ReturnValue.Codegen())
 	}
 
 	return result
@@ -94,14 +94,34 @@ func (f *FuncSig) Codegen(isInterfaceMethod bool) *jen.Statement {
 
 type FunctionType struct {
 	types.FunctionType
-	Params     []types.Value
-	ReturnType types.Value
+	Params     []Type
+	ReturnType Type
 }
 
-func NewFunctionType(funcType *types.FunctionType, params []types.Value, returnType types.Value) *FunctionType {
+func NewFunctionType(funcType *types.FunctionType, params []Type, returnType Type) *FunctionType {
 	return &FunctionType{
 		FunctionType: *funcType,
 		Params:       params,
 		ReturnType:   returnType,
 	}
+}
+
+func (c *FunctionType) IsType() {}
+
+func (f *FunctionType) Codegen() jen.Code {
+	params := []jen.Code{
+		jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Env"),
+	}
+
+	for _, param := range f.Params {
+		params = append(params, param.Codegen())
+	}
+
+	result := jen.Func().Params(params...)
+
+	if f.ReturnType != UnitType() {
+		result = result.Add(f.ReturnType.Codegen())
+	}
+
+	return result
 }

@@ -1,9 +1,8 @@
-func@X call() {}
+func@(X,Y) send(value: Int@X) Int@Y {
+    return await X->Y value;
+}
 
 func@(A,B) foo() {
-  let x: func@A() = call@A;
-  let y: func@B() = call@B;
-
-  x();
-  y();
+    let x: Int@A = 10;
+    let Y: Int@B = send@(A,B)(x);
 }

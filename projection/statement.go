@@ -23,7 +23,7 @@ func NewStmtVarDecl(name string, expr Expression) Statement {
 
 func (decl *StmtVarDecl) Codegen() jen.Statement {
 
-	genDecl := jen.Var().Id(decl.Name).Add(CodegenType(decl.Expr.Type())).Op("=").Add(decl.Expr.Codegen())
+	genDecl := jen.Var().Id(decl.Name).Add(decl.Expr.Type().Codegen()).Op("=").Add(decl.Expr.Codegen())
 	fixUnused := jen.Id("_").Op("=").Id(decl.Name)
 
 	return []jen.Code{genDecl, fixUnused}

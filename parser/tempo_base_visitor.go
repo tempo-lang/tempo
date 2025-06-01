@@ -27,11 +27,11 @@ func (v *BaseTempoVisitor) VisitRoleTypeNormal(ctx *RoleTypeNormalContext) inter
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseTempoVisitor) VisitFuncTypeSig(ctx *FuncTypeSigContext) interface{} {
+func (v *BaseTempoVisitor) VisitClosureType(ctx *ClosureTypeContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseTempoVisitor) VisitFuncTypeParamList(ctx *FuncTypeParamListContext) interface{} {
+func (v *BaseTempoVisitor) VisitClosureParamList(ctx *ClosureParamListContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

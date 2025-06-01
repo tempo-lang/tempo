@@ -2,38 +2,36 @@ package types
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/tempo-lang/tempo/misc"
+	"github.com/tempo-lang/tempo/parser"
 )
 
 type FunctionType struct {
-	params       []*Type
-	returnType   *Type
-	roleSubst    *RoleSubst
-	instantiated bool
+	ident      parser.IIdentContext
+	params     []*Type
+	returnType *Type
+	roles      []string
 }
 
 func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Value {
-	if f.instantiated {
-		panic("function already instantiated")
-	}
-
 	substParams := []*Type{}
 	for _, p := range f.params {
 		substParams = append(substParams, p.SubstituteRoles(substMap))
 	}
 
-	newRoleSubst := NewRoleSubst()
-	for _, from := range f.roleSubst.Roles {
-		newRoleSubst.AddRole(from, substMap.Map[from])
+	newRoles := []string{}
+	for _, r := range f.roles {
+		newRoles = append(newRoles, substMap.Subst(r))
 	}
 
-	return &FunctionType{
-		params:       substParams,
-		returnType:   f.returnType.SubstituteRoles(substMap),
-		roleSubst:    newRoleSubst,
-		instantiated: true,
-	}
+	return Function(
+		f.ident,
+		substParams,
+		f.returnType.SubstituteRoles(substMap),
+		newRoles,
+	)
 }
 
 func (f *FunctionType) CoerceTo(other Value) (Value, bool) {
@@ -41,12 +39,25 @@ func (f *FunctionType) CoerceTo(other Value) (Value, bool) {
 		return value, true
 	}
 
+	if closure, ok := other.(*ClosureType); ok {
+		thisClosure := Closure(f.Params(), f.ReturnType())
+		return thisClosure.CoerceTo(closure)
+	}
+
 	g, ok := other.(*FunctionType)
 	if !ok {
 		return Invalid().Value(), false
 	}
 
+	if f.ident != g.ident {
+		return Invalid().Value(), false
+	}
+
 	if len(f.params) != len(g.params) {
+		return Invalid().Value(), false
+	}
+
+	if !slices.Equal(f.roles, g.roles) {
 		return Invalid().Value(), false
 	}
 
@@ -66,12 +77,7 @@ func (f *FunctionType) CoerceTo(other Value) (Value, bool) {
 		canCoerce = false
 	}
 
-	newFunc := &FunctionType{
-		params:       newParams,
-		returnType:   newReturn,
-		roleSubst:    f.roleSubst,
-		instantiated: f.instantiated,
-	}
+	newFunc := Function(f.ident, newParams, newReturn, f.roles)
 
 	return newFunc, canCoerce
 }
@@ -90,7 +96,7 @@ func (f *FunctionType) ToString() string {
 	if f.returnType.Value() != Unit() {
 		returnType = f.returnType.ToString()
 	}
-	return fmt.Sprintf("func(%s)%s", params, returnType)
+	return fmt.Sprintf("func %s(%s)%s", f.ident.GetText(), params, returnType)
 }
 
 func (f *FunctionType) IsValue()    {}
@@ -104,24 +110,19 @@ func (f *FunctionType) ReturnType() *Type {
 	return f.returnType
 }
 
-func (f *FunctionType) IsInstantiated() bool {
-	return f.instantiated
+func (f *FunctionType) NameIdent() parser.IIdentContext {
+	return f.ident
 }
 
-func (f *FunctionType) RoleSubstitution() *RoleSubst {
-	return f.roleSubst
+func (f *FunctionType) Roles() *Roles {
+	return NewRole(f.roles, false)
 }
 
-func Function(params []*Type, returnType *Type, roles []string, instantiated bool) Value {
-	roleSubst := NewRoleSubst()
-	for _, role := range roles {
-		roleSubst.AddRole(role, role)
-	}
-
+func Function(ident parser.IIdentContext, params []*Type, returnType *Type, roles []string) Value {
 	return &FunctionType{
-		params:       params,
-		returnType:   returnType,
-		roleSubst:    roleSubst,
-		instantiated: instantiated,
+		ident:      ident,
+		params:     params,
+		returnType: returnType,
+		roles:      roles,
 	}
 }

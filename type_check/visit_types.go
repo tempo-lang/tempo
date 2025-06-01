@@ -23,11 +23,11 @@ func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) *types.Type 
 	return valType
 }
 
-func (tc *typeChecker) VisitFuncTypeSig(ctx *parser.FuncTypeSigContext) any {
+func (tc *typeChecker) VisitClosureType(ctx *parser.ClosureTypeContext) any {
 	return nil
 }
 
-func (tc *typeChecker) VisitFuncTypeParamList(ctx *parser.FuncTypeParamListContext) any {
+func (tc *typeChecker) VisitClosureParamList(ctx *parser.ClosureParamListContext) any {
 	return nil
 }
 

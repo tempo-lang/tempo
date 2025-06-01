@@ -214,7 +214,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	tc.info.Symbols[ctx.IdentAccess().Ident()] = sym
 
 	identType := sym.Type()
-	funcValue, isFunc := sym.Type().Value().(*types.FunctionType)
+	_, isFunc := sym.Type().Value().(*types.FunctionType)
 
 	if _, isStructDef := sym.(*sym_table.StructSymbol); isStructDef {
 		tc.reportError(type_error.NewStructNotInitialized(ctx))
@@ -243,7 +243,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 			tc.reportError(type_error.NewInstantiateNonFunction(ctx.IdentAccess(), sym))
 			return tc.registerType(ctx, types.Invalid())
 		}
-	} else if isFunc && !funcValue.IsInstantiated() {
+	} else if isFunc {
 		tc.reportError(type_error.NewFunctionNotInstantiated(ctx.IdentAccess(), sym))
 		return tc.registerType(ctx, types.Invalid())
 	}
@@ -349,26 +349,39 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	callFuncValue, ok := callType.Value().(*types.FunctionType)
-	if !ok {
+	switch callFuncValue := callType.Value().(type) {
+	case *types.FunctionType:
+		if len(ctx.FuncArgList().AllExpr()) != len(callFuncValue.Params()) {
+			tc.reportError(type_error.NewCallWrongArgCountError(ctx))
+		} else {
+			for i, arg := range ctx.FuncArgList().AllExpr() {
+				argType := tc.visitExpr(arg)
+				paramType := callFuncValue.Params()[i]
+
+				if _, ok := argType.CoerceTo(paramType); !ok {
+					tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramType))
+				}
+			}
+		}
+		return tc.registerType(ctx, callFuncValue.ReturnType())
+	case *types.ClosureType:
+		if len(ctx.FuncArgList().AllExpr()) != len(callFuncValue.Params()) {
+			tc.reportError(type_error.NewCallWrongArgCountError(ctx))
+		} else {
+			for i, arg := range ctx.FuncArgList().AllExpr() {
+				argType := tc.visitExpr(arg)
+				paramType := callFuncValue.Params()[i]
+
+				if _, ok := argType.CoerceTo(paramType); !ok {
+					tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramType))
+				}
+			}
+		}
+		return tc.registerType(ctx, callFuncValue.ReturnType())
+	default:
 		tc.reportError(type_error.NewCallNonFunctionError(ctx, callType))
 		return tc.registerType(ctx, types.Invalid())
 	}
-
-	if len(ctx.FuncArgList().AllExpr()) != len(callFuncValue.Params()) {
-		tc.reportError(type_error.NewCallWrongArgCountError(ctx))
-	} else {
-		for i, arg := range ctx.FuncArgList().AllExpr() {
-			argType := tc.visitExpr(arg)
-			paramType := callFuncValue.Params()[i]
-
-			if _, ok := argType.CoerceTo(paramType); !ok {
-				tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramType))
-			}
-		}
-	}
-
-	return tc.registerType(ctx, callFuncValue.ReturnType())
 }
 
 func (tc *typeChecker) VisitFuncArgList(ctx *parser.FuncArgListContext) any {

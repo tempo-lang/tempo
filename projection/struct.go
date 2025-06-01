@@ -49,7 +49,7 @@ func (c *ChoreographyStruct) AddStruct(role string, structCtx parser.IStructCont
 	return c.Structs[role]
 }
 
-func (s *Struct) AddField(field parser.IStructFieldContext, fieldType types.Value) {
+func (s *Struct) AddField(field parser.IStructFieldContext, fieldType Type) {
 	s.Fields = append(s.Fields, StructField{
 		Struct:   s,
 		FieldCtx: field,
@@ -73,11 +73,11 @@ type StructField struct {
 	Struct   *Struct
 	FieldCtx parser.IStructFieldContext
 	Name     string
-	Type     types.Value
+	Type     Type
 }
 
 func (f *StructField) Codegen() *jen.Statement {
-	return jen.Id(f.Name).Add(CodegenType(f.Type)).Tag(map[string]string{"json": f.Name})
+	return jen.Id(f.Name).Add(f.Type.Codegen()).Tag(map[string]string{"json": f.Name})
 }
 
 type StructType struct {
@@ -85,11 +85,17 @@ type StructType struct {
 	role string
 }
 
+func (c *StructType) IsType() {}
+
 func NewStructType(structType *types.StructType, role string) *StructType {
 	return &StructType{
 		StructType: *structType,
 		role:       role,
 	}
+}
+
+func (s *StructType) Codegen() jen.Code {
+	return jen.Id(fmt.Sprintf("%s_%s", s.Name(), s.Role()))
 }
 
 func (s *StructType) Role() string {

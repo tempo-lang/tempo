@@ -8,67 +8,52 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-func CodegenType(t types.Value) jen.Code {
-	if builtinType, isBuiltin := t.(types.Builtin); isBuiltin {
-		return CodegenBuiltinType(builtinType)
-	}
-
-	if asyncType, isAsync := t.(*types.Async); isAsync {
-		return CodegenAsyncType(asyncType)
-	}
-
-	if structType, isStruct := t.(*StructType); isStruct {
-		return CodegenStructType(structType)
-	}
-	if _, ok := t.(*types.StructType); ok {
-		panic(fmt.Sprintf("struct %#v should be of type projection.StructType instead", t))
-	}
-
-	if infType, isInf := t.(*InterfaceType); isInf {
-		return CodegenInterfaceType(infType)
-	}
-	if _, ok := t.(*types.InterfaceType); ok {
-		panic(fmt.Sprintf("struct %#v should be of type projection.InterfaceType instead", t))
-	}
-
-	if funcType, isFunc := t.(*FunctionType); isFunc {
-		return CodegenFuncType(funcType)
-	}
-	if _, ok := t.(*types.FunctionType); ok {
-		panic(fmt.Sprintf("function %#v should be of type projection.FunctionType instead", t))
-	}
-
-	panic(fmt.Sprintf("failed to generate type: %#v", t))
+type Type interface {
+	IsType()
+	Codegen() jen.Code
 }
 
-func CodegenFuncType(funcType *FunctionType) jen.Code {
-	params := []jen.Code{
-		jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Env"),
-	}
+// func CodegenType(t types.Value) jen.Code {
+// 	if builtinType, isBuiltin := t.(types.Builtin); isBuiltin {
+// 		return CodegenBuiltinType(builtinType)
+// 	}
 
-	for _, param := range funcType.Params {
-		params = append(params, CodegenType(param))
-	}
+// 	if asyncType, isAsync := t.(*types.Async); isAsync {
+// 		return CodegenAsyncType(asyncType)
+// 	}
 
-	result := jen.Func().Params(params...)
+// 	if structType, isStruct := t.(*StructType); isStruct {
+// 		return CodegenStructType(structType)
+// 	}
+// 	if _, ok := t.(*types.StructType); ok {
+// 		panic(fmt.Sprintf("struct %#v should be of type projection.StructType instead", t))
+// 	}
 
-	if funcType.ReturnType != types.Unit() {
-		result = result.Add(CodegenType(funcType.ReturnType))
-	}
+// 	if infType, isInf := t.(*InterfaceType); isInf {
+// 		return CodegenInterfaceType(infType)
+// 	}
+// 	if _, ok := t.(*types.InterfaceType); ok {
+// 		panic(fmt.Sprintf("struct %#v should be of type projection.InterfaceType instead", t))
+// 	}
 
-	return result
+// 	if funcType, isFunc := t.(*FunctionType); isFunc {
+// 		return CodegenFuncType(funcType)
+// 	}
+// 	if _, ok := t.(*types.FunctionType); ok {
+// 		panic(fmt.Sprintf("function %#v should be of type projection.FunctionType instead", t))
+// 	}
+
+// 	panic(fmt.Sprintf("failed to generate type: %#v", t))
+// }
+
+type BuiltinType struct {
+	types.Value
 }
 
-func CodegenStructType(structType *StructType) jen.Code {
-	return jen.Id(fmt.Sprintf("%s_%s", structType.Name(), structType.Role()))
-}
+func (c *BuiltinType) IsType() {}
 
-func CodegenInterfaceType(infType *InterfaceType) jen.Code {
-	return jen.Id(fmt.Sprintf("%s_%s", infType.Name(), infType.Role()))
-}
-
-func CodegenBuiltinType(builtinType types.Builtin) jen.Code {
-	switch builtinType.(type) {
+func (t *BuiltinType) Codegen() jen.Code {
+	switch t.Value.(type) {
 	case *types.IntType:
 		return jen.Int()
 	case *types.FloatType:
@@ -78,11 +63,41 @@ func CodegenBuiltinType(builtinType types.Builtin) jen.Code {
 	case *types.BoolType:
 		return jen.Bool()
 	default:
-		panic(fmt.Sprintf("unknown builtin type: %s", builtinType.ToString()))
+		panic(fmt.Sprintf("unknown builtin type: %s", t.Value.ToString()))
 	}
 }
 
-func CodegenAsyncType(asyncType *types.Async) jen.Code {
-	innerType := CodegenType(asyncType.Inner())
+type AsyncType struct {
+	Inner Type
+}
+
+func (c *AsyncType) IsType() {}
+
+func NewAsyncType(inner Type) *AsyncType {
+	if _, innerAsync := inner.(*AsyncType); innerAsync {
+		panic(fmt.Sprintf("nested async type: %#v", inner))
+	}
+
+	return &AsyncType{
+		Inner: inner,
+	}
+}
+
+func (t *AsyncType) Codegen() jen.Code {
+	innerType := t.Inner.Codegen()
 	return jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Async").Types(innerType)
+}
+
+type unitType struct{}
+
+var unit unitType = unitType{}
+
+func UnitType() Type {
+	return &unit
+}
+
+func (c *unitType) IsType() {}
+
+func (t *unitType) Codegen() jen.Code {
+	panic("attempt to codegen unit type")
 }

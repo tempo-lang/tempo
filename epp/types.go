@@ -1,12 +1,14 @@
 package epp
 
 import (
+	"fmt"
+
 	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (epp *epp) eppType(roleName string, typ *types.Type) types.Value {
+func (epp *epp) eppType(roleName string, typ *types.Type) projection.Type {
 	if typ.Roles().Contains(roleName) {
 
 		switch typeValue := typ.Value().(type) {
@@ -31,12 +33,11 @@ func (epp *epp) eppType(roleName string, typ *types.Type) types.Value {
 
 			return projection.NewInterfaceType(typeValue, roleSubstMap.Subst(roleName))
 		case *types.FunctionType:
-
-			params := []types.Value{}
+			params := []projection.Type{}
 			for _, param := range typeValue.Params() {
 				paramType := epp.eppType(roleName, param)
 
-				if paramType != types.Unit() {
+				if paramType != projection.UnitType() {
 					params = append(params, paramType)
 				}
 			}
@@ -44,10 +45,32 @@ func (epp *epp) eppType(roleName string, typ *types.Type) types.Value {
 			returnType := epp.eppType(roleName, typeValue.ReturnType())
 
 			return projection.NewFunctionType(typeValue, params, returnType)
+		case *types.ClosureType:
+			params := []projection.Type{}
+			for _, param := range typeValue.Params() {
+				paramType := epp.eppType(roleName, param)
+
+				if paramType != projection.UnitType() {
+					params = append(params, paramType)
+				}
+			}
+
+			returnType := epp.eppType(roleName, typeValue.ReturnType())
+
+			return projection.NewClosureType(params, returnType)
+		case *types.Async:
+			innerType := epp.eppType(roleName, types.New(typeValue.Inner(), typ.Roles()))
+			return projection.NewAsyncType(innerType)
+		case *types.UnitValue:
+			return projection.UnitType()
 		}
 
-		return typ.Value()
+		if builtin, ok := typ.Value().(types.Builtin); ok {
+			return &projection.BuiltinType{Value: builtin}
+		}
+
+		panic(fmt.Sprintf("failed to epp type: %#v\n", typ))
 	} else {
-		return types.Unit()
+		return projection.UnitType()
 	}
 }

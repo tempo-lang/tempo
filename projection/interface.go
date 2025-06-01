@@ -90,6 +90,12 @@ func NewInterfaceType(interfaceType *types.InterfaceType, role string) *Interfac
 	}
 }
 
+func (c *InterfaceType) IsType() {}
+
+func (t *InterfaceType) Codegen() jen.Code {
+	return jen.Id(fmt.Sprintf("%s_%s", t.Name(), t.Role()))
+}
+
 func (i *InterfaceType) Role() string {
 	return i.role
 }

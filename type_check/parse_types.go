@@ -17,23 +17,23 @@ func BuiltinValues() map[string]types.Value {
 
 func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type, type_error.Error) {
 	// parser error
-	if ctx == nil || ((ctx.RoleType() == nil || ctx.Ident() == nil) && ctx.FuncTypeSig() == nil) {
+	if ctx == nil || ((ctx.RoleType() == nil || ctx.Ident() == nil) && ctx.ClosureType() == nil) {
 		return types.Invalid(), nil
 	}
 
 	isAsync := ctx.ASYNC() != nil
 
-	if funcSig := ctx.FuncTypeSig(); funcSig != nil {
-		funcType, err := tc.parseValueTypeFuncSig(funcSig)
+	if closure := ctx.ClosureType(); closure != nil {
+		closureType, err := tc.parseClosureTypeSig(closure)
 		if err != nil {
 			return types.Invalid(), err
 		}
 
 		if isAsync {
-			return types.New(types.NewAsync(funcType.Value()), funcType.Roles()), nil
+			return types.New(types.NewAsync(closureType.Value()), closureType.Roles()), nil
 		}
 
-		return funcType, nil
+		return closureType, nil
 	}
 
 	role, ok := tc.parseRoleType(ctx.RoleType())
@@ -70,9 +70,9 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 	}
 }
 
-func (tc *typeChecker) parseValueTypeFuncSig(ctx parser.IFuncTypeSigContext) (*types.Type, type_error.Error) {
+func (tc *typeChecker) parseClosureTypeSig(ctx parser.IClosureTypeContext) (*types.Type, type_error.Error) {
 	// parser error
-	if ctx.RoleType() == nil || ctx.FuncTypeParamList() == nil {
+	if ctx.RoleType() == nil || ctx.GetParams() == nil {
 		return types.Invalid(), nil
 	}
 
@@ -82,7 +82,7 @@ func (tc *typeChecker) parseValueTypeFuncSig(ctx parser.IFuncTypeSigContext) (*t
 	}
 
 	params := []*types.Type{}
-	for _, param := range ctx.FuncTypeParamList().AllValueType() {
+	for _, param := range ctx.GetParams().AllValueType() {
 		paramType, err := tc.parseValueType(param)
 		if err != nil {
 			return types.Invalid(), err
@@ -99,8 +99,8 @@ func (tc *typeChecker) parseValueTypeFuncSig(ctx parser.IFuncTypeSigContext) (*t
 		returnType = ret
 	}
 
-	funcValue := types.Function(params, returnType, roles.Participants(), true)
-	funcType := types.New(funcValue, roles)
+	closureValue := types.Closure(params, returnType)
+	funcType := types.New(closureValue, roles)
 
 	return funcType, nil
 }
@@ -139,7 +139,7 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, [
 		}
 	}
 
-	fn := types.New(types.Function(params, returnType, funcRoles.Participants(), false), funcRoles)
+	fn := types.New(types.Function(ctx.Ident(), params, returnType, funcRoles.Participants()), funcRoles)
 
 	return fn, errors
 }

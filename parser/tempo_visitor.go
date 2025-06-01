@@ -22,11 +22,11 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#roleTypeNormal.
 	VisitRoleTypeNormal(ctx *RoleTypeNormalContext) interface{}
 
-	// Visit a parse tree produced by TempoParser#funcTypeSig.
-	VisitFuncTypeSig(ctx *FuncTypeSigContext) interface{}
+	// Visit a parse tree produced by TempoParser#closureType.
+	VisitClosureType(ctx *ClosureTypeContext) interface{}
 
-	// Visit a parse tree produced by TempoParser#funcTypeParamList.
-	VisitFuncTypeParamList(ctx *FuncTypeParamListContext) interface{}
+	// Visit a parse tree produced by TempoParser#closureParamList.
+	VisitClosureParamList(ctx *ClosureParamListContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#struct.
 	VisitStruct(ctx *StructContext) interface{}

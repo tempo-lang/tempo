@@ -22,11 +22,11 @@ type TempoListener interface {
 	// EnterRoleTypeNormal is called when entering the roleTypeNormal production.
 	EnterRoleTypeNormal(c *RoleTypeNormalContext)
 
-	// EnterFuncTypeSig is called when entering the funcTypeSig production.
-	EnterFuncTypeSig(c *FuncTypeSigContext)
+	// EnterClosureType is called when entering the closureType production.
+	EnterClosureType(c *ClosureTypeContext)
 
-	// EnterFuncTypeParamList is called when entering the funcTypeParamList production.
-	EnterFuncTypeParamList(c *FuncTypeParamListContext)
+	// EnterClosureParamList is called when entering the closureParamList production.
+	EnterClosureParamList(c *ClosureParamListContext)
 
 	// EnterStruct is called when entering the struct production.
 	EnterStruct(c *StructContext)
@@ -133,11 +133,11 @@ type TempoListener interface {
 	// ExitRoleTypeNormal is called when exiting the roleTypeNormal production.
 	ExitRoleTypeNormal(c *RoleTypeNormalContext)
 
-	// ExitFuncTypeSig is called when exiting the funcTypeSig production.
-	ExitFuncTypeSig(c *FuncTypeSigContext)
+	// ExitClosureType is called when exiting the closureType production.
+	ExitClosureType(c *ClosureTypeContext)
 
-	// ExitFuncTypeParamList is called when exiting the funcTypeParamList production.
-	ExitFuncTypeParamList(c *FuncTypeParamListContext)
+	// ExitClosureParamList is called when exiting the closureParamList production.
+	ExitClosureParamList(c *ClosureParamListContext)
 
 	// ExitStruct is called when exiting the struct production.
 	ExitStruct(c *StructContext)

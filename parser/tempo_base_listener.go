@@ -50,17 +50,17 @@ func (s *BaseTempoListener) EnterRoleTypeNormal(ctx *RoleTypeNormalContext) {}
 // ExitRoleTypeNormal is called when production roleTypeNormal is exited.
 func (s *BaseTempoListener) ExitRoleTypeNormal(ctx *RoleTypeNormalContext) {}
 
-// EnterFuncTypeSig is called when production funcTypeSig is entered.
-func (s *BaseTempoListener) EnterFuncTypeSig(ctx *FuncTypeSigContext) {}
+// EnterClosureType is called when production closureType is entered.
+func (s *BaseTempoListener) EnterClosureType(ctx *ClosureTypeContext) {}
 
-// ExitFuncTypeSig is called when production funcTypeSig is exited.
-func (s *BaseTempoListener) ExitFuncTypeSig(ctx *FuncTypeSigContext) {}
+// ExitClosureType is called when production closureType is exited.
+func (s *BaseTempoListener) ExitClosureType(ctx *ClosureTypeContext) {}
 
-// EnterFuncTypeParamList is called when production funcTypeParamList is entered.
-func (s *BaseTempoListener) EnterFuncTypeParamList(ctx *FuncTypeParamListContext) {}
+// EnterClosureParamList is called when production closureParamList is entered.
+func (s *BaseTempoListener) EnterClosureParamList(ctx *ClosureParamListContext) {}
 
-// ExitFuncTypeParamList is called when production funcTypeParamList is exited.
-func (s *BaseTempoListener) ExitFuncTypeParamList(ctx *FuncTypeParamListContext) {}
+// ExitClosureParamList is called when production closureParamList is exited.
+func (s *BaseTempoListener) ExitClosureParamList(ctx *ClosureParamListContext) {}
 
 // EnterStruct is called when production struct is entered.
 func (s *BaseTempoListener) EnterStruct(ctx *StructContext) {}

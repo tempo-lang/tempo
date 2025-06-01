@@ -1,0 +1,8 @@
+func@X call(val: Int@X) {}
+func@Y call2(param: Int@Y) {}
+
+func@(A,B) foo() {
+  let x: func@A(Int@A) = call@A;
+  x = call2@A;
+  x(10);
+}

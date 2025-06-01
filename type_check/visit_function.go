@@ -92,7 +92,7 @@ func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr
 			if fnValue, ok := fnType.Value().(*types.FunctionType); ok {
 				// make return type invalid
 				fnType = types.New(
-					types.Function(fnValue.Params(), types.Invalid(), fnType.Roles().Participants(), fnValue.IsInstantiated()),
+					types.Function(fnValue.NameIdent(), fnValue.Params(), types.Invalid(), fnValue.Roles().Participants()),
 					fnType.Roles(),
 				)
 			}

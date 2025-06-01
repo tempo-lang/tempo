@@ -9,7 +9,6 @@ import (
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/sym_table"
-	"github.com/tempo-lang/tempo/types"
 )
 
 func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projection.Expression, []projection.Statement) {
@@ -39,10 +38,13 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		if exprType.Roles().Contains(roleName) {
 			name := sym.SymbolName()
-			switch sym.(type) {
+			switch sym := sym.(type) {
 			case *sym_table.FuncSymbol:
 				funcType := exprValue.(*projection.FunctionType)
-				roleSubst := funcType.RoleSubstitution().Inverse().Subst(roleName)
+
+				substMap, _ := funcType.Roles().SubstituteMap(sym.Roles())
+
+				roleSubst := substMap.Subst(roleName)
 				name += "_" + roleSubst
 			}
 
@@ -74,14 +76,14 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		return projection.NewExprString(str), []projection.Statement{}
 	case *parser.ExprAwaitContext:
-		inner, aux := epp.eppExpression(roleName, expr.Expr())
-		if inner != nil {
-			if innerExprAsync, innerIsFixedAsync := inner.(*projection.ExprAsync); innerIsFixedAsync {
+		asyncExpr, aux := epp.eppExpression(roleName, expr.Expr())
+		if asyncExpr != nil {
+			if innerExprAsync, innerIsFixedAsync := asyncExpr.(*projection.ExprAsync); innerIsFixedAsync {
 				// await fixed async cancels out
 				return innerExprAsync.Inner(), aux
 			} else {
-				asyncType := epp.info.Types[expr.Expr()].Value().(*types.Async)
-				return projection.NewExprAwait(inner, asyncType.Inner()), aux
+				asyncType := asyncExpr.Type().(*projection.AsyncType)
+				return projection.NewExprAwait(asyncExpr, asyncType.Inner), aux
 			}
 		} else {
 			return nil, aux
@@ -90,7 +92,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		sender := expr.GetSender().(*parser.RoleTypeNormalContext)
 		senderRole := sender.Ident(0).GetText()
 
-		receivers := parser.RoleTypeAllIdents(expr.RoleType(1))
+		receivers := parser.RoleTypeAllIdents(expr.GetReceiver())
 		inner, aux := epp.eppExpression(roleName, expr.Expr())
 
 		receiverRoles := []string{}
@@ -112,8 +114,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		// receiver
 		if slices.Contains(receiverRoles, roleName) {
-			innerType := epp.info.Types[expr.Expr()]
-			return projection.NewExprRecv(innerType.Value(), senderRole), aux
+			return projection.NewExprRecv(inner.Type(), senderRole), aux
 		}
 
 		valueType := epp.info.Types[expr.Expr()]
@@ -129,23 +130,44 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			return nil, aux
 		}
 
-		callFuncValue := epp.eppType(roleName, callType).(*projection.FunctionType)
+		switch callFuncValue := epp.eppType(roleName, callType).(type) {
+		case *projection.FunctionType:
+			argValues := []projection.Expression{}
 
-		argValues := []projection.Expression{}
+			for i, arg := range expr.FuncArgList().AllExpr() {
+				argVal, extra := epp.eppExpression(roleName, arg)
+				aux = append(aux, extra...)
 
-		for i, arg := range expr.FuncArgList().AllExpr() {
-			argVal, extra := epp.eppExpression(roleName, arg)
-			aux = append(aux, extra...)
-
-			if callFuncValue.FunctionType.Params()[i].Roles().Contains(roleName) {
-				argValues = append(argValues, argVal)
+				if callFuncValue.FunctionType.Params()[i].Roles().Contains(roleName) {
+					argValues = append(argValues, argVal)
+				}
 			}
+
+			funcSym := epp.info.Symbols[callFuncValue.NameIdent()].(*sym_table.FuncSymbol)
+
+			returnValue := callFuncValue.ReturnType
+			roleSubst, _ := callFuncValue.Roles().SubstituteMap(funcSym.Roles())
+
+			return projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, roleSubst), aux
+		case *projection.ClosureType:
+			argValues := []projection.Expression{}
+
+			// for i, arg := range expr.FuncArgList().AllExpr() {
+			// 	argVal, extra := epp.eppExpression(roleName, arg)
+			// 	aux = append(aux, extra...)
+
+			// 	if callFuncValue.Params()[i].Roles().Contains(roleName) {
+			// 		argValues = append(argValues, argVal)
+			// 	}
+			// }
+
+			returnValue := callFuncValue.ReturnType
+
+			return projection.NewExprCallClosure(callExpr, roleName, argValues, returnValue), aux
+		default:
+			panic("unreachable")
 		}
 
-		returnValue := callFuncValue.ReturnType
-		roleSubst := callFuncValue.RoleSubstitution()
-
-		return projection.NewExprCall(callExpr, roleName, argValues, returnValue, roleSubst), aux
 	case *parser.ExprStructContext:
 		stSym := epp.info.Symbols[expr.Ident()].(*sym_table.StructSymbol)
 

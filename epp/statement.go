@@ -5,7 +5,7 @@ import (
 
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/projection"
-	"github.com/tempo-lang/tempo/types"
+	"github.com/tempo-lang/tempo/sym_table"
 )
 
 func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []projection.Statement) {
@@ -19,6 +19,10 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 		result = aux
 
 		if sym.Type().Roles().Contains(roleName) {
+
+			varibleType := epp.eppType(roleName, sym.Type())
+			expr = epp.storeExpression(roleName, expr, varibleType)
+
 			varName := stmt.Ident().GetText()
 			result = append(result, projection.NewStmtAssign(varName, expr))
 			return
@@ -34,12 +38,9 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 
 		if varSym.Type().Roles().Contains(roleName) {
 			variableName := stmt.Ident().GetText()
-			varibleType := varSym.Type()
+			varibleType := epp.eppType(roleName, varSym.Type())
 
-			_, exprIsAsync := expr.Type().(*types.Async)
-			if _, isAsync := varibleType.Value().(*types.Async); isAsync && !exprIsAsync {
-				expr = projection.NewExprAsync(expr)
-			}
+			expr = epp.storeExpression(roleName, expr, varibleType)
 
 			result = append(result, projection.NewStmtVarDecl(variableName, expr))
 			return
@@ -94,4 +95,50 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 	}
 
 	return
+}
+
+func (epp *epp) storeExpression(roleName string, expr projection.Expression, storeType projection.Type) projection.Expression {
+	if _, ok := expr.Type().(*projection.FunctionType); ok {
+		expr = epp.convertFuncToClosure(roleName, expr)
+	}
+
+	_, exprIsAsync := expr.Type().(*projection.AsyncType)
+	if _, isAsync := storeType.(*projection.AsyncType); isAsync && !exprIsAsync {
+		expr = projection.NewExprAsync(expr)
+	}
+
+	return expr
+}
+
+func (epp *epp) convertFuncToClosure(roleName string, funcExpr projection.Expression) projection.Expression {
+	funcType, ok := funcExpr.Type().(*projection.FunctionType)
+	if !ok {
+		panic(fmt.Sprintf("can not convert non-function to closure: %#v", funcExpr.Type()))
+	}
+
+	funcSym := epp.info.Symbols[funcType.NameIdent()].(*sym_table.FuncSymbol)
+	closureParams := []projection.ClosureParam{}
+
+	paramRoleSubst, _ := funcType.Roles().SubstituteMap(funcSym.Roles())
+	argRoleSubst := paramRoleSubst.Inverse()
+
+	paramRole := paramRoleSubst.Subst(roleName)
+
+	for _, param := range funcSym.Params() {
+		if param.Type().Roles().Contains(paramRole) {
+			paramType := funcType.Params[len(closureParams)]
+			closureParams = append(closureParams, projection.NewClosureParam(param.SymbolName(), paramType))
+		}
+	}
+
+	argValues := []projection.Expression{}
+	for _, param := range closureParams {
+		argValues = append(argValues, projection.NewExprIdent(param.Name, param.Type))
+	}
+
+	body := []projection.Statement{
+		projection.NewStmtExpr(projection.NewExprCallFunc(funcExpr, roleName, argValues, funcType.ReturnType, argRoleSubst)),
+	}
+
+	return projection.NewExprClosure(closureParams, funcType.ReturnType, body)
 }

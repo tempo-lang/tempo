@@ -11,7 +11,7 @@ import (
 
 type Expression interface {
 	Codegen() jen.Code
-	Type() types.Value
+	Type() Type
 	HasSideEffects() bool
 	ReturnsValue() bool
 	IsExpression()
@@ -25,8 +25,8 @@ func (e *ExprInt) Codegen() jen.Code {
 	return jen.Lit(e.Value)
 }
 
-func (e *ExprInt) Type() types.Value {
-	return types.Int()
+func (e *ExprInt) Type() Type {
+	return &BuiltinType{Value: types.Int()}
 }
 
 func (e *ExprInt) ReturnsValue() bool {
@@ -53,8 +53,8 @@ func (e *ExprString) Codegen() jen.Code {
 	return jen.Lit(e.Value)
 }
 
-func (e *ExprString) Type() types.Value {
-	return types.String()
+func (e *ExprString) Type() Type {
+	return &BuiltinType{Value: types.String()}
 }
 
 func (e *ExprString) ReturnsValue() bool {
@@ -75,14 +75,14 @@ func NewExprString(value string) Expression {
 
 type ExprIdent struct {
 	Name    string
-	typeVal types.Value
+	typeVal Type
 }
 
 func (e *ExprIdent) Codegen() jen.Code {
 	return jen.Id(e.Name)
 }
 
-func (e *ExprIdent) Type() types.Value {
+func (e *ExprIdent) Type() Type {
 	return e.typeVal
 }
 
@@ -96,7 +96,7 @@ func (e *ExprIdent) HasSideEffects() bool {
 
 func (e *ExprIdent) IsExpression() {}
 
-func NewExprIdent(name string, typeVal types.Value) Expression {
+func NewExprIdent(name string, typeVal Type) Expression {
 	return &ExprIdent{Name: name, typeVal: typeVal}
 }
 
@@ -112,8 +112,8 @@ func (e *ExprBool) Codegen() jen.Code {
 	}
 }
 
-func (e *ExprBool) Type() types.Value {
-	return types.Bool()
+func (e *ExprBool) Type() Type {
+	return &BuiltinType{Value: types.Bool()}
 }
 
 func (e *ExprBool) ReturnsValue() bool {
@@ -185,14 +185,14 @@ type ExprBinaryOp struct {
 	operator Operator
 	lhs      Expression
 	rhs      Expression
-	typeVal  types.Value
+	typeVal  Type
 }
 
 func (e *ExprBinaryOp) Codegen() jen.Code {
 	return jen.Add(e.lhs.Codegen()).Op(string(e.operator)).Add(e.rhs.Codegen())
 }
 
-func (e *ExprBinaryOp) Type() types.Value {
+func (e *ExprBinaryOp) Type() Type {
 	return e.typeVal
 }
 
@@ -206,7 +206,7 @@ func (e *ExprBinaryOp) HasSideEffects() bool {
 
 func (e *ExprBinaryOp) IsExpression() {}
 
-func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression, typeVal types.Value) Expression {
+func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression, typeVal Type) Expression {
 	return &ExprBinaryOp{
 		operator: operator,
 		lhs:      lhs,
@@ -223,8 +223,8 @@ func (e *ExprAsync) Codegen() jen.Code {
 	return RuntimeFunc("FixedAsync").Call(e.inner.Codegen())
 }
 
-func (e *ExprAsync) Type() types.Value {
-	return types.NewAsync(e.inner.Type())
+func (e *ExprAsync) Type() Type {
+	return NewAsyncType(e.inner.Type())
 }
 
 func (e *ExprAsync) ReturnsValue() bool {
@@ -247,7 +247,7 @@ func NewExprAsync(inner Expression) Expression {
 
 type ExprAwait struct {
 	expr    Expression
-	typeVal types.Value
+	typeVal Type
 }
 
 func (e *ExprAwait) Inner() Expression {
@@ -258,7 +258,7 @@ func (e *ExprAwait) Codegen() jen.Code {
 	return RuntimeFunc("GetAsync").Call(e.Inner().Codegen())
 }
 
-func (e *ExprAwait) Type() types.Value {
+func (e *ExprAwait) Type() Type {
 	return e.typeVal
 }
 
@@ -272,7 +272,7 @@ func (e *ExprAwait) HasSideEffects() bool {
 
 func (e *ExprAwait) IsExpression() {}
 
-func NewExprAwait(inner Expression, typeVal types.Value) Expression {
+func NewExprAwait(inner Expression, typeVal Type) Expression {
 	return &ExprAwait{expr: inner, typeVal: typeVal}
 }
 
@@ -304,8 +304,8 @@ func (e *ExprSend) HasSideEffects() bool {
 
 func (e *ExprSend) IsExpression() {}
 
-func (e *ExprSend) Type() types.Value {
-	return types.Unit()
+func (e *ExprSend) Type() Type {
+	return UnitType()
 }
 
 func NewExprSend(expr Expression, receivers []string) Expression {
@@ -316,12 +316,12 @@ func NewExprSend(expr Expression, receivers []string) Expression {
 }
 
 type ExprRecv struct {
-	recvType types.Value
+	recvType Type
 	sender   string
 }
 
 func (e *ExprRecv) Codegen() jen.Code {
-	recvType := CodegenType(e.recvType)
+	recvType := e.recvType.Codegen()
 	return RuntimeFunc("Recv").Types(recvType).Call(jen.Id("env"), jen.Lit(e.sender))
 }
 
@@ -335,26 +335,26 @@ func (e *ExprRecv) HasSideEffects() bool {
 
 func (e *ExprRecv) IsExpression() {}
 
-func (e *ExprRecv) Type() types.Value {
-	return types.NewAsync(e.recvType)
+func (e *ExprRecv) Type() Type {
+	return NewAsyncType(e.recvType)
 }
 
-func NewExprRecv(recvType types.Value, sender string) Expression {
+func NewExprRecv(recvType Type, sender string) Expression {
 	return &ExprRecv{
 		recvType: recvType,
 		sender:   sender,
 	}
 }
 
-type ExprCall struct {
+type ExprCallFunc struct {
 	FuncExpr   Expression
 	FuncRole   string
 	Args       []Expression
-	ReturnType types.Value
+	ReturnType Type
 	RoleSubs   *types.RoleSubst
 }
 
-func (e *ExprCall) Codegen() jen.Code {
+func (e *ExprCallFunc) Codegen() jen.Code {
 	args := []jen.Code{}
 
 	roleSub := []jen.Code{}
@@ -370,30 +370,69 @@ func (e *ExprCall) Codegen() jen.Code {
 	}
 
 	return jen.Add(e.FuncExpr.Codegen()).Call(args...)
-	// return jen.Id(fmt.Sprintf("%s_%s", e.FuncName, e.FuncRole)).Call(args...)
 }
 
-func (e *ExprCall) Type() types.Value {
+func (e *ExprCallFunc) Type() Type {
 	return e.ReturnType
 }
 
-func (e *ExprCall) ReturnsValue() bool {
-	return e.ReturnType != types.Unit()
+func (e *ExprCallFunc) ReturnsValue() bool {
+	return e.ReturnType != UnitType()
 }
 
-func (e *ExprCall) HasSideEffects() bool {
+func (e *ExprCallFunc) HasSideEffects() bool {
 	return true
 }
 
-func (e *ExprCall) IsExpression() {}
+func (e *ExprCallFunc) IsExpression() {}
 
-func NewExprCall(funcExpr Expression, funcRole string, args []Expression, returnType types.Value, roleSubs *types.RoleSubst) Expression {
-	return &ExprCall{
+func NewExprCallFunc(funcExpr Expression, funcRole string, args []Expression, returnType Type, roleSubs *types.RoleSubst) Expression {
+	return &ExprCallFunc{
 		FuncExpr:   funcExpr,
 		FuncRole:   funcRole,
 		Args:       args,
 		ReturnType: returnType,
 		RoleSubs:   roleSubs,
+	}
+}
+
+type ExprCallClosure struct {
+	ClosureExpr Expression
+	Role        string
+	Args        []Expression
+	ReturnType  Type
+}
+
+func (e *ExprCallClosure) Codegen() jen.Code {
+	args := []jen.Code{}
+
+	for _, arg := range e.Args {
+		args = append(args, arg.Codegen())
+	}
+
+	return jen.Add(e.ClosureExpr.Codegen()).Call(args...)
+}
+
+func (e *ExprCallClosure) Type() Type {
+	return e.ReturnType
+}
+
+func (e *ExprCallClosure) ReturnsValue() bool {
+	return e.ReturnType != UnitType()
+}
+
+func (e *ExprCallClosure) HasSideEffects() bool {
+	return true
+}
+
+func (e *ExprCallClosure) IsExpression() {}
+
+func NewExprCallClosure(closureExpr Expression, role string, args []Expression, returnType Type) Expression {
+	return &ExprCallClosure{
+		ClosureExpr: closureExpr,
+		Role:        role,
+		Args:        args,
+		ReturnType:  returnType,
 	}
 }
 
@@ -419,7 +458,7 @@ func (e *ExprStruct) Codegen() jen.Code {
 	return jen.Id(name).Values(fields)
 }
 
-func (e *ExprStruct) Type() types.Value {
+func (e *ExprStruct) Type() Type {
 	return e.StructType
 }
 
@@ -451,14 +490,14 @@ func NewExprStruct(structName, structRole string, fieldNames []string, fields ma
 type ExprFieldAccess struct {
 	BaseExpr  Expression
 	FieldName string
-	FieldType types.Value
+	FieldType Type
 }
 
 func (e *ExprFieldAccess) Codegen() jen.Code {
 	return jen.Add(e.BaseExpr.Codegen()).Dot(e.FieldName)
 }
 
-func (e *ExprFieldAccess) Type() types.Value {
+func (e *ExprFieldAccess) Type() Type {
 	return e.FieldType
 }
 
@@ -472,7 +511,7 @@ func (e *ExprFieldAccess) HasSideEffects() bool {
 
 func (e *ExprFieldAccess) IsExpression() {}
 
-func NewExprFieldAccess(structExpr Expression, fieldName string, typ types.Value) Expression {
+func NewExprFieldAccess(structExpr Expression, fieldName string, typ Type) Expression {
 	return &ExprFieldAccess{
 		BaseExpr:  structExpr,
 		FieldName: fieldName,

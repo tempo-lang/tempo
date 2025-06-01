@@ -47,7 +47,7 @@ func tempoParserInit() {
 		"NUMBER", "END", "WHITESPACE",
 	}
 	staticData.RuleNames = []string{
-		"sourceFile", "ident", "valueType", "roleType", "funcTypeSig", "funcTypeParamList",
+		"sourceFile", "ident", "valueType", "roleType", "closureType", "closureParamList",
 		"struct", "structFieldList", "structField", "interface", "interfaceMethodsList",
 		"interfaceMethod", "func", "funcSig", "funcParamList", "funcParam",
 		"funcArgList", "scope", "stmt", "expr", "exprStructField", "identAccess",
@@ -276,8 +276,8 @@ const (
 	TempoParserRULE_ident                = 1
 	TempoParserRULE_valueType            = 2
 	TempoParserRULE_roleType             = 3
-	TempoParserRULE_funcTypeSig          = 4
-	TempoParserRULE_funcTypeParamList    = 5
+	TempoParserRULE_closureType          = 4
+	TempoParserRULE_closureParamList     = 5
 	TempoParserRULE_struct               = 6
 	TempoParserRULE_structFieldList      = 7
 	TempoParserRULE_structField          = 8
@@ -695,7 +695,7 @@ type IValueTypeContext interface {
 	Ident() IIdentContext
 	ROLE_AT() antlr.TerminalNode
 	RoleType() IRoleTypeContext
-	FuncTypeSig() IFuncTypeSigContext
+	ClosureType() IClosureTypeContext
 	ASYNC() antlr.TerminalNode
 
 	// IsValueTypeContext differentiates from other interfaces.
@@ -770,10 +770,10 @@ func (s *ValueTypeContext) RoleType() IRoleTypeContext {
 	return t.(IRoleTypeContext)
 }
 
-func (s *ValueTypeContext) FuncTypeSig() IFuncTypeSigContext {
+func (s *ValueTypeContext) ClosureType() IClosureTypeContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IFuncTypeSigContext); ok {
+		if _, ok := ctx.(IClosureTypeContext); ok {
 			t = ctx.(antlr.RuleContext)
 			break
 		}
@@ -783,7 +783,7 @@ func (s *ValueTypeContext) FuncTypeSig() IFuncTypeSigContext {
 		return nil
 	}
 
-	return t.(IFuncTypeSigContext)
+	return t.(IClosureTypeContext)
 }
 
 func (s *ValueTypeContext) ASYNC() antlr.TerminalNode {
@@ -872,7 +872,7 @@ func (p *TempoParser) ValueType() (localctx IValueTypeContext) {
 	case TempoParserFUNC:
 		{
 			p.SetState(63)
-			p.FuncTypeSig()
+			p.ClosureType()
 		}
 
 	default:
@@ -1294,21 +1294,21 @@ errorExit:
 	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
-// IFuncTypeSigContext is an interface to support dynamic dispatch.
-type IFuncTypeSigContext interface {
+// IClosureTypeContext is an interface to support dynamic dispatch.
+type IClosureTypeContext interface {
 	antlr.ParserRuleContext
 
 	// GetParser returns the parser.
 	GetParser() antlr.Parser
 
 	// GetParams returns the params rule contexts.
-	GetParams() IFuncTypeParamListContext
+	GetParams() IClosureParamListContext
 
 	// GetReturnType returns the returnType rule contexts.
 	GetReturnType() IValueTypeContext
 
 	// SetParams sets the params rule contexts.
-	SetParams(IFuncTypeParamListContext)
+	SetParams(IClosureParamListContext)
 
 	// SetReturnType sets the returnType rule contexts.
 	SetReturnType(IValueTypeContext)
@@ -1317,64 +1317,64 @@ type IFuncTypeSigContext interface {
 	FUNC() antlr.TerminalNode
 	ROLE_AT() antlr.TerminalNode
 	RoleType() IRoleTypeContext
-	FuncTypeParamList() IFuncTypeParamListContext
+	ClosureParamList() IClosureParamListContext
 	ValueType() IValueTypeContext
 
-	// IsFuncTypeSigContext differentiates from other interfaces.
-	IsFuncTypeSigContext()
+	// IsClosureTypeContext differentiates from other interfaces.
+	IsClosureTypeContext()
 }
 
-type FuncTypeSigContext struct {
+type ClosureTypeContext struct {
 	antlr.BaseParserRuleContext
 	parser     antlr.Parser
-	params     IFuncTypeParamListContext
+	params     IClosureParamListContext
 	returnType IValueTypeContext
 }
 
-func NewEmptyFuncTypeSigContext() *FuncTypeSigContext {
-	var p = new(FuncTypeSigContext)
+func NewEmptyClosureTypeContext() *ClosureTypeContext {
+	var p = new(ClosureTypeContext)
 	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
-	p.RuleIndex = TempoParserRULE_funcTypeSig
+	p.RuleIndex = TempoParserRULE_closureType
 	return p
 }
 
-func InitEmptyFuncTypeSigContext(p *FuncTypeSigContext) {
+func InitEmptyClosureTypeContext(p *ClosureTypeContext) {
 	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
-	p.RuleIndex = TempoParserRULE_funcTypeSig
+	p.RuleIndex = TempoParserRULE_closureType
 }
 
-func (*FuncTypeSigContext) IsFuncTypeSigContext() {}
+func (*ClosureTypeContext) IsClosureTypeContext() {}
 
-func NewFuncTypeSigContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FuncTypeSigContext {
-	var p = new(FuncTypeSigContext)
+func NewClosureTypeContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ClosureTypeContext {
+	var p = new(ClosureTypeContext)
 
 	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
-	p.RuleIndex = TempoParserRULE_funcTypeSig
+	p.RuleIndex = TempoParserRULE_closureType
 
 	return p
 }
 
-func (s *FuncTypeSigContext) GetParser() antlr.Parser { return s.parser }
+func (s *ClosureTypeContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *FuncTypeSigContext) GetParams() IFuncTypeParamListContext { return s.params }
+func (s *ClosureTypeContext) GetParams() IClosureParamListContext { return s.params }
 
-func (s *FuncTypeSigContext) GetReturnType() IValueTypeContext { return s.returnType }
+func (s *ClosureTypeContext) GetReturnType() IValueTypeContext { return s.returnType }
 
-func (s *FuncTypeSigContext) SetParams(v IFuncTypeParamListContext) { s.params = v }
+func (s *ClosureTypeContext) SetParams(v IClosureParamListContext) { s.params = v }
 
-func (s *FuncTypeSigContext) SetReturnType(v IValueTypeContext) { s.returnType = v }
+func (s *ClosureTypeContext) SetReturnType(v IValueTypeContext) { s.returnType = v }
 
-func (s *FuncTypeSigContext) FUNC() antlr.TerminalNode {
+func (s *ClosureTypeContext) FUNC() antlr.TerminalNode {
 	return s.GetToken(TempoParserFUNC, 0)
 }
 
-func (s *FuncTypeSigContext) ROLE_AT() antlr.TerminalNode {
+func (s *ClosureTypeContext) ROLE_AT() antlr.TerminalNode {
 	return s.GetToken(TempoParserROLE_AT, 0)
 }
 
-func (s *FuncTypeSigContext) RoleType() IRoleTypeContext {
+func (s *ClosureTypeContext) RoleType() IRoleTypeContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
 		if _, ok := ctx.(IRoleTypeContext); ok {
@@ -1390,10 +1390,10 @@ func (s *FuncTypeSigContext) RoleType() IRoleTypeContext {
 	return t.(IRoleTypeContext)
 }
 
-func (s *FuncTypeSigContext) FuncTypeParamList() IFuncTypeParamListContext {
+func (s *ClosureTypeContext) ClosureParamList() IClosureParamListContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IFuncTypeParamListContext); ok {
+		if _, ok := ctx.(IClosureParamListContext); ok {
 			t = ctx.(antlr.RuleContext)
 			break
 		}
@@ -1403,10 +1403,10 @@ func (s *FuncTypeSigContext) FuncTypeParamList() IFuncTypeParamListContext {
 		return nil
 	}
 
-	return t.(IFuncTypeParamListContext)
+	return t.(IClosureParamListContext)
 }
 
-func (s *FuncTypeSigContext) ValueType() IValueTypeContext {
+func (s *ClosureTypeContext) ValueType() IValueTypeContext {
 	var t antlr.RuleContext
 	for _, ctx := range s.GetChildren() {
 		if _, ok := ctx.(IValueTypeContext); ok {
@@ -1422,39 +1422,39 @@ func (s *FuncTypeSigContext) ValueType() IValueTypeContext {
 	return t.(IValueTypeContext)
 }
 
-func (s *FuncTypeSigContext) GetRuleContext() antlr.RuleContext {
+func (s *ClosureTypeContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *FuncTypeSigContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+func (s *ClosureTypeContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
-func (s *FuncTypeSigContext) EnterRule(listener antlr.ParseTreeListener) {
+func (s *ClosureTypeContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(TempoListener); ok {
-		listenerT.EnterFuncTypeSig(s)
+		listenerT.EnterClosureType(s)
 	}
 }
 
-func (s *FuncTypeSigContext) ExitRule(listener antlr.ParseTreeListener) {
+func (s *ClosureTypeContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(TempoListener); ok {
-		listenerT.ExitFuncTypeSig(s)
+		listenerT.ExitClosureType(s)
 	}
 }
 
-func (s *FuncTypeSigContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+func (s *ClosureTypeContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 	switch t := visitor.(type) {
 	case TempoVisitor:
-		return t.VisitFuncTypeSig(s)
+		return t.VisitClosureType(s)
 
 	default:
 		return t.VisitChildren(s)
 	}
 }
 
-func (p *TempoParser) FuncTypeSig() (localctx IFuncTypeSigContext) {
-	localctx = NewFuncTypeSigContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 8, TempoParserRULE_funcTypeSig)
+func (p *TempoParser) ClosureType() (localctx IClosureTypeContext) {
+	localctx = NewClosureTypeContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 8, TempoParserRULE_closureType)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
@@ -1481,9 +1481,9 @@ func (p *TempoParser) FuncTypeSig() (localctx IFuncTypeSigContext) {
 	{
 		p.SetState(96)
 
-		var _x = p.FuncTypeParamList()
+		var _x = p.ClosureParamList()
 
-		localctx.(*FuncTypeSigContext).params = _x
+		localctx.(*ClosureTypeContext).params = _x
 	}
 	p.SetState(98)
 	p.GetErrorHandler().Sync(p)
@@ -1498,7 +1498,7 @@ func (p *TempoParser) FuncTypeSig() (localctx IFuncTypeSigContext) {
 
 			var _x = p.ValueType()
 
-			localctx.(*FuncTypeSigContext).returnType = _x
+			localctx.(*ClosureTypeContext).returnType = _x
 		}
 
 	}
@@ -1516,8 +1516,8 @@ errorExit:
 	goto errorExit // Trick to prevent compiler error if the label is not used
 }
 
-// IFuncTypeParamListContext is an interface to support dynamic dispatch.
-type IFuncTypeParamListContext interface {
+// IClosureParamListContext is an interface to support dynamic dispatch.
+type IClosureParamListContext interface {
 	antlr.ParserRuleContext
 
 	// GetParser returns the parser.
@@ -1531,51 +1531,51 @@ type IFuncTypeParamListContext interface {
 	AllCOMMA() []antlr.TerminalNode
 	COMMA(i int) antlr.TerminalNode
 
-	// IsFuncTypeParamListContext differentiates from other interfaces.
-	IsFuncTypeParamListContext()
+	// IsClosureParamListContext differentiates from other interfaces.
+	IsClosureParamListContext()
 }
 
-type FuncTypeParamListContext struct {
+type ClosureParamListContext struct {
 	antlr.BaseParserRuleContext
 	parser antlr.Parser
 }
 
-func NewEmptyFuncTypeParamListContext() *FuncTypeParamListContext {
-	var p = new(FuncTypeParamListContext)
+func NewEmptyClosureParamListContext() *ClosureParamListContext {
+	var p = new(ClosureParamListContext)
 	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
-	p.RuleIndex = TempoParserRULE_funcTypeParamList
+	p.RuleIndex = TempoParserRULE_closureParamList
 	return p
 }
 
-func InitEmptyFuncTypeParamListContext(p *FuncTypeParamListContext) {
+func InitEmptyClosureParamListContext(p *ClosureParamListContext) {
 	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, nil, -1)
-	p.RuleIndex = TempoParserRULE_funcTypeParamList
+	p.RuleIndex = TempoParserRULE_closureParamList
 }
 
-func (*FuncTypeParamListContext) IsFuncTypeParamListContext() {}
+func (*ClosureParamListContext) IsClosureParamListContext() {}
 
-func NewFuncTypeParamListContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *FuncTypeParamListContext {
-	var p = new(FuncTypeParamListContext)
+func NewClosureParamListContext(parser antlr.Parser, parent antlr.ParserRuleContext, invokingState int) *ClosureParamListContext {
+	var p = new(ClosureParamListContext)
 
 	antlr.InitBaseParserRuleContext(&p.BaseParserRuleContext, parent, invokingState)
 
 	p.parser = parser
-	p.RuleIndex = TempoParserRULE_funcTypeParamList
+	p.RuleIndex = TempoParserRULE_closureParamList
 
 	return p
 }
 
-func (s *FuncTypeParamListContext) GetParser() antlr.Parser { return s.parser }
+func (s *ClosureParamListContext) GetParser() antlr.Parser { return s.parser }
 
-func (s *FuncTypeParamListContext) LPAREN() antlr.TerminalNode {
+func (s *ClosureParamListContext) LPAREN() antlr.TerminalNode {
 	return s.GetToken(TempoParserLPAREN, 0)
 }
 
-func (s *FuncTypeParamListContext) RPAREN() antlr.TerminalNode {
+func (s *ClosureParamListContext) RPAREN() antlr.TerminalNode {
 	return s.GetToken(TempoParserRPAREN, 0)
 }
 
-func (s *FuncTypeParamListContext) AllValueType() []IValueTypeContext {
+func (s *ClosureParamListContext) AllValueType() []IValueTypeContext {
 	children := s.GetChildren()
 	len := 0
 	for _, ctx := range children {
@@ -1596,7 +1596,7 @@ func (s *FuncTypeParamListContext) AllValueType() []IValueTypeContext {
 	return tst
 }
 
-func (s *FuncTypeParamListContext) ValueType(i int) IValueTypeContext {
+func (s *ClosureParamListContext) ValueType(i int) IValueTypeContext {
 	var t antlr.RuleContext
 	j := 0
 	for _, ctx := range s.GetChildren() {
@@ -1616,47 +1616,47 @@ func (s *FuncTypeParamListContext) ValueType(i int) IValueTypeContext {
 	return t.(IValueTypeContext)
 }
 
-func (s *FuncTypeParamListContext) AllCOMMA() []antlr.TerminalNode {
+func (s *ClosureParamListContext) AllCOMMA() []antlr.TerminalNode {
 	return s.GetTokens(TempoParserCOMMA)
 }
 
-func (s *FuncTypeParamListContext) COMMA(i int) antlr.TerminalNode {
+func (s *ClosureParamListContext) COMMA(i int) antlr.TerminalNode {
 	return s.GetToken(TempoParserCOMMA, i)
 }
 
-func (s *FuncTypeParamListContext) GetRuleContext() antlr.RuleContext {
+func (s *ClosureParamListContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *FuncTypeParamListContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
+func (s *ClosureParamListContext) ToStringTree(ruleNames []string, recog antlr.Recognizer) string {
 	return antlr.TreesStringTree(s, ruleNames, recog)
 }
 
-func (s *FuncTypeParamListContext) EnterRule(listener antlr.ParseTreeListener) {
+func (s *ClosureParamListContext) EnterRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(TempoListener); ok {
-		listenerT.EnterFuncTypeParamList(s)
+		listenerT.EnterClosureParamList(s)
 	}
 }
 
-func (s *FuncTypeParamListContext) ExitRule(listener antlr.ParseTreeListener) {
+func (s *ClosureParamListContext) ExitRule(listener antlr.ParseTreeListener) {
 	if listenerT, ok := listener.(TempoListener); ok {
-		listenerT.ExitFuncTypeParamList(s)
+		listenerT.ExitClosureParamList(s)
 	}
 }
 
-func (s *FuncTypeParamListContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+func (s *ClosureParamListContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 	switch t := visitor.(type) {
 	case TempoVisitor:
-		return t.VisitFuncTypeParamList(s)
+		return t.VisitClosureParamList(s)
 
 	default:
 		return t.VisitChildren(s)
 	}
 }
 
-func (p *TempoParser) FuncTypeParamList() (localctx IFuncTypeParamListContext) {
-	localctx = NewFuncTypeParamListContext(p, p.GetParserRuleContext(), p.GetState())
-	p.EnterRule(localctx, 10, TempoParserRULE_funcTypeParamList)
+func (p *TempoParser) ClosureParamList() (localctx IClosureParamListContext) {
+	localctx = NewClosureParamListContext(p, p.GetParserRuleContext(), p.GetState())
+	p.EnterRule(localctx, 10, TempoParserRULE_closureParamList)
 	var _la int
 
 	p.EnterOuterAlt(localctx, 1)
