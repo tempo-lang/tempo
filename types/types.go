@@ -23,53 +23,57 @@ func ValuesEqual(a, b Value) bool {
 	return reflect.DeepEqual(a, b)
 }
 
-func ValueCoerseTo(thisValue, otherValue Value) bool {
-	if thisValue == Invalid().Value() || otherValue == Invalid().Value() {
-		return true
+func baseCoerceValue(thisValue, otherValue Value) (Value, bool) {
+	if thisValue == Invalid().Value() {
+		return otherValue, true
+	}
+
+	if otherValue == Invalid().Value() {
+		return Invalid().Value(), true
 	}
 
 	// plain types can coerce to async types
 	if _, isAsync := thisValue.(*Async); !isAsync {
 		if otherAsync, otherIsAsync := otherValue.(*Async); otherIsAsync {
-			otherValue = otherAsync.Inner()
+			innerCoerce, ok := thisValue.CoerceTo(otherAsync.Inner())
+			return NewAsync(innerCoerce), ok
 		}
 	}
 
-	if !ValuesEqual(thisValue, otherValue) {
-		return false
-	}
-
-	return true
+	return nil, false
 }
 
-func (t *Type) CanCoerceTo(other *Type) bool {
-	if !ValueCoerseTo(t.value, other.value) {
-		return false
+func (t *Type) CoerceTo(other *Type) (*Type, bool) {
+	newValue, ok := t.value.CoerceTo(other.value)
+	if !ok {
+		return Invalid(), false
 	}
 
+	newType := New(newValue, other.Roles())
+
 	if t.roles.participants == nil {
-		return true
+		return newType, true
 	}
 
 	if other.roles.participants == nil {
-		return false
+		return newType, false
 	}
 
 	if t.roles.IsSharedRole() {
-		return t.roles.Encompass(other.roles)
+		return newType, t.roles.Encompass(other.roles)
 	}
 
 	if len(t.roles.participants) != len(other.roles.participants) {
-		return false
+		return newType, false
 	}
 
 	for i, role := range t.roles.participants {
 		if role != other.roles.participants[i] {
-			return false
+			return newType, false
 		}
 	}
 
-	return true
+	return newType, true
 }
 
 func (t *Type) Roles() *Roles {
@@ -109,12 +113,17 @@ type Value interface {
 	ToString() string
 	IsValue()
 	SubstituteRoles(substMap *RoleSubst) Value
+	CoerceTo(other Value) (Value, bool)
 }
 
 type InvalidValue struct{}
 
 func (t *InvalidValue) SubstituteRoles(substMap *RoleSubst) Value {
 	return t
+}
+
+func (t *InvalidValue) CoerceTo(other Value) (Value, bool) {
+	return other, true
 }
 
 var invalid_type InvalidValue = InvalidValue{}
@@ -141,6 +150,10 @@ type UnitValue struct{}
 
 func (u *UnitValue) SubstituteRoles(substMap *RoleSubst) Value {
 	return u
+}
+
+func (t *UnitValue) CoerceTo(other Value) (Value, bool) {
+	return Unit(), other == Unit()
 }
 
 func (u *UnitValue) IsValue() {}

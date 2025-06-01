@@ -44,7 +44,7 @@ func TestCanCoerceTypes(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.fromType.CanCoerceTo(tc.toType) != tc.canCoerse {
+			if _, canCoerce := tc.fromType.CoerceTo(tc.toType); canCoerce != tc.canCoerse {
 				t.Errorf("Expected %s coerse to %s to be %v", tc.fromType.ToString(), tc.toType.ToString(), tc.canCoerse)
 			}
 		})

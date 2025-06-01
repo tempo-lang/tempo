@@ -20,6 +20,19 @@ func (s *StructType) SubstituteRoles(substMap *RoleSubst) Value {
 	return s
 }
 
+func (s *StructType) CoerceTo(other Value) (Value, bool) {
+	if value, ok := baseCoerceValue(s, other); ok {
+		return value, true
+	}
+
+	if otherStruct, ok := other.(*StructType); ok {
+		if s.structIdent == otherStruct.structIdent {
+			return s, true
+		}
+	}
+	return Invalid().Value(), false
+}
+
 func (s *StructType) IsSendable() bool {
 	return true
 }

@@ -51,7 +51,7 @@ let z: Pair@(A,B) // distributed
 ### Asynchronous types
 
 An asynchronous value, indicates that the underlying value is not necessarily present yet.
-To get the underlying value the `await` expression is used, which will wait for the value to arrive before continuing with the underlying value.
+Use the `await` expression to get the underlying value, which will wait until it arrives before continuing with the underlying value.
 
 Normal types can be coerced into asynchronous types that immediately return the result when `await` is used.
 

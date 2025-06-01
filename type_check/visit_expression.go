@@ -65,12 +65,12 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 
 	switch {
 	case slices.Contains(arithmeticOps, op):
-		if !types.ValueCoerseTo(lhs.Value(), types.Int()) {
+		if _, ok := lhs.Value().CoerceTo(types.Int()); !ok {
 			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
 			typeError = true
 		}
 
-		if !types.ValueCoerseTo(rhs.Value(), types.Int()) {
+		if _, ok := rhs.Value().CoerceTo(types.Int()); !ok {
 			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
 			typeError = true
 		}
@@ -117,12 +117,12 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
 		}
 	case slices.Contains(inequalityOps, op):
-		if !types.ValueCoerseTo(lhs.Value(), types.Int()) {
+		if _, ok := lhs.Value().CoerceTo(types.Int()); !ok {
 			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
 			typeError = true
 		}
 
-		if !types.ValueCoerseTo(rhs.Value(), types.Int()) {
+		if _, ok := rhs.Value().CoerceTo(types.Int()); !ok {
 			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
 			typeError = true
 		}
@@ -138,12 +138,12 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		}
 
 	case slices.Contains(booleanOps, op):
-		if !types.ValueCoerseTo(lhs.Value(), types.Bool()) {
+		if _, ok := lhs.Value().CoerceTo(types.Bool()); !ok {
 			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Bool()))
 			typeError = true
 		}
 
-		if !types.ValueCoerseTo(rhs.Value(), types.Bool()) {
+		if _, ok := rhs.Value().CoerceTo(types.Bool()); !ok {
 			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Bool()))
 			typeError = true
 		}
@@ -362,7 +362,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 			argType := tc.visitExpr(arg)
 			paramType := callFuncValue.Params()[i]
 
-			if !argType.CanCoerceTo(paramType) {
+			if _, ok := argType.CoerceTo(paramType); !ok {
 				tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramType))
 			}
 		}
@@ -453,7 +453,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 
 		defSubstType := defField.SubstituteRoles(defRoleSubst)
 
-		if !exprType.CanCoerceTo(defSubstType) {
+		if _, ok := exprType.CoerceTo(defSubstType); !ok {
 			tc.reportError(type_error.NewIncompatibleTypesError(exprFieldsExpr[name], exprType, defField))
 			foundError = true
 			continue

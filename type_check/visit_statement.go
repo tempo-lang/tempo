@@ -31,12 +31,16 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 			}
 		}
 
-		if !typeFailed && !exprType.CanCoerceTo(declType) {
-			tc.reportError(type_error.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
-			typeFailed = true
+		if !typeFailed {
+			newType, ok := exprType.CoerceTo(declType)
+			if !ok {
+				tc.reportError(type_error.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
+				typeFailed = true
+			} else {
+				stmtType = newType
+			}
 		}
 
-		stmtType = declType
 		if typeFailed {
 			stmtType = types.Invalid()
 		} else if roleFailed {
@@ -70,7 +74,7 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 		tc.reportError(type_error.NewUnassignableSymbolError(ctx, sym.Type()))
 	} else {
 		exprType := tc.visitExpr(ctx.Expr())
-		if !exprType.CanCoerceTo(sym.Type()) {
+		if _, ok := exprType.CoerceTo(sym.Type()); !ok {
 			tc.reportError(type_error.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
 		}
 	}
@@ -83,7 +87,7 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 	guardType := tc.visitExpr(ctx.Expr())
 
-	if !types.ValueCoerseTo(guardType.Value(), types.Bool()) {
+	if _, ok := guardType.Value().CoerceTo(types.Bool()); !ok {
 		tc.reportError(type_error.NewInvalidValueError(ctx.Expr(), guardType.Value(), types.Bool()))
 	}
 
@@ -136,7 +140,7 @@ func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
 
 	returnType := tc.visitExpr(ctx.Expr())
 
-	if !returnType.CanCoerceTo(expectedReturnType) {
+	if _, ok := returnType.CoerceTo(expectedReturnType); !ok {
 		tc.reportError(type_error.NewIncompatibleTypesError(ctx.Expr(), returnType, expectedReturnType))
 	}
 

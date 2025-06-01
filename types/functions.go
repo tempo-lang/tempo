@@ -7,7 +7,6 @@ import (
 )
 
 type FunctionType struct {
-	// funcIdent  parser.IIdentContext
 	params       []*Type
 	returnType   *Type
 	roleSubst    *RoleSubst
@@ -35,6 +34,46 @@ func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Value {
 		roleSubst:    newRoleSubst,
 		instantiated: true,
 	}
+}
+
+func (f *FunctionType) CoerceTo(other Value) (Value, bool) {
+	if value, ok := baseCoerceValue(f, other); ok {
+		return value, true
+	}
+
+	g, ok := other.(*FunctionType)
+	if !ok {
+		return Invalid().Value(), false
+	}
+
+	if len(f.params) != len(g.params) {
+		return Invalid().Value(), false
+	}
+
+	canCoerce := true
+	newParams := []*Type{}
+	for i := range f.params {
+		if newParam, ok := f.params[i].CoerceTo(g.params[i]); ok {
+			newParams = append(newParams, newParam)
+		} else {
+			newParams = append(newParams, Invalid())
+			canCoerce = false
+		}
+	}
+
+	newReturn, ok := f.returnType.CoerceTo(g.returnType)
+	if !ok {
+		canCoerce = false
+	}
+
+	newFunc := &FunctionType{
+		params:       newParams,
+		returnType:   newReturn,
+		roleSubst:    f.roleSubst,
+		instantiated: f.instantiated,
+	}
+
+	return newFunc, canCoerce
 }
 
 func (f *FunctionType) IsSendable() bool {

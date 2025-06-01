@@ -14,6 +14,17 @@ func (s *InterfaceType) SubstituteRoles(substMap *RoleSubst) Value {
 	return s
 }
 
+func (s *InterfaceType) CoerceTo(other Value) (Value, bool) {
+	if value, ok := baseCoerceValue(s, other); ok {
+		return value, true
+	}
+
+	if otherInf, ok := other.(*InterfaceType); ok {
+		return other, s.ident == otherInf.ident
+	}
+	return Unit(), false
+}
+
 func (s *InterfaceType) IsSendable() bool {
 	return false
 }

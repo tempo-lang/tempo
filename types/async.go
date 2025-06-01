@@ -10,6 +10,21 @@ func (a *Async) SubstituteRoles(substMap *RoleSubst) Value {
 	return NewAsync(a.inner.SubstituteRoles(substMap))
 }
 
+func (t *Async) CoerceTo(other Value) (Value, bool) {
+	if value, ok := baseCoerceValue(t, other); ok {
+		return value, true
+	}
+
+	if otherAsync, ok := other.(*Async); ok {
+		if newValue, canCoerce := t.inner.CoerceTo(otherAsync.inner); canCoerce {
+			return NewAsync(newValue), true
+		} else {
+			return NewAsync(Invalid().Value()), false
+		}
+	}
+	return Invalid().Value(), false
+}
+
 func (a *Async) IsSendable() bool {
 	return false
 }
