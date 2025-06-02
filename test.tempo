@@ -1,8 +1,11 @@
-func@(X,Y) send(value: Int@X) Int@Y {
-    return await X->Y value;
+func@(A,B) foo(value: Int@A, fn: func@(A,B)(Int@A)Int@B) Int@B {
+  return fn(value);
 }
 
-func@(A,B) foo() {
-    let x: Int@A = 10;
-    let Y: Int@B = send@(A,B)(x);
+func@(F,G) send(value: Int@F) Int@G {
+  return await F->G value;
+}
+
+func@(X,Y) bar() {
+  let result: Int@Y = foo@(X,Y)(10, send@(X,Y));
 }

@@ -18,6 +18,6 @@ func foo_A(env *runtime.Env) {
 	x = func(param int) {
 		call2_Y(env.Subst("A", "Y"), param)
 	}
-	x()
+	x(10)
 }
 func foo_B(env *runtime.Env) {}

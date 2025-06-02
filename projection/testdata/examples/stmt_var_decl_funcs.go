@@ -4,16 +4,24 @@ package choreography
 import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography call
-func call_X(env *runtime.Env) {}
+func call_X(env *runtime.Env, val int) {}
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var x func(*runtime.Env) = call_X
+	var x func(int) = func(val int) {
+		call_X(env.Subst("A", "X"), val)
+	}
 	_ = x
-	x(env.Subst("A", "X"))
+	var val int = 10
+	_ = val
+	x(val)
 }
 func foo_B(env *runtime.Env) {
-	var y func(*runtime.Env) = call_X
+	var y func(int) = func(val int) {
+		call_X(env.Subst("B", "X"), val)
+	}
 	_ = y
-	y(env.Subst("B", "X"))
+	var val int = 10
+	_ = val
+	y(val)
 }

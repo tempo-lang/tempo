@@ -9,6 +9,7 @@ import (
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/sym_table"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projection.Expression, []projection.Statement) {
@@ -114,7 +115,8 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		// receiver
 		if slices.Contains(receiverRoles, roleName) {
-			return projection.NewExprRecv(inner.Type(), senderRole), aux
+			innerType := epp.eppType(senderRole, epp.info.Types[expr.Expr()])
+			return projection.NewExprRecv(innerType, senderRole), aux
 		}
 
 		valueType := epp.info.Types[expr.Expr()]
@@ -138,31 +140,37 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 				argVal, extra := epp.eppExpression(roleName, arg)
 				aux = append(aux, extra...)
 
-				if callFuncValue.FunctionType.Params()[i].Roles().Contains(roleName) {
-					argValues = append(argValues, argVal)
+				funcParam := callFuncValue.FunctionType.Params()[i]
+				if funcParam.Roles().Contains(roleName) {
+					paramType := callFuncValue.Params[len(argValues)]
+					argStored := epp.storeExpression(roleName, argVal, paramType)
+					argValues = append(argValues, argStored)
 				}
 			}
 
 			funcSym := epp.info.Symbols[callFuncValue.NameIdent()].(*sym_table.FuncSymbol)
 
 			returnValue := callFuncValue.ReturnType
-			roleSubst, _ := callFuncValue.Roles().SubstituteMap(funcSym.Roles())
+			roleSubst, _ := funcSym.Roles().SubstituteMap(callFuncValue.Roles())
 
 			return projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, roleSubst), aux
 		case *projection.ClosureType:
+			closureType := callType.Value().(*types.ClosureType)
+
 			argValues := []projection.Expression{}
+			for i, arg := range expr.FuncArgList().AllExpr() {
+				argVal, extra := epp.eppExpression(roleName, arg)
+				aux = append(aux, extra...)
 
-			// for i, arg := range expr.FuncArgList().AllExpr() {
-			// 	argVal, extra := epp.eppExpression(roleName, arg)
-			// 	aux = append(aux, extra...)
-
-			// 	if callFuncValue.Params()[i].Roles().Contains(roleName) {
-			// 		argValues = append(argValues, argVal)
-			// 	}
-			// }
+				closureParam := closureType.Params()[i]
+				if closureParam.Roles().Contains(roleName) {
+					paramType := callFuncValue.Params[len(argValues)]
+					argStored := epp.storeExpression(roleName, argVal, paramType)
+					argValues = append(argValues, argStored)
+				}
+			}
 
 			returnValue := callFuncValue.ReturnType
-
 			return projection.NewExprCallClosure(callExpr, roleName, argValues, returnValue), aux
 		default:
 			panic("unreachable")

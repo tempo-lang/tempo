@@ -1,9 +1,10 @@
-func@X call() {}
+func@X call(val: Int@X) {}
 
 func@(A,B) foo() {
-  let x: func@A() = call@A;
-  let y: func@B() = call@B;
+  let x: func@A(Int@A) = call@A;
+  let y: func@B(Int@B) = call@B;
 
-  x();
-  y();
+  let val = 10;
+  x(val);
+  y(val);
 }

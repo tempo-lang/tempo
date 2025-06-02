@@ -136,8 +136,16 @@ func (epp *epp) convertFuncToClosure(roleName string, funcExpr projection.Expres
 		argValues = append(argValues, projection.NewExprIdent(param.Name, param.Type))
 	}
 
+	callExpr := projection.NewExprCallFunc(funcExpr, roleName, argValues, funcType.ReturnType, argRoleSubst)
+	var callStmt projection.Statement
+	if funcType.ReturnType != projection.UnitType() {
+		callStmt = projection.NewStmtReturn(callExpr)
+	} else {
+		callStmt = projection.NewStmtExpr(callExpr)
+	}
+
 	body := []projection.Statement{
-		projection.NewStmtExpr(projection.NewExprCallFunc(funcExpr, roleName, argValues, funcType.ReturnType, argRoleSubst)),
+		callStmt,
 	}
 
 	return projection.NewExprClosure(closureParams, funcType.ReturnType, body)

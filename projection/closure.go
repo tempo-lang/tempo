@@ -38,6 +38,11 @@ func (e *ExprClosure) Codegen() jen.Code {
 	}
 
 	result := jen.Func().Params(params...)
+
+	if e.ReturnType != UnitType() {
+		result = result.Add(e.ReturnType.Codegen())
+	}
+
 	result = result.BlockFunc(func(block *jen.Group) {
 		for _, bodyStmt := range e.Body {
 			for _, stmt := range bodyStmt.Codegen() {

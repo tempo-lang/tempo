@@ -4,9 +4,30 @@ package choreography
 import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography foo
-func foo_A(env *runtime.Env, value int, fn func(*runtime.Env, int)) {
-	fn(env.Subst("A", "A", "B", "B"), value)
+func foo_A(env *runtime.Env, value int, fn func(int)) {
+	fn(value)
 }
-func foo_B(env *runtime.Env, fn func(*runtime.Env) int) int {
-	return fn(env.Subst("A", "A", "B", "B"))
+func foo_B(env *runtime.Env, fn func() int) int {
+	return fn()
+}
+
+// Projection of choreography send
+func send_F(env *runtime.Env, value int) {
+	runtime.Send(env, value, "G")
+}
+func send_G(env *runtime.Env) int {
+	return runtime.GetAsync(runtime.Recv[int](env, "F"))
+}
+
+// Projection of choreography bar
+func bar_X(env *runtime.Env) {
+	foo_A(env.Subst("X", "A", "Y", "B"), 10, func(value int) {
+		send_F(env.Subst("X", "F", "Y", "G"), value)
+	})
+}
+func bar_Y(env *runtime.Env) {
+	var result int = foo_B(env.Subst("X", "A", "Y", "B"), func() int {
+		return send_G(env.Subst("X", "F", "Y", "G"))
+	})
+	_ = result
 }
