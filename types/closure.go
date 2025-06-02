@@ -72,7 +72,7 @@ func (c *ClosureType) ToString() string {
 	if c.returnType.Value() != Unit() {
 		returnType = c.returnType.ToString()
 	}
-	return fmt.Sprintf("CLOSURE func(%s)%s", params, returnType)
+	return fmt.Sprintf("func(%s)%s", params, returnType)
 }
 
 func Closure(params []*Type, returnType *Type) *ClosureType {
