@@ -1,11 +1,5 @@
-func@(A,B) foo(value: Int@A, fn: func@(A,B)(Int@A)Int@B) Int@B {
-  return fn(value);
-}
-
-func@(F,G) send(value: Int@F) Int@G {
-  return await F->G value;
-}
-
-func@(X,Y) bar() {
-  let result: Int@Y = foo@(X,Y)(10, send@(X,Y));
+func@(A,B,C) compose(f: func@(A,B)(Int@A)Int@B, g: func@(B,C)(Int@B)Int@C) func@(A,B,C)(Int@A)Int@C {
+  return (in: Int@A) Int@C => {
+    return g(f(in));
+  };
 }
