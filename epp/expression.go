@@ -229,22 +229,37 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			if containsRole {
 				fields[fieldName] = field
 				fieldNames = append(fieldNames, fieldName)
+			} else if field != nil && field.HasSideEffects() {
+				aux = append(aux, projection.NewStmtExpr(field))
 			}
 		}
 
-		structType := exprValue.(*projection.StructType)
-
-		return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst.Subst(roleName), fieldNames, fields, structType), aux
+		if exprType.Roles().Contains(roleName) {
+			structType := exprValue.(*projection.StructType)
+			return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst.Subst(roleName), fieldNames, fields, structType), aux
+		} else {
+			return nil, aux
+		}
 	case *parser.ExprFieldAccessContext:
 		baseExpr, aux := epp.eppExpression(roleName, expr.Expr())
-		fieldName := expr.Ident().GetText()
 
-		return projection.NewExprFieldAccess(baseExpr, fieldName, exprValue), aux
+		if exprType.Roles().Contains(roleName) {
+			fieldName := expr.Ident().GetText()
+			return projection.NewExprFieldAccess(baseExpr, fieldName, exprValue), aux
+		} else {
+			if baseExpr != nil && baseExpr.HasSideEffects() {
+				aux = append(aux, projection.NewStmtExpr(baseExpr))
+			}
+			return nil, aux
+		}
 	case *parser.ExprClosureContext:
+		if !exprType.Roles().Contains(roleName) {
+			return nil, []projection.Statement{}
+		}
+
 		closureType := exprType.Value().(*types.ClosureType)
 
 		params := []projection.ClosureParam{}
-
 		for i, param := range expr.ClosureSig().FuncParamList().AllFuncParam() {
 			paramType := closureType.Params()[i]
 			if paramType.Roles().Contains(roleName) {

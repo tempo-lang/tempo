@@ -14,7 +14,7 @@ Here is a brief list of implemented things.
 - [x] Function calls
 - [x] Struct types
 - [x] Interfaces
-- [ ] Closures
+- [x] Closures
 - [ ] Lists
 - [ ] Maps
 - [ ] Methods
