@@ -9,8 +9,8 @@ func@(X,Y) incAndSend(value: Int@X) Int@Y {
 }
 
 func@(A,B,C) Start(in: Int@A) Int@C {
-  let f: func@(A,B)(Int@A)Int@B = incAndSend@(A,B);
-  let g: func@(B,C)(Int@B)Int@C = incAndSend@(B,C);
+  let f = incAndSend@(A,B);
+  let g = incAndSend@(B,C);
   let c = compose@(A,B,C)(f, g);
 
   return c(in);

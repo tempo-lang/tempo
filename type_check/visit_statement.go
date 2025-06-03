@@ -11,6 +11,12 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	hasExplicitType := ctx.ValueType() != nil
 
 	exprType := tc.visitExpr(ctx.Expr())
+
+	// convert function type to closure type when stored in a variable
+	if funcType, ok := exprType.Value().(*types.FunctionType); ok {
+		exprType = types.New(types.Closure(funcType.Params(), funcType.ReturnType()), funcType.Roles())
+	}
+
 	stmtType := exprType
 
 	roleFailed := false

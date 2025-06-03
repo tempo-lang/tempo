@@ -543,8 +543,11 @@ func (tc *typeChecker) VisitIdentAccess(ctx *parser.IdentAccessContext) any {
 }
 
 func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
-
 	sig := ctx.ClosureSig()
+	if sig == nil || sig.FuncParamList() == nil || sig.GetReturnType() == nil {
+		// parser error
+		return tc.registerType(ctx, types.Invalid())
+	}
 
 	returnType := tc.visitValueType(sig.GetReturnType())
 	tc.checkRolesInScope(sig.GetReturnType().RoleType())
