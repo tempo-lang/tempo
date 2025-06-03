@@ -117,39 +117,39 @@ func (e *FunctionNotInstantiated) ParserRule() antlr.ParserRuleContext {
 }
 
 type FunctionMissingReturn struct {
-	funcSym *sym_table.FuncSymbol
+	callableEnv sym_table.CallableEnv
 }
 
-func NewFunctionMissingReturn(funcSym *sym_table.FuncSymbol) Error {
+func NewFunctionMissingReturn(callableEnv sym_table.CallableEnv) Error {
 	return &FunctionMissingReturn{
-		funcSym: funcSym,
+		callableEnv: callableEnv,
 	}
 }
 
 func (e *FunctionMissingReturn) Error() string {
-	return fmt.Sprintf("function '%s' is missing return statement", e.funcSym.SymbolName())
+	return "missing return statement"
 }
 
 func (e *FunctionMissingReturn) IsTypeError() {}
 
 func (e *FunctionMissingReturn) ParserRule() antlr.ParserRuleContext {
-	return e.funcSym.FuncSig().GetReturnType()
+	return e.callableEnv.ReturnCtx()
 }
 
 type ReturnValueMissing struct {
-	funcSym   *sym_table.FuncSymbol
-	returnCtx *parser.StmtReturnContext
+	callableEnv sym_table.CallableEnv
+	returnCtx   *parser.StmtReturnContext
 }
 
-func NewReturnValueMissing(funcSym *sym_table.FuncSymbol, returnCtx *parser.StmtReturnContext) Error {
+func NewReturnValueMissing(callableEnv sym_table.CallableEnv, returnCtx *parser.StmtReturnContext) Error {
 	return &ReturnValueMissing{
-		funcSym:   funcSym,
-		returnCtx: returnCtx,
+		callableEnv: callableEnv,
+		returnCtx:   returnCtx,
 	}
 }
 
 func (e *ReturnValueMissing) Error() string {
-	return fmt.Sprintf("return is missing value of type '%s'", e.funcSym.FuncValue().ReturnType().ToString())
+	return fmt.Sprintf("return is missing value of type '%s'", e.callableEnv.ReturnType().ToString())
 }
 
 func (e *ReturnValueMissing) IsTypeError() {}

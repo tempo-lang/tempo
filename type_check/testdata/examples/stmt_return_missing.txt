@@ -1,3 +1,3 @@
 func@(A,B) foo() Bool@A {}
 ---
-1:18: function 'foo' is missing return statement
+1:18: missing return statement

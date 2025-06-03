@@ -35,6 +35,10 @@ func (v *BaseTempoVisitor) VisitClosureParamList(ctx *ClosureParamListContext) i
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitClosureSig(ctx *ClosureSigContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitStruct(ctx *StructContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -144,6 +148,10 @@ func (v *BaseTempoVisitor) VisitExprNum(ctx *ExprNumContext) interface{} {
 }
 
 func (v *BaseTempoVisitor) VisitExprAwait(ctx *ExprAwaitContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitExprClosure(ctx *ExprClosureContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

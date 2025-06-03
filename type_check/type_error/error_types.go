@@ -23,7 +23,7 @@ type ValueRoleNotInScopeError struct {
 }
 
 func (v *ValueRoleNotInScopeError) Error() string {
-	return fmt.Sprintf("value '%s' has roles '%s' that are not in scope", v.Value.GetText(), misc.JoinStrings(v.InaccessibleRoles, ","))
+	return fmt.Sprintf("value '%s' contains roles '%s' that are not in scope", v.Value.GetText(), misc.JoinStrings(v.InaccessibleRoles, ","))
 }
 
 func (v *ValueRoleNotInScopeError) IsTypeError() {}
@@ -41,24 +41,22 @@ func NewValueRoleNotInScopeError(value antlr.ParserRuleContext, valueRoles *type
 }
 
 type UnexpectedSharedType struct {
-	Ident parser.IIdentContext
-	Type  *types.Type
+	RoleType parser.IRoleTypeContext
 }
 
 func (u *UnexpectedSharedType) Error() string {
-	return fmt.Sprintf("symbol '%s' is not allowed to have shared type", u.Ident.GetText())
+	return "shared type not allowed here"
 }
 
 func (u *UnexpectedSharedType) IsTypeError() {}
 
 func (u *UnexpectedSharedType) ParserRule() antlr.ParserRuleContext {
-	return u.Ident
+	return u.RoleType
 }
 
-func NewUnexpectedSharedTypeError(ident parser.IIdentContext, identType *types.Type) Error {
+func NewUnexpectedSharedTypeError(roleType parser.IRoleTypeContext) Error {
 	return &UnexpectedSharedType{
-		Ident: ident,
-		Type:  identType,
+		RoleType: roleType,
 	}
 }
 

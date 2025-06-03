@@ -17,10 +17,14 @@ roleType:
 	(LSQUARE ident (COMMA ident)* RSQUARE)				# roleTypeShared
 	| (ident | (LPAREN ident (COMMA ident)* RPAREN))	# roleTypeNormal;
 
+// closure
 closureType:
 	FUNC ROLE_AT roleType params = closureParamList returnType = valueType?;
 
 closureParamList: LPAREN (valueType (COMMA valueType)*)? RPAREN;
+
+closureSig:
+	FUNC ROLE_AT roleType params = funcParamList returnType = valueType?;
 
 // struct
 struct: STRUCT ROLE_AT roleType ident structFieldList;
@@ -82,6 +86,7 @@ expr:
 	| STRING (ROLE_AT roleType)?						# exprString
 	| (TRUE | FALSE) (ROLE_AT roleType)?				# exprBool
 	| AWAIT expr										# exprAwait
+	| closureSig scope									# exprClosure
 	| ident ROLE_AT roleType exprStructField			# exprStruct
 	| expr funcArgList									# exprCall
 	| expr DOT ident									# exprFieldAccess

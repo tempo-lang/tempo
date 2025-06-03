@@ -60,6 +60,14 @@ func (f *FuncSymbol) AddParam(param *FuncParamSymbol) {
 	f.params = append(f.params, param)
 }
 
+func (f *FuncSymbol) ReturnType() *types.Type {
+	return f.FuncValue().ReturnType()
+}
+
+func (f *FuncSymbol) ReturnCtx() parser.IValueTypeContext {
+	return f.funcCtx.GetReturnType()
+}
+
 func (f *FuncSymbol) Roles() *types.Roles {
 	return f.funcType.Roles()
 }

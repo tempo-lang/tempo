@@ -28,6 +28,9 @@ type TempoListener interface {
 	// EnterClosureParamList is called when entering the closureParamList production.
 	EnterClosureParamList(c *ClosureParamListContext)
 
+	// EnterClosureSig is called when entering the closureSig production.
+	EnterClosureSig(c *ClosureSigContext)
+
 	// EnterStruct is called when entering the struct production.
 	EnterStruct(c *StructContext)
 
@@ -112,6 +115,9 @@ type TempoListener interface {
 	// EnterExprAwait is called when entering the exprAwait production.
 	EnterExprAwait(c *ExprAwaitContext)
 
+	// EnterExprClosure is called when entering the exprClosure production.
+	EnterExprClosure(c *ExprClosureContext)
+
 	// EnterExprStructField is called when entering the exprStructField production.
 	EnterExprStructField(c *ExprStructFieldContext)
 
@@ -138,6 +144,9 @@ type TempoListener interface {
 
 	// ExitClosureParamList is called when exiting the closureParamList production.
 	ExitClosureParamList(c *ClosureParamListContext)
+
+	// ExitClosureSig is called when exiting the closureSig production.
+	ExitClosureSig(c *ClosureSigContext)
 
 	// ExitStruct is called when exiting the struct production.
 	ExitStruct(c *StructContext)
@@ -222,6 +231,9 @@ type TempoListener interface {
 
 	// ExitExprAwait is called when exiting the exprAwait production.
 	ExitExprAwait(c *ExprAwaitContext)
+
+	// ExitExprClosure is called when exiting the exprClosure production.
+	ExitExprClosure(c *ExprClosureContext)
 
 	// ExitExprStructField is called when exiting the exprStructField production.
 	ExitExprStructField(c *ExprStructFieldContext)

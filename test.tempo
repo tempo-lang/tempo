@@ -1,5 +1,5 @@
 func@(A,B,C) compose(f: func@(A,B)(Int@A)Int@B, g: func@(B,C)(Int@B)Int@C) func@(A,B,C)(Int@A)Int@C {
-  return (in: Int@A) Int@C => {
+  return func@(A,B,C) (in: Int@A) Int@C {
     return g(f(in));
   };
 }

@@ -49,7 +49,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	}
 
 	if len(stmtType.Roles().Participants()) == 0 {
-		newParticipants := tc.currentScope.GetFunc().Roles().Participants()
+		newParticipants := tc.currentScope.Roles().Participants()
 		stmtType = types.New(
 			stmtType.Value(),
 			types.NewRole(newParticipants, true),
@@ -122,10 +122,10 @@ func (tc *typeChecker) VisitStmtExpr(ctx *parser.StmtExprContext) any {
 
 func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
 
-	funcSym := tc.currentScope.GetFunc()
-	expectedReturnType := funcSym.FuncValue().ReturnType()
+	funcSym := tc.currentScope.GetCallableEnv()
+	expectedReturnType := funcSym.ReturnType()
 
-	missingRoles := funcSym.Roles().
+	missingRoles := funcSym.Scope().Roles().
 		SubtractParticipants(tc.currentScope.Roles().Participants())
 	if len(missingRoles) > 0 {
 		tc.reportError(type_error.NewReturnNotAllRolesError(ctx, missingRoles))

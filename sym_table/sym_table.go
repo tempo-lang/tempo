@@ -16,7 +16,7 @@ type Scope struct {
 	pos          antlr.Token
 	end          antlr.Token
 	roles        []string
-	funcSym      *FuncSymbol
+	callableEnv  CallableEnv
 	structSym    *StructSymbol
 	interfaceSym *InterfaceSymbol
 }
@@ -29,7 +29,7 @@ func NewScope(pos antlr.Token, end antlr.Token, parent *Scope, roles []string) *
 		pos:          pos,
 		end:          end,
 		roles:        roles,
-		funcSym:      nil,
+		callableEnv:  nil,
 		structSym:    nil,
 		interfaceSym: nil,
 	}
@@ -133,16 +133,16 @@ func (scope *Scope) MakeChild(pos antlr.Token, end antlr.Token, roles []string) 
 	return child
 }
 
-func (scope *Scope) SetFunc(funcSym *FuncSymbol) {
-	scope.funcSym = funcSym
+func (scope *Scope) SetCallableEnv(callableEnv CallableEnv) {
+	scope.callableEnv = callableEnv
 }
 
-func (scope *Scope) GetFunc() *FuncSymbol {
+func (scope *Scope) GetCallableEnv() CallableEnv {
 	s := scope
-	for s.funcSym == nil && s.parent != nil {
+	for s.callableEnv == nil && s.parent != nil {
 		s = s.parent
 	}
-	return s.funcSym
+	return s.callableEnv
 }
 
 func (scope *Scope) SetStruct(structSym *StructSymbol) {

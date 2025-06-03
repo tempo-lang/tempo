@@ -28,6 +28,9 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#closureParamList.
 	VisitClosureParamList(ctx *ClosureParamListContext) interface{}
 
+	// Visit a parse tree produced by TempoParser#closureSig.
+	VisitClosureSig(ctx *ClosureSigContext) interface{}
+
 	// Visit a parse tree produced by TempoParser#struct.
 	VisitStruct(ctx *StructContext) interface{}
 
@@ -111,6 +114,9 @@ type TempoVisitor interface {
 
 	// Visit a parse tree produced by TempoParser#exprAwait.
 	VisitExprAwait(ctx *ExprAwaitContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#exprClosure.
+	VisitExprClosure(ctx *ExprClosureContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#exprStructField.
 	VisitExprStructField(ctx *ExprStructFieldContext) interface{}

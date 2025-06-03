@@ -82,7 +82,7 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 		}
 
 		scope := epp.info.GlobalScope.Innermost(stmt.GetStart())
-		funcReturnRoles := scope.GetFunc().FuncValue().ReturnType().Roles()
+		funcReturnRoles := scope.GetCallableEnv().ReturnType().Roles()
 		if funcReturnRoles.Contains(roleName) {
 			result = append(result, projection.NewStmtReturn(expr))
 		} else if expr != nil && expr.HasSideEffects() {

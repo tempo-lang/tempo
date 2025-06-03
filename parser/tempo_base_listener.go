@@ -62,6 +62,12 @@ func (s *BaseTempoListener) EnterClosureParamList(ctx *ClosureParamListContext) 
 // ExitClosureParamList is called when production closureParamList is exited.
 func (s *BaseTempoListener) ExitClosureParamList(ctx *ClosureParamListContext) {}
 
+// EnterClosureSig is called when production closureSig is entered.
+func (s *BaseTempoListener) EnterClosureSig(ctx *ClosureSigContext) {}
+
+// ExitClosureSig is called when production closureSig is exited.
+func (s *BaseTempoListener) ExitClosureSig(ctx *ClosureSigContext) {}
+
 // EnterStruct is called when production struct is entered.
 func (s *BaseTempoListener) EnterStruct(ctx *StructContext) {}
 
@@ -229,6 +235,12 @@ func (s *BaseTempoListener) EnterExprAwait(ctx *ExprAwaitContext) {}
 
 // ExitExprAwait is called when production exprAwait is exited.
 func (s *BaseTempoListener) ExitExprAwait(ctx *ExprAwaitContext) {}
+
+// EnterExprClosure is called when production exprClosure is entered.
+func (s *BaseTempoListener) EnterExprClosure(ctx *ExprClosureContext) {}
+
+// ExitExprClosure is called when production exprClosure is exited.
+func (s *BaseTempoListener) ExitExprClosure(ctx *ExprClosureContext) {}
 
 // EnterExprStructField is called when production exprStructField is entered.
 func (s *BaseTempoListener) EnterExprStructField(ctx *ExprStructFieldContext) {}

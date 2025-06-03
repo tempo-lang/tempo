@@ -20,7 +20,8 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 	tc.currentScope = sym.Scope()
 
 	if sym.Type().Roles().IsSharedRole() {
-		tc.reportError(type_error.NewUnexpectedSharedTypeError(ctx.FuncSig().GetName(), sym.Type()))
+		ctx.FuncSig().RoleType()
+		tc.reportError(type_error.NewUnexpectedSharedTypeError(ctx.FuncSig().RoleType()))
 	}
 
 	ctx.FuncSig().Accept(tc)
@@ -55,7 +56,7 @@ func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
 	paramSym := sym_table.NewFuncParamSymbol(ctx, tc.currentScope, paramType)
 	tc.insertSymbol(paramSym)
 
-	funcSym := tc.currentScope.GetFunc()
+	funcSym := tc.currentScope.GetCallableEnv()
 	funcSym.AddParam(paramSym.(*sym_table.FuncParamSymbol))
 
 	return nil
@@ -102,7 +103,7 @@ func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr
 	tc.currentScope = tc.currentScope.Parent()
 
 	funcSym := sym_table.NewFuncSymbol(fn, funcScope, fnType)
-	funcScope.SetFunc(funcSym.(*sym_table.FuncSymbol))
+	funcScope.SetCallableEnv(funcSym.(*sym_table.FuncSymbol))
 	tc.insertSymbol(funcSym)
 
 	return funcSym, true

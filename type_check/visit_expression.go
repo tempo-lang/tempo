@@ -541,3 +541,44 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 func (tc *typeChecker) VisitIdentAccess(ctx *parser.IdentAccessContext) any {
 	return nil
 }
+
+func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
+
+	sig := ctx.ClosureSig()
+
+	returnType := tc.visitValueType(sig.GetReturnType())
+	tc.checkRolesInScope(sig.GetReturnType().RoleType())
+
+	closureRoles, _ := tc.parseRoleType(sig.RoleType())
+	if closureRoles.IsSharedRole() {
+		tc.reportError(type_error.NewUnexpectedSharedTypeError(sig.RoleType()))
+	}
+
+	// enter scope
+	tc.currentScope = tc.currentScope.MakeChild(ctx.Scope().GetStart(), ctx.Scope().GetStop(), closureRoles.Participants())
+	closureEnv := sym_table.NewClosureEnv(tc.currentScope, returnType, sig.GetReturnType())
+	tc.currentScope.SetCallableEnv(closureEnv)
+
+	// add params to scope
+	sig.FuncParamList().Accept(tc)
+
+	returnsValue := ctx.Scope().Accept(tc) == true
+	if !returnsValue && returnType.Value() != types.Unit() {
+		tc.reportError(type_error.NewFunctionMissingReturn(closureEnv))
+	}
+
+	// exit scope
+	tc.currentScope = tc.currentScope.Parent()
+
+	paramTypes := []*types.Type{}
+	for _, param := range closureEnv.Params() {
+		paramTypes = append(paramTypes, param.Type())
+	}
+
+	closureType := types.New(types.Closure(paramTypes, returnType), closureRoles)
+	return tc.registerType(ctx, closureType)
+}
+
+func (tc *typeChecker) VisitClosureSig(ctx *parser.ClosureSigContext) any {
+	return nil
+}

@@ -190,17 +190,12 @@ func completionItemsForRoleType(file *tempoFile, roleType parser.IRoleTypeContex
 	logger.Infof("Finding completions for RoleType")
 
 	scope := file.info.GlobalScope.Innermost(roleType.GetStart())
-	if scope == nil || scope.GetFunc() == nil {
-		return nil, false
-	}
-
-	funcSym := scope.GetFunc().Roles()
-	if funcSym == nil {
+	if scope == nil {
 		return nil, false
 	}
 
 	completionItems := []protocol.CompletionItem{}
-	for _, role := range funcSym.Participants() {
+	for _, role := range scope.Roles().Participants() {
 		detail := "role"
 
 		completionItems = append(completionItems, protocol.CompletionItem{
