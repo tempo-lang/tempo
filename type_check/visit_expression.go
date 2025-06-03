@@ -544,13 +544,16 @@ func (tc *typeChecker) VisitIdentAccess(ctx *parser.IdentAccessContext) any {
 
 func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 	sig := ctx.ClosureSig()
-	if sig == nil || sig.FuncParamList() == nil || sig.GetReturnType() == nil {
+	if sig == nil || sig.FuncParamList() == nil {
 		// parser error
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	returnType := tc.visitValueType(sig.GetReturnType())
-	tc.checkRolesInScope(sig.GetReturnType().RoleType())
+	var returnType *types.Type = types.New(types.Unit(), types.EveryoneRole())
+	if sig.GetReturnType() != nil {
+		returnType = tc.visitValueType(sig.GetReturnType())
+		tc.checkRolesInScope(sig.GetReturnType().RoleType())
+	}
 
 	closureRoles, _ := tc.parseRoleType(sig.RoleType())
 	if closureRoles.IsSharedRole() {
