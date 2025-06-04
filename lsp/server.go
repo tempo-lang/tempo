@@ -54,6 +54,8 @@ func (s *tempoServer) initialize(context *glsp.Context, params *protocol.Initial
 	logger.Info("Initializing server...")
 
 	capabilities := s.Handler().CreateServerCapabilities()
+	capabilities.TextDocumentSync = protocol.TextDocumentSyncKindFull
+
 	capabilities.CompletionProvider = &protocol.CompletionOptions{
 		TriggerCharacters: []string{".", "@"},
 	}

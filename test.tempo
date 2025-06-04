@@ -1,6 +1,0 @@
-func@B bar() {}
-
-func@A foo() {
-  let closure = bar@A;
-  closure();
-}
