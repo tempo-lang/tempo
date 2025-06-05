@@ -97,6 +97,8 @@ func (s *tempoServer) Handler() *protocol.Handler {
 		TextDocumentDefinition:        s.gotoDefinition,
 		TextDocumentReferences:        s.gotoReferences,
 		TextDocumentDocumentSymbol:    s.documentSymbols,
+		TextDocumentPrepareRename:     s.prepareRename,
+		TextDocumentRename:            s.renameSymbol,
 	}
 }
 
@@ -112,6 +114,10 @@ func (s *tempoServer) initialize(context *glsp.Context, params *protocol.Initial
 
 	capabilities.SignatureHelpProvider = &protocol.SignatureHelpOptions{
 		TriggerCharacters: []string{"("},
+	}
+
+	capabilities.RenameProvider = &protocol.RenameOptions{
+		PrepareProvider: toPtr(true),
 	}
 
 	logger.Infof("Capabilities: %#v", capabilities)
