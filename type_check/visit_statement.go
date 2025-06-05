@@ -40,7 +40,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 		if !typeFailed {
 			newType, ok := exprType.CoerceTo(declType)
 			if !ok {
-				tc.reportError(type_error.NewInvalidDeclTypeError(ctx.ValueType(), declType, ctx.Expr(), exprType))
+				tc.reportError(type_error.NewInvalidDeclType(ctx.ValueType(), declType, ctx.Expr(), exprType))
 				typeFailed = true
 			} else {
 				stmtType = newType
@@ -75,19 +75,18 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 	}
 
 	tc.info.Symbols[ctx.Ident()] = sym
+	sym.AddWrite(ctx.Ident())
 
 	if !sym.IsAssignable() {
-		tc.reportError(type_error.NewUnassignableSymbolError(ctx, sym.Type()))
+		tc.reportError(type_error.NewUnassignableSymbol(ctx, sym.Type()))
 	} else {
 		exprType := tc.visitExpr(ctx.Expr())
 		if _, ok := exprType.CoerceTo(sym.Type()); !ok {
-			tc.reportError(type_error.NewInvalidAssignTypeError(ctx, sym.Type(), exprType))
+			tc.reportError(type_error.NewInvalidAssignType(ctx, sym.Type(), exprType))
 		}
 	}
 
 	tc.checkExprInScope(ctx.Ident(), sym.Type().Roles())
-
-	sym.AddWrite(ctx.Ident())
 
 	return false
 }
@@ -96,7 +95,7 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 	guardType := tc.visitExpr(ctx.Expr())
 
 	if _, ok := guardType.Value().CoerceTo(types.Bool()); !ok {
-		tc.reportError(type_error.NewInvalidValueError(ctx.Expr(), guardType.Value(), types.Bool()))
+		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), guardType.Value(), types.Bool()))
 	}
 
 	tc.checkExprInScope(ctx.Expr(), guardType.Roles())
@@ -136,7 +135,7 @@ func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
 	missingRoles := funcSym.Scope().Roles().
 		SubtractParticipants(tc.currentScope.Roles().Participants())
 	if len(missingRoles) > 0 {
-		tc.reportError(type_error.NewReturnNotAllRolesError(ctx, missingRoles))
+		tc.reportError(type_error.NewReturnNotAllRoles(ctx, missingRoles))
 	}
 
 	if ctx.Expr() == nil {
@@ -149,7 +148,7 @@ func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
 	returnType := tc.visitExpr(ctx.Expr())
 
 	if _, ok := returnType.CoerceTo(expectedReturnType); !ok {
-		tc.reportError(type_error.NewIncompatibleTypesError(ctx.Expr(), returnType, expectedReturnType))
+		tc.reportError(type_error.NewIncompatibleTypes(ctx.Expr(), returnType, expectedReturnType))
 	}
 
 	return true

@@ -20,7 +20,7 @@ func (tc typeChecker) checkDuplicateRoles(ctx antlr.ParserRuleContext, roleType 
 
 	// report last error if present
 	if len(duplications) > 0 {
-		return type_error.NewDuplicateRolesError(ctx, duplications)
+		return type_error.NewDuplicateRoles(ctx, duplications)
 	}
 	return nil
 }

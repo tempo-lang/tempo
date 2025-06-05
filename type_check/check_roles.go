@@ -19,7 +19,7 @@ func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType 
 	}
 
 	if len(unknownRoles) > 0 {
-		tc.reportError(type_error.NewValueRoleNotInScopeError(value, roleType, unknownRoles))
+		tc.reportError(type_error.NewValueRoleNotInScope(value, roleType, unknownRoles))
 		return false
 	}
 
@@ -38,7 +38,7 @@ func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool 
 	}
 
 	if len(unknownRoles) > 0 {
-		tc.reportError(type_error.NewRolesNotInScopeError(roleType, unknownRoles))
+		tc.reportError(type_error.NewRolesNotInScope(roleType, unknownRoles))
 		return false
 	}
 

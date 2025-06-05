@@ -9,124 +9,95 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-type InvalidNumberError struct {
+type InvalidNumber struct {
+	baseError
 	Num parser.ILiteralContext
 }
 
-func NewInvalidNumberError(num parser.ILiteralContext) Error {
-	return &InvalidNumberError{
+func NewInvalidNumber(num parser.ILiteralContext) Error {
+	return &InvalidNumber{
 		Num: num,
 	}
 }
 
-func (i *InvalidNumberError) Error() string {
+func (i *InvalidNumber) Error() string {
 	return fmt.Sprintf("invalid number '%s'", i.Num.GetText())
 }
 
-func (i *InvalidNumberError) IsTypeError() {}
-
-func (i *InvalidNumberError) ParserRule() antlr.ParserRuleContext {
+func (i *InvalidNumber) ParserRule() antlr.ParserRuleContext {
 	return i.Num
 }
 
 type ComNonLocalSender struct {
+	baseError
 	Com *parser.ExprComContext
 }
 
-type ComNonLocalSenderError struct {
-	Com *parser.ExprComContext
-}
-
-func (e *ComNonLocalSenderError) Error() string {
+func (e *ComNonLocalSender) Error() string {
 	return "only a single sender is allowed"
 }
 
-func (e *ComNonLocalSenderError) IsTypeError() {}
-
-func (e *ComNonLocalSenderError) ParserRule() antlr.ParserRuleContext {
+func (e *ComNonLocalSender) ParserRule() antlr.ParserRuleContext {
 	return e.Com.GetSender()
 }
 
-func NewComNonLocalSenderError(com *parser.ExprComContext) Error {
-	return &ComNonLocalSenderError{
+func NewComNonLocalSender(com *parser.ExprComContext) Error {
+	return &ComNonLocalSender{
 		Com: com,
 	}
 }
 
-type ComValueNotAtSenderError struct {
+type ComValueNotAtSender struct {
+	baseError
 	Com      *parser.ExprComContext
 	ExprType *types.Type
 }
 
-func (c *ComValueNotAtSenderError) Error() string {
+func (c *ComValueNotAtSender) Error() string {
 	sender := parser.RoleTypeAllIdents(c.Com.RoleType(0))[0]
 	return fmt.Sprintf("value of type '%s' is not present at sender '%s'", c.ExprType.ToString(), sender.GetText())
 }
 
-func (c *ComValueNotAtSenderError) IsTypeError() {}
-
-func (c *ComValueNotAtSenderError) ParserRule() antlr.ParserRuleContext {
+func (c *ComValueNotAtSender) ParserRule() antlr.ParserRuleContext {
 	return c.Com.Expr()
 }
 
-func NewComValueNotAtSenderError(com *parser.ExprComContext, exprType *types.Type) Error {
-	return &ComValueNotAtSenderError{
+func NewComValueNotAtSender(com *parser.ExprComContext, exprType *types.Type) Error {
+	return &ComValueNotAtSender{
 		Com:      com,
 		ExprType: exprType,
 	}
 }
 
-type DivisionByZeroError struct {
-	Expr parser.IExprContext
-}
-
-func (e *DivisionByZeroError) Error() string {
-	return "invalid operation, division by zero"
-}
-
-func (e *DivisionByZeroError) IsTypeError() {}
-
-func (e *DivisionByZeroError) ParserRule() antlr.ParserRuleContext {
-	return e.Expr
-}
-
-func NewDivisionByZeroError(expr parser.IExprContext) Error {
-	return &DivisionByZeroError{
-		Expr: expr,
-	}
-}
-
-type UnequatableTypeError struct {
+type UnequatableType struct {
+	baseError
 	BinOp *parser.ExprBinOpContext
 	Value types.Value
 }
 
-func (e *UnequatableTypeError) Error() string {
+func (e *UnequatableType) Error() string {
 	return fmt.Sprintf("type value '%s' is not equatable", e.Value.ToString())
 }
 
-func (e *UnequatableTypeError) IsTypeError() {}
-
-func (e *UnequatableTypeError) ParserRule() antlr.ParserRuleContext {
+func (e *UnequatableType) ParserRule() antlr.ParserRuleContext {
 	return e.BinOp
 }
 
-func NewUnequatableTypeError(binOp *parser.ExprBinOpContext, value types.Value) Error {
-	return &UnequatableTypeError{
+func NewUnequatableType(binOp *parser.ExprBinOpContext, value types.Value) Error {
+	return &UnequatableType{
 		BinOp: binOp,
 		Value: value,
 	}
 }
 
 type StructNotInitialized struct {
+	baseError
 	Ident *parser.ExprIdentContext
 }
 
 func (e *StructNotInitialized) Error() string {
 	return fmt.Sprintf("struct '%s' is not initialized", e.Ident.GetText())
 }
-
-func (e *StructNotInitialized) IsTypeError() {}
 
 func (e *StructNotInitialized) ParserRule() antlr.ParserRuleContext {
 	return e.Ident

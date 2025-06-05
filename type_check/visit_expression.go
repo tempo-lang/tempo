@@ -71,9 +71,9 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 					return allowed, true
 				}
 			}
-			tc.reportError(type_error.NewBinOpIncompatibleTypeError(ctx, lhs.Value(), allowedTypes))
+			tc.reportError(type_error.NewBinOpIncompatibleType(ctx, lhs.Value(), allowedTypes))
 		} else {
-			tc.reportError(type_error.NewValueMismatchError(ctx, lhs.Value(), rhs.Value()))
+			tc.reportError(type_error.NewValueMismatch(ctx, lhs.Value(), rhs.Value()))
 		}
 		return types.Invalid().Value(), false
 	}
@@ -97,7 +97,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 
 		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
 		if !ok {
-			tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
+			tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
 			typeError = true
 		}
 
@@ -106,19 +106,19 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		}
 	case slices.Contains(equalityOps, op):
 		if !lhs.Value().IsEquatable() {
-			tc.reportError(type_error.NewUnequatableTypeError(ctx, lhs.Value()))
+			tc.reportError(type_error.NewUnequatableType(ctx, lhs.Value()))
 		} else if !rhs.Value().IsEquatable() {
-			tc.reportError(type_error.NewUnequatableTypeError(ctx, rhs.Value()))
+			tc.reportError(type_error.NewUnequatableType(ctx, rhs.Value()))
 		} else {
 			if !types.ValuesEqual(lhs.Value(), rhs.Value()) {
-				tc.reportError(type_error.NewValueMismatchError(ctx, lhs.Value(), rhs.Value()))
+				tc.reportError(type_error.NewValueMismatch(ctx, lhs.Value(), rhs.Value()))
 				typeError = true
 			}
 		}
 
 		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
 		if !ok {
-			tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
+			tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
 			typeError = true
 		}
 
@@ -132,7 +132,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 
 		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
 		if !ok {
-			tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
+			tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
 			typeError = true
 		}
 
@@ -146,7 +146,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 
 		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
 		if !ok {
-			tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
+			tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
 			typeError = true
 		}
 
@@ -194,7 +194,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		if isFunc {
 			roleSubst, ok := identType.Roles().SubstituteMap(roles)
 			if !ok {
-				tc.reportError(type_error.NewUnmergableRolesError(ctx, []*types.Roles{identType.Roles(), roles}))
+				tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{identType.Roles(), roles}))
 				return tc.registerType(ctx, types.Invalid())
 			}
 
@@ -225,7 +225,7 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 		return tc.registerType(ctx, types.New(asyncType.Inner(), exprType.Roles()))
 	}
 
-	tc.reportError(type_error.NewExpectedAsyncTypeError(ctx, exprType))
+	tc.reportError(type_error.NewExpectedAsyncType(ctx, exprType))
 	return tc.registerType(ctx, types.Invalid())
 }
 
@@ -237,13 +237,13 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	invalidRole := false
 
 	if !innerExprType.Value().IsSendable() {
-		tc.reportError(type_error.NewUnsendableTypeError(ctx, innerExprType))
+		tc.reportError(type_error.NewUnsendableType(ctx, innerExprType))
 		invalidType = true
 	}
 
 	if fromRoles, ok := tc.parseRoleType(ctx.RoleType(0)); ok {
 		if !fromRoles.IsLocalRole() {
-			tc.reportError(type_error.NewComNonLocalSenderError(ctx))
+			tc.reportError(type_error.NewComNonLocalSender(ctx))
 		}
 
 		if tc.checkRolesInScope(ctx.RoleType(0)) {
@@ -252,7 +252,7 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 
 		exprHasParticipants := len(innerExprType.Roles().Participants()) > 0
 		if exprHasParticipants && !innerExprType.Roles().Contains(fromRoles.Participants()[0]) {
-			tc.reportError(type_error.NewComValueNotAtSenderError(ctx, innerExprType))
+			tc.reportError(type_error.NewComValueNotAtSender(ctx, innerExprType))
 		}
 	} else {
 		invalidRole = true
@@ -302,34 +302,34 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	switch callFuncValue := callType.Value().(type) {
 	case *types.FunctionType:
 		if len(ctx.FuncArgList().AllExpr()) != len(callFuncValue.Params()) {
-			tc.reportError(type_error.NewCallWrongArgCountError(ctx))
+			tc.reportError(type_error.NewCallWrongArgCount(ctx))
 		} else {
 			for i, arg := range ctx.FuncArgList().AllExpr() {
 				argType := tc.visitExpr(arg)
 				paramType := callFuncValue.Params()[i]
 
 				if _, ok := argType.CoerceTo(paramType); !ok {
-					tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramType))
+					tc.reportError(type_error.NewIncompatibleTypes(arg, argType, paramType))
 				}
 			}
 		}
 		return tc.registerType(ctx, callFuncValue.ReturnType())
 	case *types.ClosureType:
 		if len(ctx.FuncArgList().AllExpr()) != len(callFuncValue.Params()) {
-			tc.reportError(type_error.NewCallWrongArgCountError(ctx))
+			tc.reportError(type_error.NewCallWrongArgCount(ctx))
 		} else {
 			for i, arg := range ctx.FuncArgList().AllExpr() {
 				argType := tc.visitExpr(arg)
 				paramType := callFuncValue.Params()[i]
 
 				if _, ok := argType.CoerceTo(paramType); !ok {
-					tc.reportError(type_error.NewIncompatibleTypesError(arg, argType, paramType))
+					tc.reportError(type_error.NewIncompatibleTypes(arg, argType, paramType))
 				}
 			}
 		}
 		return tc.registerType(ctx, callFuncValue.ReturnType())
 	default:
-		tc.reportError(type_error.NewCallNonFunctionError(ctx, callType))
+		tc.reportError(type_error.NewCallNonFunction(ctx, callType))
 		return tc.registerType(ctx, types.Invalid())
 	}
 }
@@ -351,11 +351,12 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 
 	structSym, ok := sym.(*sym_table.StructSymbol)
 	if !ok {
-		tc.reportError(type_error.NewExpectedStructTypeError(sym, ctx))
+		tc.reportError(type_error.NewExpectedStructType(sym, ctx))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
 	tc.info.Symbols[ctx.Ident()] = sym
+	sym.AddRead(ctx.Ident())
 
 	roles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
@@ -376,14 +377,14 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		}
 
 		if !found {
-			tc.reportError(type_error.NewMissingStructFieldError(ctx, defField))
+			tc.reportError(type_error.NewMissingStructField(ctx, defField))
 		}
 	}
 
 	structRoles := structSym.Type().Roles()
 	defRoleSubst, ok := structRoles.SubstituteMap(roles)
 	if !ok {
-		tc.reportError(type_error.NewStructWrongRoleCountError(ctx.RoleType(), structSym))
+		tc.reportError(type_error.NewStructWrongRoleCount(ctx.RoleType(), structSym))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -409,7 +410,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	for name, exprType := range exprFieldsType {
 		defField, found := defFields[name]
 		if !found {
-			tc.reportError(type_error.NewUnexpectedStructFieldError(exprFieldsIdent[name], structSym))
+			tc.reportError(type_error.NewUnexpectedStructField(exprFieldsIdent[name], structSym))
 			foundError = true
 			continue
 		}
@@ -417,7 +418,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		defSubstType := defField.SubstituteRoles(defRoleSubst)
 
 		if _, ok := exprType.CoerceTo(defSubstType); !ok {
-			tc.reportError(type_error.NewIncompatibleTypesError(exprFieldsExpr[name], exprType, defField))
+			tc.reportError(type_error.NewIncompatibleTypes(exprFieldsExpr[name], exprType, defField))
 			foundError = true
 			continue
 		}
@@ -507,7 +508,7 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 
 	closureRoles, _ := tc.parseRoleType(sig.RoleType())
 	if closureRoles.IsSharedRole() {
-		tc.reportError(type_error.NewUnexpectedSharedTypeError(sig.RoleType()))
+		tc.reportError(type_error.NewUnexpectedSharedType(sig.RoleType()))
 	}
 
 	// enter scope

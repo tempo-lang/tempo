@@ -10,75 +10,73 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-type DuplicateRolesError struct {
+type DuplicateRoles struct {
+	baseError
 	Ctx            antlr.ParserRuleContext
 	DuplicateRoles []string
 }
 
-func NewDuplicateRolesError(ctx antlr.ParserRuleContext, duplicateRoles []string) Error {
-	return &DuplicateRolesError{
+func NewDuplicateRoles(ctx antlr.ParserRuleContext, duplicateRoles []string) Error {
+	return &DuplicateRoles{
 		Ctx:            ctx,
 		DuplicateRoles: duplicateRoles,
 	}
 }
 
-func (e *DuplicateRolesError) IsTypeError() {}
-
-func (e *DuplicateRolesError) Error() string {
+func (e *DuplicateRoles) Error() string {
 	dupRoles := misc.JoinStrings(e.DuplicateRoles, ",")
 	return fmt.Sprintf("duplicate roles '%s'", dupRoles)
 }
 
-func (e *DuplicateRolesError) ParserRule() antlr.ParserRuleContext {
+func (e *DuplicateRoles) ParserRule() antlr.ParserRuleContext {
 	return e.Ctx
 }
 
-type RolesNotInScopeError struct {
+type RolesNotInScope struct {
+	baseError
 	RoleType     parser.IRoleTypeContext
 	UnknownRoles []string
 }
 
-func NewRolesNotInScopeError(roleType parser.IRoleTypeContext, unknownRoles []string) Error {
-	return &RolesNotInScopeError{
+func NewRolesNotInScope(roleType parser.IRoleTypeContext, unknownRoles []string) Error {
+	return &RolesNotInScope{
 		RoleType:     roleType,
 		UnknownRoles: unknownRoles,
 	}
 }
 
-func (e *RolesNotInScopeError) IsTypeError() {}
-
-func (e *RolesNotInScopeError) Error() string {
+func (e *RolesNotInScope) Error() string {
 	return fmt.Sprintf("roles '%s' are not in scope", misc.JoinStrings(e.UnknownRoles, ","))
 }
 
-func (e *RolesNotInScopeError) ParserRule() antlr.ParserRuleContext {
+func (e *RolesNotInScope) ParserRule() antlr.ParserRuleContext {
 	return e.RoleType
 }
 
-type UnmergableRolesError struct {
+type UnmergableRoles struct {
+	baseError
 	Expr  parser.IExprContext
 	Roles []*types.Roles
 }
 
-func (u *UnmergableRolesError) Error() string {
+func (u *UnmergableRoles) Error() string {
 	roles := misc.JoinStringsFunc(u.Roles, ", ", func(role *types.Roles) string { return role.ToString() })
 	return fmt.Sprintf("can not merge roles '%s'", roles)
 }
 
-func (u *UnmergableRolesError) IsTypeError() {}
-
-func (u *UnmergableRolesError) ParserRule() antlr.ParserRuleContext {
+func (u *UnmergableRoles) ParserRule() antlr.ParserRuleContext {
 	return u.Expr
 }
 
-func NewUnmergableRolesError(expr parser.IExprContext, roles []*types.Roles) Error {
-	return &UnmergableRolesError{
+func NewUnmergableRoles(expr parser.IExprContext, roles []*types.Roles) Error {
+	return &UnmergableRoles{
 		Expr:  expr,
 		Roles: roles,
 	}
 }
 
 type SharedRoleSingleParticipant struct {
+	baseError
 	roleType *parser.RoleTypeSharedContext
 }
 
@@ -91,8 +89,6 @@ func NewSharedRoleSingleParticipant(roleType *parser.RoleTypeSharedContext) Erro
 func (e *SharedRoleSingleParticipant) Error() string {
 	return "shared role must have more than one participant"
 }
-
-func (e *SharedRoleSingleParticipant) IsTypeError() {}
 
 func (e *SharedRoleSingleParticipant) ParserRule() antlr.ParserRuleContext {
 	return e.roleType

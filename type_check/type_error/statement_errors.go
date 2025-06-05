@@ -10,15 +10,16 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-type InvalidDeclTypeError struct {
+type InvalidDeclType struct {
+	baseError
 	DeclToken parser.IValueTypeContext
 	DeclType  *types.Type
 	ExprToken parser.IExprContext
 	ExprType  *types.Type
 }
 
-func NewInvalidDeclTypeError(declToken parser.IValueTypeContext, declType *types.Type, exprToken parser.IExprContext, exprType *types.Type) Error {
-	return &InvalidDeclTypeError{
+func NewInvalidDeclType(declToken parser.IValueTypeContext, declType *types.Type, exprToken parser.IExprContext, exprType *types.Type) Error {
+	return &InvalidDeclType{
 		DeclToken: declToken,
 		DeclType:  declType,
 		ExprToken: exprToken,
@@ -26,58 +27,54 @@ func NewInvalidDeclTypeError(declToken parser.IValueTypeContext, declType *types
 	}
 }
 
-func (e *InvalidDeclTypeError) Error() string {
+func (e *InvalidDeclType) Error() string {
 	return fmt.Sprintf("invalid declaration type, expected '%s' found '%s'", e.DeclType.ToString(), e.ExprType.ToString())
 }
 
-func (e *InvalidDeclTypeError) IsTypeError() {}
-
-func (e *InvalidDeclTypeError) ParserRule() antlr.ParserRuleContext {
+func (e *InvalidDeclType) ParserRule() antlr.ParserRuleContext {
 	return e.ExprToken
 }
 
-type InvalidAssignTypeError struct {
+type InvalidAssignType struct {
+	baseError
 	Assign   *parser.StmtAssignContext
 	VarType  *types.Type
 	ExprType *types.Type
 }
 
-func (i *InvalidAssignTypeError) Error() string {
+func (i *InvalidAssignType) Error() string {
 	return fmt.Sprintf("invalid assignment type, expected '%s' found '%s'", i.VarType.ToString(), i.ExprType.ToString())
 }
 
-func (i *InvalidAssignTypeError) IsTypeError() {}
-
-func (i *InvalidAssignTypeError) ParserRule() antlr.ParserRuleContext {
+func (i *InvalidAssignType) ParserRule() antlr.ParserRuleContext {
 	return i.Assign.Expr()
 }
 
-func NewInvalidAssignTypeError(assign *parser.StmtAssignContext, varType *types.Type, exprType *types.Type) Error {
-	return &InvalidAssignTypeError{
+func NewInvalidAssignType(assign *parser.StmtAssignContext, varType *types.Type, exprType *types.Type) Error {
+	return &InvalidAssignType{
 		Assign:   assign,
 		VarType:  varType,
 		ExprType: exprType,
 	}
 }
 
-type ReturnNotAllRolesError struct {
+type ReturnNotAllRoles struct {
+	baseError
 	Return       *parser.StmtReturnContext
 	MissignRoles []string
 }
 
-func NewReturnNotAllRolesError(ret *parser.StmtReturnContext, missingRoles []string) Error {
-	return &ReturnNotAllRolesError{
+func NewReturnNotAllRoles(ret *parser.StmtReturnContext, missingRoles []string) Error {
+	return &ReturnNotAllRoles{
 		Return:       ret,
 		MissignRoles: missingRoles,
 	}
 }
 
-func (e *ReturnNotAllRolesError) Error() string {
+func (e *ReturnNotAllRoles) Error() string {
 	return fmt.Sprintf("return statement is missing roles '%s'", misc.JoinStrings(e.MissignRoles, ","))
 }
 
-func (e *ReturnNotAllRolesError) IsTypeError() {}
-
-func (e *ReturnNotAllRolesError) ParserRule() antlr.ParserRuleContext {
+func (e *ReturnNotAllRoles) ParserRule() antlr.ParserRuleContext {
 	return e.Return
 }

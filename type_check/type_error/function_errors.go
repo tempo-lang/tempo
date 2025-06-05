@@ -10,69 +10,67 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-type CallNonFunctionError struct {
+type CallNonFunction struct {
+	baseError
 	callExpr *parser.ExprCallContext
 	symType  *types.Type
 }
 
-func NewCallNonFunctionError(callExpr *parser.ExprCallContext, symType *types.Type) Error {
-	return &CallNonFunctionError{
+func NewCallNonFunction(callExpr *parser.ExprCallContext, symType *types.Type) Error {
+	return &CallNonFunction{
 		callExpr: callExpr,
 		symType:  symType,
 	}
 }
 
-func (e *CallNonFunctionError) Error() string {
+func (e *CallNonFunction) Error() string {
 	return fmt.Sprintf("call to non-function '%s'", e.symType.ToString())
 }
 
-func (e *CallNonFunctionError) IsTypeError() {}
-
-func (e *CallNonFunctionError) ParserRule() antlr.ParserRuleContext {
+func (e *CallNonFunction) ParserRule() antlr.ParserRuleContext {
 	return e.callExpr
 }
 
-type CallWrongArgCountError struct {
+type CallWrongArgCount struct {
+	baseError
 	callExpr *parser.ExprCallContext
 }
 
-func NewCallWrongArgCountError(callExpr *parser.ExprCallContext) Error {
-	return &CallWrongArgCountError{
+func NewCallWrongArgCount(callExpr *parser.ExprCallContext) Error {
+	return &CallWrongArgCount{
 		callExpr: callExpr,
 	}
 }
 
-func (e *CallWrongArgCountError) Error() string {
+func (e *CallWrongArgCount) Error() string {
 	return "call has wrong number of arguments"
 }
 
-func (e *CallWrongArgCountError) IsTypeError() {}
-
-func (e *CallWrongArgCountError) ParserRule() antlr.ParserRuleContext {
+func (e *CallWrongArgCount) ParserRule() antlr.ParserRuleContext {
 	return e.callExpr
 }
 
-type CallWrongRoleCountError struct {
+type CallWrongRoleCount struct {
+	baseError
 	callExpr *parser.ExprCallContext
 }
 
-func NewCallWrongRoleCountError(callExpr *parser.ExprCallContext) Error {
-	return &CallWrongRoleCountError{
+func NewCallWrongRoleCount(callExpr *parser.ExprCallContext) Error {
+	return &CallWrongRoleCount{
 		callExpr: callExpr,
 	}
 }
 
-func (e *CallWrongRoleCountError) Error() string {
+func (e *CallWrongRoleCount) Error() string {
 	return "call has wrong number of roles"
 }
 
-func (e *CallWrongRoleCountError) IsTypeError() {}
-
-func (e *CallWrongRoleCountError) ParserRule() antlr.ParserRuleContext {
+func (e *CallWrongRoleCount) ParserRule() antlr.ParserRuleContext {
 	return e.callExpr
 }
 
 type InstantiateNonFunction struct {
+	baseError
 	identAccess parser.IIdentAccessContext
 	sym         sym_table.Symbol
 }
@@ -88,13 +86,12 @@ func (e *InstantiateNonFunction) Error() string {
 	return fmt.Sprintf("can not instantiate roles of '%s' with type '%s', since it is not a function", e.sym.SymbolName(), e.sym.Type().ToString())
 }
 
-func (e *InstantiateNonFunction) IsTypeError() {}
-
 func (e *InstantiateNonFunction) ParserRule() antlr.ParserRuleContext {
 	return e.identAccess.RoleType()
 }
 
 type FunctionNotInstantiated struct {
+	baseError
 	identAccess parser.IIdentAccessContext
 	sym         sym_table.Symbol
 }
@@ -110,13 +107,12 @@ func (e *FunctionNotInstantiated) Error() string {
 	return "roles of function must be instantiated"
 }
 
-func (e *FunctionNotInstantiated) IsTypeError() {}
-
 func (e *FunctionNotInstantiated) ParserRule() antlr.ParserRuleContext {
 	return e.identAccess
 }
 
 type FunctionMissingReturn struct {
+	baseError
 	callableEnv sym_table.CallableEnv
 }
 
@@ -130,13 +126,12 @@ func (e *FunctionMissingReturn) Error() string {
 	return "missing return statement"
 }
 
-func (e *FunctionMissingReturn) IsTypeError() {}
-
 func (e *FunctionMissingReturn) ParserRule() antlr.ParserRuleContext {
 	return e.callableEnv.ReturnCtx()
 }
 
 type ReturnValueMissing struct {
+	baseError
 	callableEnv sym_table.CallableEnv
 	returnCtx   *parser.StmtReturnContext
 }
@@ -151,8 +146,6 @@ func NewReturnValueMissing(callableEnv sym_table.CallableEnv, returnCtx *parser.
 func (e *ReturnValueMissing) Error() string {
 	return fmt.Sprintf("return is missing value of type '%s'", e.callableEnv.ReturnType().ToString())
 }
-
-func (e *ReturnValueMissing) IsTypeError() {}
 
 func (e *ReturnValueMissing) ParserRule() antlr.ParserRuleContext {
 	return e.returnCtx

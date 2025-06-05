@@ -20,7 +20,7 @@ func (tc *typeChecker) checkLiteralRoles(roleTypeCtx parser.IRoleTypeContext) *t
 
 	hasError := false
 	if roleType.IsDistributedRole() {
-		tc.reportError(type_error.NewNotDistributedTypeError(roleTypeCtx))
+		tc.reportError(type_error.NewNotDistributedType(roleTypeCtx))
 		hasError = true
 	}
 
@@ -44,7 +44,7 @@ func (tc *typeChecker) VisitExprPrimitive(ctx *parser.ExprPrimitiveContext) any 
 func (tc *typeChecker) VisitInt(ctx *parser.IntContext) any {
 	_, err := strconv.Atoi(ctx.GetText())
 	if err != nil {
-		tc.reportError(type_error.NewInvalidNumberError(ctx))
+		tc.reportError(type_error.NewInvalidNumber(ctx))
 	}
 
 	return types.Int()
@@ -53,7 +53,7 @@ func (tc *typeChecker) VisitInt(ctx *parser.IntContext) any {
 func (tc *typeChecker) VisitFloat(ctx *parser.FloatContext) any {
 	_, err := strconv.ParseFloat(ctx.GetText(), 64)
 	if err != nil {
-		tc.reportError(type_error.NewInvalidNumberError(ctx))
+		tc.reportError(type_error.NewInvalidNumber(ctx))
 	}
 
 	return types.Float()

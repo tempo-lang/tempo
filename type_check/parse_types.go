@@ -47,7 +47,7 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 	if builtinType, isBuiltinType := BuiltinValues()[typeName.GetText()]; isBuiltinType {
 		typeValue = builtinType
 		if !role.IsSharedRole() && len(role.Participants()) > 1 {
-			return types.Invalid(), type_error.NewNotDistributedTypeError(ctx)
+			return types.Invalid(), type_error.NewNotDistributedType(ctx)
 		}
 	}
 
@@ -58,6 +58,7 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 		}
 
 		typeValue = sym.Type().Value()
+		sym.AddRead(ctx.Ident())
 	}
 
 	if typeValue != nil {
@@ -66,7 +67,7 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 		}
 		return types.New(typeValue, role), nil
 	} else {
-		return types.Invalid(), type_error.NewUnknownTypeError(typeName)
+		return types.Invalid(), type_error.NewUnknownType(typeName)
 	}
 }
 
@@ -123,7 +124,7 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, [
 		}
 
 		if unknownRoles := paramType.Roles().SubtractParticipants(funcRoles.Participants()); len(unknownRoles) > 0 {
-			errors = append(errors, type_error.NewRolesNotInScopeError(param.ValueType().RoleType(), unknownRoles))
+			errors = append(errors, type_error.NewRolesNotInScope(param.ValueType().RoleType(), unknownRoles))
 		}
 
 		params = append(params, paramType)

@@ -11,6 +11,7 @@ import (
 )
 
 type SymbolAlreadyExists struct {
+	baseError
 	ExistingSymbol parser.IIdentContext
 	NewSymbol      parser.IIdentContext
 }
@@ -22,8 +23,6 @@ func NewSymbolAlreadyExistsError(existing parser.IIdentContext, newSym parser.II
 	}
 }
 
-func (s *SymbolAlreadyExists) IsTypeError() {}
-
 func (s *SymbolAlreadyExists) Error() string {
 	return fmt.Sprintf("symbol '%s' already declared", s.NewSymbol.GetText())
 }
@@ -32,137 +31,132 @@ func (e *SymbolAlreadyExists) ParserRule() antlr.ParserRuleContext {
 	return e.NewSymbol
 }
 
-type UnknownSymbolError struct {
+type UnknownSymbol struct {
+	baseError
 	SymName parser.IIdentContext
 }
 
-func NewUnknownSymbolError(symName parser.IIdentContext) Error {
-	return &UnknownSymbolError{
+func NewUnknownSymbol(symName parser.IIdentContext) Error {
+	return &UnknownSymbol{
 		SymName: symName,
 	}
 }
 
-func (e *UnknownSymbolError) Error() string {
+func (e *UnknownSymbol) Error() string {
 	return fmt.Sprintf("unknown symbol '%s'", e.SymName.GetText())
 }
 
-func (e *UnknownSymbolError) IsTypeError() {}
-
-func (e *UnknownSymbolError) ParserRule() antlr.ParserRuleContext {
+func (e *UnknownSymbol) ParserRule() antlr.ParserRuleContext {
 	return e.SymName
 }
 
-type UnassignableSymbolError struct {
+type UnassignableSymbol struct {
+	baseError
 	Assign *parser.StmtAssignContext
 	Type   *types.Type
 }
 
-func (u *UnassignableSymbolError) Error() string {
+func (u *UnassignableSymbol) Error() string {
 	return fmt.Sprintf("can not assign value to '%s' of type '%s'", u.Assign.Ident().GetText(), u.Type.ToString())
 }
 
-func (u *UnassignableSymbolError) IsTypeError() {}
-
-func (u *UnassignableSymbolError) ParserRule() antlr.ParserRuleContext {
+func (u *UnassignableSymbol) ParserRule() antlr.ParserRuleContext {
 	return u.Assign
 }
 
-func NewUnassignableSymbolError(assign *parser.StmtAssignContext, symType *types.Type) Error {
-	return &UnassignableSymbolError{
+func NewUnassignableSymbol(assign *parser.StmtAssignContext, symType *types.Type) Error {
+	return &UnassignableSymbol{
 		Assign: assign,
 		Type:   symType,
 	}
 }
 
-type ExpectedStructTypeError struct {
+type ExpectedStructType struct {
+	baseError
 	sym  sym_table.Symbol
 	expr *parser.ExprStructContext
 }
 
-func (e *ExpectedStructTypeError) Error() string {
+func (e *ExpectedStructType) Error() string {
 	return fmt.Sprintf("type '%s' is not a struct", e.sym.Type().ToString())
 }
 
-func (e *ExpectedStructTypeError) IsTypeError() {}
-
-func (e *ExpectedStructTypeError) ParserRule() antlr.ParserRuleContext {
+func (e *ExpectedStructType) ParserRule() antlr.ParserRuleContext {
 	return e.expr
 }
 
-func NewExpectedStructTypeError(sym sym_table.Symbol, expr *parser.ExprStructContext) Error {
-	return &ExpectedStructTypeError{
+func NewExpectedStructType(sym sym_table.Symbol, expr *parser.ExprStructContext) Error {
+	return &ExpectedStructType{
 		sym:  sym,
 		expr: expr,
 	}
 }
 
-type UnexpectedStructFieldError struct {
+type UnexpectedStructField struct {
+	baseError
 	ident parser.IIdentContext
 	sym   *sym_table.StructSymbol
 }
 
-func (e *UnexpectedStructFieldError) Error() string {
+func (e *UnexpectedStructField) Error() string {
 	return fmt.Sprintf("unexpected field '%s' in struct '%s'", e.ident.GetText(), e.sym.SymbolName())
 }
 
-func (e *UnexpectedStructFieldError) IsTypeError() {}
-
-func (e *UnexpectedStructFieldError) ParserRule() antlr.ParserRuleContext {
+func (e *UnexpectedStructField) ParserRule() antlr.ParserRuleContext {
 	return e.ident
 }
 
-func NewUnexpectedStructFieldError(ident parser.IIdentContext, sym *sym_table.StructSymbol) Error {
-	return &UnexpectedStructFieldError{
+func NewUnexpectedStructField(ident parser.IIdentContext, sym *sym_table.StructSymbol) Error {
+	return &UnexpectedStructField{
 		ident: ident,
 		sym:   sym,
 	}
 }
 
-type MissingStructFieldError struct {
+type MissingStructField struct {
+	baseError
 	expr  *parser.ExprStructContext
 	field *sym_table.StructFieldSymbol
 }
 
-func (e *MissingStructFieldError) Error() string {
+func (e *MissingStructField) Error() string {
 	return fmt.Sprintf("missing field '%s' in struct '%s'", e.field.SymbolName(), e.field.Struct().SymbolName())
 }
 
-func (e *MissingStructFieldError) IsTypeError() {}
-
-func (e *MissingStructFieldError) ParserRule() antlr.ParserRuleContext {
+func (e *MissingStructField) ParserRule() antlr.ParserRuleContext {
 	return e.expr
 }
 
-func NewMissingStructFieldError(expr *parser.ExprStructContext, field *sym_table.StructFieldSymbol) Error {
-	return &MissingStructFieldError{
+func NewMissingStructField(expr *parser.ExprStructContext, field *sym_table.StructFieldSymbol) Error {
+	return &MissingStructField{
 		expr:  expr,
 		field: field,
 	}
 }
 
-type StructWrongRoleCountError struct {
+type StructWrongRoleCount struct {
+	baseError
 	roleType parser.IRoleTypeContext
 	sym      *sym_table.StructSymbol
 }
 
-func (e *StructWrongRoleCountError) Error() string {
+func (e *StructWrongRoleCount) Error() string {
 	return fmt.Sprintf("wrong number of roles for struct '%s'", e.sym.SymbolName())
 }
 
-func (e *StructWrongRoleCountError) IsTypeError() {}
-
-func (e *StructWrongRoleCountError) ParserRule() antlr.ParserRuleContext {
+func (e *StructWrongRoleCount) ParserRule() antlr.ParserRuleContext {
 	return e.roleType
 }
 
-func NewStructWrongRoleCountError(roleType parser.IRoleTypeContext, sym *sym_table.StructSymbol) Error {
-	return &StructWrongRoleCountError{
+func NewStructWrongRoleCount(roleType parser.IRoleTypeContext, sym *sym_table.StructSymbol) Error {
+	return &StructWrongRoleCount{
 		roleType: roleType,
 		sym:      sym,
 	}
 }
 
 type FieldAccessUnknownField struct {
+	baseError
 	expr *parser.ExprFieldAccessContext
 	sym  sym_table.Symbol
 }
@@ -170,8 +164,6 @@ type FieldAccessUnknownField struct {
 func (e *FieldAccessUnknownField) Error() string {
 	return fmt.Sprintf("unknown field '%s' in '%s'", e.expr.Ident().GetText(), e.sym.SymbolName())
 }
-
-func (e *FieldAccessUnknownField) IsTypeError() {}
 
 func (e *FieldAccessUnknownField) ParserRule() antlr.ParserRuleContext {
 	return e.expr.Ident()
@@ -185,6 +177,7 @@ func NewFieldAccessUnknownField(expr *parser.ExprFieldAccessContext, sym sym_tab
 }
 
 type FieldAccessUnexpectedType struct {
+	baseError
 	fieldAccess *parser.ExprFieldAccessContext
 	objectType  *types.Type
 }

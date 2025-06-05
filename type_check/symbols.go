@@ -9,7 +9,7 @@ import (
 func (tc *typeChecker) lookupSymbol(name parser.IIdentContext) (sym_table.Symbol, type_error.Error) {
 	sym, ok := tc.currentScope.LookupSymbol(name)
 	if !ok {
-		return nil, type_error.NewUnknownSymbolError(name)
+		return nil, type_error.NewUnknownSymbol(name)
 	}
 	return sym, nil
 }

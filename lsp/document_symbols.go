@@ -21,6 +21,10 @@ func documentSymbolsInScope(scope *sym_table.Scope) []protocol.DocumentSymbol {
 	result := []protocol.DocumentSymbol{}
 
 	for sym := range scope.Symbols() {
+		if sym.SymbolName() == "" {
+			continue
+		}
+
 		symNameRange := parserRuleToRange(sym.Ident())
 		newSym := protocol.DocumentSymbol{
 			Name:           sym.SymbolName(),
