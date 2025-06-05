@@ -3,6 +3,7 @@ package type_error
 import (
 	"fmt"
 
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 
@@ -62,6 +63,25 @@ func (c *ComValueNotAtSender) ParserRule() antlr.ParserRuleContext {
 	return c.Com.Expr()
 }
 
+func (c *ComValueNotAtSender) Annotations() []Annotation {
+	roles := c.ExprType.Roles()
+	if roles.IsLocalRole() {
+		return []Annotation{
+			{
+				Type:    AnnotationTypeHint,
+				Message: fmt.Sprintf("change sender to '%s', so it matches the role of the value.", roles.Participants()[0]),
+			},
+		}
+	} else {
+		return []Annotation{
+			{
+				Type:    AnnotationTypeHint,
+				Message: fmt.Sprintf("change sender to one of '%s', so it matches one of the roles having the value.", misc.JoinStrings(roles.Participants(), ", ")),
+			},
+		}
+	}
+}
+
 func NewComValueNotAtSender(com *parser.ExprComContext, exprType *types.Type) Error {
 	return &ComValueNotAtSender{
 		Com:      com,
@@ -101,6 +121,13 @@ func (e *StructNotInitialized) Error() string {
 
 func (e *StructNotInitialized) ParserRule() antlr.ParserRuleContext {
 	return e.Ident
+}
+
+func (e *StructNotInitialized) Annotations() []Annotation {
+	return []Annotation{{
+		Type:    "hint",
+		Message: fmt.Sprintf("add roles after the name of the structure, like %s@(A,B,C)", e.Ident.GetText()),
+	}}
 }
 
 func NewStructNotInitialized(ident *parser.ExprIdentContext) Error {

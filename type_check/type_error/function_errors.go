@@ -107,6 +107,13 @@ func (e *FunctionNotInstantiated) Error() string {
 	return "roles of function must be instantiated"
 }
 
+func (e *FunctionNotInstantiated) Annotations() []Annotation {
+	return []Annotation{{
+		Type:    "hint",
+		Message: fmt.Sprintf("add roles after the name of the function, like %s@(A,B,C)", e.identAccess.GetText()),
+	}}
+}
+
 func (e *FunctionNotInstantiated) ParserRule() antlr.ParserRuleContext {
 	return e.identAccess
 }

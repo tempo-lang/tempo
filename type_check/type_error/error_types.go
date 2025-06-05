@@ -11,6 +11,18 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+type AnnotationType string
+
+const (
+	AnnotationTypeHint AnnotationType = "hint"
+	AnnotationTypeNote AnnotationType = "note"
+)
+
+type Annotation struct {
+	Type    AnnotationType
+	Message string
+}
+
 type RelatedInfo struct {
 	Message    string
 	ParserRule antlr.ParserRuleContext
@@ -21,12 +33,16 @@ type Error interface {
 	ParserRule() antlr.ParserRuleContext
 	IsTypeError()
 	RelatedInfo() []RelatedInfo
+	Annotations() []Annotation
 }
 
 type baseError struct{}
 
 func (*baseError) IsTypeError() {}
 func (*baseError) RelatedInfo() []RelatedInfo {
+	return nil
+}
+func (*baseError) Annotations() []Annotation {
 	return nil
 }
 
@@ -249,4 +265,11 @@ func (e *NotDistributedType) Error() string {
 
 func (e *NotDistributedType) ParserRule() antlr.ParserRuleContext {
 	return e.typeCtx
+}
+
+func (e *NotDistributedType) Annotations() []Annotation {
+	return []Annotation{{
+		Type:    AnnotationTypeHint,
+		Message: "change the type a single role, or make it a shared type instead.",
+	}}
 }
