@@ -82,9 +82,7 @@ expr:
 		| AND
 		| OR
 	) rhs = expr										# exprBinOp
-	| NUMBER (ROLE_AT roleType)?						# exprNum
-	| STRING (ROLE_AT roleType)?						# exprString
-	| (TRUE | FALSE) (ROLE_AT roleType)?				# exprBool
+	| literal (ROLE_AT roleType)?						# exprPrimitive
 	| AWAIT expr										# exprAwait
 	| closureSig scope									# exprClosure
 	| ident ROLE_AT roleType exprStructField			# exprStruct
@@ -98,6 +96,12 @@ exprStructField:
 	LCURLY (ident COLON expr (COMMA ident COLON expr)*)? RCURLY;
 
 identAccess: ident (ROLE_AT roleType)?;
+
+literal:
+	(NUMBER DOT NUMBER | NUMBER DOT | DOT NUMBER)	# float
+	| NUMBER										# int
+	| STRING										# string
+	| (TRUE | FALSE)								# bool;
 
 /*
  * Lexer Rules

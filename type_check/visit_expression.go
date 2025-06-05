@@ -2,7 +2,6 @@ package type_check
 
 import (
 	"slices"
-	"strconv"
 
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/projection"
@@ -28,8 +27,8 @@ func (tc *typeChecker) registerType(expr parser.IExprContext, exprType *types.Ty
 }
 
 func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
-	lhs := tc.visitExpr(ctx.Expr(0))
-	rhs := tc.visitExpr(ctx.Expr(1))
+	lhs := tc.visitExpr(ctx.GetLhs())
+	rhs := tc.visitExpr(ctx.GetRhs())
 
 	if lhs.IsInvalid() || rhs.IsInvalid() {
 		return types.Invalid()
@@ -66,12 +65,12 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	switch {
 	case slices.Contains(arithmeticOps, op):
 		if _, ok := lhs.Value().CoerceTo(types.Int()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.GetLhs(), lhs.Value(), types.Int()))
 			typeError = true
 		}
 
 		if _, ok := rhs.Value().CoerceTo(types.Int()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.GetRhs(), rhs.Value(), types.Int()))
 			typeError = true
 		}
 
@@ -81,15 +80,15 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			typeError = true
 		}
 
-		if op == projection.OpDiv || op == projection.OpMod {
-			if numExpr, ok := ctx.Expr(1).(*parser.ExprNumContext); ok {
-				if num, err := strconv.Atoi(numExpr.NUMBER().GetText()); err == nil {
-					if num == 0 {
-						tc.reportError(type_error.NewDivisionByZeroError(ctx.Expr(1)))
-					}
-				}
-			}
-		}
+		// if op == projection.OpDiv || op == projection.OpMod {
+		// 	if numExpr, ok := ctx.GetRhs().(*parser.ExprNumContext); ok {
+		// 		if num, err := strconv.Atoi(numExpr.NUMBER().GetText()); err == nil {
+		// 			if num == 0 {
+		// 				tc.reportError(type_error.NewDivisionByZeroError(ctx.GetRhs()))
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		if !typeError {
 			return tc.registerType(ctx, types.New(types.Int(), newRoles))
@@ -118,12 +117,12 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		}
 	case slices.Contains(inequalityOps, op):
 		if _, ok := lhs.Value().CoerceTo(types.Int()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Int()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.GetLhs(), lhs.Value(), types.Int()))
 			typeError = true
 		}
 
 		if _, ok := rhs.Value().CoerceTo(types.Int()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Int()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.GetRhs(), rhs.Value(), types.Int()))
 			typeError = true
 		}
 
@@ -139,12 +138,12 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 
 	case slices.Contains(booleanOps, op):
 		if _, ok := lhs.Value().CoerceTo(types.Bool()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(0), lhs.Value(), types.Bool()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.GetLhs(), lhs.Value(), types.Bool()))
 			typeError = true
 		}
 
 		if _, ok := rhs.Value().CoerceTo(types.Bool()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.Expr(1), rhs.Value(), types.Bool()))
+			tc.reportError(type_error.NewInvalidValueError(ctx.GetRhs(), rhs.Value(), types.Bool()))
 			typeError = true
 		}
 
@@ -165,43 +164,6 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 func (tc *typeChecker) VisitExprGroup(ctx *parser.ExprGroupContext) any {
 	innerType := tc.visitExpr(ctx.Expr())
 	return tc.registerType(ctx, innerType)
-}
-
-func (tc *typeChecker) VisitExprBool(ctx *parser.ExprBoolContext) any {
-	roleType := tc.checkLiteralRoles(ctx.RoleType())
-	return tc.registerType(ctx, types.New(types.Bool(), roleType))
-}
-
-func (tc *typeChecker) checkLiteralRoles(roleTypeCtx parser.IRoleTypeContext) *types.Roles {
-	if roleTypeCtx == nil {
-		return types.EveryoneRole()
-	}
-
-	roleType, ok := tc.parseRoleType(roleTypeCtx)
-	if !ok {
-		return types.EveryoneRole()
-	}
-
-	hasError := false
-	if roleType.IsDistributedRole() {
-		tc.reportError(type_error.NewNotDistributedTypeError(roleTypeCtx))
-		hasError = true
-	}
-
-	if !tc.checkRolesInScope(roleTypeCtx) {
-		hasError = true
-	}
-
-	if hasError {
-		return types.EveryoneRole()
-	}
-
-	return roleType
-}
-
-func (tc *typeChecker) VisitExprString(ctx *parser.ExprStringContext) any {
-	roleType := tc.checkLiteralRoles(ctx.RoleType())
-	return tc.registerType(ctx, types.New(types.String(), roleType))
 }
 
 func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
@@ -251,16 +213,6 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	tc.checkExprInScope(ctx, identType.Roles())
 
 	return tc.registerType(ctx, identType)
-}
-
-func (tc *typeChecker) VisitExprNum(ctx *parser.ExprNumContext) any {
-	_, err := strconv.Atoi(ctx.NUMBER().GetText())
-	if err != nil {
-		tc.reportError(type_error.NewInvalidNumberError(ctx))
-	}
-
-	roleType := tc.checkLiteralRoles(ctx.RoleType())
-	return tc.registerType(ctx, types.New(types.Int(), roleType))
 }
 
 func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {

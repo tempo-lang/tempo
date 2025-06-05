@@ -123,15 +123,7 @@ func (v *BaseTempoVisitor) VisitExprCom(ctx *ExprComContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseTempoVisitor) VisitExprString(ctx *ExprStringContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
 func (v *BaseTempoVisitor) VisitExprGroup(ctx *ExprGroupContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseTempoVisitor) VisitExprBool(ctx *ExprBoolContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -143,10 +135,6 @@ func (v *BaseTempoVisitor) VisitExprIdent(ctx *ExprIdentContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseTempoVisitor) VisitExprNum(ctx *ExprNumContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
 func (v *BaseTempoVisitor) VisitExprAwait(ctx *ExprAwaitContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -155,10 +143,30 @@ func (v *BaseTempoVisitor) VisitExprClosure(ctx *ExprClosureContext) interface{}
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitExprPrimitive(ctx *ExprPrimitiveContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitExprStructField(ctx *ExprStructFieldContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
 func (v *BaseTempoVisitor) VisitIdentAccess(ctx *IdentAccessContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitFloat(ctx *FloatContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitInt(ctx *IntContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitString(ctx *StringContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitBool(ctx *BoolContext) interface{} {
 	return v.VisitChildren(ctx)
 }

@@ -94,14 +94,8 @@ type TempoListener interface {
 	// EnterExprCom is called when entering the exprCom production.
 	EnterExprCom(c *ExprComContext)
 
-	// EnterExprString is called when entering the exprString production.
-	EnterExprString(c *ExprStringContext)
-
 	// EnterExprGroup is called when entering the exprGroup production.
 	EnterExprGroup(c *ExprGroupContext)
-
-	// EnterExprBool is called when entering the exprBool production.
-	EnterExprBool(c *ExprBoolContext)
 
 	// EnterExprStruct is called when entering the exprStruct production.
 	EnterExprStruct(c *ExprStructContext)
@@ -109,20 +103,32 @@ type TempoListener interface {
 	// EnterExprIdent is called when entering the exprIdent production.
 	EnterExprIdent(c *ExprIdentContext)
 
-	// EnterExprNum is called when entering the exprNum production.
-	EnterExprNum(c *ExprNumContext)
-
 	// EnterExprAwait is called when entering the exprAwait production.
 	EnterExprAwait(c *ExprAwaitContext)
 
 	// EnterExprClosure is called when entering the exprClosure production.
 	EnterExprClosure(c *ExprClosureContext)
 
+	// EnterExprPrimitive is called when entering the exprPrimitive production.
+	EnterExprPrimitive(c *ExprPrimitiveContext)
+
 	// EnterExprStructField is called when entering the exprStructField production.
 	EnterExprStructField(c *ExprStructFieldContext)
 
 	// EnterIdentAccess is called when entering the identAccess production.
 	EnterIdentAccess(c *IdentAccessContext)
+
+	// EnterFloat is called when entering the float production.
+	EnterFloat(c *FloatContext)
+
+	// EnterInt is called when entering the int production.
+	EnterInt(c *IntContext)
+
+	// EnterString is called when entering the string production.
+	EnterString(c *StringContext)
+
+	// EnterBool is called when entering the bool production.
+	EnterBool(c *BoolContext)
 
 	// ExitSourceFile is called when exiting the sourceFile production.
 	ExitSourceFile(c *SourceFileContext)
@@ -211,14 +217,8 @@ type TempoListener interface {
 	// ExitExprCom is called when exiting the exprCom production.
 	ExitExprCom(c *ExprComContext)
 
-	// ExitExprString is called when exiting the exprString production.
-	ExitExprString(c *ExprStringContext)
-
 	// ExitExprGroup is called when exiting the exprGroup production.
 	ExitExprGroup(c *ExprGroupContext)
-
-	// ExitExprBool is called when exiting the exprBool production.
-	ExitExprBool(c *ExprBoolContext)
 
 	// ExitExprStruct is called when exiting the exprStruct production.
 	ExitExprStruct(c *ExprStructContext)
@@ -226,18 +226,30 @@ type TempoListener interface {
 	// ExitExprIdent is called when exiting the exprIdent production.
 	ExitExprIdent(c *ExprIdentContext)
 
-	// ExitExprNum is called when exiting the exprNum production.
-	ExitExprNum(c *ExprNumContext)
-
 	// ExitExprAwait is called when exiting the exprAwait production.
 	ExitExprAwait(c *ExprAwaitContext)
 
 	// ExitExprClosure is called when exiting the exprClosure production.
 	ExitExprClosure(c *ExprClosureContext)
 
+	// ExitExprPrimitive is called when exiting the exprPrimitive production.
+	ExitExprPrimitive(c *ExprPrimitiveContext)
+
 	// ExitExprStructField is called when exiting the exprStructField production.
 	ExitExprStructField(c *ExprStructFieldContext)
 
 	// ExitIdentAccess is called when exiting the identAccess production.
 	ExitIdentAccess(c *IdentAccessContext)
+
+	// ExitFloat is called when exiting the float production.
+	ExitFloat(c *FloatContext)
+
+	// ExitInt is called when exiting the int production.
+	ExitInt(c *IntContext)
+
+	// ExitString is called when exiting the string production.
+	ExitString(c *StringContext)
+
+	// ExitBool is called when exiting the bool production.
+	ExitBool(c *BoolContext)
 }

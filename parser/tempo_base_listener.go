@@ -194,23 +194,11 @@ func (s *BaseTempoListener) EnterExprCom(ctx *ExprComContext) {}
 // ExitExprCom is called when production exprCom is exited.
 func (s *BaseTempoListener) ExitExprCom(ctx *ExprComContext) {}
 
-// EnterExprString is called when production exprString is entered.
-func (s *BaseTempoListener) EnterExprString(ctx *ExprStringContext) {}
-
-// ExitExprString is called when production exprString is exited.
-func (s *BaseTempoListener) ExitExprString(ctx *ExprStringContext) {}
-
 // EnterExprGroup is called when production exprGroup is entered.
 func (s *BaseTempoListener) EnterExprGroup(ctx *ExprGroupContext) {}
 
 // ExitExprGroup is called when production exprGroup is exited.
 func (s *BaseTempoListener) ExitExprGroup(ctx *ExprGroupContext) {}
-
-// EnterExprBool is called when production exprBool is entered.
-func (s *BaseTempoListener) EnterExprBool(ctx *ExprBoolContext) {}
-
-// ExitExprBool is called when production exprBool is exited.
-func (s *BaseTempoListener) ExitExprBool(ctx *ExprBoolContext) {}
 
 // EnterExprStruct is called when production exprStruct is entered.
 func (s *BaseTempoListener) EnterExprStruct(ctx *ExprStructContext) {}
@@ -224,12 +212,6 @@ func (s *BaseTempoListener) EnterExprIdent(ctx *ExprIdentContext) {}
 // ExitExprIdent is called when production exprIdent is exited.
 func (s *BaseTempoListener) ExitExprIdent(ctx *ExprIdentContext) {}
 
-// EnterExprNum is called when production exprNum is entered.
-func (s *BaseTempoListener) EnterExprNum(ctx *ExprNumContext) {}
-
-// ExitExprNum is called when production exprNum is exited.
-func (s *BaseTempoListener) ExitExprNum(ctx *ExprNumContext) {}
-
 // EnterExprAwait is called when production exprAwait is entered.
 func (s *BaseTempoListener) EnterExprAwait(ctx *ExprAwaitContext) {}
 
@@ -242,6 +224,12 @@ func (s *BaseTempoListener) EnterExprClosure(ctx *ExprClosureContext) {}
 // ExitExprClosure is called when production exprClosure is exited.
 func (s *BaseTempoListener) ExitExprClosure(ctx *ExprClosureContext) {}
 
+// EnterExprPrimitive is called when production exprPrimitive is entered.
+func (s *BaseTempoListener) EnterExprPrimitive(ctx *ExprPrimitiveContext) {}
+
+// ExitExprPrimitive is called when production exprPrimitive is exited.
+func (s *BaseTempoListener) ExitExprPrimitive(ctx *ExprPrimitiveContext) {}
+
 // EnterExprStructField is called when production exprStructField is entered.
 func (s *BaseTempoListener) EnterExprStructField(ctx *ExprStructFieldContext) {}
 
@@ -253,3 +241,27 @@ func (s *BaseTempoListener) EnterIdentAccess(ctx *IdentAccessContext) {}
 
 // ExitIdentAccess is called when production identAccess is exited.
 func (s *BaseTempoListener) ExitIdentAccess(ctx *IdentAccessContext) {}
+
+// EnterFloat is called when production float is entered.
+func (s *BaseTempoListener) EnterFloat(ctx *FloatContext) {}
+
+// ExitFloat is called when production float is exited.
+func (s *BaseTempoListener) ExitFloat(ctx *FloatContext) {}
+
+// EnterInt is called when production int is entered.
+func (s *BaseTempoListener) EnterInt(ctx *IntContext) {}
+
+// ExitInt is called when production int is exited.
+func (s *BaseTempoListener) ExitInt(ctx *IntContext) {}
+
+// EnterString is called when production string is entered.
+func (s *BaseTempoListener) EnterString(ctx *StringContext) {}
+
+// ExitString is called when production string is exited.
+func (s *BaseTempoListener) ExitString(ctx *StringContext) {}
+
+// EnterBool is called when production bool is entered.
+func (s *BaseTempoListener) EnterBool(ctx *BoolContext) {}
+
+// ExitBool is called when production bool is exited.
+func (s *BaseTempoListener) ExitBool(ctx *BoolContext) {}

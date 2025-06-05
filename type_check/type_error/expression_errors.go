@@ -10,10 +10,10 @@ import (
 )
 
 type InvalidNumberError struct {
-	Num parser.IExprContext
+	Num parser.ILiteralContext
 }
 
-func NewInvalidNumberError(num parser.IExprContext) Error {
+func NewInvalidNumberError(num parser.ILiteralContext) Error {
 	return &InvalidNumberError{
 		Num: num,
 	}

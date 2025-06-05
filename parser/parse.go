@@ -79,19 +79,19 @@ type ErrorListener struct {
 // ReportAmbiguity implements antlr.ErrorListener.
 func (t *ErrorListener) ReportAmbiguity(recognizer antlr.Parser, dfa *antlr.DFA, startIndex int, stopIndex int, exact bool, ambigAlts *antlr.BitSet, configs *antlr.ATNConfigSet) {
 	// t.Errors = append(t.Errors, errors.New("ambiguity error"))
-	fmt.Printf("ambiguity error")
+	panic("ambiguity error")
 }
 
 // ReportAttemptingFullContext implements antlr.ErrorListener.
 func (t *ErrorListener) ReportAttemptingFullContext(recognizer antlr.Parser, dfa *antlr.DFA, startIndex int, stopIndex int, conflictingAlts *antlr.BitSet, configs *antlr.ATNConfigSet) {
 	// t.Errors = append(t.Errors, errors.New("attempting full context error"))
-	fmt.Printf("context error")
+	panic("context error")
 }
 
 // ReportContextSensitivity implements antlr.ErrorListener.
 func (t *ErrorListener) ReportContextSensitivity(recognizer antlr.Parser, dfa *antlr.DFA, startIndex int, stopIndex int, prediction int, configs *antlr.ATNConfigSet) {
 	// t.Errors = append(t.Errors, errors.New("context sensitivity error"))
-	fmt.Printf("sensitivity error")
+	panic("sensitivity error")
 }
 
 // SyntaxError implements antlr.ErrorListener.

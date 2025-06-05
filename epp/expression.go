@@ -35,10 +35,9 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			}
 			return nil, aux
 		}
-	case *parser.ExprBoolContext:
+	case *parser.ExprPrimitiveContext:
 		if exprType.Roles().Contains(roleName) {
-			value := expr.TRUE() != nil
-			return projection.NewExprBool(value), []projection.Statement{}
+			return epp.eppLiteral(expr.Literal()), []projection.Statement{}
 		} else {
 			return nil, []projection.Statement{}
 		}
@@ -60,37 +59,6 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			}
 
 			return projection.NewExprIdent(name, exprValue), []projection.Statement{}
-		} else {
-			return nil, []projection.Statement{}
-		}
-	case *parser.ExprNumContext:
-		if exprType.Roles().Contains(roleName) {
-			num, err := strconv.Atoi(expr.NUMBER().GetText())
-			if err != nil {
-				panic(fmt.Sprintf("expected NUMBER to be convertible to int: %s", expr.GetText()))
-			}
-			return projection.NewExprInt(num), []projection.Statement{}
-		} else {
-			return nil, []projection.Statement{}
-		}
-	case *parser.ExprStringContext:
-		if exprType.Roles().Contains(roleName) {
-			str := expr.STRING().GetText()
-			str = str[1 : len(str)-1] // remote quotes
-
-			escapes := map[string]string{
-				`\\`: `\`,
-				`\"`: `"`,
-				`\n`: "\n",
-				`\r`: "\r",
-				`\t`: "\t",
-			}
-
-			for from, to := range escapes {
-				str = strings.ReplaceAll(str, from, to)
-			}
-
-			return projection.NewExprString(str), []projection.Statement{}
 		} else {
 			return nil, []projection.Statement{}
 		}
@@ -282,4 +250,43 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	}
 
 	panic(fmt.Sprintf("unknown expression: %#v", expr))
+}
+
+func (epp *epp) eppLiteral(lit parser.ILiteralContext) projection.Expression {
+	switch lit := lit.(type) {
+	case *parser.BoolContext:
+		value := lit.TRUE() != nil
+		return projection.NewExprBool(value)
+	case *parser.FloatContext:
+		num, err := strconv.ParseFloat(lit.GetText(), 64)
+		if err != nil {
+			panic(fmt.Sprintf("could not parse float: %s", lit.GetText()))
+		}
+		return projection.NewExprFloat(num)
+	case *parser.IntContext:
+		num, err := strconv.Atoi(lit.GetText())
+		if err != nil {
+			panic(fmt.Sprintf("could not parse int: %s", lit.GetText()))
+		}
+		return projection.NewExprInt(num)
+	case *parser.StringContext:
+		str := lit.STRING().GetText()
+		str = str[1 : len(str)-1] // remote quotes
+
+		escapes := map[string]string{
+			`\\`: `\`,
+			`\"`: `"`,
+			`\n`: "\n",
+			`\r`: "\r",
+			`\t`: "\t",
+		}
+
+		for from, to := range escapes {
+			str = strings.ReplaceAll(str, from, to)
+		}
+
+		return projection.NewExprString(str)
+	}
+
+	panic(fmt.Sprintf("unknown literal: %#v", lit))
 }

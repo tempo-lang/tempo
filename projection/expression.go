@@ -45,6 +45,34 @@ func NewExprInt(value int) Expression {
 	}
 }
 
+type ExprFloat struct {
+	Value float64
+}
+
+func (e *ExprFloat) Codegen() jen.Code {
+	return jen.Lit(e.Value)
+}
+
+func (e *ExprFloat) Type() Type {
+	return &BuiltinType{Value: types.Float()}
+}
+
+func (e *ExprFloat) ReturnsValue() bool {
+	return true
+}
+
+func (e *ExprFloat) HasSideEffects() bool {
+	return false
+}
+
+func (e *ExprFloat) IsExpression() {}
+
+func NewExprFloat(value float64) Expression {
+	return &ExprFloat{
+		Value: value,
+	}
+}
+
 type ExprString struct {
 	Value string
 }

@@ -94,14 +94,8 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#exprCom.
 	VisitExprCom(ctx *ExprComContext) interface{}
 
-	// Visit a parse tree produced by TempoParser#exprString.
-	VisitExprString(ctx *ExprStringContext) interface{}
-
 	// Visit a parse tree produced by TempoParser#exprGroup.
 	VisitExprGroup(ctx *ExprGroupContext) interface{}
-
-	// Visit a parse tree produced by TempoParser#exprBool.
-	VisitExprBool(ctx *ExprBoolContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#exprStruct.
 	VisitExprStruct(ctx *ExprStructContext) interface{}
@@ -109,18 +103,30 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#exprIdent.
 	VisitExprIdent(ctx *ExprIdentContext) interface{}
 
-	// Visit a parse tree produced by TempoParser#exprNum.
-	VisitExprNum(ctx *ExprNumContext) interface{}
-
 	// Visit a parse tree produced by TempoParser#exprAwait.
 	VisitExprAwait(ctx *ExprAwaitContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#exprClosure.
 	VisitExprClosure(ctx *ExprClosureContext) interface{}
 
+	// Visit a parse tree produced by TempoParser#exprPrimitive.
+	VisitExprPrimitive(ctx *ExprPrimitiveContext) interface{}
+
 	// Visit a parse tree produced by TempoParser#exprStructField.
 	VisitExprStructField(ctx *ExprStructFieldContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#identAccess.
 	VisitIdentAccess(ctx *IdentAccessContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#float.
+	VisitFloat(ctx *FloatContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#int.
+	VisitInt(ctx *IntContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#string.
+	VisitString(ctx *StringContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#bool.
+	VisitBool(ctx *BoolContext) interface{}
 }
