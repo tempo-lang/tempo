@@ -2,4 +2,4 @@ func@(A,B) foo() {
     let x: Int@A = true < 10;
 }
 ---
-2:20: invalid value, expected 'Int' but found 'Bool'
+2:20: type values 'Bool' and 'Int' do not match

@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A)A(){12000*770000000000000;}")

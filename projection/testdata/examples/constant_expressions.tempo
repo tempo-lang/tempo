@@ -1,4 +1,6 @@
-func@(A) constants(){
-  let numberValue: Int@(A) = 123;
-  let booleanValue: Bool@(A) = true;
+func@A constants(){
+  let intValue: Int@A = 123;
+  let floatValue: Float@A = 123.0;
+  let booleanValue: Bool@A = true;
+  let stringValue: String@A = "Hello";
 }

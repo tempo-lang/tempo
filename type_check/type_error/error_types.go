@@ -5,6 +5,7 @@ import (
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -165,6 +166,37 @@ func (e *ExpectedAsyncTypeError) IsTypeError() {}
 
 func (e *ExpectedAsyncTypeError) ParserRule() antlr.ParserRuleContext {
 	return e.Expr
+}
+
+type BinOpIncompatibleType struct {
+	BinOp   *parser.ExprBinOpContext
+	Value   types.Value
+	Allowed []types.Value
+}
+
+func (e *BinOpIncompatibleType) Error() string {
+	allowed := make([]string, len(e.Allowed))
+	for i, v := range e.Allowed {
+		allowed[i] = v.ToString()
+	}
+
+	op := projection.ParseOperator(e.BinOp)
+
+	return fmt.Sprintf("value '%s' not allowed for operation '%s', allowed types '%s'", e.Value.ToString(), op, misc.JoinStrings(allowed, ", "))
+}
+
+func (e *BinOpIncompatibleType) IsTypeError() {}
+
+func (e *BinOpIncompatibleType) ParserRule() antlr.ParserRuleContext {
+	return e.BinOp
+}
+
+func NewBinOpIncompatibleTypeError(binOp *parser.ExprBinOpContext, value types.Value, allowed []types.Value) Error {
+	return &BinOpIncompatibleType{
+		BinOp:   binOp,
+		Value:   value,
+		Allowed: allowed,
+	}
 }
 
 func NewExpectedAsyncTypeError(expr parser.IExprContext, exprType *types.Type) Error {

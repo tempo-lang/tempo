@@ -62,15 +62,36 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	typeError := false
 	op := projection.ParseOperator(ctx)
 
+	numberTypes := []types.Value{types.Int(), types.Float()}
+
+	areSameTypes := func(allowedTypes []types.Value) (types.Value, bool) {
+		if types.ValuesEqual(lhs.Value(), rhs.Value()) {
+			for _, allowed := range allowedTypes {
+				if types.ValuesEqual(allowed, lhs.Value()) {
+					return allowed, true
+				}
+			}
+			tc.reportError(type_error.NewBinOpIncompatibleTypeError(ctx, lhs.Value(), allowedTypes))
+		} else {
+			tc.reportError(type_error.NewValueMismatchError(ctx, lhs.Value(), rhs.Value()))
+		}
+		return types.Invalid().Value(), false
+	}
+
 	switch {
 	case slices.Contains(arithmeticOps, op):
-		if _, ok := lhs.Value().CoerceTo(types.Int()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.GetLhs(), lhs.Value(), types.Int()))
-			typeError = true
+		allowedTypes := []types.Value{types.Int()}
+
+		if op != projection.OpMod {
+			allowedTypes = append(allowedTypes, types.Float())
 		}
 
-		if _, ok := rhs.Value().CoerceTo(types.Int()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.GetRhs(), rhs.Value(), types.Int()))
+		if op == projection.OpAdd {
+			allowedTypes = append(allowedTypes, types.String())
+		}
+
+		value, ok := areSameTypes(allowedTypes)
+		if !ok {
 			typeError = true
 		}
 
@@ -80,20 +101,9 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			typeError = true
 		}
 
-		// if op == projection.OpDiv || op == projection.OpMod {
-		// 	if numExpr, ok := ctx.GetRhs().(*parser.ExprNumContext); ok {
-		// 		if num, err := strconv.Atoi(numExpr.NUMBER().GetText()); err == nil {
-		// 			if num == 0 {
-		// 				tc.reportError(type_error.NewDivisionByZeroError(ctx.GetRhs()))
-		// 			}
-		// 		}
-		// 	}
-		// }
-
 		if !typeError {
-			return tc.registerType(ctx, types.New(types.Int(), newRoles))
+			return tc.registerType(ctx, types.New(value, newRoles))
 		}
-
 	case slices.Contains(equalityOps, op):
 		if !lhs.Value().IsEquatable() {
 			tc.reportError(type_error.NewUnequatableTypeError(ctx, lhs.Value()))
@@ -116,13 +126,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
 		}
 	case slices.Contains(inequalityOps, op):
-		if _, ok := lhs.Value().CoerceTo(types.Int()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.GetLhs(), lhs.Value(), types.Int()))
-			typeError = true
-		}
-
-		if _, ok := rhs.Value().CoerceTo(types.Int()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.GetRhs(), rhs.Value(), types.Int()))
+		if _, ok := areSameTypes(numberTypes); !ok {
 			typeError = true
 		}
 
@@ -135,15 +139,8 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		if !typeError {
 			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
 		}
-
 	case slices.Contains(booleanOps, op):
-		if _, ok := lhs.Value().CoerceTo(types.Bool()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.GetLhs(), lhs.Value(), types.Bool()))
-			typeError = true
-		}
-
-		if _, ok := rhs.Value().CoerceTo(types.Bool()); !ok {
-			tc.reportError(type_error.NewInvalidValueError(ctx.GetRhs(), rhs.Value(), types.Bool()))
+		if _, ok := areSameTypes([]types.Value{types.Bool()}); !ok {
 			typeError = true
 		}
 

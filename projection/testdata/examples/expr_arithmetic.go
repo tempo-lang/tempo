@@ -5,6 +5,12 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var x int = 2 + 3
+	var x int = 2 + 3 - 4*5/6%7
 	_ = x
+	var y string = "hello" + " world"
+	_ = y
+	var z float64 = 2.0 + 3.0 - 4.0*5.0/6.0
+	_ = z
+	var w bool = true && false || true
+	_ = w
 }

@@ -2,4 +2,4 @@ func@A wrongAdd() {
   let x: Int@A = 2 + false;
 }
 ---
-2:22: invalid value, expected 'Int' but found 'Bool'
+2:18: type values 'Int' and 'Bool' do not match

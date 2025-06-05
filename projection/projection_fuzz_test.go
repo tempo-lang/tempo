@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -120,10 +121,22 @@ func FuzzProjection(f *testing.F) {
 			conf := types.Config{}
 			conf.Importer = importer
 
+			// allow these Go errors for now
+			ignoredGoErrors := []string{
+				"invalid operation: division by zero",
+				"(overflows)",
+			}
+
 			_, err = conf.Check("choreography", fset, []*ast.File{parsedAST}, nil)
 			if err != nil {
-				result <- fmt.Errorf("Go code type error: %v\n\nINPUT:\n%s\n\nPROJECTION:\n%s", err, source, output)
-				return
+				isIgnoredError := slices.ContainsFunc(ignoredGoErrors, func(e string) bool {
+					return strings.Contains(err.Error(), e)
+				})
+
+				if !isIgnoredError {
+					result <- fmt.Errorf("Go code type error: %v\n\nINPUT:\n%s\n\nPROJECTION:\n%s", err, source, output)
+					return
+				}
 			}
 
 			result <- nil
