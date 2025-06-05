@@ -9,13 +9,13 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func (s *tempoServer) analyzeFile(ctx *glsp.Context, file *tempoFile) {
-	logger.Infof("Analyzing file: %s", file.GetUri())
+func (s *tempoServer) analyzeDocument(notify glsp.NotifyFunc, docUri protocol.URI, version int, source string) {
+	logger.Infof("Calculating diagnostics of document: %s", docUri)
 
 	diagnostics := []protocol.Diagnostic{}
 
 	// parse source input
-	inputStream := antlr.NewInputStream(file.GetSource())
+	inputStream := antlr.NewInputStream(source)
 	sourceFile, syntaxErrors := parser.Parse(inputStream)
 	for _, err := range syntaxErrors {
 		errorSeverity := protocol.DiagnosticSeverityError
@@ -39,7 +39,8 @@ func (s *tempoServer) analyzeFile(ctx *glsp.Context, file *tempoFile) {
 	// type check ast
 	info, typeErrors := type_check.TypeCheck(sourceFile)
 
-	file.SetInfo(sourceFile, info)
+	tempoDoc := newTempoDoc(docUri, version, source, sourceFile, info)
+	s.UpdateDocument(tempoDoc)
 
 	for _, err := range typeErrors {
 		errorSeverity := protocol.DiagnosticSeverityError
@@ -51,8 +52,10 @@ func (s *tempoServer) analyzeFile(ctx *glsp.Context, file *tempoFile) {
 		})
 	}
 
-	ctx.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
-		URI:         file.GetUri(),
+	protoVersion := protocol.UInteger(version)
+	notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+		URI:         docUri,
+		Version:     &protoVersion,
 		Diagnostics: diagnostics,
 	})
 }

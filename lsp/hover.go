@@ -13,14 +13,12 @@ import (
 
 func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.HoverParams) (*protocol.Hover, error) {
 
-	file, ok := s.files[params.TextDocument.URI]
+	doc, ok := s.GetDocument(params.TextDocument.URI)
 	if !ok {
 		return nil, nil
 	}
-	file.lock.RLock()
-	defer file.lock.RUnlock()
 
-	leaf, _ := astNodeAtPosition(file.ast, params.Position)
+	leaf, _ := astNodeAtPosition(doc.ast, params.Position)
 	if leaf == nil {
 		return nil, nil
 	}
@@ -29,10 +27,10 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 	for node != nil {
 		switch node := node.(type) {
 		case *parser.StmtReturnContext:
-			if exprType, ok := file.info.Types[node.Expr()]; ok {
+			if exprType, ok := doc.info.Types[node.Expr()]; ok {
 
 				if len(exprType.Roles().Participants()) == 0 {
-					scope := file.info.GlobalScope.Innermost(node.GetStart())
+					scope := doc.info.GlobalScope.Innermost(node.GetStart())
 
 					exprType = types.New(
 						exprType.Value(),
@@ -44,7 +42,7 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 				return hoverCode(fmt.Sprintf("return %s", exprType.ToString()), &stmtRange), nil
 			}
 		case *parser.IdentContext:
-			if identSym, ok := file.info.Symbols[node]; ok {
+			if identSym, ok := doc.info.Symbols[node]; ok {
 				identRange := parserRuleToRange(node)
 				identCode := fmt.Sprintf("let %s: %s", identSym.SymbolName(), identSym.Type().ToString())
 				if _, ok := identSym.Type().Value().(*types.FunctionType); ok {
@@ -53,10 +51,10 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 				return hoverCode(identCode, &identRange), nil
 			}
 		case parser.IExprContext:
-			if exprType, ok := file.info.Types[node]; ok {
+			if exprType, ok := doc.info.Types[node]; ok {
 
 				if len(exprType.Roles().Participants()) == 0 {
-					scope := file.info.GlobalScope.Innermost(node.GetStart())
+					scope := doc.info.GlobalScope.Innermost(node.GetStart())
 
 					exprType = types.New(
 						exprType.Value(),

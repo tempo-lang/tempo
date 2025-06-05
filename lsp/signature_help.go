@@ -14,14 +14,12 @@ import (
 )
 
 func (s *tempoServer) signatureHelp(context *glsp.Context, params *protocol.SignatureHelpParams) (*protocol.SignatureHelp, error) {
-	file, ok := s.files[params.TextDocument.URI]
+	doc, ok := s.GetDocument(params.TextDocument.URI)
 	if !ok {
 		return nil, nil
 	}
-	file.lock.RLock()
-	defer file.lock.RUnlock()
 
-	leaf, _ := astNodeAtPosition(file.ast, params.Position)
+	leaf, _ := astNodeAtPosition(doc.ast, params.Position)
 	if leaf == nil {
 		return nil, nil
 	}
@@ -40,11 +38,11 @@ func (s *tempoServer) signatureHelp(context *glsp.Context, params *protocol.Sign
 		return nil, nil
 	}
 
-	funcType := file.info.Types[exprCall.Expr()]
+	funcType := doc.info.Types[exprCall.Expr()]
 
 	switch funcValue := funcType.Value().(type) {
 	case *types.FunctionType:
-		return funcSignatureHelp(params, file.info, funcValue, exprCall)
+		return funcSignatureHelp(params, doc.info, funcValue, exprCall)
 	case *types.ClosureType:
 		return closureSignatureHelp(params, funcType, exprCall)
 	default:

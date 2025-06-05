@@ -1,6 +1,10 @@
 package lsp
 
 import (
+	"sync"
+
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/type_check"
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -16,12 +20,53 @@ var version string = "0.0.1"
 var logger commonlog.Logger
 
 type tempoServer struct {
-	files map[protocol.DocumentUri]*tempoFile
+	lock      sync.RWMutex
+	documents map[protocol.DocumentUri]*tempoDoc
+}
+
+func (s *tempoServer) GetDocument(url protocol.DocumentUri) (*tempoDoc, bool) {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	doc, ok := s.documents[url]
+	return doc, ok
+}
+
+func (s *tempoServer) UpdateDocument(newDoc *tempoDoc) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if existingDoc, ok := s.documents[newDoc.uri]; ok {
+		if existingDoc.version > newDoc.version {
+			logger.Infof("newer version of document already exists (existing=%d, this=%d): %s",
+				existingDoc.version, newDoc.version, newDoc.uri)
+			return
+		}
+	}
+
+	s.documents[newDoc.uri] = newDoc
+}
+
+type tempoDoc struct {
+	uri     protocol.URI
+	version int
+	source  string
+	ast     parser.ISourceFileContext
+	info    *type_check.Info
+}
+
+func newTempoDoc(uri protocol.URI, version int, source string, ast parser.ISourceFileContext, info *type_check.Info) *tempoDoc {
+	return &tempoDoc{
+		ast:     ast,
+		info:    info,
+		uri:     uri,
+		version: version,
+		source:  source,
+	}
 }
 
 func newTempoServer() *tempoServer {
 	return &tempoServer{
-		files: map[protocol.DocumentUri]*tempoFile{},
+		documents: map[protocol.DocumentUri]*tempoDoc{},
 	}
 }
 

@@ -11,19 +11,17 @@ import (
 )
 
 func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (any, error) {
-	file, ok := s.files[params.TextDocument.URI]
+	doc, ok := s.GetDocument(params.TextDocument.URI)
 	if !ok {
 		return nil, nil
 	}
-	file.lock.RLock()
-	defer file.lock.RUnlock()
 
-	leaf, _ := astNodeAtPosition(file.ast, params.Position)
+	leaf, _ := astNodeAtPosition(doc.ast, params.Position)
 	if leaf == nil {
 		return nil, nil
 	}
 
-	scope := file.info.GlobalScope.Innermost(leaf.GetStart())
+	scope := doc.info.GlobalScope.Innermost(leaf.GetStart())
 
 	var completionItems []protocol.CompletionItem
 	foundItems := false
@@ -34,7 +32,7 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 		switch node := node.(type) {
 		case *parser.ExprFieldAccessContext:
 			logger.Debugf("Visit Expression (FieldAccess)")
-			items, ok := completionItemsForFieldAccess(file, node)
+			items, ok := completionItemsForFieldAccess(doc, node)
 			if ok {
 				completionItems = items
 				foundItems = true
@@ -52,7 +50,7 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 			logger.Debugf("Visit Function")
 		case parser.IRoleTypeContext:
 			logger.Debugf("Visit Role Type: %T", node)
-			items, ok := completionItemsForRoleType(file, node)
+			items, ok := completionItemsForRoleType(doc, node)
 			if ok {
 				completionItems = items
 				foundItems = true
@@ -64,7 +62,7 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 			if leaf.GetText() == "." {
 				logger.Debug("Attempting to recover ExprFieldAccess")
 				if fieldAccess, ok := node.GetChild(0).GetParent().(*parser.ExprFieldAccessContext); ok {
-					items, ok := completionItemsForFieldAccess(file, fieldAccess)
+					items, ok := completionItemsForFieldAccess(doc, fieldAccess)
 					if ok {
 						completionItems = items
 						foundItems = true
@@ -76,7 +74,7 @@ func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *prot
 			if leaf.GetText() == "@" {
 				logger.Debug("Attempting to recover RoleType")
 				if roleType, ok := node.GetChild(node.GetChildCount() - 1).(parser.IRoleTypeContext); ok {
-					items, ok := completionItemsForRoleType(file, roleType)
+					items, ok := completionItemsForRoleType(doc, roleType)
 					if ok {
 						completionItems = items
 						foundItems = true
@@ -153,7 +151,7 @@ func completionItemsAllInScope(scope *sym_table.Scope) []protocol.CompletionItem
 	return completionItems
 }
 
-func completionItemsForFieldAccess(file *tempoFile, fieldAccess *parser.ExprFieldAccessContext) ([]protocol.CompletionItem, bool) {
+func completionItemsForFieldAccess(file *tempoDoc, fieldAccess *parser.ExprFieldAccessContext) ([]protocol.CompletionItem, bool) {
 	logger.Infof("Finding completions for ExprFieldAccess")
 
 	fieldType, ok := file.info.Types[fieldAccess.Expr()]
@@ -186,7 +184,7 @@ func completionItemsForFieldAccess(file *tempoFile, fieldAccess *parser.ExprFiel
 	return nil, false
 }
 
-func completionItemsForRoleType(file *tempoFile, roleType parser.IRoleTypeContext) ([]protocol.CompletionItem, bool) {
+func completionItemsForRoleType(file *tempoDoc, roleType parser.IRoleTypeContext) ([]protocol.CompletionItem, bool) {
 	logger.Infof("Finding completions for RoleType")
 
 	scope := file.info.GlobalScope.Innermost(roleType.GetStart())

@@ -1,9 +1,6 @@
 package lsp
 
 import (
-	"context"
-	"slices"
-
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -15,12 +12,8 @@ func (s *tempoServer) textDocumentDidOpen(ctx *glsp.Context, params *protocol.Di
 
 	logger.Infof("New file opened: %s", params.TextDocument.URI)
 
-	analysisCtx := context.Background()
-	tempoFile := newTempoFile(params.TextDocument, analysisCtx)
-	s.files[params.TextDocument.URI] = tempoFile
-
 	// analyze file in background
-	go s.analyzeFile(ctx, tempoFile)
+	go s.analyzeDocument(ctx.Notify, params.TextDocument.URI, int(params.TextDocument.Version), params.TextDocument.Text)
 
 	return nil
 }
@@ -28,75 +21,29 @@ func (s *tempoServer) textDocumentDidOpen(ctx *glsp.Context, params *protocol.Di
 func (s *tempoServer) textDocumentDidChange(ctx *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	logger.Infof("File changed: %s", params.TextDocument.URI)
 
-	file, ok := s.files[params.TextDocument.URI]
+	doc, ok := s.GetDocument(params.TextDocument.URI)
 	if !ok {
 		logger.Warningf("Changed file is unknown: %s", params.TextDocument.URI)
 		return nil
 	}
 
-	source := file.GetSource()
-	newSource := file.GetSource()
+	if doc.version >= int(params.TextDocument.Version) {
+		logger.Warningf("Existing document %d is newer than in change event %d", doc.version, params.TextDocument.Version)
+		return nil
+	}
 
-	// sort edits to be in reverse order
-	slices.SortFunc(params.ContentChanges, func(a, b any) int {
-		aa, ok := a.(protocol.TextDocumentContentChangeEvent)
-		if !ok {
-			return 0
-		}
-
-		bb, ok := b.(protocol.TextDocumentContentChangeEvent)
-		if !ok {
-			return 0
-		}
-
-		if aa.Range.Start.Line != bb.Range.Start.Line {
-			return int(bb.Range.Start.Line) - int(aa.Range.Start.Line)
-		}
-
-		return int(bb.Range.Start.Character) - int(aa.Range.Start.Character)
-	})
+	var newSource string
 
 	for _, change := range params.ContentChanges {
 		switch change := change.(type) {
 		case protocol.TextDocumentContentChangeEventWhole:
 			newSource = change.Text
-		case protocol.TextDocumentContentChangeEvent:
-			line := 0
-			col := 0
-			start := change.Range.Start
-			startIdx := -1
-			end := change.Range.End
-			endIdx := -1
-
-			for i, c := range source {
-				if line == int(start.Line) && col == int(start.Character) {
-					startIdx = i
-				}
-
-				if line == int(end.Line) && col == int(end.Character) {
-					endIdx = i
-				}
-
-				if startIdx != -1 && endIdx != -1 {
-					break
-				}
-
-				col += 1
-				if c == '\n' {
-					line += 1
-					col = 0
-				}
-			}
-
-			newSource = source[0:startIdx] + change.Text + newSource[endIdx:]
 		default:
 			logger.Errorf("unexpected type: %#v", change)
 		}
 	}
 
-	file.ReplaceSource(newSource)
-
-	go s.analyzeFile(ctx, file)
+	go s.analyzeDocument(ctx.Notify, params.TextDocument.URI, int(params.TextDocument.Version), newSource)
 
 	return nil
 }
