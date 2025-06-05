@@ -30,7 +30,7 @@ var buildCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		inputFile := args[0]
+		inputFile := path.Clean(args[0])
 
 		input, err := antlr.NewFileStream(inputFile)
 		if err != nil {
@@ -50,8 +50,7 @@ var buildCmd = &cobra.Command{
 		if errors != nil {
 			for _, err := range errors {
 				if typeErr, ok := err.(type_error.Error); ok {
-					token := typeErr.ParserRule().GetStart()
-					fmt.Printf("Type error %d:%d: %s\n", token.GetLine(), token.GetColumn()+1, typeErr.Error())
+					type_error.FormatError(os.Stdout, input, typeErr, !*disableTerminalColor)
 				} else {
 					fmt.Printf("%v\n", err)
 				}

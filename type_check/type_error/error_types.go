@@ -11,7 +11,7 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-type RelatedError struct {
+type RelatedInfo struct {
 	Message    string
 	ParserRule antlr.ParserRuleContext
 }
@@ -20,13 +20,13 @@ type Error interface {
 	error
 	ParserRule() antlr.ParserRuleContext
 	IsTypeError()
-	RelatedErrors() []RelatedError
+	RelatedInfo() []RelatedInfo
 }
 
 type baseError struct{}
 
 func (*baseError) IsTypeError() {}
-func (*baseError) RelatedErrors() []RelatedError {
+func (*baseError) RelatedInfo() []RelatedInfo {
 	return nil
 }
 

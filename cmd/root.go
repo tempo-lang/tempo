@@ -7,10 +7,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var disableTerminalColor *bool
+
 var rootCmd = &cobra.Command{
 	Use:   "tempo",
 	Short: "Tempo choreographic programming language",
 	Long:  `The compiler for Tempo, a practical choreographic programming language.`,
+}
+
+func init() {
+	disableTerminalColor = rootCmd.Flags().Bool("nocolor", false, "Disable colors in the terminal")
 }
 
 func Execute() {

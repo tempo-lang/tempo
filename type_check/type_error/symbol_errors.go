@@ -31,6 +31,13 @@ func (e *SymbolAlreadyExists) ParserRule() antlr.ParserRuleContext {
 	return e.NewSymbol
 }
 
+func (e *SymbolAlreadyExists) RelatedInfo() []RelatedInfo {
+	return []RelatedInfo{{
+		Message:    "symbol first declared here",
+		ParserRule: e.ExistingSymbol,
+	}}
+}
+
 type UnknownSymbol struct {
 	baseError
 	SymName parser.IIdentContext

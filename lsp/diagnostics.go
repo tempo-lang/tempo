@@ -45,10 +45,22 @@ func (s *tempoServer) analyzeDocument(notify glsp.NotifyFunc, docUri protocol.UR
 	for _, err := range typeErrors {
 		errorSeverity := protocol.DiagnosticSeverityError
 
+		relatedInfo := []protocol.DiagnosticRelatedInformation{}
+		for _, related := range err.RelatedInfo() {
+			relatedInfo = append(relatedInfo, protocol.DiagnosticRelatedInformation{
+				Location: protocol.Location{
+					URI:   docUri,
+					Range: parserRuleToRange(related.ParserRule),
+				},
+				Message: related.Message,
+			})
+		}
+
 		diagnostics = append(diagnostics, protocol.Diagnostic{
-			Range:    parserRuleToRange(err.ParserRule()),
-			Severity: &errorSeverity,
-			Message:  err.Error(),
+			Range:              parserRuleToRange(err.ParserRule()),
+			Severity:           &errorSeverity,
+			Message:            err.Error(),
+			RelatedInformation: relatedInfo,
 		})
 	}
 
