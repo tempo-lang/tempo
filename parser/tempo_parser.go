@@ -44,7 +44,7 @@ func tempoParserInit() {
 		"RSQUARE", "RCURLY", "PLUS", "MINUS", "MULTIPLY", "DIVIDE", "MODULO",
 		"EQUAL", "NOT_EQUAL", "LESS", "LESS_EQ", "GREATER", "GREATER_EQ", "AND",
 		"OR", "IS", "ROLE_AT", "COMMA", "DOT", "COLON", "COM", "STRING", "ID",
-		"NUMBER", "END", "WHITESPACE",
+		"NUMBER", "END", "WHITESPACE", "LINE_COMMENT", "BLOCK_COMMENT",
 	}
 	staticData.RuleNames = []string{
 		"sourceFile", "ident", "valueType", "roleType", "closureType", "closureParamList",
@@ -55,7 +55,7 @@ func tempoParserInit() {
 	}
 	staticData.PredictionContextCache = antlr.NewPredictionContextCache()
 	staticData.serializedATN = []int32{
-		4, 1, 41, 320, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
+		4, 1, 43, 320, 2, 0, 7, 0, 2, 1, 7, 1, 2, 2, 7, 2, 2, 3, 7, 3, 2, 4, 7,
 		4, 2, 5, 7, 5, 2, 6, 7, 6, 2, 7, 7, 7, 2, 8, 7, 8, 2, 9, 7, 9, 2, 10, 7,
 		10, 2, 11, 7, 11, 2, 12, 7, 12, 2, 13, 7, 13, 2, 14, 7, 14, 2, 15, 7, 15,
 		2, 16, 7, 16, 2, 17, 7, 17, 2, 18, 7, 18, 2, 19, 7, 19, 2, 20, 7, 20, 2,
@@ -232,48 +232,50 @@ func NewTempoParser(input antlr.TokenStream) *TempoParser {
 
 // TempoParser tokens.
 const (
-	TempoParserEOF        = antlr.TokenEOF
-	TempoParserSTRUCT     = 1
-	TempoParserINTERFACE  = 2
-	TempoParserFUNC       = 3
-	TempoParserRETURN     = 4
-	TempoParserLET        = 5
-	TempoParserASYNC      = 6
-	TempoParserAWAIT      = 7
-	TempoParserIF         = 8
-	TempoParserELSE       = 9
-	TempoParserTRUE       = 10
-	TempoParserFALSE      = 11
-	TempoParserLPAREN     = 12
-	TempoParserLSQUARE    = 13
-	TempoParserLCURLY     = 14
-	TempoParserRPAREN     = 15
-	TempoParserRSQUARE    = 16
-	TempoParserRCURLY     = 17
-	TempoParserPLUS       = 18
-	TempoParserMINUS      = 19
-	TempoParserMULTIPLY   = 20
-	TempoParserDIVIDE     = 21
-	TempoParserMODULO     = 22
-	TempoParserEQUAL      = 23
-	TempoParserNOT_EQUAL  = 24
-	TempoParserLESS       = 25
-	TempoParserLESS_EQ    = 26
-	TempoParserGREATER    = 27
-	TempoParserGREATER_EQ = 28
-	TempoParserAND        = 29
-	TempoParserOR         = 30
-	TempoParserIS         = 31
-	TempoParserROLE_AT    = 32
-	TempoParserCOMMA      = 33
-	TempoParserDOT        = 34
-	TempoParserCOLON      = 35
-	TempoParserCOM        = 36
-	TempoParserSTRING     = 37
-	TempoParserID         = 38
-	TempoParserNUMBER     = 39
-	TempoParserEND        = 40
-	TempoParserWHITESPACE = 41
+	TempoParserEOF           = antlr.TokenEOF
+	TempoParserSTRUCT        = 1
+	TempoParserINTERFACE     = 2
+	TempoParserFUNC          = 3
+	TempoParserRETURN        = 4
+	TempoParserLET           = 5
+	TempoParserASYNC         = 6
+	TempoParserAWAIT         = 7
+	TempoParserIF            = 8
+	TempoParserELSE          = 9
+	TempoParserTRUE          = 10
+	TempoParserFALSE         = 11
+	TempoParserLPAREN        = 12
+	TempoParserLSQUARE       = 13
+	TempoParserLCURLY        = 14
+	TempoParserRPAREN        = 15
+	TempoParserRSQUARE       = 16
+	TempoParserRCURLY        = 17
+	TempoParserPLUS          = 18
+	TempoParserMINUS         = 19
+	TempoParserMULTIPLY      = 20
+	TempoParserDIVIDE        = 21
+	TempoParserMODULO        = 22
+	TempoParserEQUAL         = 23
+	TempoParserNOT_EQUAL     = 24
+	TempoParserLESS          = 25
+	TempoParserLESS_EQ       = 26
+	TempoParserGREATER       = 27
+	TempoParserGREATER_EQ    = 28
+	TempoParserAND           = 29
+	TempoParserOR            = 30
+	TempoParserIS            = 31
+	TempoParserROLE_AT       = 32
+	TempoParserCOMMA         = 33
+	TempoParserDOT           = 34
+	TempoParserCOLON         = 35
+	TempoParserCOM           = 36
+	TempoParserSTRING        = 37
+	TempoParserID            = 38
+	TempoParserNUMBER        = 39
+	TempoParserEND           = 40
+	TempoParserWHITESPACE    = 41
+	TempoParserLINE_COMMENT  = 42
+	TempoParserBLOCK_COMMENT = 43
 )
 
 // TempoParser rules.

@@ -158,3 +158,6 @@ ID: ('_' [a-zA-Z_0-9]+ | [a-zA-Z][a-zA-Z_0-9]*);
 NUMBER: [0-9]+;
 END: ';';
 WHITESPACE: [ \t\r\n]+ -> skip;
+
+LINE_COMMENT: '//' ~( '\r' | '\n')* -> skip;
+BLOCK_COMMENT: '/*' .*? '*/' -> skip;
