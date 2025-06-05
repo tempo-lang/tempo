@@ -1,9 +1,6 @@
 package lsp
 
 import (
-	"github.com/antlr4-go/antlr/v4"
-	"github.com/tempo-lang/tempo/parser"
-	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -14,23 +11,9 @@ func (s *tempoServer) highlight(context *glsp.Context, params *protocol.Document
 		return nil, nil
 	}
 
-	leaf, _ := astNodeAtPosition(doc.ast, params.Position)
-	if leaf == nil {
+	sym, found := findSymFromPos(doc, params.Position)
+	if !found {
 		return nil, nil
-	}
-
-	var sym sym_table.Symbol
-
-	var node antlr.Tree = leaf
-	for node != nil {
-		if ident, ok := node.(*parser.IdentContext); ok {
-			if identSym, ok := doc.info.Symbols[ident]; ok {
-				sym = identSym
-				break
-			}
-			return nil, nil
-		}
-		node = node.GetParent()
 	}
 
 	highlights := []protocol.DocumentHighlight{

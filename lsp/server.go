@@ -96,6 +96,7 @@ func (s *tempoServer) Handler() *protocol.Handler {
 		TextDocumentDeclaration:       s.gotoDeclaration,
 		TextDocumentDefinition:        s.gotoDefinition,
 		TextDocumentReferences:        s.gotoReferences,
+		TextDocumentDocumentSymbol:    s.documentSymbols,
 	}
 }
 

@@ -2,6 +2,7 @@ package lsp
 
 import (
 	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/sym_table"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
@@ -15,6 +16,20 @@ func parserRuleToRange(rule antlr.ParserRuleContext) protocol.Range {
 		End: protocol.Position{
 			Line:      uint32(rule.GetStop().GetLine() - 1),
 			Character: uint32(rule.GetStop().GetColumn() + endTokenLength + 1),
+		},
+	}
+}
+
+func scopeToRange(scope *sym_table.Scope) protocol.Range {
+	endTokenLength := scope.End().GetStop() - scope.End().GetStart()
+	return protocol.Range{
+		Start: protocol.Position{
+			Line:      uint32(scope.Pos().GetLine() - 1),
+			Character: uint32(scope.Pos().GetColumn()),
+		},
+		End: protocol.Position{
+			Line:      uint32(scope.End().GetLine() - 1),
+			Character: uint32(scope.End().GetColumn() + endTokenLength + 1),
 		},
 	}
 }
