@@ -87,6 +87,8 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 
 	tc.checkExprInScope(ctx.Ident(), sym.Type().Roles())
 
+	sym.AddWrite(ctx.Ident())
+
 	return false
 }
 

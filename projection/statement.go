@@ -10,23 +10,29 @@ type Statement interface {
 }
 
 type StmtVarDecl struct {
-	Name string
-	Expr Expression
+	Name     string
+	Expr     Expression
+	IsUnused bool
 }
 
-func NewStmtVarDecl(name string, expr Expression) Statement {
+func NewStmtVarDecl(name string, expr Expression, isUnused bool) Statement {
 	return &StmtVarDecl{
-		Name: name,
-		Expr: expr,
+		Name:     name,
+		Expr:     expr,
+		IsUnused: isUnused,
 	}
 }
 
 func (decl *StmtVarDecl) Codegen() jen.Statement {
+	result := []jen.Code{
+		jen.Var().Id(decl.Name).Add(decl.Expr.Type().Codegen()).Op("=").Add(decl.Expr.Codegen()),
+	}
 
-	genDecl := jen.Var().Id(decl.Name).Add(decl.Expr.Type().Codegen()).Op("=").Add(decl.Expr.Codegen())
-	fixUnused := jen.Id("_").Op("=").Id(decl.Name)
+	if decl.IsUnused {
+		result = append(result, jen.Id("_").Op("=").Id(decl.Name))
+	}
 
-	return []jen.Code{genDecl, fixUnused}
+	return result
 }
 
 func (decl *StmtVarDecl) IsStatement() {}

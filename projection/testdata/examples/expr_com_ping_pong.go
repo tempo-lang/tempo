@@ -11,6 +11,5 @@ func foo_A(env *runtime.Env) {
 }
 func foo_B(env *runtime.Env) {
 	var tmp0 *runtime.Async[int] = runtime.FixedAsync(runtime.GetAsync(runtime.Recv[int](env, "A")))
-	_ = tmp0
 	runtime.Send(env, runtime.GetAsync(tmp0), "A")
 }

@@ -52,10 +52,9 @@ func (s *tempoServer) analyzeDocument(notify glsp.NotifyFunc, docUri protocol.UR
 		})
 	}
 
-	protoVersion := protocol.UInteger(version)
 	notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
 		URI:         docUri,
-		Version:     &protoVersion,
+		Version:     toPtr(protocol.UInteger(version)),
 		Diagnostics: diagnostics,
 	})
 }

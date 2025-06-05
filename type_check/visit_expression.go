@@ -171,6 +171,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	}
 
 	tc.info.Symbols[ctx.IdentAccess().Ident()] = sym
+	sym.AddRead(ctx.IdentAccess().Ident())
 
 	identType := sym.Type()
 	_, isFunc := sym.Type().Value().(*types.FunctionType)

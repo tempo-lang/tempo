@@ -11,29 +11,61 @@ type Symbol interface {
 	Type() *types.Type
 	Parent() *Scope
 	IsAssignable() bool
+
+	AccessReads() []parser.IIdentContext
+	AccessWrites() []parser.IIdentContext
+	AddRead(ident parser.IIdentContext)
+	AddWrite(ident parser.IIdentContext)
+}
+
+type baseSymbol struct {
+	ident        parser.IIdentContext
+	symType      *types.Type
+	parent       *Scope
+	accessReads  []parser.IIdentContext
+	accessWrites []parser.IIdentContext
+}
+
+func newBaseSymbol(ident parser.IIdentContext, symType *types.Type, parent *Scope) baseSymbol {
+	return baseSymbol{
+		ident:        ident,
+		symType:      symType,
+		parent:       parent,
+		accessReads:  []parser.IIdentContext{},
+		accessWrites: []parser.IIdentContext{},
+	}
+}
+
+func (s *baseSymbol) SymbolName() string {
+	return s.ident.GetText()
+}
+func (s *baseSymbol) Ident() parser.IIdentContext {
+	return s.ident
+}
+func (s *baseSymbol) Type() *types.Type {
+	return s.symType
+}
+func (s *baseSymbol) Parent() *Scope {
+	return s.parent
+}
+func (s *baseSymbol) AccessReads() []parser.IIdentContext {
+	return s.accessReads
+}
+func (s *baseSymbol) AccessWrites() []parser.IIdentContext {
+	return s.accessWrites
+}
+func (s *baseSymbol) AddRead(ident parser.IIdentContext) {
+	s.accessReads = append(s.accessReads, ident)
+}
+func (s *baseSymbol) AddWrite(ident parser.IIdentContext) {
+	s.accessWrites = append(s.accessWrites, ident)
 }
 
 type FuncSymbol struct {
-	funcCtx  parser.IFuncSigContext
-	scope    *Scope
-	funcType *types.Type
-	params   []*FuncParamSymbol
-}
-
-func (f *FuncSymbol) Parent() *Scope {
-	return f.scope.parent
-}
-
-func (f *FuncSymbol) Ident() parser.IIdentContext {
-	return f.funcCtx.Ident()
-}
-
-func (f *FuncSymbol) SymbolName() string {
-	return f.funcCtx.Ident().GetText()
-}
-
-func (f *FuncSymbol) Type() *types.Type {
-	return f.funcType
+	baseSymbol
+	funcCtx parser.IFuncSigContext
+	scope   *Scope
+	params  []*FuncParamSymbol
 }
 
 func (f *FuncSymbol) FuncSig() parser.IFuncSigContext {
@@ -41,7 +73,7 @@ func (f *FuncSymbol) FuncSig() parser.IFuncSigContext {
 }
 
 func (f *FuncSymbol) FuncValue() *types.FunctionType {
-	return f.funcType.Value().(*types.FunctionType)
+	return f.Type().Value().(*types.FunctionType)
 }
 
 func (f *FuncSymbol) Scope() *Scope {
@@ -69,42 +101,28 @@ func (f *FuncSymbol) ReturnCtx() parser.IValueTypeContext {
 }
 
 func (f *FuncSymbol) Roles() *types.Roles {
-	return f.funcType.Roles()
+	return f.Type().Roles()
 }
 
 func NewFuncSymbol(fn parser.IFuncSigContext, scope *Scope, funcType *types.Type) Symbol {
 	return &FuncSymbol{
-		funcCtx:  fn,
-		scope:    scope,
-		funcType: funcType,
-		params:   []*FuncParamSymbol{},
+		baseSymbol: newBaseSymbol(fn.GetName(), funcType, scope.Parent()),
+		funcCtx:    fn,
+		scope:      scope,
+		params:     []*FuncParamSymbol{},
 	}
 }
 
 type FuncParamSymbol struct {
-	param     parser.IFuncParamContext
-	paramType *types.Type
-	parent    *Scope
+	baseSymbol
+	param parser.IFuncParamContext
 }
 
 func NewFuncParamSymbol(param parser.IFuncParamContext, parent *Scope, paramType *types.Type) Symbol {
-	return &FuncParamSymbol{param: param, parent: parent, paramType: paramType}
-}
-
-func (param *FuncParamSymbol) SymbolName() string {
-	return param.param.Ident().GetText()
-}
-
-func (param *FuncParamSymbol) Ident() parser.IIdentContext {
-	return param.param.Ident()
-}
-
-func (f *FuncParamSymbol) Type() *types.Type {
-	return f.paramType
-}
-
-func (param *FuncParamSymbol) Parent() *Scope {
-	return param.parent
+	return &FuncParamSymbol{
+		baseSymbol: newBaseSymbol(param.Ident(), paramType, parent),
+		param:      param,
+	}
 }
 
 func (param *FuncParamSymbol) IsAssignable() bool {
@@ -116,29 +134,15 @@ func (param *FuncParamSymbol) Param() parser.IFuncParamContext {
 }
 
 type VariableSymbol struct {
-	decl    *parser.StmtVarDeclContext
-	parent  *Scope
-	varType *types.Type
+	baseSymbol
+	decl *parser.StmtVarDeclContext
 }
 
 func NewVariableSymbol(decl *parser.StmtVarDeclContext, parent *Scope, varType *types.Type) Symbol {
-	return &VariableSymbol{decl: decl, parent: parent, varType: varType}
-}
-
-func (v *VariableSymbol) SymbolName() string {
-	return v.decl.Ident().GetText()
-}
-
-func (v *VariableSymbol) Ident() parser.IIdentContext {
-	return v.decl.Ident()
-}
-
-func (v *VariableSymbol) Type() *types.Type {
-	return v.varType
-}
-
-func (v *VariableSymbol) Parent() *Scope {
-	return v.parent
+	return &VariableSymbol{
+		baseSymbol: newBaseSymbol(decl.Ident(), varType, parent),
+		decl:       decl,
+	}
 }
 
 func (v *VariableSymbol) IsAssignable() bool {
@@ -150,6 +154,7 @@ func (v *VariableSymbol) VarDecl() *parser.StmtVarDeclContext {
 }
 
 type StructSymbol struct {
+	baseSymbol
 	structCtx  parser.IStructContext
 	scope      *Scope
 	structType *types.Type
@@ -157,6 +162,7 @@ type StructSymbol struct {
 }
 
 type StructFieldSymbol struct {
+	baseSymbol
 	field        parser.IStructFieldContext
 	parentStruct *StructSymbol
 	fieldType    *types.Type
@@ -164,27 +170,11 @@ type StructFieldSymbol struct {
 
 func NewStructSymbol(structCtx parser.IStructContext, scope *Scope, structType *types.Type) Symbol {
 	return &StructSymbol{
+		baseSymbol: newBaseSymbol(structCtx.Ident(), structType, scope.Parent()),
 		structCtx:  structCtx,
 		scope:      scope,
-		structType: structType,
 		fields:     []*StructFieldSymbol{},
 	}
-}
-
-func (s *StructSymbol) SymbolName() string {
-	return s.structCtx.Ident().GetText()
-}
-
-func (s *StructSymbol) Ident() parser.IIdentContext {
-	return s.structCtx.Ident()
-}
-
-func (s *StructSymbol) Type() *types.Type {
-	return s.structType
-}
-
-func (s *StructSymbol) Parent() *Scope {
-	return s.scope.parent
 }
 
 func (s *StructSymbol) IsAssignable() bool {
@@ -205,26 +195,11 @@ func (s *StructSymbol) AddField(field *StructFieldSymbol) {
 
 func NewStructFieldSymbol(field parser.IStructFieldContext, parentStruct *StructSymbol, fieldType *types.Type) Symbol {
 	return &StructFieldSymbol{
+		baseSymbol:   newBaseSymbol(field.Ident(), fieldType, parentStruct.Scope()),
 		field:        field,
 		parentStruct: parentStruct,
 		fieldType:    fieldType,
 	}
-}
-
-func (f *StructFieldSymbol) SymbolName() string {
-	return f.field.Ident().GetText()
-}
-
-func (f *StructFieldSymbol) Ident() parser.IIdentContext {
-	return f.field.Ident()
-}
-
-func (f *StructFieldSymbol) Type() *types.Type {
-	return f.fieldType
-}
-
-func (f *StructFieldSymbol) Parent() *Scope {
-	return f.parentStruct.scope.parent
 }
 
 func (f *StructFieldSymbol) IsAssignable() bool {
@@ -240,6 +215,7 @@ func (f *StructFieldSymbol) Field() parser.IStructFieldContext {
 }
 
 type InterfaceSymbol struct {
+	baseSymbol
 	interfaceCtx  parser.IInterfaceContext
 	scope         *Scope
 	interfaceType *types.Type
@@ -247,6 +223,7 @@ type InterfaceSymbol struct {
 }
 
 type InterfaceMethodSymbol struct {
+	baseSymbol
 	method       parser.IInterfaceMethodContext
 	parentStruct *InterfaceSymbol
 	methodType   *types.Type
@@ -254,27 +231,11 @@ type InterfaceMethodSymbol struct {
 
 func NewInterfaceSymbol(interfaceCtx parser.IInterfaceContext, scope *Scope, interfaceType *types.Type) Symbol {
 	return &InterfaceSymbol{
-		interfaceCtx:  interfaceCtx,
-		scope:         scope,
-		interfaceType: interfaceType,
-		methods:       []*InterfaceMethodSymbol{},
+		baseSymbol:   newBaseSymbol(interfaceCtx.Ident(), interfaceType, scope.Parent()),
+		interfaceCtx: interfaceCtx,
+		scope:        scope,
+		methods:      []*InterfaceMethodSymbol{},
 	}
-}
-
-func (i *InterfaceSymbol) SymbolName() string {
-	return i.interfaceCtx.Ident().GetText()
-}
-
-func (i *InterfaceSymbol) Ident() parser.IIdentContext {
-	return i.interfaceCtx.Ident()
-}
-
-func (i *InterfaceSymbol) Type() *types.Type {
-	return i.interfaceType
-}
-
-func (i *InterfaceSymbol) Parent() *Scope {
-	return i.scope.parent
 }
 
 func (i *InterfaceSymbol) IsAssignable() bool {
@@ -295,26 +256,11 @@ func (i *InterfaceSymbol) AddMethod(method *InterfaceMethodSymbol) {
 
 func NewInterfaceMethodSymbol(method parser.IInterfaceMethodContext, parentInterface *InterfaceSymbol, methodType *types.Type) Symbol {
 	return &InterfaceMethodSymbol{
+		baseSymbol:   newBaseSymbol(method.FuncSig().GetName(), methodType, parentInterface.Scope()),
 		method:       method,
 		parentStruct: parentInterface,
 		methodType:   methodType,
 	}
-}
-
-func (m *InterfaceMethodSymbol) SymbolName() string {
-	return m.method.FuncSig().Ident().GetText()
-}
-
-func (m *InterfaceMethodSymbol) Ident() parser.IIdentContext {
-	return m.method.FuncSig().Ident()
-}
-
-func (m *InterfaceMethodSymbol) Type() *types.Type {
-	return m.methodType
-}
-
-func (m *InterfaceMethodSymbol) Parent() *Scope {
-	return m.parentStruct.scope.parent
 }
 
 func (m *InterfaceMethodSymbol) IsAssignable() bool {

@@ -108,34 +108,25 @@ func symbolToCompletionItem(sym sym_table.Symbol) protocol.CompletionItem {
 	var kind *protocol.CompletionItemKind = nil
 	switch sym.(type) {
 	case *sym_table.FuncParamSymbol:
-		k := protocol.CompletionItemKindProperty
-		kind = &k
+		kind = toPtr(protocol.CompletionItemKindProperty)
 	case *sym_table.FuncSymbol:
-		k := protocol.CompletionItemKindFunction
-		kind = &k
+		kind = toPtr(protocol.CompletionItemKindFunction)
 	case *sym_table.StructSymbol:
-		k := protocol.CompletionItemKindStruct
-		kind = &k
+		kind = toPtr(protocol.CompletionItemKindStruct)
 	case *sym_table.StructFieldSymbol:
-		k := protocol.CompletionItemKindField
-		kind = &k
+		kind = toPtr(protocol.CompletionItemKindField)
 	case *sym_table.VariableSymbol:
-		k := protocol.CompletionItemKindVariable
-		kind = &k
+		kind = toPtr(protocol.CompletionItemKindVariable)
 	case *sym_table.InterfaceMethodSymbol:
-		k := protocol.CompletionItemKindMethod
-		kind = &k
+		kind = toPtr(protocol.CompletionItemKindMethod)
 	case *sym_table.InterfaceSymbol:
-		k := protocol.CompletionItemKindInterface
-		kind = &k
+		kind = toPtr(protocol.CompletionItemKindInterface)
 	}
-
-	symTypeName := sym.Type().ToString()
 
 	return protocol.CompletionItem{
 		Label:  sym.SymbolName(),
 		Kind:   kind,
-		Detail: &symTypeName,
+		Detail: toPtr(sym.Type().ToString()),
 	}
 }
 

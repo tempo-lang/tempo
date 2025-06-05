@@ -42,7 +42,7 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 
 			expr = epp.storeExpression(roleName, expr, varibleType)
 
-			result = append(result, projection.NewStmtVarDecl(variableName, expr))
+			result = append(result, projection.NewStmtVarDecl(variableName, expr, true))
 			return
 		} else if expr != nil && expr.HasSideEffects() {
 			result = append(result, projection.NewStmtExpr(expr))
