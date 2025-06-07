@@ -24,14 +24,18 @@ func NewDuplicateRoles(ctx antlr.ParserRuleContext, duplicateRoles []string) Err
 }
 
 func (e *DuplicateRoles) Error() string {
-	dupRoles := formatList("role", "roles", e.DuplicateRoles, "and")
-	return fmt.Sprintf("%s %s duplicated, duplicate roles are not allowed", dupRoles, toBe(e.DuplicateRoles))
+	return "duplicate roles are not allowed"
 }
 
 func (e *DuplicateRoles) Annotations() []Annotation {
+	dupRoles := formatList("role", "roles", e.DuplicateRoles, "and")
+
 	return []Annotation{{
 		Type:    AnnotationTypeNote,
 		Message: "a process can only act as one role at a time in a function, struct or interface.",
+	}, {
+		Type:    AnnotationTypeHint,
+		Message: fmt.Sprintf("the %s %s used multiple times.", dupRoles, toBe(e.DuplicateRoles)),
 	}}
 }
 

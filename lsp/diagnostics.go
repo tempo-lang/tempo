@@ -64,6 +64,7 @@ func (s *tempoServer) analyzeDocument(notify glsp.NotifyFunc, docUri protocol.UR
 			Code: &protocol.IntegerOrString{
 				Value: fmt.Sprintf("E%d", err.Code()),
 			},
+			Source: toPtr("tempo"),
 		})
 	}
 

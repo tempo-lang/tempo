@@ -7,4 +7,4 @@ func@A foo() {
   let x: Point@(A,A) = Point@(A,A) { x: 10, y: 10 };
 }
 ---
-E11 7:30: role `A` is duplicated, duplicate roles are not allowed
+E11 7:30: duplicate roles are not allowed

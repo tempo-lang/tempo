@@ -2,4 +2,4 @@ interface@(A,B) Point {
   func@(A,A) foo();
 }
 ---
-E11 2:8: role `A` is duplicated, duplicate roles are not allowed
+E11 2:8: duplicate roles are not allowed
