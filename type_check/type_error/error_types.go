@@ -116,6 +116,14 @@ func toBe[T any](items []T) string {
 	}
 }
 
+func amount(number int, singular, plural string) string {
+	if number == 1 {
+		return fmt.Sprintf("%d %s", number, singular)
+	} else {
+		return fmt.Sprintf("%d %s", number, plural)
+	}
+}
+
 type ValueRoleNotInScope struct {
 	baseError
 	Value             antlr.ParserRuleContext

@@ -167,12 +167,13 @@ func NewMissingStructField(expr *parser.ExprStructContext, field *sym_table.Stru
 
 type StructWrongRoleCount struct {
 	baseError
-	roleType parser.IRoleTypeContext
-	sym      *sym_table.StructSymbol
+	sym        sym_table.Symbol
+	roleType   parser.IRoleTypeContext
+	parsedRole *types.Roles
 }
 
 func (e *StructWrongRoleCount) Error() string {
-	return fmt.Sprintf("wrong number of roles for struct `%s`", e.sym.SymbolName())
+	return fmt.Sprintf("wrong number of roles in `%s`", e.sym.SymbolName())
 }
 
 func (e *StructWrongRoleCount) ParserRule() antlr.ParserRuleContext {
@@ -183,11 +184,33 @@ func (e *StructWrongRoleCount) Code() ErrorCode {
 	return CodeStructWrongRoleCount
 }
 
-func NewStructWrongRoleCount(roleType parser.IRoleTypeContext, sym *sym_table.StructSymbol) Error {
+func NewWrongRoleCount(sym sym_table.Symbol, roleType parser.IRoleTypeContext, parsedRole *types.Roles) Error {
 	return &StructWrongRoleCount{
-		roleType: roleType,
-		sym:      sym,
+		sym:        sym,
+		roleType:   roleType,
+		parsedRole: parsedRole,
 	}
+}
+
+func (e *StructWrongRoleCount) Annotations() []Annotation {
+	expectedRoles := amount(len(e.sym.Type().Roles().Participants()), "role", "roles")
+	actualRoles := amount(len(e.parsedRole.Participants()), "role", "roles")
+	wasWere := "were"
+	if len(e.parsedRole.Participants()) == 1 {
+		wasWere = "was"
+	}
+
+	return []Annotation{{
+		Type:    AnnotationTypeHint,
+		Message: fmt.Sprintf("type `%s` expects %s, but %s %s found", e.sym.Type().ToString(), expectedRoles, actualRoles, wasWere),
+	}}
+}
+
+func (e *StructWrongRoleCount) RelatedInfo() []RelatedInfo {
+	return []RelatedInfo{{
+		Message:    "type declared here",
+		ParserRule: e.sym.Ident(),
+	}}
 }
 
 type FieldAccessUnknownField struct {

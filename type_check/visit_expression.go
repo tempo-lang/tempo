@@ -388,7 +388,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	structRoles := structSym.Type().Roles()
 	defRoleSubst, ok := structRoles.SubstituteMap(roles)
 	if !ok {
-		tc.reportError(type_error.NewStructWrongRoleCount(ctx.RoleType(), structSym))
+		tc.reportError(type_error.NewWrongRoleCount(structSym, ctx.RoleType(), roles))
 		return tc.registerType(ctx, types.Invalid())
 	}
 

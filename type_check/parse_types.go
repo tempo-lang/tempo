@@ -51,6 +51,7 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 		}
 	}
 
+	var typeError type_error.Error = nil
 	if typeValue == nil {
 		sym, err := tc.lookupSymbol(typeName)
 		if err != nil {
@@ -59,13 +60,18 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type
 
 		typeValue = sym.Type().Value()
 		sym.AddRead(ctx.Ident())
+
+		expectedRoleCount := len(sym.Type().Roles().Participants())
+		if len(role.Participants()) != expectedRoleCount {
+			typeError = type_error.NewWrongRoleCount(sym, ctx.RoleType(), role)
+		}
 	}
 
 	if typeValue != nil {
 		if isAsync {
 			typeValue = types.NewAsync(typeValue)
 		}
-		return types.New(typeValue, role), nil
+		return types.New(typeValue, role), typeError
 	} else {
 		return types.Invalid(), type_error.NewUnknownType(typeName)
 	}

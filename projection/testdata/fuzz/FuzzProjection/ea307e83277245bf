@@ -1,0 +1,2 @@
+go test fuzz v1
+string("struct@(A,B)A121{A0200:Bar@(A,B),A000070:Bar@(B,A)}\nstruct@(A0Y) Bar{}")
