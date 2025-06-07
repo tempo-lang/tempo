@@ -4,4 +4,4 @@ func@A foo() {
   bar@(A,A)();
 }
 ---
-4:7: duplicate roles 'A'
+E11 4:7: role `A` is duplicated, duplicate roles are not allowed

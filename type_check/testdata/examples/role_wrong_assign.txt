@@ -3,4 +3,4 @@ func@(A,B) foo() {
   let y: Int@B = x;
 }
 ---
-3:18: invalid declaration type, expected 'Int@B' found 'Int@A'
+E24 3:18: cannot assign type `Int@A` to `Int@B`

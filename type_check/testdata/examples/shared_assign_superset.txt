@@ -4,4 +4,4 @@ func@(A,B,C) foo(){
   x = shared;
 }
 ---
-4:7: invalid assignment type, expected 'Int@[A,B,C]' found 'Int@[A,B]'
+E24 4:7: cannot assign type `Int@[A,B]` to `Int@[A,B,C]`

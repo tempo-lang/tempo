@@ -6,4 +6,4 @@ func@(A,B) foo() {
     }
 }
 ---
-5:9: value 'x' contains roles 'A' that are not in scope
+E1 5:9: value `x` contains role `A` that is not in scope

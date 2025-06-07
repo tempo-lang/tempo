@@ -3,4 +3,4 @@ func@A foo() {
   let x: Int@A = 10;
 }
 ---
-2:3: unknown symbol 'x'
+E16 2:3: value `x` is undefined or not in scope

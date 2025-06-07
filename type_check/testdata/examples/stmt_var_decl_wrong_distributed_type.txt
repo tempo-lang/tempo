@@ -2,4 +2,4 @@ func@(A,B) foo() {
     let x: Int@(A,B) = 10;
 }
 ---
-2:12: type 'Int@(A,B)' is not distributed
+E10 2:12: type `Int@(A,B)` cannot be distributed

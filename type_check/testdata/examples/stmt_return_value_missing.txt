@@ -2,4 +2,4 @@ func@(A,B) foo() Bool@A {
   return;
 }
 ---
-2:3: return is missing value of type 'Bool@A'
+E36 2:3: return is missing value of type `Bool@A`

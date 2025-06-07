@@ -2,4 +2,4 @@ func@(A,B) foo() {
     let result: Int@A = await J->A 10;
 }
 ---
-2:31: roles 'J' are not in scope
+E12 2:31: role `J` is not in scope

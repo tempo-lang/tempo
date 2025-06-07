@@ -2,4 +2,4 @@ interface@(A,B) Action {
   func@(A,X) foo();
 }
 ---
-2:8: roles 'X' are not in scope
+E12 2:8: role `X` is not in scope

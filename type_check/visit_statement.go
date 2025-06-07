@@ -40,7 +40,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 		if !typeFailed {
 			newType, ok := exprType.CoerceTo(declType)
 			if !ok {
-				tc.reportError(type_error.NewInvalidDeclType(ctx.ValueType(), declType, ctx.Expr(), exprType))
+				tc.reportError(type_error.NewInvalidAssignType(ctx.Expr(), declType, exprType))
 				typeFailed = true
 			} else {
 				stmtType = newType
@@ -82,7 +82,7 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 	} else {
 		exprType := tc.visitExpr(ctx.Expr())
 		if _, ok := exprType.CoerceTo(sym.Type()); !ok {
-			tc.reportError(type_error.NewInvalidAssignType(ctx, sym.Type(), exprType))
+			tc.reportError(type_error.NewInvalidAssignType(ctx.Expr(), sym.Type(), exprType))
 		}
 	}
 

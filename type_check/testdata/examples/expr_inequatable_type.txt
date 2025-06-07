@@ -2,4 +2,4 @@ func@A foo() {
   foo@A == foo@A;
 }
 ---
-2:3: type value 'func foo()' is not equatable
+E29 2:3: values of type `func foo()` cannot be compared

@@ -225,7 +225,7 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 		return tc.registerType(ctx, types.New(asyncType.Inner(), exprType.Roles()))
 	}
 
-	tc.reportError(type_error.NewExpectedAsyncType(ctx, exprType))
+	tc.reportError(type_error.NewAwaitNonAsyncType(ctx, exprType))
 	return tc.registerType(ctx, types.Invalid())
 }
 
@@ -301,8 +301,10 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 
 	switch callFuncValue := callType.Value().(type) {
 	case *types.FunctionType:
-		if len(ctx.FuncArgList().AllExpr()) != len(callFuncValue.Params()) {
-			tc.reportError(type_error.NewCallWrongArgCount(ctx))
+		funcParamCount := len(callFuncValue.Params())
+		callArgCount := len(ctx.FuncArgList().AllExpr())
+		if funcParamCount != callArgCount {
+			tc.reportError(type_error.NewCallWrongArgCount(ctx, funcParamCount, callArgCount))
 		} else {
 			for i, arg := range ctx.FuncArgList().AllExpr() {
 				argType := tc.visitExpr(arg)
@@ -315,8 +317,10 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		}
 		return tc.registerType(ctx, callFuncValue.ReturnType())
 	case *types.ClosureType:
-		if len(ctx.FuncArgList().AllExpr()) != len(callFuncValue.Params()) {
-			tc.reportError(type_error.NewCallWrongArgCount(ctx))
+		funcParamCount := len(callFuncValue.Params())
+		callArgCount := len(ctx.FuncArgList().AllExpr())
+		if funcParamCount != callArgCount {
+			tc.reportError(type_error.NewCallWrongArgCount(ctx, funcParamCount, callArgCount))
 		} else {
 			for i, arg := range ctx.FuncArgList().AllExpr() {
 				argType := tc.visitExpr(arg)

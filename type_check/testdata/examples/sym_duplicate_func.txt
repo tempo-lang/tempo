@@ -1,4 +1,4 @@
 func@(A,B) foo(value: Int@A) {}
 func@(C,D) foo(value: Int@C) {}
 ---
-2:12: symbol 'foo' already declared
+E15 2:12: symbol `foo` is already declared

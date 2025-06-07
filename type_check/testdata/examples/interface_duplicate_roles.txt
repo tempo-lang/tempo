@@ -6,4 +6,4 @@ func@A foo(action: runnable@(A,A)) {
   action.run(10);
 }
 ---
-5:29: duplicate roles 'A'
+E11 5:29: role `A` is duplicated, duplicate roles are not allowed

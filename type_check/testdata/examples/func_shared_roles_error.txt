@@ -1,3 +1,3 @@
 func@[A,B] foo() {}
 ---
-1:6: shared type not allowed here
+E2 1:6: shared type is not allowed here

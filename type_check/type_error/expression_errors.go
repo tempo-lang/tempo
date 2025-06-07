@@ -3,7 +3,6 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 
@@ -12,21 +11,34 @@ import (
 
 type InvalidNumber struct {
 	baseError
-	Num parser.ILiteralContext
+	Num    parser.ILiteralContext
+	Reason error
 }
 
-func NewInvalidNumber(num parser.ILiteralContext) Error {
+func NewInvalidNumber(num parser.ILiteralContext, reason error) Error {
 	return &InvalidNumber{
-		Num: num,
+		Num:    num,
+		Reason: reason,
 	}
 }
 
 func (i *InvalidNumber) Error() string {
-	return fmt.Sprintf("invalid number '%s'", i.Num.GetText())
+	return fmt.Sprintf("value `%s` is an invalid number", i.Num.GetText())
 }
 
 func (i *InvalidNumber) ParserRule() antlr.ParserRuleContext {
 	return i.Num
+}
+
+func (i *InvalidNumber) Annotations() []Annotation {
+	return []Annotation{{
+		Type:    AnnotationTypeNote,
+		Message: "reason: " + i.Reason.Error(),
+	}}
+}
+
+func (e *InvalidNumber) Code() ErrorCode {
+	return CodeInvalidNumber
 }
 
 type ComNonLocalSender struct {
@@ -40,6 +52,10 @@ func (e *ComNonLocalSender) Error() string {
 
 func (e *ComNonLocalSender) ParserRule() antlr.ParserRuleContext {
 	return e.Com.GetSender()
+}
+
+func (e *ComNonLocalSender) Code() ErrorCode {
+	return CodeComNonLocalSender
 }
 
 func NewComNonLocalSender(com *parser.ExprComContext) Error {
@@ -56,11 +72,15 @@ type ComValueNotAtSender struct {
 
 func (c *ComValueNotAtSender) Error() string {
 	sender := parser.RoleTypeAllIdents(c.Com.RoleType(0))[0]
-	return fmt.Sprintf("value of type '%s' is not present at sender '%s'", c.ExprType.ToString(), sender.GetText())
+	return fmt.Sprintf("value of type `%s` is not present at sender `%s`", c.ExprType.ToString(), sender.GetText())
 }
 
 func (c *ComValueNotAtSender) ParserRule() antlr.ParserRuleContext {
 	return c.Com.Expr()
+}
+
+func (e *ComValueNotAtSender) Code() ErrorCode {
+	return CodeComValueNotAtSender
 }
 
 func (c *ComValueNotAtSender) Annotations() []Annotation {
@@ -69,14 +89,15 @@ func (c *ComValueNotAtSender) Annotations() []Annotation {
 		return []Annotation{
 			{
 				Type:    AnnotationTypeHint,
-				Message: fmt.Sprintf("change sender to '%s', so it matches the role of the value.", roles.Participants()[0]),
+				Message: fmt.Sprintf("consider changing the sender to `%s`, so it matches the role of the value.", roles.Participants()[0]),
 			},
 		}
 	} else {
+		formattedRoles := formatList("", "", roles.Participants(), "or")
 		return []Annotation{
 			{
 				Type:    AnnotationTypeHint,
-				Message: fmt.Sprintf("change sender to one of '%s', so it matches one of the roles having the value.", misc.JoinStrings(roles.Participants(), ", ")),
+				Message: fmt.Sprintf("consider changing the sender to %s, so it matches a role with the value.", formattedRoles),
 			},
 		}
 	}
@@ -96,11 +117,15 @@ type UnequatableType struct {
 }
 
 func (e *UnequatableType) Error() string {
-	return fmt.Sprintf("type value '%s' is not equatable", e.Value.ToString())
+	return fmt.Sprintf("values of type `%s` cannot be compared", e.Value.ToString())
 }
 
 func (e *UnequatableType) ParserRule() antlr.ParserRuleContext {
 	return e.BinOp
+}
+
+func (e *UnequatableType) Code() ErrorCode {
+	return CodeUnequatableType
 }
 
 func NewUnequatableType(binOp *parser.ExprBinOpContext, value types.Value) Error {
@@ -116,11 +141,15 @@ type StructNotInitialized struct {
 }
 
 func (e *StructNotInitialized) Error() string {
-	return fmt.Sprintf("struct '%s' is not initialized", e.Ident.GetText())
+	return fmt.Sprintf("struct `%s` is not initialized", e.Ident.GetText())
 }
 
 func (e *StructNotInitialized) ParserRule() antlr.ParserRuleContext {
 	return e.Ident
+}
+
+func (e *StructNotInitialized) Code() ErrorCode {
+	return CodeStructNotInitialized
 }
 
 func (e *StructNotInitialized) Annotations() []Annotation {

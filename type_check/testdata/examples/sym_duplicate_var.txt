@@ -3,4 +3,4 @@ func@A foo() {
   let x: Int@A = 2;
 }
 ---
-3:7: symbol 'x' already declared
+E15 3:7: symbol `x` is already declared

@@ -4,5 +4,5 @@ func@(A) foo() {
     let y: Int@A = await x;
 }
 ---
-2:16: roles 'B' are not in scope
-4:20: expected async type 'Int@A'
+E12 2:16: role `B` is not in scope
+E7 4:20: cannot await type `Int@A` since it is not an async type

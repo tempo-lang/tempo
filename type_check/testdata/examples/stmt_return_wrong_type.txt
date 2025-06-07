@@ -2,4 +2,4 @@ func@A foo() Int@A {
   return true;
 }
 ---
-2:10: type 'Bool@[]' is not compatible with type 'Int@A'
+E5 2:10: type `Bool@[]` is not compatible with type `Int@A`

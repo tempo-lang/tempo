@@ -2,4 +2,4 @@ func@(A,B) foo() {
   let x: Int@B = await A -> B true;
 }
 ---
-2:18: invalid declaration type, expected 'Int@B' found 'Bool@B'
+E24 2:18: cannot assign type `Bool@B` to `Int@B`

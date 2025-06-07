@@ -2,4 +2,4 @@ func@(A) overflow() {
   let x: Int@A = 99999999999999999999;
 }
 ---
-2:18: invalid number '99999999999999999999'
+E26 2:18: value `99999999999999999999` is an invalid number

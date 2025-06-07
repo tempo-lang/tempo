@@ -4,4 +4,4 @@ func@A assign() {
   x = y;
 }
 ---
-4:7: invalid assignment type, expected 'Int@A' found 'Bool@A'
+E24 4:7: cannot assign type `Bool@A` to `Int@A`

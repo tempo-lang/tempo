@@ -24,49 +24,52 @@ func NewCallNonFunction(callExpr *parser.ExprCallContext, symType *types.Type) E
 }
 
 func (e *CallNonFunction) Error() string {
-	return fmt.Sprintf("call to non-function '%s'", e.symType.ToString())
+	return fmt.Sprintf("cannot call value of type `%s`, since it is not a function", e.symType.ToString())
 }
 
 func (e *CallNonFunction) ParserRule() antlr.ParserRuleContext {
 	return e.callExpr
 }
 
+func (e *CallNonFunction) Code() ErrorCode {
+	return CodeCallNonFunction
+}
+
 type CallWrongArgCount struct {
 	baseError
 	callExpr *parser.ExprCallContext
+	expected int
+	actual   int
 }
 
-func NewCallWrongArgCount(callExpr *parser.ExprCallContext) Error {
+func NewCallWrongArgCount(callExpr *parser.ExprCallContext, expected, actual int) Error {
 	return &CallWrongArgCount{
 		callExpr: callExpr,
+		expected: expected,
+		actual:   actual,
 	}
 }
 
 func (e *CallWrongArgCount) Error() string {
-	return "call has wrong number of arguments"
+	expectedArgs := fmt.Sprintf("%d arguments", e.expected)
+	if e.expected == 1 {
+		expectedArgs = fmt.Sprintf("%d argument", e.expected)
+	}
+
+	actualArgs := fmt.Sprintf("%d", e.actual)
+	if e.actual < e.expected {
+		actualArgs = fmt.Sprintf("only %d", e.actual)
+	}
+
+	return fmt.Sprintf("function expected %s, but %s was given", expectedArgs, actualArgs)
 }
 
 func (e *CallWrongArgCount) ParserRule() antlr.ParserRuleContext {
-	return e.callExpr
+	return e.callExpr.FuncArgList()
 }
 
-type CallWrongRoleCount struct {
-	baseError
-	callExpr *parser.ExprCallContext
-}
-
-func NewCallWrongRoleCount(callExpr *parser.ExprCallContext) Error {
-	return &CallWrongRoleCount{
-		callExpr: callExpr,
-	}
-}
-
-func (e *CallWrongRoleCount) Error() string {
-	return "call has wrong number of roles"
-}
-
-func (e *CallWrongRoleCount) ParserRule() antlr.ParserRuleContext {
-	return e.callExpr
+func (e *CallWrongArgCount) Code() ErrorCode {
+	return CodeCallWrongArgCount
 }
 
 type InstantiateNonFunction struct {
@@ -83,11 +86,15 @@ func NewInstantiateNonFunction(identAccess parser.IIdentAccessContext, sym sym_t
 }
 
 func (e *InstantiateNonFunction) Error() string {
-	return fmt.Sprintf("can not instantiate roles of '%s' with type '%s', since it is not a function", e.sym.SymbolName(), e.sym.Type().ToString())
+	return fmt.Sprintf("cannot instantiate roles of `%s` with type `%s`, since it is not a function", e.sym.SymbolName(), e.sym.Type().ToString())
 }
 
 func (e *InstantiateNonFunction) ParserRule() antlr.ParserRuleContext {
 	return e.identAccess.RoleType()
+}
+
+func (e *InstantiateNonFunction) Code() ErrorCode {
+	return CodeInstantiateNonFunction
 }
 
 type FunctionNotInstantiated struct {
@@ -118,6 +125,10 @@ func (e *FunctionNotInstantiated) ParserRule() antlr.ParserRuleContext {
 	return e.identAccess
 }
 
+func (e *FunctionNotInstantiated) Code() ErrorCode {
+	return CodeFunctionNotInstantiated
+}
+
 type FunctionMissingReturn struct {
 	baseError
 	callableEnv sym_table.CallableEnv
@@ -137,6 +148,10 @@ func (e *FunctionMissingReturn) ParserRule() antlr.ParserRuleContext {
 	return e.callableEnv.ReturnCtx()
 }
 
+func (e *FunctionMissingReturn) Code() ErrorCode {
+	return CodeFunctionMissingReturn
+}
+
 type ReturnValueMissing struct {
 	baseError
 	callableEnv sym_table.CallableEnv
@@ -151,9 +166,20 @@ func NewReturnValueMissing(callableEnv sym_table.CallableEnv, returnCtx *parser.
 }
 
 func (e *ReturnValueMissing) Error() string {
-	return fmt.Sprintf("return is missing value of type '%s'", e.callableEnv.ReturnType().ToString())
+	return fmt.Sprintf("return is missing value of type `%s`", e.callableEnv.ReturnType().ToString())
 }
 
 func (e *ReturnValueMissing) ParserRule() antlr.ParserRuleContext {
 	return e.returnCtx
+}
+
+func (e *ReturnValueMissing) Code() ErrorCode {
+	return CodeReturnValueMissing
+}
+
+func (e *ReturnValueMissing) RelatedInfo() []RelatedInfo {
+	return []RelatedInfo{{
+		Message:    "return type is specified here",
+		ParserRule: e.callableEnv.ReturnCtx(),
+	}}
 }

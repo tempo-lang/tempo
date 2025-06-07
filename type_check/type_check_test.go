@@ -48,7 +48,7 @@ func TestExamples(t *testing.T) {
 
 				line := typeError.ParserRule().GetStart().GetLine()
 				col := typeError.ParserRule().GetStart().GetColumn() + 1
-				formattedErrors = append(formattedErrors, fmt.Sprintf("%d:%d: %s", line, col, typeError.Error()))
+				formattedErrors = append(formattedErrors, fmt.Sprintf("E%d %d:%d: %s", typeError.Code(), line, col, typeError.Error()))
 			}
 
 			actualErrors := misc.JoinStrings(formattedErrors, "\n")

@@ -5,4 +5,4 @@ func@(A,B) foo() {
   }
 }
 ---
-4:5: return statement is missing roles 'B'
+E25 4:5: role `B` is missing from the return statement

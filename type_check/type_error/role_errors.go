@@ -24,12 +24,23 @@ func NewDuplicateRoles(ctx antlr.ParserRuleContext, duplicateRoles []string) Err
 }
 
 func (e *DuplicateRoles) Error() string {
-	dupRoles := misc.JoinStrings(e.DuplicateRoles, ",")
-	return fmt.Sprintf("duplicate roles '%s'", dupRoles)
+	dupRoles := formatList("role", "roles", e.DuplicateRoles, "and")
+	return fmt.Sprintf("%s %s duplicated, duplicate roles are not allowed", dupRoles, toBe(e.DuplicateRoles))
+}
+
+func (e *DuplicateRoles) Annotations() []Annotation {
+	return []Annotation{{
+		Type:    AnnotationTypeNote,
+		Message: "a process can only act as one role at a time in a function, struct or interface.",
+	}}
 }
 
 func (e *DuplicateRoles) ParserRule() antlr.ParserRuleContext {
 	return e.Ctx
+}
+
+func (e *DuplicateRoles) Code() ErrorCode {
+	return CodeDuplicateRoles
 }
 
 type RolesNotInScope struct {
@@ -46,11 +57,16 @@ func NewRolesNotInScope(roleType parser.IRoleTypeContext, unknownRoles []string)
 }
 
 func (e *RolesNotInScope) Error() string {
-	return fmt.Sprintf("roles '%s' are not in scope", misc.JoinStrings(e.UnknownRoles, ","))
+	roles := formatList("role", "roles", e.UnknownRoles, "and")
+	return fmt.Sprintf("%s %s not in scope", roles, toBe(e.UnknownRoles))
 }
 
 func (e *RolesNotInScope) ParserRule() antlr.ParserRuleContext {
 	return e.RoleType
+}
+
+func (e *RolesNotInScope) Code() ErrorCode {
+	return CodeRolesNotInScope
 }
 
 type UnmergableRoles struct {
@@ -61,11 +77,15 @@ type UnmergableRoles struct {
 
 func (u *UnmergableRoles) Error() string {
 	roles := misc.JoinStringsFunc(u.Roles, ", ", func(role *types.Roles) string { return role.ToString() })
-	return fmt.Sprintf("can not merge roles '%s'", roles)
+	return fmt.Sprintf("can not merge roles `%s`", roles)
 }
 
 func (u *UnmergableRoles) ParserRule() antlr.ParserRuleContext {
 	return u.Expr
+}
+
+func (e *UnmergableRoles) Code() ErrorCode {
+	return CodeUnmergableRoles
 }
 
 func NewUnmergableRoles(expr parser.IExprContext, roles []*types.Roles) Error {
@@ -92,4 +112,8 @@ func (e *SharedRoleSingleParticipant) Error() string {
 
 func (e *SharedRoleSingleParticipant) ParserRule() antlr.ParserRuleContext {
 	return e.roleType
+}
+
+func (e *SharedRoleSingleParticipant) Code() ErrorCode {
+	return CodeSharedRoleSingleParticipant
 }

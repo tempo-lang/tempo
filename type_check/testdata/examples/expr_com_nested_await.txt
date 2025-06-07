@@ -2,4 +2,4 @@ func@(A, B) foo() {
   let value: async Int@A = B -> A (A -> B 10);
 }
 ---
-2:35: can not send type 'async Int@B'
+E9 2:35: can not send values of type `async Int@B`

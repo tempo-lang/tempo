@@ -2,4 +2,4 @@ struct@(A) Foo {
   value: Int@B
 }
 ---
-2:14: roles 'B' are not in scope
+E12 2:14: role `B` is not in scope

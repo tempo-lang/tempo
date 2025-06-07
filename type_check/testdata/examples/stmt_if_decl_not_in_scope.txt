@@ -5,4 +5,4 @@ func@(A,B) foo() {
     }
 }
 ---
-4:20: roles 'B' are not in scope
+E12 4:20: role `B` is not in scope

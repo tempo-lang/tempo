@@ -11,6 +11,47 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+type ErrorCode int
+
+const (
+	CodeValueRoleNotInScope ErrorCode = iota + 1
+	CodeUnexpectedSharedType
+	CodeUnknownType
+	CodeValueMismatch
+	CodeIncompatibleTypes
+	CodeInvalidValue
+	CodeExpectedAsyncType
+	CodeBinOpIncompatibleType
+	CodeUnsendableType
+	CodeNotDistributedType
+	CodeDuplicateRoles
+	CodeRolesNotInScope
+	CodeUnmergableRoles
+	CodeSharedRoleSingleParticipant
+	CodeSymbolAlreadyExists
+	CodeUnknownSymbol
+	CodeUnassignableSymbol
+	CodeExpectedStructType
+	CodeUnexpectedStructField
+	CodeMissingStructField
+	CodeStructWrongRoleCount
+	CodeFieldAccessUnknownField
+	CodeFieldAccessUnexpectedType
+	CodeInvalidAssignType
+	CodeReturnNotAllRoles
+	CodeInvalidNumber
+	CodeComNonLocalSender
+	CodeComValueNotAtSender
+	CodeUnequatableType
+	CodeStructNotInitialized
+	CodeCallNonFunction
+	CodeCallWrongArgCount
+	CodeInstantiateNonFunction
+	CodeFunctionNotInstantiated
+	CodeFunctionMissingReturn
+	CodeReturnValueMissing
+)
+
 type AnnotationType string
 
 const (
@@ -34,6 +75,7 @@ type Error interface {
 	IsTypeError()
 	RelatedInfo() []RelatedInfo
 	Annotations() []Annotation
+	Code() ErrorCode
 }
 
 type baseError struct{}
@@ -46,6 +88,34 @@ func (*baseError) Annotations() []Annotation {
 	return nil
 }
 
+func formatList(singular, plural string, items []string, combine string) string {
+	if len(items) == 1 {
+		if singular != "" {
+			singular += " "
+		}
+
+		return fmt.Sprintf("%s`%s`", singular, items[0])
+	}
+
+	if plural != "" {
+		plural += " "
+	}
+
+	formattedItems := misc.JoinStringsFunc(items[:len(items)-1], ", ", func(item string) string {
+		return fmt.Sprintf("`%s`", item)
+	})
+
+	return fmt.Sprintf("%s%s %s `%s`", plural, formattedItems, combine, items[len(items)-1])
+}
+
+func toBe[T any](items []T) string {
+	if len(items) == 1 {
+		return "is"
+	} else {
+		return "are"
+	}
+}
+
 type ValueRoleNotInScope struct {
 	baseError
 	Value             antlr.ParserRuleContext
@@ -54,11 +124,16 @@ type ValueRoleNotInScope struct {
 }
 
 func (v *ValueRoleNotInScope) Error() string {
-	return fmt.Sprintf("value '%s' contains roles '%s' that are not in scope", v.Value.GetText(), misc.JoinStrings(v.InaccessibleRoles, ","))
+	roles := formatList("role", "roles", v.InaccessibleRoles, "and")
+	return fmt.Sprintf("value `%s` contains %s that %s not in scope", v.Value.GetText(), roles, toBe(v.InaccessibleRoles))
 }
 
 func (v *ValueRoleNotInScope) ParserRule() antlr.ParserRuleContext {
 	return v.Value
+}
+
+func (e *ValueRoleNotInScope) Code() ErrorCode {
+	return CodeValueRoleNotInScope
 }
 
 func NewValueRoleNotInScope(value antlr.ParserRuleContext, valueRoles *types.Roles, inaccessibleRoles []string) Error {
@@ -75,11 +150,15 @@ type UnexpectedSharedType struct {
 }
 
 func (u *UnexpectedSharedType) Error() string {
-	return "shared type not allowed here"
+	return "shared type is not allowed here"
 }
 
 func (u *UnexpectedSharedType) ParserRule() antlr.ParserRuleContext {
 	return u.RoleType
+}
+
+func (e *UnexpectedSharedType) Code() ErrorCode {
+	return CodeUnexpectedSharedType
 }
 
 func NewUnexpectedSharedType(roleType parser.IRoleTypeContext) Error {
@@ -100,11 +179,15 @@ func NewUnknownType(typeName parser.IIdentContext) Error {
 }
 
 func (e *UnknownType) Error() string {
-	return fmt.Sprintf("unknown type '%s'", e.TypeName.GetText())
+	return fmt.Sprintf("type name `%s` is undefined or not in scope", e.TypeName.GetText())
 }
 
 func (e *UnknownType) ParserRule() antlr.ParserRuleContext {
 	return e.TypeName
+}
+
+func (e *UnknownType) Code() ErrorCode {
+	return CodeUnknownType
 }
 
 type ValueMismatch struct {
@@ -115,11 +198,15 @@ type ValueMismatch struct {
 }
 
 func (t *ValueMismatch) Error() string {
-	return fmt.Sprintf("type values '%s' and '%s' do not match", t.FirstValue.ToString(), t.SecondValue.ToString())
+	return fmt.Sprintf("types `%s` and `%s` are not compatible", t.FirstValue.ToString(), t.SecondValue.ToString())
 }
 
 func (t *ValueMismatch) ParserRule() antlr.ParserRuleContext {
 	return t.Expr
+}
+
+func (e *ValueMismatch) Code() ErrorCode {
+	return CodeValueMismatch
 }
 
 func NewValueMismatch(expr parser.IExprContext, firstValue types.Value, secondValue types.Value) Error {
@@ -138,11 +225,15 @@ type IncompatibleTypes struct {
 }
 
 func (e *IncompatibleTypes) Error() string {
-	return fmt.Sprintf("type '%s' is not compatible with type '%s'", e.ExprType.ToString(), e.ExpectedType.ToString())
+	return fmt.Sprintf("type `%s` is not compatible with type `%s`", e.ExprType.ToString(), e.ExpectedType.ToString())
 }
 
 func (e *IncompatibleTypes) ParserRule() antlr.ParserRuleContext {
 	return e.Expr
+}
+
+func (e *IncompatibleTypes) Code() ErrorCode {
+	return CodeIncompatibleTypes
 }
 
 func NewIncompatibleTypes(expr parser.IExprContext, exprType *types.Type, expectedType *types.Type) Error {
@@ -161,11 +252,15 @@ type InvalidValue struct {
 }
 
 func (i *InvalidValue) Error() string {
-	return fmt.Sprintf("invalid value, expected '%s' but found '%s'", i.ExpectedValue.ToString(), i.ActualValue.ToString())
+	return fmt.Sprintf("type `%s` does not match expected type `%s`", i.ActualValue.ToString(), i.ExpectedValue.ToString())
 }
 
 func (i *InvalidValue) ParserRule() antlr.ParserRuleContext {
 	return i.Expr
+}
+
+func (e *InvalidValue) Code() ErrorCode {
+	return CodeInvalidValue
 }
 
 func NewInvalidValue(expr parser.IExprContext, actualValue types.Value, expectedValue types.Value) Error {
@@ -176,22 +271,26 @@ func NewInvalidValue(expr parser.IExprContext, actualValue types.Value, expected
 	}
 }
 
-type ExpectedAsyncType struct {
+type AwaitNonAsyncType struct {
 	baseError
 	Expr parser.IExprContext
 	Type *types.Type
 }
 
-func (e *ExpectedAsyncType) Error() string {
-	return fmt.Sprintf("expected async type '%s'", e.Type.ToString())
+func (e *AwaitNonAsyncType) Error() string {
+	return fmt.Sprintf("cannot await type `%s` since it is not an async type", e.Type.ToString())
 }
 
-func (e *ExpectedAsyncType) ParserRule() antlr.ParserRuleContext {
+func (e *AwaitNonAsyncType) ParserRule() antlr.ParserRuleContext {
 	return e.Expr
 }
 
-func NewExpectedAsyncType(expr parser.IExprContext, errType *types.Type) Error {
-	return &ExpectedAsyncType{
+func (e *AwaitNonAsyncType) Code() ErrorCode {
+	return CodeExpectedAsyncType
+}
+
+func NewAwaitNonAsyncType(expr parser.IExprContext, errType *types.Type) Error {
+	return &AwaitNonAsyncType{
 		Expr: expr,
 		Type: errType,
 	}
@@ -205,18 +304,35 @@ type BinOpIncompatibleType struct {
 }
 
 func (e *BinOpIncompatibleType) Error() string {
+	op := projection.ParseOperator(e.BinOp)
+	return fmt.Sprintf("operation `%s` cannot be performed on `%s` types", op, e.Value.ToString())
+}
+
+func (e *BinOpIncompatibleType) Annotations() []Annotation {
 	allowed := make([]string, len(e.Allowed))
 	for i, v := range e.Allowed {
-		allowed[i] = v.ToString()
+		allowed[i] = fmt.Sprintf("`%s`", v.ToString())
 	}
 
-	op := projection.ParseOperator(e.BinOp)
+	var msg string
+	if len(allowed) == 1 {
+		msg = fmt.Sprintf("only type %s is allowed.", allowed[0])
+	} else {
+		msg = fmt.Sprintf("allowed types are %s or %s.", misc.JoinStrings(allowed[:len(allowed)-1], ", "), allowed[len(allowed)-1])
+	}
 
-	return fmt.Sprintf("value '%s' not allowed for operation '%s', allowed types '%s'", e.Value.ToString(), op, misc.JoinStrings(allowed, ", "))
+	return []Annotation{{
+		Type:    AnnotationTypeNote,
+		Message: msg,
+	}}
 }
 
 func (e *BinOpIncompatibleType) ParserRule() antlr.ParserRuleContext {
 	return e.BinOp
+}
+
+func (e *BinOpIncompatibleType) Code() ErrorCode {
+	return CodeBinOpIncompatibleType
 }
 
 func NewBinOpIncompatibleType(binOp *parser.ExprBinOpContext, value types.Value, allowed []types.Value) Error {
@@ -234,11 +350,15 @@ type UnsendableType struct {
 }
 
 func (u *UnsendableType) Error() string {
-	return fmt.Sprintf("can not send type '%s'", u.UnsendableType.ToString())
+	return fmt.Sprintf("can not send values of type `%s`", u.UnsendableType.ToString())
 }
 
 func (u *UnsendableType) ParserRule() antlr.ParserRuleContext {
 	return u.Com.Expr()
+}
+
+func (e *UnsendableType) Code() ErrorCode {
+	return CodeUnsendableType
 }
 
 func NewUnsendableType(com *parser.ExprComContext, unsendableType *types.Type) Error {
@@ -260,16 +380,20 @@ func NewNotDistributedType(typeCtx antlr.ParserRuleContext) Error {
 }
 
 func (e *NotDistributedType) Error() string {
-	return fmt.Sprintf("type '%s' is not distributed", e.typeCtx.GetText())
+	return fmt.Sprintf("type `%s` cannot be distributed", e.typeCtx.GetText())
 }
 
 func (e *NotDistributedType) ParserRule() antlr.ParserRuleContext {
 	return e.typeCtx
 }
 
+func (e *NotDistributedType) Code() ErrorCode {
+	return CodeNotDistributedType
+}
+
 func (e *NotDistributedType) Annotations() []Annotation {
 	return []Annotation{{
 		Type:    AnnotationTypeHint,
-		Message: "change the type a single role, or make it a shared type instead.",
+		Message: "change the type to be a single or a shared role instead.",
 	}}
 }

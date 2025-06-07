@@ -3,4 +3,4 @@ func@(A,B,C) mismatch() {
   let y: Int@[A,B] = x;
 }
 ---
-3:22: invalid declaration type, expected 'Int@[A,B]' found 'Int@A'
+E24 3:22: cannot assign type `Int@A` to `Int@[A,B]`

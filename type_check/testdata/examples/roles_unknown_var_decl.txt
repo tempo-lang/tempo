@@ -2,4 +2,5 @@ func@(A) foo() {
   let x: Int@B = 32;
 }
 ---
-2:14: roles 'B' are not in scope
+ E12 2:14: role `B` is not in scope
+ 

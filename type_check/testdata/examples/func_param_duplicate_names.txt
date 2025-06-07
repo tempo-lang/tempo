@@ -1,3 +1,3 @@
 func@(A,B) foo(value: Int@A, value: Int@B) {}
 ---
-1:30: symbol 'value' already declared
+E15 1:30: symbol `value` is already declared
