@@ -111,6 +111,30 @@ func (s *StmtIf) Codegen() jen.Statement {
 
 func (s *StmtIf) IsStatement() {}
 
+type StmtWhile struct {
+	Cond  Expression
+	Stmts []Statement
+}
+
+func NewStmtWhile(cond Expression, stmts []Statement) Statement {
+	return &StmtWhile{
+		Cond:  cond,
+		Stmts: stmts,
+	}
+}
+
+func (s *StmtWhile) Codegen() jen.Statement {
+	body := jen.Statement{}
+	for _, stmt := range s.Stmts {
+		body = append(body, stmt.Codegen()...)
+	}
+	return []jen.Code{
+		jen.For(s.Cond.Codegen()).Block(body...),
+	}
+}
+
+func (s *StmtWhile) IsStatement() {}
+
 type StmtReturn struct {
 	Expr Expression
 }

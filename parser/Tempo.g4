@@ -61,6 +61,7 @@ scope: LCURLY stmt* RCURLY;
 stmt:
 	LET ident (COLON valueType)? IS expr END				# stmtVarDecl
 	| IF expr thenScope = scope (ELSE elseScope = scope)?	# stmtIf
+	| WHILE expr scope										# stmtWhile
 	| RETURN expr? END										# stmtReturn
 	| ident IS expr END										# stmtAssign
 	| expr END												# stmtExpr;
@@ -117,6 +118,7 @@ ASYNC: 'async';
 AWAIT: 'await';
 IF: 'if';
 ELSE: 'else';
+WHILE: 'while';
 
 TRUE: 'true';
 FALSE: 'false';

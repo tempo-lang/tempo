@@ -122,6 +122,24 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 	return thenReturn == true
 }
 
+func (tc *typeChecker) VisitStmtWhile(ctx *parser.StmtWhileContext) any {
+	condType := tc.visitExpr(ctx.Expr())
+
+	if _, ok := condType.Value().CoerceTo(types.Bool()); !ok {
+		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), condType.Value(), types.Bool()))
+	}
+
+	tc.checkExprInScope(ctx.Expr(), condType.Roles())
+
+	scopeRoles := condType.Roles().Participants()
+
+	tc.currentScope = tc.currentScope.MakeChild(ctx.Scope().GetStart(), ctx.Scope().GetStop(), scopeRoles)
+	ctx.Scope().Accept(tc)
+	tc.currentScope = tc.currentScope.Parent()
+
+	return false
+}
+
 func (tc *typeChecker) VisitStmtExpr(ctx *parser.StmtExprContext) any {
 	tc.visitExpr(ctx.Expr())
 	return false

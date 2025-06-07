@@ -73,6 +73,9 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#stmtIf.
 	VisitStmtIf(ctx *StmtIfContext) interface{}
 
+	// Visit a parse tree produced by TempoParser#stmtWhile.
+	VisitStmtWhile(ctx *StmtWhileContext) interface{}
+
 	// Visit a parse tree produced by TempoParser#stmtReturn.
 	VisitStmtReturn(ctx *StmtReturnContext) interface{}
 

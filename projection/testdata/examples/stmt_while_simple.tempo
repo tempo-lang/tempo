@@ -1,0 +1,6 @@
+func@(A) countdown() {
+   let x = 10@A;
+   while x > 0 {
+      x = x - 1;
+   }
+}

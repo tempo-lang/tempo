@@ -152,6 +152,12 @@ func (s *BaseTempoListener) EnterStmtIf(ctx *StmtIfContext) {}
 // ExitStmtIf is called when production stmtIf is exited.
 func (s *BaseTempoListener) ExitStmtIf(ctx *StmtIfContext) {}
 
+// EnterStmtWhile is called when production stmtWhile is entered.
+func (s *BaseTempoListener) EnterStmtWhile(ctx *StmtWhileContext) {}
+
+// ExitStmtWhile is called when production stmtWhile is exited.
+func (s *BaseTempoListener) ExitStmtWhile(ctx *StmtWhileContext) {}
+
 // EnterStmtReturn is called when production stmtReturn is entered.
 func (s *BaseTempoListener) EnterStmtReturn(ctx *StmtReturnContext) {}
 

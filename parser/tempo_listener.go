@@ -73,6 +73,9 @@ type TempoListener interface {
 	// EnterStmtIf is called when entering the stmtIf production.
 	EnterStmtIf(c *StmtIfContext)
 
+	// EnterStmtWhile is called when entering the stmtWhile production.
+	EnterStmtWhile(c *StmtWhileContext)
+
 	// EnterStmtReturn is called when entering the stmtReturn production.
 	EnterStmtReturn(c *StmtReturnContext)
 
@@ -195,6 +198,9 @@ type TempoListener interface {
 
 	// ExitStmtIf is called when exiting the stmtIf production.
 	ExitStmtIf(c *StmtIfContext)
+
+	// ExitStmtWhile is called when exiting the stmtWhile production.
+	ExitStmtWhile(c *StmtWhileContext)
 
 	// ExitStmtReturn is called when exiting the stmtReturn production.
 	ExitStmtReturn(c *StmtReturnContext)

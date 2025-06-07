@@ -69,6 +69,20 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 
 			result = append(result, projection.NewStmtIf(guard, thenBranch, elseBranch))
 		}
+	case *parser.StmtWhileContext:
+		cond, aux := epp.eppExpression(roleName, stmt.Expr())
+		result = aux
+
+		condType := epp.info.Types[stmt.Expr()]
+
+		if condType.Roles().Contains(roleName) {
+			stmts := []projection.Statement{}
+			for _, s := range stmt.Scope().AllStmt() {
+				stmts = append(stmts, epp.EppStmt(roleName, s)...)
+			}
+
+			result = append(result, projection.NewStmtWhile(cond, stmts))
+		}
 	case *parser.StmtExprContext:
 		expr, aux := epp.eppExpression(roleName, stmt.Expr())
 		result = aux

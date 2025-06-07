@@ -95,6 +95,10 @@ func (v *BaseTempoVisitor) VisitStmtIf(ctx *StmtIfContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitStmtWhile(ctx *StmtWhileContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitStmtReturn(ctx *StmtReturnContext) interface{} {
 	return v.VisitChildren(ctx)
 }
