@@ -86,7 +86,7 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 	case *parser.StmtExprContext:
 		expr, aux := epp.eppExpression(roleName, stmt.Expr())
 		result = aux
-		if expr != nil {
+		if expr != nil && expr.HasSideEffects() {
 			result = append(result, projection.NewStmtExpr(expr))
 		}
 	case *parser.StmtReturnContext:

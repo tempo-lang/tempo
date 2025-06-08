@@ -7,7 +7,6 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func ShiftRoles_A(env *runtime.Env, count int) {
 	if count > 0 {
 		runtime.Send(env, count, "B")
-		_ = count
 		ShiftRoles_D(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
 	}
 }
@@ -19,13 +18,11 @@ func ShiftRoles_B(env *runtime.Env, count int) {
 }
 func ShiftRoles_C(env *runtime.Env, count int) {
 	if count > 0 {
-		_ = count
 		ShiftRoles_B(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
 	}
 }
 func ShiftRoles_D(env *runtime.Env, count int) {
 	if count > 0 {
-		_ = count
 		ShiftRoles_C(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
 	}
 }

@@ -41,7 +41,6 @@ func Authenticate_Client(env *runtime.Env, credentials Credentials_A, hasher Has
 	var salt *runtime.Async[string] = runtime.Recv[string](env, "IP")
 	_ = salt
 	var tmp0 *runtime.Async[string] = runtime.FixedAsync(hasher.CalcHash(env.Subst("Client", "A"), runtime.GetAsync(salt), credentials.Password))
-	_ = tmp0
 	runtime.Send(env, runtime.GetAsync(tmp0), "IP")
 	var valid *runtime.Async[bool] = runtime.Recv[bool](env, "IP")
 	_ = valid
@@ -80,18 +79,15 @@ func Authenticate_IP(env *runtime.Env, registry ClientRegistry_A, tokenGen Token
 	var username *runtime.Async[string] = runtime.Recv[string](env, "Client")
 	_ = username
 	var tmp1 *runtime.Async[string] = runtime.FixedAsync(registry.GetSalt(env.Subst("IP", "A"), runtime.GetAsync(username)))
-	_ = tmp1
 	runtime.Send(env, runtime.GetAsync(tmp1), "Client")
 	var hash *runtime.Async[string] = runtime.Recv[string](env, "Client")
 	_ = hash
 	var tmp2 *runtime.Async[bool] = runtime.FixedAsync(registry.Check(env.Subst("IP", "A"), runtime.GetAsync(hash)))
-	_ = tmp2
 	runtime.Send(env, runtime.GetAsync(tmp2), "Client", "Service")
 	var valid *runtime.Async[bool] = tmp2
 	_ = valid
 	if runtime.GetAsync(valid) {
 		var tmp3 *runtime.Async[string] = runtime.FixedAsync(tokenGen.GenerateToken(env.Subst("IP", "A")))
-		_ = tmp3
 		runtime.Send(env, runtime.GetAsync(tmp3), "Client", "Service")
 	}
 }
