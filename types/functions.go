@@ -40,8 +40,8 @@ func (f *FunctionType) ReplaceSharedRoles(participants []string) Value {
 }
 
 func (f *FunctionType) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(f, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(f, other); ok != nil {
+		return value, *ok
 	}
 
 	if closure, ok := other.(*ClosureType); ok {
@@ -105,7 +105,7 @@ func (f *FunctionType) ToString() string {
 	if f.returnType != Unit() {
 		returnType = f.returnType.ToString()
 	}
-	return fmt.Sprintf("func %s(%s)%s", f.ident.GetText(), params, returnType)
+	return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.ident.GetText(), params, returnType)
 }
 
 func (f *FunctionType) Params() []Value {

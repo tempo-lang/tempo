@@ -14,8 +14,8 @@ type ClosureType struct {
 }
 
 func (f *ClosureType) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(f, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(f, other); ok != nil {
+		return value, *ok
 	}
 
 	g, ok := other.(*ClosureType)
@@ -81,7 +81,7 @@ func (c *ClosureType) ToString() string {
 	if c.returnType != Unit() {
 		returnType = c.returnType.ToString()
 	}
-	return fmt.Sprintf("func(%s)%s", params, returnType)
+	return fmt.Sprintf("func@%s(%s)%s", c.Roles().ToString(), params, returnType)
 }
 
 func Closure(params []Value, returnType Value, participants []string) *ClosureType {

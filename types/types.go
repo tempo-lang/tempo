@@ -1,27 +1,30 @@
 package types
 
-func baseCoerceValue(thisValue, otherValue Value) (Value, bool) {
+func baseCoerceValue(thisValue, otherValue Value) (Value, *bool) {
+	fail := false
+	success := true
+
 	if !thisValue.Roles().Encompass(otherValue.Roles()) {
-		return otherValue, false
+		return otherValue, &fail
 	}
 
 	if thisValue.IsInvalid() {
-		return otherValue, true
+		return otherValue, &success
 	}
 
 	if otherValue.IsInvalid() {
-		return Invalid(), true
+		return Invalid(), &success
 	}
 
 	// plain types can coerce to async types
 	if _, isAsync := thisValue.(*Async); !isAsync {
 		if otherAsync, otherIsAsync := otherValue.(*Async); otherIsAsync {
 			innerCoerce, ok := thisValue.CoerceTo(otherAsync.Inner())
-			return NewAsync(innerCoerce), ok
+			return NewAsync(innerCoerce), &ok
 		}
 	}
 
-	return nil, false
+	return nil, nil
 }
 
 // func (t *Type) ToString() string {

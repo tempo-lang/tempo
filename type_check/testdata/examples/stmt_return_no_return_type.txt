@@ -2,4 +2,4 @@ func@(A,B) foo() {
   return true;
 }
 ---
-E5 2:10: type `Bool@[]` is not compatible with type `()@[]`
+E5 2:10: type `Bool` is not compatible with type `()`

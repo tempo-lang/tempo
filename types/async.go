@@ -16,8 +16,8 @@ func (a *Async) ReplaceSharedRoles(participants []string) Value {
 }
 
 func (t *Async) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(t, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(t, other); ok != nil {
+		return value, *ok
 	}
 
 	if otherAsync, ok := other.(*Async); ok {

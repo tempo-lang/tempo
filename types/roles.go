@@ -155,6 +155,9 @@ func (r *Roles) ToString() string {
 	case ROLE_LOCAL:
 		return r.participants[0]
 	case ROLE_SHARED:
+		if len(r.participants) == 0 {
+			return "[..]"
+		}
 		return "[" + roles + "]"
 	case ROLE_DISTRIBUTED:
 		return "(" + roles + ")"
@@ -177,6 +180,10 @@ func (r *Roles) SubtractParticipants(other []string) []string {
 
 func (r *Roles) Encompass(other *Roles) bool {
 	if (r.IsLocalRole() || r.IsSharedRole()) && other.IsLocalRole() {
+		if r.participants == nil {
+			return true
+		}
+
 		for _, role := range r.participants {
 			if other.participants[0] == role {
 				return true
@@ -199,17 +206,21 @@ func (r *Roles) Encompass(other *Roles) bool {
 		return true
 	}
 
-	if !r.IsSharedRole() || !other.IsSharedRole() {
-		return false
-	}
-
-	for _, o := range other.participants {
-		if !slices.Contains(r.participants, o) {
-			return false
+	if r.IsSharedRole() && other.IsSharedRole() {
+		if r.participants == nil {
+			return true
 		}
+
+		for _, o := range other.participants {
+			if !slices.Contains(r.participants, o) {
+				return false
+			}
+		}
+
+		return true
 	}
 
-	return true
+	return false
 }
 
 func (r *Roles) Contains(role string) bool {

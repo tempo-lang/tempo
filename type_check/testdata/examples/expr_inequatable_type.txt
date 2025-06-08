@@ -2,4 +2,4 @@ func@A foo() {
   foo@A == foo@A;
 }
 ---
-E29 2:3: values of type `func foo()` cannot be compared
+E29 2:3: values of type `func@A foo()` cannot be compared

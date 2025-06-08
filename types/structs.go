@@ -18,7 +18,10 @@ func (s *StructType) SubstituteRoles(substMap *RoleSubst) Value {
 		newRoleSubst.AddRole(from, substMap.Map[from])
 	}
 
-	return s
+	return &StructType{
+		structIdent: s.structIdent,
+		roleSubst:   newRoleSubst,
+	}
 }
 
 func (s *StructType) ReplaceSharedRoles(participants []string) Value {
@@ -26,8 +29,8 @@ func (s *StructType) ReplaceSharedRoles(participants []string) Value {
 }
 
 func (s *StructType) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(s, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(s, other); ok != nil {
+		return value, *ok
 	}
 
 	if otherStruct, ok := other.(*StructType); ok {
@@ -39,7 +42,11 @@ func (s *StructType) CoerceTo(other Value) (Value, bool) {
 }
 
 func (s *StructType) Roles() *Roles {
-	return NewRole(s.roleSubst.Roles, false)
+	participants := []string{}
+	for _, r := range s.roleSubst.Roles {
+		participants = append(participants, s.roleSubst.Subst(r))
+	}
+	return NewRole(participants, false)
 }
 
 func (s *StructType) IsSendable() bool {
@@ -51,7 +58,7 @@ func (t *StructType) IsEquatable() bool {
 }
 
 func (s *StructType) ToString() string {
-	return fmt.Sprintf("struct %s", s.structIdent.GetText())
+	return fmt.Sprintf("struct@%s %s", s.Roles().ToString(), s.structIdent.GetText())
 }
 
 func NewStructType(structIdent parser.IIdentContext, roles []string) Value {

@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 type BuiltinType string
 
 type Builtin interface {
@@ -51,13 +53,21 @@ func (b *baseBuiltin) substituteParticipants(substMap *RoleSubst) []string {
 	return b.Roles().SubstituteRoles(substMap).participants
 }
 
+func (b *baseBuiltin) formatType(t BuiltinType) string {
+	if len(b.participants) == 0 {
+		return string(t)
+	} else {
+		return fmt.Sprintf("%s@%s", t, b.Roles().ToString())
+	}
+}
+
 type StringType struct {
 	baseBuiltin
 }
 
 func (t *StringType) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(t, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(t, other); ok != nil {
+		return value, *ok
 	}
 
 	if _, ok := other.(*StringType); ok {
@@ -76,7 +86,7 @@ func (t *StringType) ReplaceSharedRoles(participants []string) Value {
 }
 
 func (t *StringType) ToString() string {
-	return "String"
+	return t.formatType(BuiltinString)
 }
 
 func String(participants []string) Value {
@@ -100,8 +110,8 @@ func (t *IntType) ReplaceSharedRoles(participants []string) Value {
 }
 
 func (t *IntType) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(t, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(t, other); ok != nil {
+		return value, *ok
 	}
 
 	if _, ok := other.(*IntType); ok {
@@ -112,7 +122,7 @@ func (t *IntType) CoerceTo(other Value) (Value, bool) {
 }
 
 func (t *IntType) ToString() string {
-	return "Int"
+	return t.formatType(BuiltinInt)
 }
 
 func Int(participants []string) Value {
@@ -136,8 +146,8 @@ func (t *FloatType) ReplaceSharedRoles(participants []string) Value {
 }
 
 func (t *FloatType) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(t, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(t, other); ok != nil {
+		return value, *ok
 	}
 
 	if _, ok := other.(*FloatType); ok {
@@ -148,7 +158,7 @@ func (t *FloatType) CoerceTo(other Value) (Value, bool) {
 }
 
 func (t *FloatType) ToString() string {
-	return "Float"
+	return t.formatType(BuiltinFloat)
 }
 
 func Float(participants []string) Value {
@@ -172,8 +182,8 @@ func (t *BoolType) ReplaceSharedRoles(participants []string) Value {
 }
 
 func (t *BoolType) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(t, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(t, other); ok != nil {
+		return value, *ok
 	}
 
 	if _, ok := other.(*BoolType); ok {
@@ -184,7 +194,7 @@ func (t *BoolType) CoerceTo(other Value) (Value, bool) {
 }
 
 func (t *BoolType) ToString() string {
-	return "Bool"
+	return t.formatType(BuiltinBool)
 }
 
 func Bool(participants []string) Value {

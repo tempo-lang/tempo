@@ -25,8 +25,8 @@ func (t *InterfaceType) Roles() *Roles {
 }
 
 func (s *InterfaceType) CoerceTo(other Value) (Value, bool) {
-	if value, ok := baseCoerceValue(s, other); ok {
-		return value, true
+	if value, ok := baseCoerceValue(s, other); ok != nil {
+		return value, *ok
 	}
 
 	if otherInf, ok := other.(*InterfaceType); ok {
@@ -44,7 +44,7 @@ func (t *InterfaceType) IsEquatable() bool {
 }
 
 func (s *InterfaceType) ToString() string {
-	return fmt.Sprintf("interface %s", s.ident.GetText())
+	return fmt.Sprintf("interface@%s %s", s.Roles().ToString(), s.ident.GetText())
 }
 
 func NewInterfaceType(ident parser.IIdentContext) Value {

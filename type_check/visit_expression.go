@@ -63,17 +63,18 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	op := projection.ParseOperator(ctx)
 
 	equalTypes := func(a, b types.Value) bool {
-		_, ok1 := lhs.CoerceTo(rhs)
-		_, ok2 := rhs.CoerceTo(lhs)
+		a = a.ReplaceSharedRoles(nil)
+		b = b.ReplaceSharedRoles(nil)
+
+		_, ok1 := a.CoerceTo(b)
+		_, ok2 := b.CoerceTo(a)
 		return ok1 && ok2
 	}
 
 	areSameTypes := func(allowedTypes []types.BuiltinType) bool {
 		if equalTypes(lhs, rhs) {
-			for _, allowed := range allowedTypes {
-				if types.BuiltinKind(lhs) == allowed {
-					return true
-				}
+			if slices.Contains(allowedTypes, types.BuiltinKind(lhs)) {
+				return true
 			}
 			tc.reportError(type_error.NewBinOpIncompatibleType(ctx, lhs, allowedTypes))
 		} else {
