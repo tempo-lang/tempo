@@ -15,7 +15,19 @@ func (v *BaseTempoVisitor) VisitIdent(ctx *IdentContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseTempoVisitor) VisitValueType(ctx *ValueTypeContext) interface{} {
+func (v *BaseTempoVisitor) VisitAsyncType(ctx *AsyncTypeContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitListType(ctx *ListTypeContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitClosureType(ctx *ClosureTypeContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitNamedType(ctx *NamedTypeContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
@@ -24,10 +36,6 @@ func (v *BaseTempoVisitor) VisitRoleTypeShared(ctx *RoleTypeSharedContext) inter
 }
 
 func (v *BaseTempoVisitor) VisitRoleTypeNormal(ctx *RoleTypeNormalContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseTempoVisitor) VisitClosureType(ctx *ClosureTypeContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

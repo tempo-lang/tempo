@@ -89,7 +89,7 @@ func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr
 	// return type
 	if fn.GetReturnType() != nil {
 		fn.GetReturnType().Accept(tc)
-		if !tc.checkRolesInScope(fn.GetReturnType().RoleType()) {
+		if !tc.checkRolesInScope(findRoleType(fn.GetReturnType())) {
 			if fnValue, ok := fnType.Value().(*types.FunctionType); ok {
 				// make return type invalid
 				fnType = types.New(

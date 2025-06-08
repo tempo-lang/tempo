@@ -507,7 +507,7 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 	var returnType *types.Type = types.New(types.Unit(), types.EveryoneRole())
 	if sig.GetReturnType() != nil {
 		returnType = tc.visitValueType(sig.GetReturnType())
-		tc.checkRolesInScope(sig.GetReturnType().RoleType())
+		tc.checkRolesInScope(findRoleType(sig.GetReturnType()))
 	}
 
 	closureRoles, _ := tc.parseRoleType(sig.RoleType())

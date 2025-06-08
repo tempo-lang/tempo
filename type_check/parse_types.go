@@ -1,6 +1,8 @@
 package type_check
 
 import (
+	"fmt"
+
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
@@ -16,68 +18,29 @@ func BuiltinValues() map[string]types.Value {
 }
 
 func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (*types.Type, type_error.Error) {
-	// parser error
-	if ctx == nil || ((ctx.RoleType() == nil || ctx.Ident() == nil) && ctx.ClosureType() == nil) {
-		return types.Invalid(), nil
+	switch ctx := ctx.(type) {
+	case *parser.NamedTypeContext:
+		return tc.parseNamedValueType(ctx)
+	case *parser.ListTypeContext:
+		return tc.parseListValueType(ctx)
+	case *parser.AsyncTypeContext:
+		return tc.parseAsyncValueType(ctx)
+	case *parser.ClosureTypeContext:
+		return tc.parseClosureValueType(ctx)
 	}
-
-	isAsync := ctx.ASYNC() != nil
-
-	if closure := ctx.ClosureType(); closure != nil {
-		closureType, err := tc.parseClosureTypeSig(closure)
-		if err != nil {
-			return types.Invalid(), err
-		}
-
-		if isAsync {
-			return types.New(types.NewAsync(closureType.Value()), closureType.Roles()), nil
-		}
-
-		return closureType, nil
-	}
-
-	role, ok := tc.parseRoleType(ctx.RoleType())
-	if !ok {
-		return types.Invalid(), nil
-	}
-
-	typeName := ctx.Ident()
-	var typeValue types.Value = nil
-
-	if builtinType, isBuiltinType := BuiltinValues()[typeName.GetText()]; isBuiltinType {
-		typeValue = builtinType
-		if !role.IsSharedRole() && len(role.Participants()) > 1 {
-			return types.Invalid(), type_error.NewNotDistributedType(ctx)
-		}
-	}
-
-	var typeError type_error.Error = nil
-	if typeValue == nil {
-		sym, err := tc.lookupSymbol(typeName)
-		if err != nil {
-			return types.Invalid(), err
-		}
-
-		typeValue = sym.Type().Value()
-		sym.AddRead(ctx.Ident())
-
-		expectedRoleCount := len(sym.Type().Roles().Participants())
-		if len(role.Participants()) != expectedRoleCount {
-			typeError = type_error.NewWrongRoleCount(sym, ctx.RoleType(), role)
-		}
-	}
-
-	if typeValue != nil {
-		if isAsync {
-			typeValue = types.NewAsync(typeValue)
-		}
-		return types.New(typeValue, role), typeError
-	} else {
-		return types.Invalid(), type_error.NewUnknownType(typeName)
-	}
+	panic(fmt.Sprintf("parseValueType unexpected ctx: %T", ctx))
 }
 
-func (tc *typeChecker) parseClosureTypeSig(ctx parser.IClosureTypeContext) (*types.Type, type_error.Error) {
+func (tc *typeChecker) parseAsyncValueType(ctx *parser.AsyncTypeContext) (*types.Type, type_error.Error) {
+	inner, err := tc.parseValueType(ctx.GetInner())
+	if err != nil {
+		return nil, err
+	}
+
+	return types.New(types.NewAsync(inner.Value()), inner.Roles()), nil
+}
+
+func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (*types.Type, type_error.Error) {
 	// parser error
 	if ctx.RoleType() == nil || ctx.GetParams() == nil {
 		return types.Invalid(), nil
@@ -112,6 +75,54 @@ func (tc *typeChecker) parseClosureTypeSig(ctx parser.IClosureTypeContext) (*typ
 	return funcType, nil
 }
 
+func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (*types.Type, type_error.Error) {
+	// parser error
+	if ctx == nil || ctx.RoleType() == nil || ctx.Ident() == nil {
+		return types.Invalid(), nil
+	}
+
+	role, ok := tc.parseRoleType(ctx.RoleType())
+	if !ok {
+		return types.Invalid(), nil
+	}
+
+	typeName := ctx.Ident()
+	var typeValue types.Value = nil
+
+	if builtinType, isBuiltinType := BuiltinValues()[typeName.GetText()]; isBuiltinType {
+		typeValue = builtinType
+		if !role.IsSharedRole() && len(role.Participants()) > 1 {
+			return types.Invalid(), type_error.NewNotDistributedType(ctx)
+		}
+	}
+
+	var typeError type_error.Error = nil
+	if typeValue == nil {
+		sym, err := tc.lookupSymbol(typeName)
+		if err != nil {
+			return types.Invalid(), err
+		}
+
+		typeValue = sym.Type().Value()
+		sym.AddRead(ctx.Ident())
+
+		expectedRoleCount := len(sym.Type().Roles().Participants())
+		if len(role.Participants()) != expectedRoleCount {
+			typeError = type_error.NewWrongRoleCount(sym, ctx.RoleType(), role)
+		}
+	}
+
+	if typeValue != nil {
+		return types.New(typeValue, role), typeError
+	} else {
+		return types.Invalid(), type_error.NewUnknownType(typeName)
+	}
+}
+
+func (tc *typeChecker) parseListValueType(ctx *parser.ListTypeContext) (*types.Type, type_error.Error) {
+	return nil, nil
+}
+
 func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, []type_error.Error) {
 	errors := []type_error.Error{}
 
@@ -130,7 +141,7 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (*types.Type, [
 		}
 
 		if unknownRoles := paramType.Roles().SubtractParticipants(funcRoles.Participants()); len(unknownRoles) > 0 {
-			errors = append(errors, type_error.NewRolesNotInScope(param.ValueType().RoleType(), unknownRoles))
+			errors = append(errors, type_error.NewRolesNotInScope(findRoleType(param.ValueType()), unknownRoles))
 		}
 
 		params = append(params, paramType)
@@ -219,4 +230,19 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (*types.
 	}
 
 	return types.New(types.NewInterfaceType(ctx.Ident()), roles), nil
+}
+
+func findRoleType(ctx parser.IValueTypeContext) parser.IRoleTypeContext {
+	switch ctx := ctx.(type) {
+	case *parser.AsyncTypeContext:
+		return findRoleType(ctx.GetInner())
+	case *parser.ClosureTypeContext:
+		return ctx.RoleType()
+	case *parser.ListTypeContext:
+		return findRoleType(ctx.GetInner())
+	case *parser.NamedTypeContext:
+		return ctx.RoleType()
+	}
+
+	panic(fmt.Sprintf("findRoleType unknown type: %T", ctx))
 }

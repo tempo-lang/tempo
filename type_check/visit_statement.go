@@ -32,7 +32,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 			tc.reportError(err)
 			typeFailed = true
 		} else if !declType.IsInvalid() {
-			if !tc.checkRolesInScope(ctx.ValueType().RoleType()) {
+			if !tc.checkRolesInScope(findRoleType(ctx.ValueType())) {
 				roleFailed = true
 			}
 		}

@@ -13,17 +13,23 @@ type TempoListener interface {
 	// EnterIdent is called when entering the ident production.
 	EnterIdent(c *IdentContext)
 
-	// EnterValueType is called when entering the valueType production.
-	EnterValueType(c *ValueTypeContext)
+	// EnterAsyncType is called when entering the asyncType production.
+	EnterAsyncType(c *AsyncTypeContext)
+
+	// EnterListType is called when entering the listType production.
+	EnterListType(c *ListTypeContext)
+
+	// EnterClosureType is called when entering the closureType production.
+	EnterClosureType(c *ClosureTypeContext)
+
+	// EnterNamedType is called when entering the namedType production.
+	EnterNamedType(c *NamedTypeContext)
 
 	// EnterRoleTypeShared is called when entering the roleTypeShared production.
 	EnterRoleTypeShared(c *RoleTypeSharedContext)
 
 	// EnterRoleTypeNormal is called when entering the roleTypeNormal production.
 	EnterRoleTypeNormal(c *RoleTypeNormalContext)
-
-	// EnterClosureType is called when entering the closureType production.
-	EnterClosureType(c *ClosureTypeContext)
 
 	// EnterClosureParamList is called when entering the closureParamList production.
 	EnterClosureParamList(c *ClosureParamListContext)
@@ -139,17 +145,23 @@ type TempoListener interface {
 	// ExitIdent is called when exiting the ident production.
 	ExitIdent(c *IdentContext)
 
-	// ExitValueType is called when exiting the valueType production.
-	ExitValueType(c *ValueTypeContext)
+	// ExitAsyncType is called when exiting the asyncType production.
+	ExitAsyncType(c *AsyncTypeContext)
+
+	// ExitListType is called when exiting the listType production.
+	ExitListType(c *ListTypeContext)
+
+	// ExitClosureType is called when exiting the closureType production.
+	ExitClosureType(c *ClosureTypeContext)
+
+	// ExitNamedType is called when exiting the namedType production.
+	ExitNamedType(c *NamedTypeContext)
 
 	// ExitRoleTypeShared is called when exiting the roleTypeShared production.
 	ExitRoleTypeShared(c *RoleTypeSharedContext)
 
 	// ExitRoleTypeNormal is called when exiting the roleTypeNormal production.
 	ExitRoleTypeNormal(c *RoleTypeNormalContext)
-
-	// ExitClosureType is called when exiting the closureType production.
-	ExitClosureType(c *ClosureTypeContext)
 
 	// ExitClosureParamList is called when exiting the closureParamList production.
 	ExitClosureParamList(c *ClosureParamListContext)

@@ -39,7 +39,7 @@ func (tc *typeChecker) VisitStructField(ctx *parser.StructFieldContext) any {
 	structSym.AddField(fieldSym.(*sym_table.StructFieldSymbol))
 
 	if !fieldType.IsInvalid() {
-		tc.checkRolesInScope(ctx.ValueType().RoleType())
+		tc.checkRolesInScope(findRoleType(ctx.ValueType()))
 	}
 
 	return nil

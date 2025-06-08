@@ -16,14 +16,26 @@ func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) *types.Type 
 		return types.Invalid()
 	}
 
-	if err := tc.checkDuplicateRoles(ctx.RoleType(), valType.Roles()); err != nil {
+	if err := tc.checkDuplicateRoles(findRoleType(ctx), valType.Roles()); err != nil {
 		tc.reportError(err)
 	}
 
 	return valType
 }
 
+func (tc *typeChecker) VisitAsyncType(ctx *parser.AsyncTypeContext) any {
+	return nil
+}
+
+func (tc *typeChecker) VisitListType(ctx *parser.ListTypeContext) any {
+	return nil
+}
+
 func (tc *typeChecker) VisitClosureType(ctx *parser.ClosureTypeContext) any {
+	return nil
+}
+
+func (tc *typeChecker) VisitNamedType(ctx *parser.NamedTypeContext) any {
 	return nil
 }
 

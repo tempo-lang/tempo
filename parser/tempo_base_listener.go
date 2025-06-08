@@ -32,11 +32,29 @@ func (s *BaseTempoListener) EnterIdent(ctx *IdentContext) {}
 // ExitIdent is called when production ident is exited.
 func (s *BaseTempoListener) ExitIdent(ctx *IdentContext) {}
 
-// EnterValueType is called when production valueType is entered.
-func (s *BaseTempoListener) EnterValueType(ctx *ValueTypeContext) {}
+// EnterAsyncType is called when production asyncType is entered.
+func (s *BaseTempoListener) EnterAsyncType(ctx *AsyncTypeContext) {}
 
-// ExitValueType is called when production valueType is exited.
-func (s *BaseTempoListener) ExitValueType(ctx *ValueTypeContext) {}
+// ExitAsyncType is called when production asyncType is exited.
+func (s *BaseTempoListener) ExitAsyncType(ctx *AsyncTypeContext) {}
+
+// EnterListType is called when production listType is entered.
+func (s *BaseTempoListener) EnterListType(ctx *ListTypeContext) {}
+
+// ExitListType is called when production listType is exited.
+func (s *BaseTempoListener) ExitListType(ctx *ListTypeContext) {}
+
+// EnterClosureType is called when production closureType is entered.
+func (s *BaseTempoListener) EnterClosureType(ctx *ClosureTypeContext) {}
+
+// ExitClosureType is called when production closureType is exited.
+func (s *BaseTempoListener) ExitClosureType(ctx *ClosureTypeContext) {}
+
+// EnterNamedType is called when production namedType is entered.
+func (s *BaseTempoListener) EnterNamedType(ctx *NamedTypeContext) {}
+
+// ExitNamedType is called when production namedType is exited.
+func (s *BaseTempoListener) ExitNamedType(ctx *NamedTypeContext) {}
 
 // EnterRoleTypeShared is called when production roleTypeShared is entered.
 func (s *BaseTempoListener) EnterRoleTypeShared(ctx *RoleTypeSharedContext) {}
@@ -49,12 +67,6 @@ func (s *BaseTempoListener) EnterRoleTypeNormal(ctx *RoleTypeNormalContext) {}
 
 // ExitRoleTypeNormal is called when production roleTypeNormal is exited.
 func (s *BaseTempoListener) ExitRoleTypeNormal(ctx *RoleTypeNormalContext) {}
-
-// EnterClosureType is called when production closureType is entered.
-func (s *BaseTempoListener) EnterClosureType(ctx *ClosureTypeContext) {}
-
-// ExitClosureType is called when production closureType is exited.
-func (s *BaseTempoListener) ExitClosureType(ctx *ClosureTypeContext) {}
 
 // EnterClosureParamList is called when production closureParamList is entered.
 func (s *BaseTempoListener) EnterClosureParamList(ctx *ClosureParamListContext) {}

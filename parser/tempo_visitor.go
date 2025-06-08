@@ -13,17 +13,23 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#ident.
 	VisitIdent(ctx *IdentContext) interface{}
 
-	// Visit a parse tree produced by TempoParser#valueType.
-	VisitValueType(ctx *ValueTypeContext) interface{}
+	// Visit a parse tree produced by TempoParser#asyncType.
+	VisitAsyncType(ctx *AsyncTypeContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#listType.
+	VisitListType(ctx *ListTypeContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#closureType.
+	VisitClosureType(ctx *ClosureTypeContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#namedType.
+	VisitNamedType(ctx *NamedTypeContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#roleTypeShared.
 	VisitRoleTypeShared(ctx *RoleTypeSharedContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#roleTypeNormal.
 	VisitRoleTypeNormal(ctx *RoleTypeNormalContext) interface{}
-
-	// Visit a parse tree produced by TempoParser#closureType.
-	VisitClosureType(ctx *ClosureTypeContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#closureParamList.
 	VisitClosureParamList(ctx *ClosureParamListContext) interface{}
