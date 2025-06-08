@@ -26,7 +26,7 @@ func (e *ExprInt) Codegen() jen.Code {
 }
 
 func (e *ExprInt) Type() Type {
-	return &BuiltinType{Value: types.Int()}
+	return &BuiltinType{Value: types.Int(nil)}
 }
 
 func (e *ExprInt) ReturnsValue() bool {
@@ -54,7 +54,7 @@ func (e *ExprFloat) Codegen() jen.Code {
 }
 
 func (e *ExprFloat) Type() Type {
-	return &BuiltinType{Value: types.Float()}
+	return &BuiltinType{Value: types.Float(nil)}
 }
 
 func (e *ExprFloat) ReturnsValue() bool {
@@ -82,7 +82,7 @@ func (e *ExprString) Codegen() jen.Code {
 }
 
 func (e *ExprString) Type() Type {
-	return &BuiltinType{Value: types.String()}
+	return &BuiltinType{Value: types.String(nil)}
 }
 
 func (e *ExprString) ReturnsValue() bool {
@@ -141,7 +141,7 @@ func (e *ExprBool) Codegen() jen.Code {
 }
 
 func (e *ExprBool) Type() Type {
-	return &BuiltinType{Value: types.Bool()}
+	return &BuiltinType{Value: types.Bool(nil)}
 }
 
 func (e *ExprBool) ReturnsValue() bool {

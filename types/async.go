@@ -3,11 +3,16 @@ package types
 import "fmt"
 
 type Async struct {
+	baseValue
 	inner Value
 }
 
 func (a *Async) SubstituteRoles(substMap *RoleSubst) Value {
 	return NewAsync(a.inner.SubstituteRoles(substMap))
+}
+
+func (a *Async) ReplaceSharedRoles(participants []string) Value {
+	return NewAsync(a.inner.ReplaceSharedRoles(participants))
 }
 
 func (t *Async) CoerceTo(other Value) (Value, bool) {
@@ -19,10 +24,14 @@ func (t *Async) CoerceTo(other Value) (Value, bool) {
 		if newValue, canCoerce := t.inner.CoerceTo(otherAsync.inner); canCoerce {
 			return NewAsync(newValue), true
 		} else {
-			return NewAsync(Invalid().Value()), false
+			return NewAsync(Invalid()), false
 		}
 	}
-	return Invalid().Value(), false
+	return Invalid(), false
+}
+
+func (t *Async) Roles() *Roles {
+	return t.inner.Roles()
 }
 
 func (a *Async) IsSendable() bool {
@@ -32,8 +41,6 @@ func (a *Async) IsSendable() bool {
 func (t *Async) IsEquatable() bool {
 	return false
 }
-
-func (a *Async) IsValue() {}
 
 func (a *Async) ToString() string {
 	return fmt.Sprintf("async %s", a.inner.ToString())

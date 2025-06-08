@@ -5,7 +5,7 @@ import (
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) *types.Type {
+func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) types.Value {
 	if ctx == nil {
 		return types.Invalid()
 	}

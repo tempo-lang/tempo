@@ -67,7 +67,7 @@ func NewComNonLocalSender(com *parser.ExprComContext) Error {
 type ComValueNotAtSender struct {
 	baseError
 	Com      *parser.ExprComContext
-	ExprType *types.Type
+	ExprType types.Value
 }
 
 func (c *ComValueNotAtSender) Error() string {
@@ -103,7 +103,7 @@ func (c *ComValueNotAtSender) Annotations() []Annotation {
 	}
 }
 
-func NewComValueNotAtSender(com *parser.ExprComContext, exprType *types.Type) Error {
+func NewComValueNotAtSender(com *parser.ExprComContext, exprType types.Value) Error {
 	return &ComValueNotAtSender{
 		Com:      com,
 		ExprType: exprType,

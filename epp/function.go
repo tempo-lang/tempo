@@ -21,7 +21,7 @@ func (epp *epp) eppFunc(function parser.IFuncContext) *projection.Choreography {
 
 func (epp *epp) eppFuncSig(role string, ctx parser.IFuncSigContext) *projection.FuncSig {
 	funcSym := epp.info.Symbols[ctx.Ident()]
-	funcType := funcSym.Type().Value().(*types.FunctionType)
+	funcType := funcSym.Type().(*types.FunctionType)
 
 	returnValue := epp.eppType(role, funcType.ReturnType())
 

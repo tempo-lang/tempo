@@ -7,6 +7,7 @@ import (
 )
 
 type StructType struct {
+	baseValue
 	structIdent parser.IIdentContext
 	roleSubst   *RoleSubst
 }
@@ -20,6 +21,10 @@ func (s *StructType) SubstituteRoles(substMap *RoleSubst) Value {
 	return s
 }
 
+func (s *StructType) ReplaceSharedRoles(participants []string) Value {
+	return s
+}
+
 func (s *StructType) CoerceTo(other Value) (Value, bool) {
 	if value, ok := baseCoerceValue(s, other); ok {
 		return value, true
@@ -30,7 +35,11 @@ func (s *StructType) CoerceTo(other Value) (Value, bool) {
 			return s, true
 		}
 	}
-	return Invalid().Value(), false
+	return Invalid(), false
+}
+
+func (s *StructType) Roles() *Roles {
+	return NewRole(s.roleSubst.Roles, false)
 }
 
 func (s *StructType) IsSendable() bool {
@@ -40,8 +49,6 @@ func (s *StructType) IsSendable() bool {
 func (t *StructType) IsEquatable() bool {
 	return true
 }
-
-func (s *StructType) IsValue() {}
 
 func (s *StructType) ToString() string {
 	return fmt.Sprintf("struct %s", s.structIdent.GetText())

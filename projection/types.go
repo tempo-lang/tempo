@@ -13,39 +13,6 @@ type Type interface {
 	Codegen() jen.Code
 }
 
-// func CodegenType(t types.Value) jen.Code {
-// 	if builtinType, isBuiltin := t.(types.Builtin); isBuiltin {
-// 		return CodegenBuiltinType(builtinType)
-// 	}
-
-// 	if asyncType, isAsync := t.(*types.Async); isAsync {
-// 		return CodegenAsyncType(asyncType)
-// 	}
-
-// 	if structType, isStruct := t.(*StructType); isStruct {
-// 		return CodegenStructType(structType)
-// 	}
-// 	if _, ok := t.(*types.StructType); ok {
-// 		panic(fmt.Sprintf("struct %#v should be of type projection.StructType instead", t))
-// 	}
-
-// 	if infType, isInf := t.(*InterfaceType); isInf {
-// 		return CodegenInterfaceType(infType)
-// 	}
-// 	if _, ok := t.(*types.InterfaceType); ok {
-// 		panic(fmt.Sprintf("struct %#v should be of type projection.InterfaceType instead", t))
-// 	}
-
-// 	if funcType, isFunc := t.(*FunctionType); isFunc {
-// 		return CodegenFuncType(funcType)
-// 	}
-// 	if _, ok := t.(*types.FunctionType); ok {
-// 		panic(fmt.Sprintf("function %#v should be of type projection.FunctionType instead", t))
-// 	}
-
-// 	panic(fmt.Sprintf("failed to generate type: %#v", t))
-// }
-
 type BuiltinType struct {
 	types.Value
 }

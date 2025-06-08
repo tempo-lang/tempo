@@ -7,8 +7,10 @@ import (
 )
 
 type ClosureType struct {
-	params     []*Type
-	returnType *Type
+	baseValue
+	params       []Value
+	returnType   Value
+	participants []string
 }
 
 func (f *ClosureType) CoerceTo(other Value) (Value, bool) {
@@ -18,15 +20,15 @@ func (f *ClosureType) CoerceTo(other Value) (Value, bool) {
 
 	g, ok := other.(*ClosureType)
 	if !ok {
-		return Invalid().Value(), false
+		return Invalid(), false
 	}
 
 	if len(f.params) != len(g.params) {
-		return Invalid().Value(), false
+		return Invalid(), false
 	}
 
 	canCoerce := true
-	newParams := []*Type{}
+	newParams := []Value{}
 	for i := range f.params {
 		if newParam, ok := f.params[i].CoerceTo(g.params[i]); ok {
 			newParams = append(newParams, newParam)
@@ -41,7 +43,7 @@ func (f *ClosureType) CoerceTo(other Value) (Value, bool) {
 		canCoerce = false
 	}
 
-	return Closure(newParams, newReturn), canCoerce
+	return Closure(newParams, newReturn, other.Roles().participants), canCoerce
 }
 
 func (c *ClosureType) IsEquatable() bool {
@@ -52,10 +54,8 @@ func (c *ClosureType) IsSendable() bool {
 	return false
 }
 
-func (c *ClosureType) IsValue() {}
-
 func (c *ClosureType) SubstituteRoles(substMap *RoleSubst) Value {
-	substParams := []*Type{}
+	substParams := []Value{}
 	for _, p := range c.params {
 		substParams = append(substParams, p.SubstituteRoles(substMap))
 	}
@@ -63,29 +63,39 @@ func (c *ClosureType) SubstituteRoles(substMap *RoleSubst) Value {
 	return Closure(
 		substParams,
 		c.returnType.SubstituteRoles(substMap),
+		c.Roles().SubstituteRoles(substMap).participants,
 	)
 }
 
+func (c *ClosureType) ReplaceSharedRoles(participants []string) Value {
+	return c
+}
+
+func (c *ClosureType) Roles() *Roles {
+	return NewRole(c.participants, false)
+}
+
 func (c *ClosureType) ToString() string {
-	params := misc.JoinStringsFunc(c.params, ", ", func(param *Type) string { return param.ToString() })
+	params := misc.JoinStringsFunc(c.params, ", ", func(param Value) string { return param.ToString() })
 	returnType := ""
-	if c.returnType.Value() != Unit() {
+	if c.returnType != Unit() {
 		returnType = c.returnType.ToString()
 	}
 	return fmt.Sprintf("func(%s)%s", params, returnType)
 }
 
-func Closure(params []*Type, returnType *Type) *ClosureType {
+func Closure(params []Value, returnType Value, participants []string) *ClosureType {
 	return &ClosureType{
-		params:     params,
-		returnType: returnType,
+		params:       params,
+		returnType:   returnType,
+		participants: participants,
 	}
 }
 
-func (c *ClosureType) Params() []*Type {
+func (c *ClosureType) Params() []Value {
 	return c.params
 }
 
-func (c *ClosureType) ReturnType() *Type {
+func (c *ClosureType) ReturnType() Value {
 	return c.returnType
 }

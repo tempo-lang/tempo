@@ -31,11 +31,7 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 
 				if len(exprType.Roles().Participants()) == 0 {
 					scope := doc.info.GlobalScope.Innermost(node.GetStart())
-
-					exprType = types.New(
-						exprType.Value(),
-						types.NewRole(scope.Roles().Participants(), true),
-					)
+					exprType = exprType.ReplaceSharedRoles(scope.Roles().Participants())
 				}
 
 				stmtRange := parserRuleToRange(node)
@@ -45,7 +41,7 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 			if identSym, ok := doc.info.Symbols[node]; ok {
 				identRange := parserRuleToRange(node)
 				identCode := fmt.Sprintf("let %s: %s", identSym.SymbolName(), identSym.Type().ToString())
-				if _, ok := identSym.Type().Value().(*types.FunctionType); ok {
+				if _, ok := identSym.Type().(*types.FunctionType); ok {
 					identCode = identSym.Type().ToString()
 				}
 				return hoverCode(identCode, &identRange), nil
@@ -55,11 +51,7 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 
 				if len(exprType.Roles().Participants()) == 0 {
 					scope := doc.info.GlobalScope.Innermost(node.GetStart())
-
-					exprType = types.New(
-						exprType.Value(),
-						types.NewRole(scope.Roles().Participants(), true),
-					)
+					exprType = exprType.ReplaceSharedRoles(scope.Roles().Participants())
 				}
 
 				exprRange := parserRuleToRange(node)

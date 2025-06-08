@@ -10,7 +10,7 @@ import (
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (tc *typeChecker) visitExpr(ctx parser.IExprContext) *types.Type {
+func (tc *typeChecker) visitExpr(ctx parser.IExprContext) types.Value {
 	if ctx == nil {
 		return types.Invalid()
 	}
@@ -18,10 +18,10 @@ func (tc *typeChecker) visitExpr(ctx parser.IExprContext) *types.Type {
 	if exprType == nil {
 		return types.Invalid()
 	}
-	return exprType.(*types.Type)
+	return exprType.(types.Value)
 }
 
-func (tc *typeChecker) registerType(expr parser.IExprContext, exprType *types.Type) *types.Type {
+func (tc *typeChecker) registerType(expr parser.IExprContext, exprType types.Value) types.Value {
 	tc.info.Types[expr] = exprType
 	return exprType
 }
@@ -62,36 +62,41 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	typeError := false
 	op := projection.ParseOperator(ctx)
 
-	numberTypes := []types.Value{types.Int(), types.Float()}
+	equalTypes := func(a, b types.Value) bool {
+		_, ok1 := lhs.CoerceTo(rhs)
+		_, ok2 := rhs.CoerceTo(lhs)
+		return ok1 && ok2
+	}
 
-	areSameTypes := func(allowedTypes []types.Value) (types.Value, bool) {
-		if types.ValuesEqual(lhs.Value(), rhs.Value()) {
+	areSameTypes := func(allowedTypes []types.BuiltinType) bool {
+		if equalTypes(lhs, rhs) {
 			for _, allowed := range allowedTypes {
-				if types.ValuesEqual(allowed, lhs.Value()) {
-					return allowed, true
+				if types.BuiltinKind(lhs) == allowed {
+					return true
 				}
 			}
-			tc.reportError(type_error.NewBinOpIncompatibleType(ctx, lhs.Value(), allowedTypes))
+			tc.reportError(type_error.NewBinOpIncompatibleType(ctx, lhs, allowedTypes))
 		} else {
-			tc.reportError(type_error.NewValueMismatch(ctx, lhs.Value(), rhs.Value()))
+			tc.reportError(type_error.NewValueMismatch(ctx, lhs, rhs))
 		}
-		return types.Invalid().Value(), false
+		return false
 	}
+
+	numberTypes := []types.BuiltinType{types.BuiltinInt, types.BuiltinFloat}
 
 	switch {
 	case slices.Contains(arithmeticOps, op):
-		allowedTypes := []types.Value{types.Int()}
+		allowedTypes := []types.BuiltinType{types.BuiltinInt}
 
 		if op != projection.OpMod {
-			allowedTypes = append(allowedTypes, types.Float())
+			allowedTypes = append(allowedTypes, types.BuiltinFloat)
 		}
 
 		if op == projection.OpAdd {
-			allowedTypes = append(allowedTypes, types.String())
+			allowedTypes = append(allowedTypes, types.BuiltinString)
 		}
 
-		value, ok := areSameTypes(allowedTypes)
-		if !ok {
+		if ok := areSameTypes(allowedTypes); !ok {
 			typeError = true
 		}
 
@@ -102,16 +107,16 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		}
 
 		if !typeError {
-			return tc.registerType(ctx, types.New(value, newRoles))
+			return tc.registerType(ctx, lhs.ReplaceSharedRoles(newRoles.Participants()))
 		}
 	case slices.Contains(equalityOps, op):
-		if !lhs.Value().IsEquatable() {
-			tc.reportError(type_error.NewUnequatableType(ctx, lhs.Value()))
-		} else if !rhs.Value().IsEquatable() {
-			tc.reportError(type_error.NewUnequatableType(ctx, rhs.Value()))
+		if !lhs.IsEquatable() {
+			tc.reportError(type_error.NewUnequatableType(ctx, lhs))
+		} else if !rhs.IsEquatable() {
+			tc.reportError(type_error.NewUnequatableType(ctx, rhs))
 		} else {
-			if !types.ValuesEqual(lhs.Value(), rhs.Value()) {
-				tc.reportError(type_error.NewValueMismatch(ctx, lhs.Value(), rhs.Value()))
+			if !equalTypes(lhs, rhs) {
+				tc.reportError(type_error.NewValueMismatch(ctx, lhs, rhs))
 				typeError = true
 			}
 		}
@@ -123,10 +128,10 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		}
 
 		if !typeError {
-			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
+			return tc.registerType(ctx, types.Bool(newRoles.Participants()))
 		}
 	case slices.Contains(inequalityOps, op):
-		if _, ok := areSameTypes(numberTypes); !ok {
+		if ok := areSameTypes(numberTypes); !ok {
 			typeError = true
 		}
 
@@ -137,10 +142,10 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		}
 
 		if !typeError {
-			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
+			return tc.registerType(ctx, types.Bool(newRoles.Participants()))
 		}
 	case slices.Contains(booleanOps, op):
-		if _, ok := areSameTypes([]types.Value{types.Bool()}); !ok {
+		if ok := areSameTypes([]types.BuiltinType{types.BuiltinBool}); !ok {
 			typeError = true
 		}
 
@@ -151,7 +156,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 		}
 
 		if !typeError {
-			return tc.registerType(ctx, types.New(types.Bool(), newRoles))
+			return tc.registerType(ctx, types.Bool(newRoles.Participants()))
 		}
 	}
 
@@ -174,7 +179,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	sym.AddRead(ctx.IdentAccess().Ident())
 
 	identType := sym.Type()
-	_, isFunc := sym.Type().Value().(*types.FunctionType)
+	_, isFunc := sym.Type().(*types.FunctionType)
 
 	if _, isStructDef := sym.(*sym_table.StructSymbol); isStructDef {
 		tc.reportError(type_error.NewStructNotInitialized(ctx))
@@ -221,8 +226,8 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	if asyncType, isAsync := exprType.Value().(*types.Async); isAsync {
-		return tc.registerType(ctx, types.New(asyncType.Inner(), exprType.Roles()))
+	if asyncType, isAsync := exprType.(*types.Async); isAsync {
+		return tc.registerType(ctx, asyncType.Inner())
 	}
 
 	tc.reportError(type_error.NewAwaitNonAsyncType(ctx, exprType))
@@ -236,7 +241,7 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	invalidType := false
 	invalidRole := false
 
-	if !innerExprType.Value().IsSendable() {
+	if !innerExprType.IsSendable() {
 		tc.reportError(type_error.NewUnsendableType(ctx, innerExprType))
 		invalidType = true
 	}
@@ -281,12 +286,11 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 			}
 		}
 
-		isShared := len(newParticipants) > 1
-		recvType = types.New(types.NewAsync(innerExprType.Value()), types.NewRole(newParticipants, isShared))
+		recvType = types.NewAsync(innerExprType).ReplaceSharedRoles(newParticipants)
 	}
 
 	if !invalidType && invalidRole {
-		recvType = types.New(types.NewAsync(innerExprType.Value()), types.EveryoneRole())
+		recvType = types.NewAsync(innerExprType).ReplaceSharedRoles(nil)
 	}
 
 	return tc.registerType(ctx, recvType)
@@ -299,7 +303,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	switch callFuncValue := callType.Value().(type) {
+	switch callFuncValue := callType.(type) {
 	case *types.FunctionType:
 		funcParamCount := len(callFuncValue.Params())
 		callArgCount := len(ctx.FuncArgList().AllExpr())
@@ -392,7 +396,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	defFields := map[string]*types.Type{}
+	defFields := map[string]types.Value{}
 	for _, field := range structSym.Fields() {
 		defFields[field.SymbolName()] = field.Type()
 	}
@@ -400,7 +404,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	fieldIdents := ctx.ExprStructField().AllIdent()
 
 	exprFieldsExpr := map[string]parser.IExprContext{}
-	exprFieldsType := map[string]*types.Type{}
+	exprFieldsType := map[string]types.Value{}
 	exprFieldsIdent := map[string]parser.IIdentContext{}
 	for i, field := range ctx.ExprStructField().AllExpr() {
 		fieldType := tc.visitExpr(field)
@@ -447,7 +451,7 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	switch value := objectType.Value().(type) {
+	switch value := objectType.(type) {
 	case *types.StructType:
 		structSym, ok := tc.currentScope.LookupParent(value.Name()).(*sym_table.StructSymbol)
 		if !ok {
@@ -504,7 +508,7 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	var returnType *types.Type = types.New(types.Unit(), types.EveryoneRole())
+	var returnType types.Value = types.Unit()
 	if sig.GetReturnType() != nil {
 		returnType = tc.visitValueType(sig.GetReturnType())
 		tc.checkRolesInScope(findRoleType(sig.GetReturnType()))
@@ -524,19 +528,19 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 	sig.FuncParamList().Accept(tc)
 
 	returnsValue := ctx.Scope().Accept(tc) == true
-	if !returnsValue && returnType.Value() != types.Unit() {
+	if !returnsValue && returnType != types.Unit() {
 		tc.reportError(type_error.NewFunctionMissingReturn(closureEnv))
 	}
 
 	// exit scope
 	tc.currentScope = tc.currentScope.Parent()
 
-	paramTypes := []*types.Type{}
+	paramTypes := []types.Value{}
 	for _, param := range closureEnv.Params() {
 		paramTypes = append(paramTypes, param.Type())
 	}
 
-	closureType := types.New(types.Closure(paramTypes, returnType), closureRoles)
+	closureType := types.Closure(paramTypes, returnType, closureRoles.Participants())
 	return tc.registerType(ctx, closureType)
 }
 

@@ -185,6 +185,20 @@ func (r *Roles) Encompass(other *Roles) bool {
 		return false
 	}
 
+	if r.IsDistributedRole() && other.IsDistributedRole() {
+		if len(r.participants) != len(other.participants) {
+			return false
+		}
+
+		for i, role := range r.participants {
+			if role != other.participants[i] {
+				return false
+			}
+		}
+
+		return true
+	}
+
 	if !r.IsSharedRole() || !other.IsSharedRole() {
 		return false
 	}
@@ -230,6 +244,6 @@ func (r *Roles) SubstituteRoles(subst *RoleSubst) *Roles {
 	return NewRole(roleSubst, r.IsSharedRole())
 }
 
-func (t *Type) SubstituteRoles(subst *RoleSubst) *Type {
-	return New(t.Value().SubstituteRoles(subst), t.Roles().SubstituteRoles(subst))
-}
+// func (t *Type) SubstituteRoles(subst *RoleSubst) *Type {
+// 	return New(t.Value().SubstituteRoles(subst), t.Roles().SubstituteRoles(subst))
+// }

@@ -151,7 +151,7 @@ func completionItemsForFieldAccess(file *tempoDoc, fieldAccess *parser.ExprField
 		return nil, false
 	}
 
-	switch fieldType := fieldType.Value().(type) {
+	switch fieldType := fieldType.(type) {
 	case *types.StructType:
 		scope := file.info.GlobalScope.Innermost(fieldAccess.GetStart())
 

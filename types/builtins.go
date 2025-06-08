@@ -1,27 +1,55 @@
 package types
 
+type BuiltinType string
+
 type Builtin interface {
 	Value
 	IsBuiltin()
 }
 
-type baseBuiltin struct{}
+const (
+	BuiltinString BuiltinType = "String"
+	BuiltinInt    BuiltinType = "Int"
+	BuiltinFloat  BuiltinType = "Float"
+	BuiltinBool   BuiltinType = "Bool"
+)
 
-func (b *baseBuiltin) IsValue()   {}
-func (b *baseBuiltin) IsBuiltin() {}
+func BuiltinKind(t Value) BuiltinType {
+	switch t.(type) {
+	case *BoolType:
+		return BuiltinBool
+	case *FloatType:
+		return BuiltinFloat
+	case *IntType:
+		return BuiltinInt
+	case *StringType:
+		return BuiltinString
+	}
+	return ""
+}
 
-func (b *baseBuiltin) IsSendable() bool {
+type baseBuiltin struct {
+	baseValue
+	participants []string
+}
+
+func (*baseBuiltin) IsBuiltin() {}
+
+func (*baseBuiltin) IsSendable() bool {
 	return true
 }
 
-func (b *baseBuiltin) IsEquatable() bool {
+func (*baseBuiltin) IsEquatable() bool {
 	return true
 }
 
-var builtin_string StringType = StringType{}
-var builtin_int IntType = IntType{}
-var builtin_float FloatType = FloatType{}
-var builtin_bool BoolType = BoolType{}
+func (b *baseBuiltin) Roles() *Roles {
+	return NewRole(b.participants, true)
+}
+
+func (b *baseBuiltin) substituteParticipants(substMap *RoleSubst) []string {
+	return b.Roles().SubstituteRoles(substMap).participants
+}
 
 type StringType struct {
 	baseBuiltin
@@ -32,22 +60,31 @@ func (t *StringType) CoerceTo(other Value) (Value, bool) {
 		return value, true
 	}
 
-	if other == String() {
-		return String(), true
+	if _, ok := other.(*StringType); ok {
+		return other, true
 	}
-	return Invalid().Value(), false
+
+	return Invalid(), false
 }
 
 func (t *StringType) SubstituteRoles(substMap *RoleSubst) Value {
-	return t
+	return String(t.baseBuiltin.substituteParticipants(substMap))
+}
+
+func (t *StringType) ReplaceSharedRoles(participants []string) Value {
+	return String(participants)
 }
 
 func (t *StringType) ToString() string {
 	return "String"
 }
 
-func String() Value {
-	return &builtin_string
+func String(participants []string) Value {
+	return &StringType{
+		baseBuiltin: baseBuiltin{
+			participants: participants,
+		},
+	}
 }
 
 type IntType struct {
@@ -55,7 +92,11 @@ type IntType struct {
 }
 
 func (t *IntType) SubstituteRoles(substMap *RoleSubst) Value {
-	return t
+	return Int(t.baseBuiltin.substituteParticipants(substMap))
+}
+
+func (t *IntType) ReplaceSharedRoles(participants []string) Value {
+	return Int(participants)
 }
 
 func (t *IntType) CoerceTo(other Value) (Value, bool) {
@@ -63,18 +104,23 @@ func (t *IntType) CoerceTo(other Value) (Value, bool) {
 		return value, true
 	}
 
-	if other == Int() {
-		return Int(), true
+	if _, ok := other.(*IntType); ok {
+		return other, true
 	}
-	return Invalid().Value(), false
+
+	return Invalid(), false
 }
 
 func (t *IntType) ToString() string {
 	return "Int"
 }
 
-func Int() Value {
-	return &builtin_int
+func Int(participants []string) Value {
+	return &IntType{
+		baseBuiltin: baseBuiltin{
+			participants: participants,
+		},
+	}
 }
 
 type FloatType struct {
@@ -82,7 +128,11 @@ type FloatType struct {
 }
 
 func (t *FloatType) SubstituteRoles(substMap *RoleSubst) Value {
-	return t
+	return Float(t.baseBuiltin.substituteParticipants(substMap))
+}
+
+func (t *FloatType) ReplaceSharedRoles(participants []string) Value {
+	return Float(participants)
 }
 
 func (t *FloatType) CoerceTo(other Value) (Value, bool) {
@@ -90,18 +140,23 @@ func (t *FloatType) CoerceTo(other Value) (Value, bool) {
 		return value, true
 	}
 
-	if other == Float() {
-		return Float(), true
+	if _, ok := other.(*FloatType); ok {
+		return other, true
 	}
-	return Invalid().Value(), false
+
+	return Invalid(), false
 }
 
 func (t *FloatType) ToString() string {
 	return "Float"
 }
 
-func Float() Value {
-	return &builtin_float
+func Float(participants []string) Value {
+	return &FloatType{
+		baseBuiltin: baseBuiltin{
+			participants: participants,
+		},
+	}
 }
 
 type BoolType struct {
@@ -109,7 +164,11 @@ type BoolType struct {
 }
 
 func (t *BoolType) SubstituteRoles(substMap *RoleSubst) Value {
-	return t
+	return Bool(t.baseBuiltin.substituteParticipants(substMap))
+}
+
+func (t *BoolType) ReplaceSharedRoles(participants []string) Value {
+	return Bool(participants)
 }
 
 func (t *BoolType) CoerceTo(other Value) (Value, bool) {
@@ -117,16 +176,21 @@ func (t *BoolType) CoerceTo(other Value) (Value, bool) {
 		return value, true
 	}
 
-	if other == Bool() {
-		return Bool(), true
+	if _, ok := other.(*BoolType); ok {
+		return other, true
 	}
-	return Invalid().Value(), false
+
+	return Invalid(), false
 }
 
 func (t *BoolType) ToString() string {
 	return "Bool"
 }
 
-func Bool() Value {
-	return &builtin_bool
+func Bool(participants []string) Value {
+	return &BoolType{
+		baseBuiltin: baseBuiltin{
+			participants: participants,
+		},
+	}
 }

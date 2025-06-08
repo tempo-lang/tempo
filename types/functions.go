@@ -9,14 +9,15 @@ import (
 )
 
 type FunctionType struct {
+	baseValue
 	ident      parser.IIdentContext
-	params     []*Type
-	returnType *Type
+	params     []Value
+	returnType Value
 	roles      []string
 }
 
 func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Value {
-	substParams := []*Type{}
+	substParams := []Value{}
 	for _, p := range f.params {
 		substParams = append(substParams, p.SubstituteRoles(substMap))
 	}
@@ -34,35 +35,39 @@ func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Value {
 	)
 }
 
+func (f *FunctionType) ReplaceSharedRoles(participants []string) Value {
+	return f
+}
+
 func (f *FunctionType) CoerceTo(other Value) (Value, bool) {
 	if value, ok := baseCoerceValue(f, other); ok {
 		return value, true
 	}
 
 	if closure, ok := other.(*ClosureType); ok {
-		thisClosure := Closure(f.Params(), f.ReturnType())
+		thisClosure := Closure(f.Params(), f.ReturnType(), f.roles)
 		return thisClosure.CoerceTo(closure)
 	}
 
 	g, ok := other.(*FunctionType)
 	if !ok {
-		return Invalid().Value(), false
+		return Invalid(), false
 	}
 
 	if f.ident != g.ident {
-		return Invalid().Value(), false
+		return Invalid(), false
 	}
 
 	if len(f.params) != len(g.params) {
-		return Invalid().Value(), false
+		return Invalid(), false
 	}
 
 	if !slices.Equal(f.roles, g.roles) {
-		return Invalid().Value(), false
+		return Invalid(), false
 	}
 
 	canCoerce := true
-	newParams := []*Type{}
+	newParams := []Value{}
 	for i := range f.params {
 		if newParam, ok := f.params[i].CoerceTo(g.params[i]); ok {
 			newParams = append(newParams, newParam)
@@ -82,6 +87,10 @@ func (f *FunctionType) CoerceTo(other Value) (Value, bool) {
 	return newFunc, canCoerce
 }
 
+func (f *FunctionType) Roles() *Roles {
+	return NewRole(f.roles, false)
+}
+
 func (f *FunctionType) IsSendable() bool {
 	return false
 }
@@ -91,22 +100,19 @@ func (t *FunctionType) IsEquatable() bool {
 }
 
 func (f *FunctionType) ToString() string {
-	params := misc.JoinStringsFunc(f.params, ", ", func(param *Type) string { return param.ToString() })
+	params := misc.JoinStringsFunc(f.params, ", ", func(param Value) string { return param.ToString() })
 	returnType := ""
-	if f.returnType.Value() != Unit() {
+	if f.returnType != Unit() {
 		returnType = f.returnType.ToString()
 	}
 	return fmt.Sprintf("func %s(%s)%s", f.ident.GetText(), params, returnType)
 }
 
-func (f *FunctionType) IsValue()    {}
-func (f *FunctionType) IsFunction() {}
-
-func (f *FunctionType) Params() []*Type {
+func (f *FunctionType) Params() []Value {
 	return f.params
 }
 
-func (f *FunctionType) ReturnType() *Type {
+func (f *FunctionType) ReturnType() Value {
 	return f.returnType
 }
 
@@ -114,11 +120,7 @@ func (f *FunctionType) NameIdent() parser.IIdentContext {
 	return f.ident
 }
 
-func (f *FunctionType) Roles() *Roles {
-	return NewRole(f.roles, false)
-}
-
-func Function(ident parser.IIdentContext, params []*Type, returnType *Type, roles []string) Value {
+func Function(ident parser.IIdentContext, params []Value, returnType Value, roles []string) Value {
 	return &FunctionType{
 		ident:      ident,
 		params:     params,

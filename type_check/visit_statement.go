@@ -13,8 +13,8 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	exprType := tc.visitExpr(ctx.Expr())
 
 	// convert function type to closure type when stored in a variable
-	if funcType, ok := exprType.Value().(*types.FunctionType); ok {
-		exprType = types.New(types.Closure(funcType.Params(), funcType.ReturnType()), funcType.Roles())
+	if funcType, ok := exprType.(*types.FunctionType); ok {
+		exprType = types.Closure(funcType.Params(), funcType.ReturnType(), funcType.Roles().Participants())
 	}
 
 	stmtType := exprType
@@ -50,16 +50,13 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 		if typeFailed {
 			stmtType = types.Invalid()
 		} else if roleFailed {
-			stmtType = types.New(declType.Value(), types.EveryoneRole())
+			stmtType = declType
 		}
 	}
 
 	if len(stmtType.Roles().Participants()) == 0 {
 		newParticipants := tc.currentScope.Roles().Participants()
-		stmtType = types.New(
-			stmtType.Value(),
-			types.NewRole(newParticipants, true),
-		)
+		stmtType = stmtType.ReplaceSharedRoles(newParticipants)
 	}
 
 	tc.insertSymbol(sym_table.NewVariableSymbol(ctx, tc.currentScope, stmtType))
@@ -94,8 +91,9 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 	guardType := tc.visitExpr(ctx.Expr())
 
-	if _, ok := guardType.Value().CoerceTo(types.Bool()); !ok {
-		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), guardType.Value(), types.Bool()))
+	boolType := types.Bool(guardType.Roles().Participants())
+	if _, ok := guardType.CoerceTo(boolType); !ok {
+		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), guardType, boolType))
 	}
 
 	tc.checkExprInScope(ctx.Expr(), guardType.Roles())
@@ -125,8 +123,8 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 func (tc *typeChecker) VisitStmtWhile(ctx *parser.StmtWhileContext) any {
 	condType := tc.visitExpr(ctx.Expr())
 
-	if _, ok := condType.Value().CoerceTo(types.Bool()); !ok {
-		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), condType.Value(), types.Bool()))
+	if types.BuiltinKind(condType) == types.BuiltinBool {
+		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), condType, types.Bool(nil)))
 	}
 
 	tc.checkExprInScope(ctx.Expr(), condType.Roles())
@@ -157,7 +155,7 @@ func (tc *typeChecker) VisitStmtReturn(ctx *parser.StmtReturnContext) any {
 	}
 
 	if ctx.Expr() == nil {
-		if expectedReturnType.Value() != types.Unit() {
+		if expectedReturnType != types.Unit() {
 			tc.reportError(type_error.NewReturnValueMissing(funcSym, ctx))
 		}
 		return true

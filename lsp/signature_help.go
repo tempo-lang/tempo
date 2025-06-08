@@ -40,7 +40,7 @@ func (s *tempoServer) signatureHelp(context *glsp.Context, params *protocol.Sign
 
 	funcType := doc.info.Types[exprCall.Expr()]
 
-	switch funcValue := funcType.Value().(type) {
+	switch funcValue := funcType.(type) {
 	case *types.FunctionType:
 		return funcSignatureHelp(params, doc.info, funcValue, exprCall)
 	case *types.ClosureType:
@@ -78,7 +78,7 @@ func funcSignatureHelp(params *protocol.SignatureHelpParams, info *type_check.In
 	}
 
 	funcLabel := fmt.Sprintf("func@%s %s(%s)", funcSym.Roles().SubstituteRoles(roleSubst).ToString(), funcSym.SymbolName(), misc.JoinStrings(paramLabels, ", "))
-	if funcSym.FuncValue().ReturnType().Value() != types.Unit() {
+	if funcSym.FuncValue().ReturnType() != types.Unit() {
 		funcLabel = funcLabel + " " + funcSym.FuncValue().ReturnType().SubstituteRoles(roleSubst).ToString()
 	}
 
@@ -94,8 +94,8 @@ func funcSignatureHelp(params *protocol.SignatureHelpParams, info *type_check.In
 	}, nil
 }
 
-func closureSignatureHelp(params *protocol.SignatureHelpParams, closureType *types.Type, exprCall *parser.ExprCallContext) (*protocol.SignatureHelp, error) {
-	closureValue := closureType.Value().(*types.ClosureType)
+func closureSignatureHelp(params *protocol.SignatureHelpParams, closureType types.Value, exprCall *parser.ExprCallContext) (*protocol.SignatureHelp, error) {
+	closureValue := closureType.(*types.ClosureType)
 
 	parameters := []protocol.ParameterInformation{}
 	for _, param := range closureValue.Params() {

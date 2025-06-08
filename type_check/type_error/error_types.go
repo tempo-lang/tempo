@@ -228,8 +228,8 @@ func NewValueMismatch(expr parser.IExprContext, firstValue types.Value, secondVa
 type IncompatibleTypes struct {
 	baseError
 	Expr         parser.IExprContext
-	ExprType     *types.Type
-	ExpectedType *types.Type
+	ExprType     types.Value
+	ExpectedType types.Value
 }
 
 func (e *IncompatibleTypes) Error() string {
@@ -244,7 +244,7 @@ func (e *IncompatibleTypes) Code() ErrorCode {
 	return CodeIncompatibleTypes
 }
 
-func NewIncompatibleTypes(expr parser.IExprContext, exprType *types.Type, expectedType *types.Type) Error {
+func NewIncompatibleTypes(expr parser.IExprContext, exprType types.Value, expectedType types.Value) Error {
 	return &IncompatibleTypes{
 		Expr:         expr,
 		ExprType:     exprType,
@@ -282,7 +282,7 @@ func NewInvalidValue(expr parser.IExprContext, actualValue types.Value, expected
 type AwaitNonAsyncType struct {
 	baseError
 	Expr parser.IExprContext
-	Type *types.Type
+	Type types.Value
 }
 
 func (e *AwaitNonAsyncType) Error() string {
@@ -297,7 +297,7 @@ func (e *AwaitNonAsyncType) Code() ErrorCode {
 	return CodeExpectedAsyncType
 }
 
-func NewAwaitNonAsyncType(expr parser.IExprContext, errType *types.Type) Error {
+func NewAwaitNonAsyncType(expr parser.IExprContext, errType types.Value) Error {
 	return &AwaitNonAsyncType{
 		Expr: expr,
 		Type: errType,
@@ -308,7 +308,7 @@ type BinOpIncompatibleType struct {
 	baseError
 	BinOp   *parser.ExprBinOpContext
 	Value   types.Value
-	Allowed []types.Value
+	Allowed []types.BuiltinType
 }
 
 func (e *BinOpIncompatibleType) Error() string {
@@ -319,7 +319,7 @@ func (e *BinOpIncompatibleType) Error() string {
 func (e *BinOpIncompatibleType) Annotations() []Annotation {
 	allowed := make([]string, len(e.Allowed))
 	for i, v := range e.Allowed {
-		allowed[i] = fmt.Sprintf("`%s`", v.ToString())
+		allowed[i] = fmt.Sprintf("`%s`", v)
 	}
 
 	var msg string
@@ -343,7 +343,7 @@ func (e *BinOpIncompatibleType) Code() ErrorCode {
 	return CodeBinOpIncompatibleType
 }
 
-func NewBinOpIncompatibleType(binOp *parser.ExprBinOpContext, value types.Value, allowed []types.Value) Error {
+func NewBinOpIncompatibleType(binOp *parser.ExprBinOpContext, value types.Value, allowed []types.BuiltinType) Error {
 	return &BinOpIncompatibleType{
 		BinOp:   binOp,
 		Value:   value,
@@ -354,7 +354,7 @@ func NewBinOpIncompatibleType(binOp *parser.ExprBinOpContext, value types.Value,
 type UnsendableType struct {
 	baseError
 	Com            *parser.ExprComContext
-	UnsendableType *types.Type
+	UnsendableType types.Value
 }
 
 func (u *UnsendableType) Error() string {
@@ -369,7 +369,7 @@ func (e *UnsendableType) Code() ErrorCode {
 	return CodeUnsendableType
 }
 
-func NewUnsendableType(com *parser.ExprComContext, unsendableType *types.Type) Error {
+func NewUnsendableType(com *parser.ExprComContext, unsendableType types.Value) Error {
 	return &UnsendableType{
 		Com:            com,
 		UnsendableType: unsendableType,

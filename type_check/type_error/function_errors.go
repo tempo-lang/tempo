@@ -13,10 +13,10 @@ import (
 type CallNonFunction struct {
 	baseError
 	callExpr *parser.ExprCallContext
-	symType  *types.Type
+	symType  types.Value
 }
 
-func NewCallNonFunction(callExpr *parser.ExprCallContext, symType *types.Type) Error {
+func NewCallNonFunction(callExpr *parser.ExprCallContext, symType types.Value) Error {
 	return &CallNonFunction{
 		callExpr: callExpr,
 		symType:  symType,

@@ -7,11 +7,21 @@ import (
 )
 
 type InterfaceType struct {
-	ident parser.IIdentContext
+	baseValue
+	ident        parser.IIdentContext
+	participants []string
 }
 
 func (s *InterfaceType) SubstituteRoles(substMap *RoleSubst) Value {
 	return s
+}
+
+func (t *InterfaceType) ReplaceSharedRoles(participants []string) Value {
+	return t
+}
+
+func (t *InterfaceType) Roles() *Roles {
+	return NewRole(t.participants, false)
 }
 
 func (s *InterfaceType) CoerceTo(other Value) (Value, bool) {
@@ -32,8 +42,6 @@ func (s *InterfaceType) IsSendable() bool {
 func (t *InterfaceType) IsEquatable() bool {
 	return true
 }
-
-func (s *InterfaceType) IsValue() {}
 
 func (s *InterfaceType) ToString() string {
 	return fmt.Sprintf("interface %s", s.ident.GetText())

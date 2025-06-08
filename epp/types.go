@@ -8,10 +8,10 @@ import (
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (epp *epp) eppType(roleName string, typ *types.Type) projection.Type {
+func (epp *epp) eppType(roleName string, typ types.Value) projection.Type {
 	if typ.Roles().Contains(roleName) {
 
-		switch typeValue := typ.Value().(type) {
+		switch typeValue := typ.(type) {
 		case *types.StructType:
 			structSym := epp.info.GlobalScope.LookupParent(typeValue.Name()).(*sym_table.StructSymbol)
 			structSym.Type().Roles().Participants()
@@ -59,13 +59,13 @@ func (epp *epp) eppType(roleName string, typ *types.Type) projection.Type {
 
 			return projection.NewClosureType(params, returnType)
 		case *types.Async:
-			innerType := epp.eppType(roleName, types.New(typeValue.Inner(), typ.Roles()))
+			innerType := epp.eppType(roleName, typeValue.Inner())
 			return projection.NewAsyncType(innerType)
 		case *types.UnitValue:
 			return projection.UnitType()
 		}
 
-		if builtin, ok := typ.Value().(types.Builtin); ok {
+		if builtin, ok := typ.(types.Builtin); ok {
 			return &projection.BuiltinType{Value: builtin}
 		}
 

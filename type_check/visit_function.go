@@ -29,7 +29,7 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 	// nil if parser error
 	if ctx.Scope() != nil {
 		returnsValue := ctx.Scope().Accept(tc) == true
-		if !returnsValue && sym.FuncValue().ReturnType().Value() != types.Unit() {
+		if !returnsValue && sym.FuncValue().ReturnType() != types.Unit() {
 			tc.reportError(type_error.NewFunctionMissingReturn(sym))
 		}
 	}
@@ -90,12 +90,9 @@ func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr
 	if fn.GetReturnType() != nil {
 		fn.GetReturnType().Accept(tc)
 		if !tc.checkRolesInScope(findRoleType(fn.GetReturnType())) {
-			if fnValue, ok := fnType.Value().(*types.FunctionType); ok {
+			if fnValue, ok := fnType.(*types.FunctionType); ok {
 				// make return type invalid
-				fnType = types.New(
-					types.Function(fnValue.NameIdent(), fnValue.Params(), types.Invalid(), fnValue.Roles().Participants()),
-					fnType.Roles(),
-				)
+				fnType = types.Function(fnValue.NameIdent(), fnValue.Params(), types.Invalid(), fnValue.Roles().Participants())
 			}
 		}
 	}

@@ -1,35 +1,16 @@
 package types
 
-import (
-	"fmt"
-	"reflect"
-
-	"github.com/tempo-lang/tempo/misc"
-)
-
-type Type struct {
-	value Value
-	roles *Roles
-}
-
-func New(value Value, roles *Roles) *Type {
-	return &Type{
-		value: value,
-		roles: roles,
-	}
-}
-
-func ValuesEqual(a, b Value) bool {
-	return reflect.DeepEqual(a, b)
-}
-
 func baseCoerceValue(thisValue, otherValue Value) (Value, bool) {
-	if thisValue == Invalid().Value() {
+	if !thisValue.Roles().Encompass(otherValue.Roles()) {
+		return otherValue, false
+	}
+
+	if thisValue.IsInvalid() {
 		return otherValue, true
 	}
 
-	if otherValue == Invalid().Value() {
-		return Invalid().Value(), true
+	if otherValue.IsInvalid() {
+		return Invalid(), true
 	}
 
 	// plain types can coerce to async types
@@ -43,76 +24,31 @@ func baseCoerceValue(thisValue, otherValue Value) (Value, bool) {
 	return nil, false
 }
 
-func (t *Type) CoerceTo(other *Type) (*Type, bool) {
-	newValue, ok := t.value.CoerceTo(other.value)
-	if !ok {
-		return Invalid(), false
-	}
+// func (t *Type) ToString() string {
 
-	newType := New(newValue, other.Roles())
+// 	switch value := t.value.(type) {
+// 	case *ClosureType:
+// 		params := misc.JoinStringsFunc(value.params, ", ", func(param *Type) string { return param.ToString() })
+// 		returnType := ""
+// 		if value.returnType.Value() != Unit() {
+// 			returnType = value.returnType.ToString()
+// 		}
+// 		return fmt.Sprintf("func@%s(%s)%s", t.roles.ToString(), params, returnType)
+// 	case *FunctionType:
+// 		params := misc.JoinStringsFunc(value.params, ", ", func(param *Type) string { return param.ToString() })
+// 		returnType := ""
+// 		if value.returnType.Value() != Unit() {
+// 			returnType = value.returnType.ToString()
+// 		}
+// 		return fmt.Sprintf("func@%s %s(%s)%s", t.roles.ToString(), value.NameIdent().GetText(), params, returnType)
+// 	case *StructType:
+// 		return fmt.Sprintf("struct@%s %s", t.roles.ToString(), value.Name())
+// 	case *InterfaceType:
+// 		return fmt.Sprintf("interface@%s %s", t.roles.ToString(), value.Name())
+// 	}
 
-	if t.roles.participants == nil {
-		return newType, true
-	}
-
-	if other.roles.participants == nil {
-		return newType, false
-	}
-
-	if t.roles.IsSharedRole() {
-		return newType, t.roles.Encompass(other.roles)
-	}
-
-	if len(t.roles.participants) != len(other.roles.participants) {
-		return newType, false
-	}
-
-	for i, role := range t.roles.participants {
-		if role != other.roles.participants[i] {
-			return newType, false
-		}
-	}
-
-	return newType, true
-}
-
-func (t *Type) Roles() *Roles {
-	return t.roles
-}
-
-func (t *Type) Value() Value {
-	return t.value
-}
-
-func (t *Type) ToString() string {
-
-	switch value := t.value.(type) {
-	case *ClosureType:
-		params := misc.JoinStringsFunc(value.params, ", ", func(param *Type) string { return param.ToString() })
-		returnType := ""
-		if value.returnType.Value() != Unit() {
-			returnType = value.returnType.ToString()
-		}
-		return fmt.Sprintf("func@%s(%s)%s", t.roles.ToString(), params, returnType)
-	case *FunctionType:
-		params := misc.JoinStringsFunc(value.params, ", ", func(param *Type) string { return param.ToString() })
-		returnType := ""
-		if value.returnType.Value() != Unit() {
-			returnType = value.returnType.ToString()
-		}
-		return fmt.Sprintf("func@%s %s(%s)%s", t.roles.ToString(), value.NameIdent().GetText(), params, returnType)
-	case *StructType:
-		return fmt.Sprintf("struct@%s %s", t.roles.ToString(), value.Name())
-	case *InterfaceType:
-		return fmt.Sprintf("interface@%s %s", t.roles.ToString(), value.Name())
-	}
-
-	return fmt.Sprintf("%s@%s", t.value.ToString(), t.roles.ToString())
-}
-
-func (t *Type) IsInvalid() bool {
-	return t.Value() == Invalid().value
-}
+// 	return fmt.Sprintf("%s@%s", t.value.ToString(), t.roles.ToString())
+// }
 
 type Value interface {
 	IsSendable() bool
@@ -120,17 +56,42 @@ type Value interface {
 	ToString() string
 	IsValue()
 	SubstituteRoles(substMap *RoleSubst) Value
+	ReplaceSharedRoles(participants []string) Value
 	CoerceTo(other Value) (Value, bool)
+	Roles() *Roles
+	IsInvalid() bool
 }
 
-type InvalidValue struct{}
+type baseValue struct{}
+
+func (*baseValue) IsValue() {}
+
+func (*baseValue) IsInvalid() bool {
+	return false
+}
+
+type InvalidValue struct {
+	baseValue
+}
+
+func (*InvalidValue) IsInvalid() bool {
+	return true
+}
 
 func (t *InvalidValue) SubstituteRoles(substMap *RoleSubst) Value {
 	return t
 }
 
+func (t *InvalidValue) ReplaceSharedRoles(participants []string) Value {
+	return t
+}
+
 func (t *InvalidValue) CoerceTo(other Value) (Value, bool) {
 	return other, true
+}
+
+func (t *InvalidValue) Roles() *Roles {
+	return EveryoneRole()
 }
 
 var invalid_type InvalidValue = InvalidValue{}
@@ -147,15 +108,19 @@ func (t *InvalidValue) ToString() string {
 	return "ERROR"
 }
 
-func (t *InvalidValue) IsValue() {}
-
-func Invalid() *Type {
-	return New(&invalid_type, NewRole(nil, false))
+func Invalid() Value {
+	return &invalid_type
 }
 
-type UnitValue struct{}
+type UnitValue struct {
+	baseValue
+}
 
 func (u *UnitValue) SubstituteRoles(substMap *RoleSubst) Value {
+	return u
+}
+
+func (u *UnitValue) ReplaceSharedRoles(participants []string) Value {
 	return u
 }
 
@@ -163,7 +128,9 @@ func (t *UnitValue) CoerceTo(other Value) (Value, bool) {
 	return Unit(), other == Unit()
 }
 
-func (u *UnitValue) IsValue() {}
+func (t *UnitValue) Roles() *Roles {
+	return EveryoneRole()
+}
 
 func (u *UnitValue) ToString() string {
 	return "()"

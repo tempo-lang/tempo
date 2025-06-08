@@ -38,7 +38,8 @@ func (tc *typeChecker) checkLiteralRoles(roleTypeCtx parser.IRoleTypeContext) *t
 func (tc *typeChecker) VisitExprPrimitive(ctx *parser.ExprPrimitiveContext) any {
 	roleType := tc.checkLiteralRoles(ctx.RoleType())
 	value := ctx.Literal().Accept(tc).(types.Value)
-	return tc.registerType(ctx, types.New(value, roleType))
+	roleSubstMap, _ := value.Roles().SubstituteMap(roleType)
+	return tc.registerType(ctx, value.SubstituteRoles(roleSubstMap))
 }
 
 func (tc *typeChecker) VisitInt(ctx *parser.IntContext) any {
@@ -47,7 +48,7 @@ func (tc *typeChecker) VisitInt(ctx *parser.IntContext) any {
 		tc.reportError(type_error.NewInvalidNumber(ctx, err))
 	}
 
-	return types.Int()
+	return types.Int(nil)
 }
 
 func (tc *typeChecker) VisitFloat(ctx *parser.FloatContext) any {
@@ -56,13 +57,13 @@ func (tc *typeChecker) VisitFloat(ctx *parser.FloatContext) any {
 		tc.reportError(type_error.NewInvalidNumber(ctx, err))
 	}
 
-	return types.Float()
+	return types.Float(nil)
 }
 
 func (tc *typeChecker) VisitBool(ctx *parser.BoolContext) any {
-	return types.Bool()
+	return types.Bool(nil)
 }
 
 func (tc *typeChecker) VisitString(ctx *parser.StringContext) any {
-	return types.String()
+	return types.String(nil)
 }

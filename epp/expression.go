@@ -116,10 +116,10 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		callFuncValue := epp.eppType(roleName, callType)
 
-		switch callType.Value().(type) {
+		switch callType.(type) {
 		case *types.FunctionType:
 			callFuncValue, _ := callFuncValue.(*projection.FunctionType)
-			funcType := callType.Value().(*types.FunctionType)
+			funcType := callType.(*types.FunctionType)
 
 			argValues := []projection.Expression{}
 			for i, arg := range expr.FuncArgList().AllExpr() {
@@ -146,7 +146,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			}
 		case *types.ClosureType:
 			callFuncValue, _ := callFuncValue.(*projection.ClosureType)
-			closureType := callType.Value().(*types.ClosureType)
+			closureType := callType.(*types.ClosureType)
 
 			argValues := []projection.Expression{}
 			for i, arg := range expr.FuncArgList().AllExpr() {
@@ -225,7 +225,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			return nil, []projection.Statement{}
 		}
 
-		closureType := exprType.Value().(*types.ClosureType)
+		closureType := exprType.(*types.ClosureType)
 
 		params := []projection.ClosureParam{}
 		for i, param := range expr.ClosureSig().FuncParamList().AllFuncParam() {

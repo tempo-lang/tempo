@@ -8,8 +8,8 @@ import (
 
 type coerceTestCase struct {
 	name      string
-	fromType  *types.Type
-	toType    *types.Type
+	fromType  types.Value
+	toType    types.Value
 	canCoerse bool
 }
 
@@ -18,26 +18,26 @@ func TestCanCoerceTypes(t *testing.T) {
 	testCases := []coerceTestCase{
 		{
 			"type can coerce to itself",
-			types.New(types.Bool(), types.SingleRole("A")),
-			types.New(types.Bool(), types.SingleRole("A")),
+			types.Bool([]string{"A"}),
+			types.Bool([]string{"A"}),
 			true,
 		},
 		{
 			"type can coerce to async version",
-			types.New(types.Bool(), types.SingleRole("A")),
-			types.New(types.NewAsync(types.Bool()), types.SingleRole("A")),
+			types.Bool([]string{"A"}),
+			types.NewAsync(types.Bool([]string{"A"})),
 			true,
 		},
 		{
 			"invalid coerse to anything",
 			types.Invalid(),
-			types.New(types.Bool(), types.NewRole([]string{"A", "B"}, true)),
+			types.Bool([]string{"A"}),
 			true,
 		},
 		{
 			"shared value coerse to subset of roles",
-			types.New(types.Bool(), types.NewRole([]string{"A", "B", "C"}, true)),
-			types.New(types.Bool(), types.NewRole([]string{"A", "C"}, true)),
+			types.Bool([]string{"A"}),
+			types.Bool([]string{"A"}),
 			true,
 		},
 	}

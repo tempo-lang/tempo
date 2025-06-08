@@ -12,8 +12,8 @@ import (
 type InvalidAssignType struct {
 	baseError
 	ExprCtx  parser.IExprContext
-	VarType  *types.Type
-	ExprType *types.Type
+	VarType  types.Value
+	ExprType types.Value
 }
 
 func (i *InvalidAssignType) Error() string {
@@ -35,7 +35,7 @@ func (e *InvalidAssignType) Code() ErrorCode {
 	return CodeInvalidAssignType
 }
 
-func NewInvalidAssignType(exprCtx parser.IExprContext, varType *types.Type, exprType *types.Type) Error {
+func NewInvalidAssignType(exprCtx parser.IExprContext, varType types.Value, exprType types.Value) Error {
 	return &InvalidAssignType{
 		ExprCtx:  exprCtx,
 		VarType:  varType,
