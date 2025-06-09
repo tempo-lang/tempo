@@ -5,7 +5,7 @@ import "fmt"
 type BuiltinType string
 
 type Builtin interface {
-	Value
+	Type
 	IsBuiltin()
 }
 
@@ -16,7 +16,7 @@ const (
 	BuiltinBool   BuiltinType = "Bool"
 )
 
-func BuiltinKind(t Value) BuiltinType {
+func BuiltinKind(t Type) BuiltinType {
 	switch t.(type) {
 	case *BoolType:
 		return BuiltinBool
@@ -31,7 +31,7 @@ func BuiltinKind(t Value) BuiltinType {
 }
 
 type baseBuiltin struct {
-	baseValue
+	baseType
 	participants []string
 }
 
@@ -65,7 +65,7 @@ type StringType struct {
 	baseBuiltin
 }
 
-func (t *StringType) CoerceTo(other Value) (Value, bool) {
+func (t *StringType) CoerceTo(other Type) (Type, bool) {
 	if value, ok := baseCoerceValue(t, other); ok != nil {
 		return value, *ok
 	}
@@ -77,11 +77,11 @@ func (t *StringType) CoerceTo(other Value) (Value, bool) {
 	return Invalid(), false
 }
 
-func (t *StringType) SubstituteRoles(substMap *RoleSubst) Value {
+func (t *StringType) SubstituteRoles(substMap *RoleSubst) Type {
 	return String(t.baseBuiltin.substituteParticipants(substMap))
 }
 
-func (t *StringType) ReplaceSharedRoles(participants []string) Value {
+func (t *StringType) ReplaceSharedRoles(participants []string) Type {
 	return String(participants)
 }
 
@@ -89,7 +89,7 @@ func (t *StringType) ToString() string {
 	return t.formatType(BuiltinString)
 }
 
-func String(participants []string) Value {
+func String(participants []string) Type {
 	return &StringType{
 		baseBuiltin: baseBuiltin{
 			participants: participants,
@@ -101,15 +101,15 @@ type IntType struct {
 	baseBuiltin
 }
 
-func (t *IntType) SubstituteRoles(substMap *RoleSubst) Value {
+func (t *IntType) SubstituteRoles(substMap *RoleSubst) Type {
 	return Int(t.baseBuiltin.substituteParticipants(substMap))
 }
 
-func (t *IntType) ReplaceSharedRoles(participants []string) Value {
+func (t *IntType) ReplaceSharedRoles(participants []string) Type {
 	return Int(participants)
 }
 
-func (t *IntType) CoerceTo(other Value) (Value, bool) {
+func (t *IntType) CoerceTo(other Type) (Type, bool) {
 	if value, ok := baseCoerceValue(t, other); ok != nil {
 		return value, *ok
 	}
@@ -125,7 +125,7 @@ func (t *IntType) ToString() string {
 	return t.formatType(BuiltinInt)
 }
 
-func Int(participants []string) Value {
+func Int(participants []string) Type {
 	return &IntType{
 		baseBuiltin: baseBuiltin{
 			participants: participants,
@@ -137,15 +137,15 @@ type FloatType struct {
 	baseBuiltin
 }
 
-func (t *FloatType) SubstituteRoles(substMap *RoleSubst) Value {
+func (t *FloatType) SubstituteRoles(substMap *RoleSubst) Type {
 	return Float(t.baseBuiltin.substituteParticipants(substMap))
 }
 
-func (t *FloatType) ReplaceSharedRoles(participants []string) Value {
+func (t *FloatType) ReplaceSharedRoles(participants []string) Type {
 	return Float(participants)
 }
 
-func (t *FloatType) CoerceTo(other Value) (Value, bool) {
+func (t *FloatType) CoerceTo(other Type) (Type, bool) {
 	if value, ok := baseCoerceValue(t, other); ok != nil {
 		return value, *ok
 	}
@@ -161,7 +161,7 @@ func (t *FloatType) ToString() string {
 	return t.formatType(BuiltinFloat)
 }
 
-func Float(participants []string) Value {
+func Float(participants []string) Type {
 	return &FloatType{
 		baseBuiltin: baseBuiltin{
 			participants: participants,
@@ -173,15 +173,15 @@ type BoolType struct {
 	baseBuiltin
 }
 
-func (t *BoolType) SubstituteRoles(substMap *RoleSubst) Value {
+func (t *BoolType) SubstituteRoles(substMap *RoleSubst) Type {
 	return Bool(t.baseBuiltin.substituteParticipants(substMap))
 }
 
-func (t *BoolType) ReplaceSharedRoles(participants []string) Value {
+func (t *BoolType) ReplaceSharedRoles(participants []string) Type {
 	return Bool(participants)
 }
 
-func (t *BoolType) CoerceTo(other Value) (Value, bool) {
+func (t *BoolType) CoerceTo(other Type) (Type, bool) {
 	if value, ok := baseCoerceValue(t, other); ok != nil {
 		return value, *ok
 	}
@@ -197,7 +197,7 @@ func (t *BoolType) ToString() string {
 	return t.formatType(BuiltinBool)
 }
 
-func Bool(participants []string) Value {
+func Bool(participants []string) Type {
 	return &BoolType{
 		baseBuiltin: baseBuiltin{
 			participants: participants,

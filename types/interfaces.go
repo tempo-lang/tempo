@@ -7,21 +7,21 @@ import (
 )
 
 type InterfaceType struct {
-	baseValue
+	baseType
 	ident        parser.IIdentContext
 	participants []string
 }
 
-func (s *InterfaceType) SubstituteRoles(substMap *RoleSubst) Value {
+func (s *InterfaceType) SubstituteRoles(substMap *RoleSubst) Type {
 	newParticipants := []string{}
 	for _, from := range s.participants {
 		newParticipants = append(newParticipants, substMap.Subst(from))
 	}
 
-	return NewInterfaceType(s.ident, newParticipants)
+	return Interface(s.ident, newParticipants)
 }
 
-func (t *InterfaceType) ReplaceSharedRoles(participants []string) Value {
+func (t *InterfaceType) ReplaceSharedRoles(participants []string) Type {
 	return t
 }
 
@@ -29,7 +29,7 @@ func (t *InterfaceType) Roles() *Roles {
 	return NewRole(t.participants, false)
 }
 
-func (s *InterfaceType) CoerceTo(other Value) (Value, bool) {
+func (s *InterfaceType) CoerceTo(other Type) (Type, bool) {
 	if value, ok := baseCoerceValue(s, other); ok != nil {
 		return value, *ok
 	}
@@ -52,7 +52,7 @@ func (s *InterfaceType) ToString() string {
 	return fmt.Sprintf("interface@%s %s", s.Roles().ToString(), s.ident.GetText())
 }
 
-func NewInterfaceType(ident parser.IIdentContext, participants []string) Value {
+func Interface(ident parser.IIdentContext, participants []string) Type {
 	return &InterfaceType{ident: ident, participants: participants}
 }
 

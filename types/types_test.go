@@ -8,8 +8,8 @@ import (
 
 type coerceTestCase struct {
 	name      string
-	fromType  types.Value
-	toType    types.Value
+	fromType  types.Type
+	toType    types.Type
 	canCoerse bool
 }
 
@@ -25,7 +25,7 @@ func TestCanCoerceTypes(t *testing.T) {
 		{
 			"type can coerce to async version",
 			types.Bool([]string{"A"}),
-			types.NewAsync(types.Bool([]string{"A"})),
+			types.Async(types.Bool([]string{"A"})),
 			true,
 		},
 		{

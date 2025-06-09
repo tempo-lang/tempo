@@ -94,7 +94,7 @@ func funcSignatureHelp(params *protocol.SignatureHelpParams, info *type_check.In
 	}, nil
 }
 
-func closureSignatureHelp(params *protocol.SignatureHelpParams, closureType types.Value, exprCall *parser.ExprCallContext) (*protocol.SignatureHelp, error) {
+func closureSignatureHelp(params *protocol.SignatureHelpParams, closureType types.Type, exprCall *parser.ExprCallContext) (*protocol.SignatureHelp, error) {
 	closureValue := closureType.(*types.ClosureType)
 
 	parameters := []protocol.ParameterInformation{}

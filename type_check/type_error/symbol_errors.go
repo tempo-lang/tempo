@@ -68,7 +68,7 @@ func (e *UnknownSymbol) Code() ErrorCode {
 type UnassignableSymbol struct {
 	baseError
 	Assign *parser.StmtAssignContext
-	Type   types.Value
+	Type   types.Type
 }
 
 func (u *UnassignableSymbol) Error() string {
@@ -83,7 +83,7 @@ func (e *UnassignableSymbol) Code() ErrorCode {
 	return CodeUnassignableSymbol
 }
 
-func NewUnassignableSymbol(assign *parser.StmtAssignContext, symType types.Value) Error {
+func NewUnassignableSymbol(assign *parser.StmtAssignContext, symType types.Type) Error {
 	return &UnassignableSymbol{
 		Assign: assign,
 		Type:   symType,
@@ -241,7 +241,7 @@ func NewFieldAccessUnknownField(expr *parser.ExprFieldAccessContext, sym sym_tab
 type FieldAccessUnexpectedType struct {
 	baseError
 	fieldAccess *parser.ExprFieldAccessContext
-	objectType  types.Value
+	objectType  types.Type
 }
 
 func (e *FieldAccessUnexpectedType) Error() string {
@@ -258,7 +258,7 @@ func (e *FieldAccessUnexpectedType) Code() ErrorCode {
 	return CodeFieldAccessUnexpectedType
 }
 
-func NewFieldAccessUnexpectedType(expr *parser.ExprFieldAccessContext, objectType types.Value) Error {
+func NewFieldAccessUnexpectedType(expr *parser.ExprFieldAccessContext, objectType types.Type) Error {
 	return &FieldAccessUnexpectedType{
 		fieldAccess: expr,
 		objectType:  objectType,

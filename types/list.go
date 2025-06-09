@@ -2,41 +2,48 @@ package types
 
 import "fmt"
 
-type List struct {
-	baseValue
-	inner Value
+type ListType struct {
+	baseType
+	inner Type
 }
 
-func (l *List) CoerceTo(other Value) (Value, bool) {
-	panic("unimplemented")
+func (l *ListType) CoerceTo(other Type) (Type, bool) {
+	if other, isOtherList := other.(*ListType); isOtherList {
+		return l.inner.CoerceTo(other.inner)
+	}
+	return Invalid(), false
 }
 
-func (l *List) IsEquatable() bool {
+func (l *ListType) IsEquatable() bool {
 	return l.inner.IsEquatable()
 }
 
-func (l *List) IsSendable() bool {
+func (l *ListType) IsSendable() bool {
 	return l.inner.IsSendable()
 }
 
-func (l *List) SubstituteRoles(substMap *RoleSubst) Value {
-	return NewList(l.inner.SubstituteRoles(substMap))
+func (l *ListType) SubstituteRoles(substMap *RoleSubst) Type {
+	return List(l.inner.SubstituteRoles(substMap))
 }
 
-func (l *List) ReplaceSharedRoles(participants []string) Value {
-	return NewList(l.inner.ReplaceSharedRoles(participants))
+func (l *ListType) ReplaceSharedRoles(participants []string) Type {
+	return List(l.inner.ReplaceSharedRoles(participants))
 }
 
-func (l *List) Roles() *Roles {
+func (l *ListType) Roles() *Roles {
 	return l.inner.Roles()
 }
 
-func (l *List) ToString() string {
+func (l *ListType) ToString() string {
 	return fmt.Sprintf("[%s]", l.inner.ToString())
 }
 
-func NewList(inner Value) Value {
-	return &List{
+func (l *ListType) Inner() Type {
+	return l.inner
+}
+
+func List(inner Type) Type {
+	return &ListType{
 		inner: inner,
 	}
 }

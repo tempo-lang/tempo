@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func A{let 00let A 0=let:0=let:0=let:0=let:0=let:0=let:0=let:0=let:0")

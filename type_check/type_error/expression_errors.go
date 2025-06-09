@@ -67,7 +67,7 @@ func NewComNonLocalSender(com *parser.ExprComContext) Error {
 type ComValueNotAtSender struct {
 	baseError
 	Com      *parser.ExprComContext
-	ExprType types.Value
+	ExprType types.Type
 }
 
 func (c *ComValueNotAtSender) Error() string {
@@ -103,7 +103,7 @@ func (c *ComValueNotAtSender) Annotations() []Annotation {
 	}
 }
 
-func NewComValueNotAtSender(com *parser.ExprComContext, exprType types.Value) Error {
+func NewComValueNotAtSender(com *parser.ExprComContext, exprType types.Type) Error {
 	return &ComValueNotAtSender{
 		Com:      com,
 		ExprType: exprType,
@@ -113,7 +113,7 @@ func NewComValueNotAtSender(com *parser.ExprComContext, exprType types.Value) Er
 type UnequatableType struct {
 	baseError
 	BinOp *parser.ExprBinOpContext
-	Value types.Value
+	Value types.Type
 }
 
 func (e *UnequatableType) Error() string {
@@ -128,7 +128,7 @@ func (e *UnequatableType) Code() ErrorCode {
 	return CodeUnequatableType
 }
 
-func NewUnequatableType(binOp *parser.ExprBinOpContext, value types.Value) Error {
+func NewUnequatableType(binOp *parser.ExprBinOpContext, value types.Type) Error {
 	return &UnequatableType{
 		BinOp: binOp,
 		Value: value,

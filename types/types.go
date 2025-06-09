@@ -1,6 +1,6 @@
 package types
 
-func baseCoerceValue(thisValue, otherValue Value) (Value, *bool) {
+func baseCoerceValue(thisValue, otherValue Type) (Type, *bool) {
 	fail := false
 	success := true
 
@@ -17,138 +17,112 @@ func baseCoerceValue(thisValue, otherValue Value) (Value, *bool) {
 	}
 
 	// plain types can coerce to async types
-	if _, isAsync := thisValue.(*Async); !isAsync {
-		if otherAsync, otherIsAsync := otherValue.(*Async); otherIsAsync {
+	if _, isAsync := thisValue.(*AsyncType); !isAsync {
+		if otherAsync, otherIsAsync := otherValue.(*AsyncType); otherIsAsync {
 			innerCoerce, ok := thisValue.CoerceTo(otherAsync.Inner())
-			return NewAsync(innerCoerce), &ok
+			return Async(innerCoerce), &ok
 		}
 	}
 
 	return nil, nil
 }
 
-// func (t *Type) ToString() string {
-
-// 	switch value := t.value.(type) {
-// 	case *ClosureType:
-// 		params := misc.JoinStringsFunc(value.params, ", ", func(param *Type) string { return param.ToString() })
-// 		returnType := ""
-// 		if value.returnType.Value() != Unit() {
-// 			returnType = value.returnType.ToString()
-// 		}
-// 		return fmt.Sprintf("func@%s(%s)%s", t.roles.ToString(), params, returnType)
-// 	case *FunctionType:
-// 		params := misc.JoinStringsFunc(value.params, ", ", func(param *Type) string { return param.ToString() })
-// 		returnType := ""
-// 		if value.returnType.Value() != Unit() {
-// 			returnType = value.returnType.ToString()
-// 		}
-// 		return fmt.Sprintf("func@%s %s(%s)%s", t.roles.ToString(), value.NameIdent().GetText(), params, returnType)
-// 	case *StructType:
-// 		return fmt.Sprintf("struct@%s %s", t.roles.ToString(), value.Name())
-// 	case *InterfaceType:
-// 		return fmt.Sprintf("interface@%s %s", t.roles.ToString(), value.Name())
-// 	}
-
-// 	return fmt.Sprintf("%s@%s", t.value.ToString(), t.roles.ToString())
-// }
-
-type Value interface {
+type Type interface {
 	IsSendable() bool
 	IsEquatable() bool
 	ToString() string
 	IsValue()
-	SubstituteRoles(substMap *RoleSubst) Value
-	ReplaceSharedRoles(participants []string) Value
-	CoerceTo(other Value) (Value, bool)
+	SubstituteRoles(substMap *RoleSubst) Type
+	ReplaceSharedRoles(participants []string) Type
+	CoerceTo(other Type) (Type, bool)
 	Roles() *Roles
 	IsInvalid() bool
 }
 
-type baseValue struct{}
+type baseType struct{}
 
-func (*baseValue) IsValue() {}
+func (*baseType) IsValue() {}
 
-func (*baseValue) IsInvalid() bool {
+func (*baseType) IsInvalid() bool {
 	return false
 }
 
-type InvalidValue struct {
-	baseValue
+type InvalidType struct {
+	baseType
 }
 
-func (*InvalidValue) IsInvalid() bool {
+func (*InvalidType) IsInvalid() bool {
 	return true
 }
 
-func (t *InvalidValue) SubstituteRoles(substMap *RoleSubst) Value {
+func (t *InvalidType) SubstituteRoles(substMap *RoleSubst) Type {
 	return t
 }
 
-func (t *InvalidValue) ReplaceSharedRoles(participants []string) Value {
+func (t *InvalidType) ReplaceSharedRoles(participants []string) Type {
 	return t
 }
 
-func (t *InvalidValue) CoerceTo(other Value) (Value, bool) {
+func (t *InvalidType) CoerceTo(other Type) (Type, bool) {
 	return other, true
 }
 
-func (t *InvalidValue) Roles() *Roles {
+func (t *InvalidType) Roles() *Roles {
 	return EveryoneRole()
 }
 
-var invalid_type InvalidValue = InvalidValue{}
+var invalid_type InvalidType = InvalidType{}
 
-func (t *InvalidValue) IsSendable() bool {
+func (t *InvalidType) IsSendable() bool {
 	return true
 }
 
-func (t *InvalidValue) IsEquatable() bool {
+func (t *InvalidType) IsEquatable() bool {
 	return true
 }
 
-func (t *InvalidValue) ToString() string {
+func (t *InvalidType) ToString() string {
 	return "ERROR"
 }
 
-func Invalid() Value {
+func Invalid() Type {
 	return &invalid_type
 }
 
-type UnitValue struct {
-	baseValue
+type UnitType struct {
+	baseType
 }
 
-func (u *UnitValue) SubstituteRoles(substMap *RoleSubst) Value {
+func (u *UnitType) SubstituteRoles(substMap *RoleSubst) Type {
 	return u
 }
 
-func (u *UnitValue) ReplaceSharedRoles(participants []string) Value {
+func (u *UnitType) ReplaceSharedRoles(participants []string) Type {
 	return u
 }
 
-func (t *UnitValue) CoerceTo(other Value) (Value, bool) {
+func (t *UnitType) CoerceTo(other Type) (Type, bool) {
 	return Unit(), other == Unit()
 }
 
-func (t *UnitValue) Roles() *Roles {
+func (t *UnitType) Roles() *Roles {
 	return EveryoneRole()
 }
 
-func (u *UnitValue) ToString() string {
+func (u *UnitType) ToString() string {
 	return "()"
 }
 
-func (u *UnitValue) IsSendable() bool {
+func (u *UnitType) IsSendable() bool {
 	return true
 }
 
-func (t *UnitValue) IsEquatable() bool {
+func (t *UnitType) IsEquatable() bool {
 	return false
 }
 
-var unit_value UnitValue = UnitValue{}
+var unit_value UnitType = UnitType{}
 
-func Unit() Value {
+func Unit() Type {
 	return &unit_value
 }

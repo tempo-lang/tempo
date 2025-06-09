@@ -7,13 +7,13 @@ import (
 )
 
 type ClosureType struct {
-	baseValue
-	params       []Value
-	returnType   Value
+	baseType
+	params       []Type
+	returnType   Type
 	participants []string
 }
 
-func (f *ClosureType) CoerceTo(other Value) (Value, bool) {
+func (f *ClosureType) CoerceTo(other Type) (Type, bool) {
 	if value, ok := baseCoerceValue(f, other); ok != nil {
 		return value, *ok
 	}
@@ -28,7 +28,7 @@ func (f *ClosureType) CoerceTo(other Value) (Value, bool) {
 	}
 
 	canCoerce := true
-	newParams := []Value{}
+	newParams := []Type{}
 	for i := range f.params {
 		if newParam, ok := f.params[i].CoerceTo(g.params[i]); ok {
 			newParams = append(newParams, newParam)
@@ -54,8 +54,8 @@ func (c *ClosureType) IsSendable() bool {
 	return false
 }
 
-func (c *ClosureType) SubstituteRoles(substMap *RoleSubst) Value {
-	substParams := []Value{}
+func (c *ClosureType) SubstituteRoles(substMap *RoleSubst) Type {
+	substParams := []Type{}
 	for _, p := range c.params {
 		substParams = append(substParams, p.SubstituteRoles(substMap))
 	}
@@ -67,7 +67,7 @@ func (c *ClosureType) SubstituteRoles(substMap *RoleSubst) Value {
 	)
 }
 
-func (c *ClosureType) ReplaceSharedRoles(participants []string) Value {
+func (c *ClosureType) ReplaceSharedRoles(participants []string) Type {
 	return c
 }
 
@@ -76,7 +76,7 @@ func (c *ClosureType) Roles() *Roles {
 }
 
 func (c *ClosureType) ToString() string {
-	params := misc.JoinStringsFunc(c.params, ", ", func(param Value) string { return param.ToString() })
+	params := misc.JoinStringsFunc(c.params, ", ", func(param Type) string { return param.ToString() })
 	returnType := ""
 	if c.returnType != Unit() {
 		returnType = c.returnType.ToString()
@@ -84,7 +84,7 @@ func (c *ClosureType) ToString() string {
 	return fmt.Sprintf("func@%s(%s)%s", c.Roles().ToString(), params, returnType)
 }
 
-func Closure(params []Value, returnType Value, participants []string) *ClosureType {
+func Closure(params []Type, returnType Type, participants []string) *ClosureType {
 	return &ClosureType{
 		params:       params,
 		returnType:   returnType,
@@ -92,10 +92,10 @@ func Closure(params []Value, returnType Value, participants []string) *ClosureTy
 	}
 }
 
-func (c *ClosureType) Params() []Value {
+func (c *ClosureType) Params() []Type {
 	return c.params
 }
 
-func (c *ClosureType) ReturnType() Value {
+func (c *ClosureType) ReturnType() Type {
 	return c.returnType
 }

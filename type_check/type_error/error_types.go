@@ -202,8 +202,8 @@ func (e *UnknownType) Code() ErrorCode {
 type ValueMismatch struct {
 	baseError
 	Expr        parser.IExprContext
-	FirstValue  types.Value
-	SecondValue types.Value
+	FirstValue  types.Type
+	SecondValue types.Type
 }
 
 func (t *ValueMismatch) Error() string {
@@ -218,7 +218,7 @@ func (e *ValueMismatch) Code() ErrorCode {
 	return CodeValueMismatch
 }
 
-func NewValueMismatch(expr parser.IExprContext, firstValue types.Value, secondValue types.Value) Error {
+func NewValueMismatch(expr parser.IExprContext, firstValue types.Type, secondValue types.Type) Error {
 	return &ValueMismatch{
 		Expr:        expr,
 		FirstValue:  firstValue,
@@ -229,8 +229,8 @@ func NewValueMismatch(expr parser.IExprContext, firstValue types.Value, secondVa
 type IncompatibleTypes struct {
 	baseError
 	Expr         parser.IExprContext
-	ExprType     types.Value
-	ExpectedType types.Value
+	ExprType     types.Type
+	ExpectedType types.Type
 }
 
 func (e *IncompatibleTypes) Error() string {
@@ -245,7 +245,7 @@ func (e *IncompatibleTypes) Code() ErrorCode {
 	return CodeIncompatibleTypes
 }
 
-func NewIncompatibleTypes(expr parser.IExprContext, exprType types.Value, expectedType types.Value) Error {
+func NewIncompatibleTypes(expr parser.IExprContext, exprType types.Type, expectedType types.Type) Error {
 	return &IncompatibleTypes{
 		Expr:         expr,
 		ExprType:     exprType,
@@ -256,8 +256,8 @@ func NewIncompatibleTypes(expr parser.IExprContext, exprType types.Value, expect
 type InvalidValue struct {
 	baseError
 	Expr          parser.IExprContext
-	ActualValue   types.Value
-	ExpectedValue types.Value
+	ActualValue   types.Type
+	ExpectedValue types.Type
 }
 
 func (i *InvalidValue) Error() string {
@@ -272,7 +272,7 @@ func (e *InvalidValue) Code() ErrorCode {
 	return CodeInvalidValue
 }
 
-func NewInvalidValue(expr parser.IExprContext, actualValue types.Value, expectedValue types.Value) Error {
+func NewInvalidValue(expr parser.IExprContext, actualValue types.Type, expectedValue types.Type) Error {
 	return &InvalidValue{
 		Expr:          expr,
 		ActualValue:   actualValue,
@@ -283,7 +283,7 @@ func NewInvalidValue(expr parser.IExprContext, actualValue types.Value, expected
 type AwaitNonAsyncType struct {
 	baseError
 	Expr parser.IExprContext
-	Type types.Value
+	Type types.Type
 }
 
 func (e *AwaitNonAsyncType) Error() string {
@@ -298,7 +298,7 @@ func (e *AwaitNonAsyncType) Code() ErrorCode {
 	return CodeExpectedAsyncType
 }
 
-func NewAwaitNonAsyncType(expr parser.IExprContext, errType types.Value) Error {
+func NewAwaitNonAsyncType(expr parser.IExprContext, errType types.Type) Error {
 	return &AwaitNonAsyncType{
 		Expr: expr,
 		Type: errType,
@@ -308,7 +308,7 @@ func NewAwaitNonAsyncType(expr parser.IExprContext, errType types.Value) Error {
 type BinOpIncompatibleType struct {
 	baseError
 	BinOp   *parser.ExprBinOpContext
-	Value   types.Value
+	Value   types.Type
 	Allowed []types.BuiltinType
 }
 
@@ -344,7 +344,7 @@ func (e *BinOpIncompatibleType) Code() ErrorCode {
 	return CodeBinOpIncompatibleType
 }
 
-func NewBinOpIncompatibleType(binOp *parser.ExprBinOpContext, value types.Value, allowed []types.BuiltinType) Error {
+func NewBinOpIncompatibleType(binOp *parser.ExprBinOpContext, value types.Type, allowed []types.BuiltinType) Error {
 	return &BinOpIncompatibleType{
 		BinOp:   binOp,
 		Value:   value,
@@ -355,7 +355,7 @@ func NewBinOpIncompatibleType(binOp *parser.ExprBinOpContext, value types.Value,
 type UnsendableType struct {
 	baseError
 	Com            *parser.ExprComContext
-	UnsendableType types.Value
+	UnsendableType types.Type
 }
 
 func (u *UnsendableType) Error() string {
@@ -370,7 +370,7 @@ func (e *UnsendableType) Code() ErrorCode {
 	return CodeUnsendableType
 }
 
-func NewUnsendableType(com *parser.ExprComContext, unsendableType types.Value) Error {
+func NewUnsendableType(com *parser.ExprComContext, unsendableType types.Type) Error {
 	return &UnsendableType{
 		Com:            com,
 		UnsendableType: unsendableType,

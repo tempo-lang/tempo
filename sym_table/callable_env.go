@@ -10,13 +10,13 @@ type CallableEnv interface {
 	Scope() *Scope
 	Params() []*FuncParamSymbol
 	AddParam(param *FuncParamSymbol)
-	ReturnType() types.Value
+	ReturnType() types.Type
 }
 
 type ClosureEnv struct {
 	scope      *Scope
 	params     []*FuncParamSymbol
-	returnType types.Value
+	returnType types.Type
 	returnCtx  parser.IValueTypeContext
 }
 
@@ -34,7 +34,7 @@ func (f *ClosureEnv) AddParam(param *FuncParamSymbol) {
 }
 
 // ReturnType implements CallableEnv.
-func (c *ClosureEnv) ReturnType() types.Value {
+func (c *ClosureEnv) ReturnType() types.Type {
 	return c.returnType
 }
 
@@ -43,7 +43,7 @@ func (c *ClosureEnv) Scope() *Scope {
 	return c.scope
 }
 
-func NewClosureEnv(scope *Scope, returnType types.Value, returnCtx parser.IValueTypeContext) CallableEnv {
+func NewClosureEnv(scope *Scope, returnType types.Type, returnCtx parser.IValueTypeContext) CallableEnv {
 	return &ClosureEnv{
 		scope:      scope,
 		params:     []*FuncParamSymbol{},

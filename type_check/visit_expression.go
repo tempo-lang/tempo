@@ -10,7 +10,7 @@ import (
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (tc *typeChecker) visitExpr(ctx parser.IExprContext) types.Value {
+func (tc *typeChecker) visitExpr(ctx parser.IExprContext) types.Type {
 	if ctx == nil {
 		return types.Invalid()
 	}
@@ -18,10 +18,10 @@ func (tc *typeChecker) visitExpr(ctx parser.IExprContext) types.Value {
 	if exprType == nil {
 		return types.Invalid()
 	}
-	return exprType.(types.Value)
+	return exprType.(types.Type)
 }
 
-func (tc *typeChecker) registerType(expr parser.IExprContext, exprType types.Value) types.Value {
+func (tc *typeChecker) registerType(expr parser.IExprContext, exprType types.Type) types.Type {
 	tc.info.Types[expr] = exprType
 	return exprType
 }
@@ -62,7 +62,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	typeError := false
 	op := projection.ParseOperator(ctx)
 
-	equalTypes := func(a, b types.Value) bool {
+	equalTypes := func(a, b types.Type) bool {
 		a = a.ReplaceSharedRoles(nil)
 		b = b.ReplaceSharedRoles(nil)
 
@@ -227,7 +227,7 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	if asyncType, isAsync := exprType.(*types.Async); isAsync {
+	if asyncType, isAsync := exprType.(*types.AsyncType); isAsync {
 		return tc.registerType(ctx, asyncType.Inner())
 	}
 
@@ -287,11 +287,11 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 			}
 		}
 
-		recvType = types.NewAsync(innerExprType).ReplaceSharedRoles(newParticipants)
+		recvType = types.Async(innerExprType).ReplaceSharedRoles(newParticipants)
 	}
 
 	if !invalidType && invalidRole {
-		recvType = types.NewAsync(innerExprType).ReplaceSharedRoles(nil)
+		recvType = types.Async(innerExprType).ReplaceSharedRoles(nil)
 	}
 
 	return tc.registerType(ctx, recvType)
@@ -397,7 +397,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	defFields := map[string]types.Value{}
+	defFields := map[string]types.Type{}
 	for _, field := range structSym.Fields() {
 		defFields[field.SymbolName()] = field.Type()
 	}
@@ -405,7 +405,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	fieldIdents := ctx.ExprStructField().AllIdent()
 
 	exprFieldsExpr := map[string]parser.IExprContext{}
-	exprFieldsType := map[string]types.Value{}
+	exprFieldsType := map[string]types.Type{}
 	exprFieldsIdent := map[string]parser.IIdentContext{}
 	for i, field := range ctx.ExprStructField().AllExpr() {
 		fieldType := tc.visitExpr(field)
@@ -509,7 +509,7 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	var returnType types.Value = types.Unit()
+	var returnType types.Type = types.Unit()
 	if sig.GetReturnType() != nil {
 		returnType = tc.visitValueType(sig.GetReturnType())
 		tc.checkRolesInScope(findRoleType(sig.GetReturnType()))
@@ -536,7 +536,7 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 	// exit scope
 	tc.currentScope = tc.currentScope.Parent()
 
-	paramTypes := []types.Value{}
+	paramTypes := []types.Type{}
 	for _, param := range closureEnv.Params() {
 		paramTypes = append(paramTypes, param.Type())
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (epp *epp) eppType(roleName string, typ types.Value) projection.Type {
+func (epp *epp) eppType(roleName string, typ types.Type) projection.Type {
 	if typ.Roles().Contains(roleName) {
 
 		switch typeValue := typ.(type) {
@@ -58,15 +58,18 @@ func (epp *epp) eppType(roleName string, typ types.Value) projection.Type {
 			returnType := epp.eppType(roleName, typeValue.ReturnType())
 
 			return projection.NewClosureType(params, returnType)
-		case *types.Async:
+		case *types.AsyncType:
 			innerType := epp.eppType(roleName, typeValue.Inner())
 			return projection.NewAsyncType(innerType)
-		case *types.UnitValue:
+		case *types.ListType:
+			innerType := epp.eppType(roleName, typeValue.Inner())
+			return projection.NewListType(innerType)
+		case *types.UnitType:
 			return projection.UnitType()
 		}
 
 		if builtin, ok := typ.(types.Builtin); ok {
-			return &projection.BuiltinType{Value: builtin}
+			return &projection.BuiltinType{Type: builtin}
 		}
 
 		panic(fmt.Sprintf("failed to epp type: %#v\n", typ))

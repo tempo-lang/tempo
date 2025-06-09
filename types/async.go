@@ -2,58 +2,58 @@ package types
 
 import "fmt"
 
-type Async struct {
-	baseValue
-	inner Value
+type AsyncType struct {
+	baseType
+	inner Type
 }
 
-func (a *Async) SubstituteRoles(substMap *RoleSubst) Value {
-	return NewAsync(a.inner.SubstituteRoles(substMap))
+func (a *AsyncType) SubstituteRoles(substMap *RoleSubst) Type {
+	return Async(a.inner.SubstituteRoles(substMap))
 }
 
-func (a *Async) ReplaceSharedRoles(participants []string) Value {
-	return NewAsync(a.inner.ReplaceSharedRoles(participants))
+func (a *AsyncType) ReplaceSharedRoles(participants []string) Type {
+	return Async(a.inner.ReplaceSharedRoles(participants))
 }
 
-func (t *Async) CoerceTo(other Value) (Value, bool) {
+func (t *AsyncType) CoerceTo(other Type) (Type, bool) {
 	if value, ok := baseCoerceValue(t, other); ok != nil {
 		return value, *ok
 	}
 
-	if otherAsync, ok := other.(*Async); ok {
+	if otherAsync, ok := other.(*AsyncType); ok {
 		if newValue, canCoerce := t.inner.CoerceTo(otherAsync.inner); canCoerce {
-			return NewAsync(newValue), true
+			return Async(newValue), true
 		} else {
-			return NewAsync(Invalid()), false
+			return Async(Invalid()), false
 		}
 	}
 	return Invalid(), false
 }
 
-func (t *Async) Roles() *Roles {
+func (t *AsyncType) Roles() *Roles {
 	return t.inner.Roles()
 }
 
-func (a *Async) IsSendable() bool {
+func (a *AsyncType) IsSendable() bool {
 	return false
 }
 
-func (t *Async) IsEquatable() bool {
+func (t *AsyncType) IsEquatable() bool {
 	return false
 }
 
-func (a *Async) ToString() string {
+func (a *AsyncType) ToString() string {
 	return fmt.Sprintf("async %s", a.inner.ToString())
 }
 
-func (a *Async) Inner() Value {
+func (a *AsyncType) Inner() Type {
 	return a.inner
 }
 
-func NewAsync(inner Value) Value {
-	if _, ok := inner.(*Async); ok {
+func Async(inner Type) Type {
+	if _, ok := inner.(*AsyncType); ok {
 		panic("nested async type")
 	}
 
-	return &Async{inner: inner}
+	return &AsyncType{inner: inner}
 }

@@ -254,7 +254,3 @@ func (r *Roles) SubstituteRoles(subst *RoleSubst) *Roles {
 
 	return NewRole(roleSubst, r.IsSharedRole())
 }
-
-// func (t *Type) SubstituteRoles(subst *RoleSubst) *Type {
-// 	return New(t.Value().SubstituteRoles(subst), t.Roles().SubstituteRoles(subst))
-// }

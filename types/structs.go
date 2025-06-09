@@ -7,12 +7,12 @@ import (
 )
 
 type StructType struct {
-	baseValue
+	baseType
 	structIdent  parser.IIdentContext
 	participants []string
 }
 
-func (s *StructType) SubstituteRoles(substMap *RoleSubst) Value {
+func (s *StructType) SubstituteRoles(substMap *RoleSubst) Type {
 	newParticipants := []string{}
 	for _, from := range s.participants {
 		newParticipants = append(newParticipants, substMap.Subst(from))
@@ -21,11 +21,11 @@ func (s *StructType) SubstituteRoles(substMap *RoleSubst) Value {
 	return NewStructType(s.structIdent, newParticipants)
 }
 
-func (s *StructType) ReplaceSharedRoles(participants []string) Value {
+func (s *StructType) ReplaceSharedRoles(participants []string) Type {
 	return s
 }
 
-func (s *StructType) CoerceTo(other Value) (Value, bool) {
+func (s *StructType) CoerceTo(other Type) (Type, bool) {
 	if value, ok := baseCoerceValue(s, other); ok != nil {
 		return value, *ok
 	}
@@ -54,7 +54,7 @@ func (s *StructType) ToString() string {
 	return fmt.Sprintf("struct@%s %s", s.Roles().ToString(), s.structIdent.GetText())
 }
 
-func NewStructType(structIdent parser.IIdentContext, participants []string) Value {
+func NewStructType(structIdent parser.IIdentContext, participants []string) Type {
 	return &StructType{structIdent: structIdent, participants: participants}
 }
 

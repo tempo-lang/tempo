@@ -8,7 +8,7 @@ import (
 type Symbol interface {
 	SymbolName() string
 	Ident() parser.IIdentContext
-	Type() types.Value
+	Type() types.Type
 	Parent() *Scope
 	IsAssignable() bool
 
@@ -20,13 +20,13 @@ type Symbol interface {
 
 type baseSymbol struct {
 	ident        parser.IIdentContext
-	symType      types.Value
+	symType      types.Type
 	parent       *Scope
 	accessReads  []parser.IIdentContext
 	accessWrites []parser.IIdentContext
 }
 
-func newBaseSymbol(ident parser.IIdentContext, symType types.Value, parent *Scope) baseSymbol {
+func newBaseSymbol(ident parser.IIdentContext, symType types.Type, parent *Scope) baseSymbol {
 	return baseSymbol{
 		ident:        ident,
 		symType:      symType,
@@ -42,7 +42,7 @@ func (s *baseSymbol) SymbolName() string {
 func (s *baseSymbol) Ident() parser.IIdentContext {
 	return s.ident
 }
-func (s *baseSymbol) Type() types.Value {
+func (s *baseSymbol) Type() types.Type {
 	return s.symType
 }
 func (s *baseSymbol) Parent() *Scope {
@@ -92,7 +92,7 @@ func (f *FuncSymbol) AddParam(param *FuncParamSymbol) {
 	f.params = append(f.params, param)
 }
 
-func (f *FuncSymbol) ReturnType() types.Value {
+func (f *FuncSymbol) ReturnType() types.Type {
 	return f.FuncValue().ReturnType()
 }
 
@@ -104,7 +104,7 @@ func (f *FuncSymbol) Roles() *types.Roles {
 	return f.Type().Roles()
 }
 
-func NewFuncSymbol(fn parser.IFuncSigContext, scope *Scope, funcType types.Value) Symbol {
+func NewFuncSymbol(fn parser.IFuncSigContext, scope *Scope, funcType types.Type) Symbol {
 	return &FuncSymbol{
 		baseSymbol: newBaseSymbol(fn.GetName(), funcType, scope.Parent()),
 		funcCtx:    fn,
@@ -118,7 +118,7 @@ type FuncParamSymbol struct {
 	param parser.IFuncParamContext
 }
 
-func NewFuncParamSymbol(param parser.IFuncParamContext, parent *Scope, paramType types.Value) Symbol {
+func NewFuncParamSymbol(param parser.IFuncParamContext, parent *Scope, paramType types.Type) Symbol {
 	return &FuncParamSymbol{
 		baseSymbol: newBaseSymbol(param.Ident(), paramType, parent),
 		param:      param,
@@ -138,7 +138,7 @@ type VariableSymbol struct {
 	decl *parser.StmtVarDeclContext
 }
 
-func NewVariableSymbol(decl *parser.StmtVarDeclContext, parent *Scope, varType types.Value) Symbol {
+func NewVariableSymbol(decl *parser.StmtVarDeclContext, parent *Scope, varType types.Type) Symbol {
 	return &VariableSymbol{
 		baseSymbol: newBaseSymbol(decl.Ident(), varType, parent),
 		decl:       decl,
@@ -157,7 +157,7 @@ type StructSymbol struct {
 	baseSymbol
 	structCtx  parser.IStructContext
 	scope      *Scope
-	structType types.Value
+	structType types.Type
 	fields     []*StructFieldSymbol
 }
 
@@ -165,10 +165,10 @@ type StructFieldSymbol struct {
 	baseSymbol
 	field        parser.IStructFieldContext
 	parentStruct *StructSymbol
-	fieldType    types.Value
+	fieldType    types.Type
 }
 
-func NewStructSymbol(structCtx parser.IStructContext, scope *Scope, structType types.Value) Symbol {
+func NewStructSymbol(structCtx parser.IStructContext, scope *Scope, structType types.Type) Symbol {
 	return &StructSymbol{
 		baseSymbol: newBaseSymbol(structCtx.Ident(), structType, scope.Parent()),
 		structCtx:  structCtx,
@@ -193,7 +193,7 @@ func (s *StructSymbol) AddField(field *StructFieldSymbol) {
 	s.fields = append(s.fields, field)
 }
 
-func NewStructFieldSymbol(field parser.IStructFieldContext, parentStruct *StructSymbol, fieldType types.Value) Symbol {
+func NewStructFieldSymbol(field parser.IStructFieldContext, parentStruct *StructSymbol, fieldType types.Type) Symbol {
 	return &StructFieldSymbol{
 		baseSymbol:   newBaseSymbol(field.Ident(), fieldType, parentStruct.Scope()),
 		field:        field,
@@ -218,7 +218,7 @@ type InterfaceSymbol struct {
 	baseSymbol
 	interfaceCtx  parser.IInterfaceContext
 	scope         *Scope
-	interfaceType types.Value
+	interfaceType types.Type
 	methods       []*InterfaceMethodSymbol
 }
 
@@ -226,10 +226,10 @@ type InterfaceMethodSymbol struct {
 	baseSymbol
 	method       parser.IInterfaceMethodContext
 	parentStruct *InterfaceSymbol
-	methodType   types.Value
+	methodType   types.Type
 }
 
-func NewInterfaceSymbol(interfaceCtx parser.IInterfaceContext, scope *Scope, interfaceType types.Value) Symbol {
+func NewInterfaceSymbol(interfaceCtx parser.IInterfaceContext, scope *Scope, interfaceType types.Type) Symbol {
 	return &InterfaceSymbol{
 		baseSymbol:   newBaseSymbol(interfaceCtx.Ident(), interfaceType, scope.Parent()),
 		interfaceCtx: interfaceCtx,
@@ -254,7 +254,7 @@ func (i *InterfaceSymbol) AddMethod(method *InterfaceMethodSymbol) {
 	i.methods = append(i.methods, method)
 }
 
-func NewInterfaceMethodSymbol(method parser.IInterfaceMethodContext, parentInterface *InterfaceSymbol, methodType types.Value) Symbol {
+func NewInterfaceMethodSymbol(method parser.IInterfaceMethodContext, parentInterface *InterfaceSymbol, methodType types.Type) Symbol {
 	return &InterfaceMethodSymbol{
 		baseSymbol:   newBaseSymbol(method.FuncSig().GetName(), methodType, parentInterface.Scope()),
 		method:       method,
