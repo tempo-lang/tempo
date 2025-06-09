@@ -38,8 +38,7 @@ func (tc *typeChecker) checkLiteralRoles(roleTypeCtx parser.IRoleTypeContext) *t
 func (tc *typeChecker) VisitExprPrimitive(ctx *parser.ExprPrimitiveContext) any {
 	roleType := tc.checkLiteralRoles(ctx.RoleType())
 	value := ctx.Literal().Accept(tc).(types.Type)
-	roleSubstMap, _ := value.Roles().SubstituteMap(roleType)
-	return tc.registerType(ctx, value.SubstituteRoles(roleSubstMap))
+	return tc.registerType(ctx, value.ReplaceSharedRoles(roleType.Participants()))
 }
 
 func (tc *typeChecker) VisitInt(ctx *parser.IntContext) any {

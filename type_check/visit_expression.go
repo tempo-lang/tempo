@@ -498,6 +498,40 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 	return tc.registerType(ctx, types.Invalid())
 }
 
+func (tc *typeChecker) VisitExprList(ctx *parser.ExprListContext) any {
+	if ctx == nil {
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	if len(ctx.AllExpr()) == 0 {
+		if tc.currentTypeHint != nil {
+			if _, isList := tc.currentTypeHint.(*types.ListType); isList {
+				return tc.registerType(ctx, tc.currentTypeHint)
+			}
+		}
+
+		tc.reportError(type_error.NewUnknownType(ctx))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	var exprType types.Type = nil
+	for _, expr := range ctx.AllExpr() {
+		if exprType == nil {
+			exprType = tc.visitExpr(expr)
+		} else {
+			nextType := tc.visitExpr(expr)
+			newType, ok := types.MergeTypes(exprType, nextType)
+			if !ok {
+				tc.reportError(type_error.NewIncompatibleTypes(expr, nextType, exprType))
+				return tc.registerType(ctx, types.List(types.Invalid()))
+			}
+			exprType = newType
+		}
+	}
+
+	return tc.registerType(ctx, types.List(exprType))
+}
+
 func (tc *typeChecker) VisitIdentAccess(ctx *parser.IdentAccessContext) any {
 	return nil
 }

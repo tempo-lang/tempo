@@ -109,6 +109,9 @@ type TempoListener interface {
 	// EnterExprStruct is called when entering the exprStruct production.
 	EnterExprStruct(c *ExprStructContext)
 
+	// EnterExprList is called when entering the exprList production.
+	EnterExprList(c *ExprListContext)
+
 	// EnterExprIdent is called when entering the exprIdent production.
 	EnterExprIdent(c *ExprIdentContext)
 
@@ -240,6 +243,9 @@ type TempoListener interface {
 
 	// ExitExprStruct is called when exiting the exprStruct production.
 	ExitExprStruct(c *ExprStructContext)
+
+	// ExitExprList is called when exiting the exprList production.
+	ExitExprList(c *ExprListContext)
 
 	// ExitExprIdent is called when exiting the exprIdent production.
 	ExitExprIdent(c *ExprIdentContext)

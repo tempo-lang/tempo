@@ -245,6 +245,25 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		}
 
 		return projection.NewExprClosure(params, returnType, body), []projection.Statement{}
+	case *parser.ExprListContext:
+		items := []projection.Expression{}
+		aux := []projection.Statement{}
+		for _, item := range expr.AllExpr() {
+			itemExpr, ax := epp.eppExpression(roleName, item)
+			aux = append(aux, ax...)
+			items = append(items, itemExpr)
+		}
+
+		if exprType.Roles().Contains(roleName) {
+			return projection.NewExprList(items, exprValue), aux
+		} else {
+			for _, item := range items {
+				if item != nil && item.HasSideEffects() {
+					aux = append(aux, projection.NewStmtExpr(item))
+				}
+			}
+			return nil, aux
+		}
 	case *parser.ExprContext:
 		panic("expr should never be base type")
 	}

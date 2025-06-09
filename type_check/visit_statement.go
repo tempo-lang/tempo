@@ -9,8 +9,29 @@ import (
 
 func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 	hasExplicitType := ctx.ValueType() != nil
+	typeFailed := false
+	roleFailed := false
+	var declType types.Type = nil
+
+	prevTypeHint := tc.currentTypeHint
+
+	if hasExplicitType {
+		var err type_error.Error
+		declType, err = tc.parseValueType(ctx.ValueType())
+		if err != nil {
+			tc.reportError(err)
+			typeFailed = true
+		} else if !declType.IsInvalid() {
+			if !tc.checkRolesInScope(findRoleType(ctx.ValueType())) {
+				roleFailed = true
+			}
+
+			tc.currentTypeHint = declType
+		}
+	}
 
 	exprType := tc.visitExpr(ctx.Expr())
+	tc.currentTypeHint = prevTypeHint
 
 	// convert function type to closure type when stored in a variable
 	if funcType, ok := exprType.(*types.FunctionType); ok {
@@ -19,24 +40,11 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 
 	stmtType := exprType
 
-	roleFailed := false
-
 	if !tc.checkExprInScope(ctx.Expr(), exprType.Roles()) {
 		roleFailed = true
 	}
 
 	if hasExplicitType {
-		typeFailed := false
-		declType, err := tc.parseValueType(ctx.ValueType())
-		if err != nil {
-			tc.reportError(err)
-			typeFailed = true
-		} else if !declType.IsInvalid() {
-			if !tc.checkRolesInScope(findRoleType(ctx.ValueType())) {
-				roleFailed = true
-			}
-		}
-
 		if !typeFailed {
 			newType, ok := exprType.CoerceTo(declType)
 			if !ok {

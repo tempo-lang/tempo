@@ -224,6 +224,12 @@ func (s *BaseTempoListener) EnterExprStruct(ctx *ExprStructContext) {}
 // ExitExprStruct is called when production exprStruct is exited.
 func (s *BaseTempoListener) ExitExprStruct(ctx *ExprStructContext) {}
 
+// EnterExprList is called when production exprList is entered.
+func (s *BaseTempoListener) EnterExprList(ctx *ExprListContext) {}
+
+// ExitExprList is called when production exprList is exited.
+func (s *BaseTempoListener) ExitExprList(ctx *ExprListContext) {}
+
 // EnterExprIdent is called when production exprIdent is entered.
 func (s *BaseTempoListener) EnterExprIdent(ctx *ExprIdentContext) {}
 

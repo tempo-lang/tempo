@@ -109,6 +109,9 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#exprStruct.
 	VisitExprStruct(ctx *ExprStructContext) interface{}
 
+	// Visit a parse tree produced by TempoParser#exprList.
+	VisitExprList(ctx *ExprListContext) interface{}
+
 	// Visit a parse tree produced by TempoParser#exprIdent.
 	VisitExprIdent(ctx *ExprIdentContext) interface{}
 

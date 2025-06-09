@@ -9,7 +9,8 @@ type ListType struct {
 
 func (l *ListType) CoerceTo(other Type) (Type, bool) {
 	if other, isOtherList := other.(*ListType); isOtherList {
-		return l.inner.CoerceTo(other.inner)
+		coerceType, ok := l.inner.CoerceTo(other.inner)
+		return List(coerceType), ok
 	}
 	return Invalid(), false
 }

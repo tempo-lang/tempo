@@ -143,6 +143,10 @@ func (v *BaseTempoVisitor) VisitExprStruct(ctx *ExprStructContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitExprList(ctx *ExprListContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitExprIdent(ctx *ExprIdentContext) interface{} {
 	return v.VisitChildren(ctx)
 }

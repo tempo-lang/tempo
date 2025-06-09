@@ -243,6 +243,45 @@ func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression, typeVal 
 	}
 }
 
+type ExprList struct {
+	items    []Expression
+	listType Type
+}
+
+func (e *ExprList) Codegen() jen.Code {
+	items := make([]jen.Code, len(e.items))
+	for i, item := range e.items {
+		items[i] = item.Codegen()
+	}
+	return jen.Add(e.listType.Codegen()).Values(items...)
+}
+
+func (e *ExprList) Type() Type {
+	return e.listType
+}
+
+func (e *ExprList) ReturnsValue() bool {
+	return true
+}
+
+func (e *ExprList) HasSideEffects() bool {
+	for _, item := range e.items {
+		if item.HasSideEffects() {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *ExprList) IsExpression() {}
+
+func NewExprList(items []Expression, listType Type) Expression {
+	return &ExprList{
+		items:    items,
+		listType: listType,
+	}
+}
+
 type ExprAsync struct {
 	inner Expression
 }

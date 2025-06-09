@@ -4,6 +4,7 @@ import (
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/type_check/type_error"
+	"github.com/tempo-lang/tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 )
@@ -12,8 +13,9 @@ type typeChecker struct {
 	*antlr.BaseParseTreeVisitor
 	errorListener ErrorListener
 
-	currentScope *sym_table.Scope
-	info         *Info
+	currentScope    *sym_table.Scope
+	info            *Info
+	currentTypeHint types.Type
 }
 
 func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []type_error.Error) {
@@ -35,9 +37,10 @@ func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []type_error.Error)
 
 func new() *typeChecker {
 	return &typeChecker{
-		errorListener: &DefaultErrorListener{},
-		currentScope:  nil,
-		info:          newInfo(),
+		errorListener:   &DefaultErrorListener{},
+		currentScope:    nil,
+		currentTypeHint: nil,
+		info:            newInfo(),
 	}
 }
 

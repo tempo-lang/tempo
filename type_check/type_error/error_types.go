@@ -16,7 +16,7 @@ type ErrorCode int
 const (
 	CodeValueRoleNotInScope ErrorCode = iota + 1
 	CodeUnexpectedSharedType
-	CodeUnknownType
+	CodeUndefinedType
 	CodeValueMismatch
 	CodeIncompatibleTypes
 	CodeInvalidValue
@@ -51,6 +51,7 @@ const (
 	CodeFunctionMissingReturn
 	CodeReturnValueMissing
 	CodeNestedAsync
+	CodeUnknownType
 )
 
 type AnnotationType string
@@ -176,23 +177,53 @@ func NewUnexpectedSharedType(roleType parser.IRoleTypeContext) Error {
 	}
 }
 
-type UnknownType struct {
+type UndefinedType struct {
 	baseError
 	TypeName parser.IIdentContext
 }
 
-func NewUnknownType(typeName parser.IIdentContext) Error {
-	return &UnknownType{
+func NewUndefinedType(typeName parser.IIdentContext) Error {
+	return &UndefinedType{
 		TypeName: typeName,
 	}
 }
 
-func (e *UnknownType) Error() string {
+func (e *UndefinedType) Error() string {
 	return fmt.Sprintf("type name `%s` is undefined or not in scope", e.TypeName.GetText())
 }
 
-func (e *UnknownType) ParserRule() antlr.ParserRuleContext {
+func (e *UndefinedType) ParserRule() antlr.ParserRuleContext {
 	return e.TypeName
+}
+
+func (e *UndefinedType) Code() ErrorCode {
+	return CodeUndefinedType
+}
+
+type UnknownType struct {
+	baseError
+	Expr parser.IExprContext
+}
+
+func NewUnknownType(expr parser.IExprContext) Error {
+	return &UnknownType{
+		Expr: expr,
+	}
+}
+
+func (e *UnknownType) Error() string {
+	return "cannot determine the type of this expression"
+}
+
+func (e *UnknownType) Annotations() []Annotation {
+	return []Annotation{{
+		Type:    AnnotationTypeHint,
+		Message: "give an explicit type in the declaration of the variable",
+	}}
+}
+
+func (e *UnknownType) ParserRule() antlr.ParserRuleContext {
+	return e.Expr
 }
 
 func (e *UnknownType) Code() ErrorCode {
