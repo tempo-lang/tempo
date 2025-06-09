@@ -50,6 +50,7 @@ const (
 	CodeFunctionNotInstantiated
 	CodeFunctionMissingReturn
 	CodeReturnValueMissing
+	CodeNestedAsync
 )
 
 type AnnotationType string
@@ -404,4 +405,27 @@ func (e *NotDistributedType) Annotations() []Annotation {
 		Type:    AnnotationTypeHint,
 		Message: "change the type to be a single or a shared role instead.",
 	}}
+}
+
+type NestedAsync struct {
+	baseError
+	asyncCtx *parser.AsyncTypeContext
+}
+
+func (e *NestedAsync) Error() string {
+	return "nested async types are not allowed"
+}
+
+func (e *NestedAsync) ParserRule() antlr.ParserRuleContext {
+	return e.asyncCtx
+}
+
+func (e *NestedAsync) Code() ErrorCode {
+	return CodeNestedAsync
+}
+
+func NewNestedAsync(asyncCtx *parser.AsyncTypeContext) Error {
+	return &NestedAsync{
+		asyncCtx: asyncCtx,
+	}
 }

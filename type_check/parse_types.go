@@ -33,6 +33,11 @@ func ToBuiltinValue(name string, participants []string) (types.Value, bool) {
 }
 
 func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (types.Value, type_error.Error) {
+	// parser error
+	if ctx == nil {
+		return types.Invalid(), nil
+	}
+
 	switch ctx := ctx.(type) {
 	case *parser.NamedTypeContext:
 		return tc.parseNamedValueType(ctx)
@@ -42,6 +47,9 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (types.Value
 		return tc.parseAsyncValueType(ctx)
 	case *parser.ClosureTypeContext:
 		return tc.parseClosureValueType(ctx)
+	case *parser.ValueTypeContext:
+		// parser error
+		return types.Invalid(), nil
 	}
 	panic(fmt.Sprintf("parseValueType unexpected ctx: %T", ctx))
 }
@@ -49,7 +57,14 @@ func (tc *typeChecker) parseValueType(ctx parser.IValueTypeContext) (types.Value
 func (tc *typeChecker) parseAsyncValueType(ctx *parser.AsyncTypeContext) (types.Value, type_error.Error) {
 	inner, err := tc.parseValueType(ctx.GetInner())
 	if err != nil {
-		return types.Invalid(), err
+		return inner, err
+	}
+
+	if _, isInnerAsync := inner.(*types.Async); isInnerAsync {
+		tc.reportError(type_error.NewNestedAsync(ctx))
+
+		// recoverable error
+		return inner, nil
 	}
 
 	return types.NewAsync(inner), nil
@@ -248,6 +263,11 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.V
 }
 
 func findRoleType(ctx parser.IValueTypeContext) parser.IRoleTypeContext {
+	// parser error
+	if ctx == nil {
+		return nil
+	}
+
 	switch ctx := ctx.(type) {
 	case *parser.AsyncTypeContext:
 		return findRoleType(ctx.GetInner())
@@ -257,6 +277,9 @@ func findRoleType(ctx parser.IValueTypeContext) parser.IRoleTypeContext {
 		return findRoleType(ctx.GetInner())
 	case *parser.NamedTypeContext:
 		return ctx.RoleType()
+	case *parser.ValueTypeContext:
+		// parser error
+		return nil
 	}
 
 	panic(fmt.Sprintf("findRoleType unknown type: %T", ctx))

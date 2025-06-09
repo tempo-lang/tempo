@@ -32,14 +32,22 @@ func Parse(input antlr.CharStream) (sourceFile ISourceFileContext, errors []*Syn
 }
 
 func RoleTypeAllIdents(ctx IRoleTypeContext) []IIdentContext {
+	// parser error
+	if ctx == nil {
+		return nil
+	}
+
 	switch ctx := ctx.(type) {
 	case *RoleTypeNormalContext:
 		return ctx.AllIdent()
 	case *RoleTypeSharedContext:
 		return ctx.AllIdent()
+	case *RoleTypeContext:
+		// parser error
+		return nil
 	}
-	// return nil on parser error
-	return nil
+
+	panic(fmt.Sprintf("unknown role type: %T", ctx))
 }
 
 type SyntaxError struct {
