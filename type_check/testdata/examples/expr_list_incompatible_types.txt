@@ -1,0 +1,7 @@
+func@(A,B,C) foo() {
+  let x = "string";
+  let y = 123;
+  let z = [x, y];
+}
+---
+E4 4:15: types `String@[A,B,C]` and `Int@[A,B,C]` are not compatible

@@ -27,36 +27,6 @@ func baseCoerceValue(thisValue, otherValue Type) (Type, *bool) {
 	return nil, nil
 }
 
-func MergeTypes(a, b Type) (Type, bool) {
-	if a.Roles().IsDistributedRole() && !b.Roles().IsDistributedRole() {
-		return Invalid(), false
-	}
-
-	if b.Roles().IsDistributedRole() && !a.Roles().IsDistributedRole() {
-		return Invalid(), false
-	}
-
-	intersectRoles, ok := RoleIntersect(a.Roles(), b.Roles())
-	if !ok {
-		return Invalid(), false
-	}
-
-	intersectParticipants := intersectRoles.participants
-
-	newA := a.ReplaceSharedRoles(intersectParticipants)
-	newB := b.ReplaceSharedRoles(intersectParticipants)
-
-	if result, ok := newA.CoerceTo(newB); ok {
-		return result, true
-	}
-
-	if result, ok := newB.CoerceTo(newA); ok {
-		return result, true
-	}
-
-	return Invalid(), false
-}
-
 type Type interface {
 	IsSendable() bool
 	IsEquatable() bool

@@ -62,23 +62,12 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	typeError := false
 	op := projection.ParseOperator(ctx)
 
-	equalTypes := func(a, b types.Type) bool {
-		a = a.ReplaceSharedRoles(nil)
-		b = b.ReplaceSharedRoles(nil)
-
-		_, ok1 := a.CoerceTo(b)
-		_, ok2 := b.CoerceTo(a)
-		return ok1 && ok2
-	}
-
 	areSameTypes := func(allowedTypes []types.BuiltinType) bool {
-		if equalTypes(lhs, rhs) {
-			if slices.Contains(allowedTypes, types.BuiltinKind(lhs)) {
+		if mergedType, ok := tc.mergeTypes(ctx, lhs, rhs); ok {
+			if slices.Contains(allowedTypes, types.BuiltinKind(mergedType)) {
 				return true
 			}
 			tc.reportError(type_error.NewBinOpIncompatibleType(ctx, lhs, allowedTypes))
-		} else {
-			tc.reportError(type_error.NewValueMismatch(ctx, lhs, rhs))
 		}
 		return false
 	}
@@ -111,25 +100,12 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			return tc.registerType(ctx, lhs.ReplaceSharedRoles(newRoles.Participants()))
 		}
 	case slices.Contains(equalityOps, op):
-		if !lhs.IsEquatable() {
-			tc.reportError(type_error.NewUnequatableType(ctx, lhs))
-		} else if !rhs.IsEquatable() {
-			tc.reportError(type_error.NewUnequatableType(ctx, rhs))
-		} else {
-			if !equalTypes(lhs, rhs) {
-				tc.reportError(type_error.NewValueMismatch(ctx, lhs, rhs))
-				typeError = true
+		if mergedType, ok := tc.mergeTypes(ctx, lhs, rhs); ok {
+			if !mergedType.IsEquatable() {
+				tc.reportError(type_error.NewUnequatableType(ctx, mergedType))
 			}
-		}
 
-		newRoles, ok := types.RoleIntersect(lhs.Roles(), rhs.Roles())
-		if !ok {
-			tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{lhs.Roles(), rhs.Roles()}))
-			typeError = true
-		}
-
-		if !typeError {
-			return tc.registerType(ctx, types.Bool(newRoles.Participants()))
+			return tc.registerType(ctx, types.Bool(mergedType.Roles().Participants()))
 		}
 	case slices.Contains(inequalityOps, op):
 		if ok := areSameTypes(numberTypes); !ok {
@@ -520,11 +496,7 @@ func (tc *typeChecker) VisitExprList(ctx *parser.ExprListContext) any {
 			exprType = tc.visitExpr(expr)
 		} else {
 			nextType := tc.visitExpr(expr)
-			newType, ok := types.MergeTypes(exprType, nextType)
-			if !ok {
-				tc.reportError(type_error.NewIncompatibleTypes(expr, nextType, exprType))
-				return tc.registerType(ctx, types.List(types.Invalid()))
-			}
+			newType, _ := tc.mergeTypes(expr, exprType, nextType)
 			exprType = newType
 		}
 	}

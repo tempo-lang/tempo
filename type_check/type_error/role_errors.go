@@ -3,7 +3,6 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 
@@ -80,8 +79,14 @@ type UnmergableRoles struct {
 }
 
 func (u *UnmergableRoles) Error() string {
-	roles := misc.JoinStringsFunc(u.Roles, ", ", func(role *types.Roles) string { return role.ToString() })
-	return fmt.Sprintf("can not merge roles `%s`", roles)
+	roles := []string{}
+	for _, role := range u.Roles {
+		roles = append(roles, role.ToString())
+	}
+
+	rolesList := formatList("role", "roles", roles, "and")
+
+	return fmt.Sprintf("cannot merge %s", rolesList)
 }
 
 func (u *UnmergableRoles) ParserRule() antlr.ParserRuleContext {

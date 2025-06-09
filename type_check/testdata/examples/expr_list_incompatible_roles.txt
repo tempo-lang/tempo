@@ -1,0 +1,7 @@
+func@(A,B) foo() {
+  let x = "string"@A;
+  let y = "string"@B;
+  let z = [x, y];
+}
+---
+E13 4:15: cannot merge roles `A` and `B`

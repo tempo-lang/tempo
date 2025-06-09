@@ -1,0 +1,5 @@
+func@(A,B,C) foo() {
+  let x = "AB"@[A,B];
+  let y = "BC"@[B,C];
+  let z = [x, y];
+}
