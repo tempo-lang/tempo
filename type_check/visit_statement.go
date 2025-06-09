@@ -50,7 +50,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 		if typeFailed {
 			stmtType = types.Invalid()
 		} else if roleFailed {
-			stmtType = declType
+			stmtType = declType.ReplaceSharedRoles(nil)
 		}
 	}
 
@@ -123,7 +123,7 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 func (tc *typeChecker) VisitStmtWhile(ctx *parser.StmtWhileContext) any {
 	condType := tc.visitExpr(ctx.Expr())
 
-	if types.BuiltinKind(condType) == types.BuiltinBool {
+	if types.BuiltinKind(condType) != types.BuiltinBool {
 		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), condType, types.Bool(nil)))
 	}
 

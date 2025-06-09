@@ -142,6 +142,10 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (types.Value, [
 		return types.Invalid(), errors
 	}
 
+	if funcRoles.IsSharedRole() {
+		tc.reportError(type_error.NewUnexpectedSharedType(ctx.RoleType()))
+	}
+
 	params := []types.Value{}
 
 	for _, param := range ctx.FuncParamList().AllFuncParam() {
@@ -240,7 +244,7 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.V
 		tc.reportError(err)
 	}
 
-	return types.NewInterfaceType(ctx.Ident()), nil
+	return types.NewInterfaceType(ctx.Ident(), roles.Participants()), nil
 }
 
 func findRoleType(ctx parser.IValueTypeContext) parser.IRoleTypeContext {

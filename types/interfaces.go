@@ -13,7 +13,12 @@ type InterfaceType struct {
 }
 
 func (s *InterfaceType) SubstituteRoles(substMap *RoleSubst) Value {
-	return s
+	newParticipants := []string{}
+	for _, from := range s.participants {
+		newParticipants = append(newParticipants, substMap.Subst(from))
+	}
+
+	return NewInterfaceType(s.ident, newParticipants)
 }
 
 func (t *InterfaceType) ReplaceSharedRoles(participants []string) Value {
@@ -47,8 +52,8 @@ func (s *InterfaceType) ToString() string {
 	return fmt.Sprintf("interface@%s %s", s.Roles().ToString(), s.ident.GetText())
 }
 
-func NewInterfaceType(ident parser.IIdentContext) Value {
-	return &InterfaceType{ident: ident}
+func NewInterfaceType(ident parser.IIdentContext, participants []string) Value {
+	return &InterfaceType{ident: ident, participants: participants}
 }
 
 func (s *InterfaceType) Name() string {

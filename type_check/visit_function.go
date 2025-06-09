@@ -19,11 +19,6 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 
 	tc.currentScope = sym.Scope()
 
-	if sym.Type().Roles().IsSharedRole() {
-		ctx.FuncSig().RoleType()
-		tc.reportError(type_error.NewUnexpectedSharedType(ctx.FuncSig().RoleType()))
-	}
-
 	ctx.FuncSig().Accept(tc)
 
 	// nil if parser error
