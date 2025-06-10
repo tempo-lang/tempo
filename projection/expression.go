@@ -217,6 +217,10 @@ type ExprBinaryOp struct {
 }
 
 func (e *ExprBinaryOp) Codegen() jen.Code {
+	if _, isList := e.typeVal.(*ListType); isList {
+		return jen.Append(e.lhs.Codegen(), jen.Add(e.rhs.Codegen()).Op("..."))
+	}
+
 	return jen.Add(e.lhs.Codegen()).Op(string(e.operator)).Add(e.rhs.Codegen())
 }
 

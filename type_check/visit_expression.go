@@ -62,17 +62,28 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	typeError := false
 	op := projection.ParseOperator(ctx)
 
-	areSameTypes := func(allowedTypes []types.BuiltinType) bool {
-		if mergedType, ok := tc.mergeTypes(ctx, lhs, rhs); ok {
-			if slices.Contains(allowedTypes, types.BuiltinKind(mergedType)) {
-				return true
-			}
+	mergedType, ok := tc.mergeTypes(ctx, lhs, rhs)
+	if !ok {
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	isBuiltinTypeOf := func(allowedTypes []types.BuiltinType) bool {
+		if slices.Contains(allowedTypes, types.BuiltinKind(mergedType)) {
+			return true
+		} else {
 			tc.reportError(type_error.NewBinOpIncompatibleType(ctx, lhs, allowedTypes))
+			return false
 		}
-		return false
 	}
 
 	numberTypes := []types.BuiltinType{types.BuiltinInt, types.BuiltinFloat}
+
+	// concatenate lists
+	if op == projection.OpAdd {
+		if _, ok := mergedType.(*types.ListType); ok {
+			return tc.registerType(ctx, mergedType)
+		}
+	}
 
 	switch {
 	case slices.Contains(arithmeticOps, op):
@@ -86,7 +97,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			allowedTypes = append(allowedTypes, types.BuiltinString)
 		}
 
-		if ok := areSameTypes(allowedTypes); !ok {
+		if ok := isBuiltinTypeOf(allowedTypes); !ok {
 			typeError = true
 		}
 
@@ -108,7 +119,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			return tc.registerType(ctx, types.Bool(mergedType.Roles().Participants()))
 		}
 	case slices.Contains(inequalityOps, op):
-		if ok := areSameTypes(numberTypes); !ok {
+		if ok := isBuiltinTypeOf(numberTypes); !ok {
 			typeError = true
 		}
 
@@ -122,7 +133,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 			return tc.registerType(ctx, types.Bool(newRoles.Participants()))
 		}
 	case slices.Contains(booleanOps, op):
-		if ok := areSameTypes([]types.BuiltinType{types.BuiltinBool}); !ok {
+		if ok := isBuiltinTypeOf([]types.BuiltinType{types.BuiltinBool}); !ok {
 			typeError = true
 		}
 
