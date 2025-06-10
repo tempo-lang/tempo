@@ -264,6 +264,23 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			}
 			return nil, aux
 		}
+	case *parser.ExprIndexContext:
+		baseExpr, aux := epp.eppExpression(roleName, expr.GetBaseExpr())
+
+		indexExpr, a := epp.eppExpression(roleName, expr.GetIndexExpr())
+		aux = append(aux, a...)
+
+		if exprType.Roles().Contains(roleName) {
+			return projection.NewExprIndex(baseExpr, indexExpr), aux
+		} else {
+			if baseExpr != nil && baseExpr.HasSideEffects() {
+				aux = append(aux, projection.NewStmtExpr(baseExpr))
+			}
+			if indexExpr != nil && indexExpr.HasSideEffects() {
+				aux = append(aux, projection.NewStmtExpr(indexExpr))
+			}
+			return nil, aux
+		}
 	case *parser.ExprContext:
 		panic("expr should never be base type")
 	}

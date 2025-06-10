@@ -485,6 +485,45 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 	return tc.registerType(ctx, types.Invalid())
 }
 
+func (tc *typeChecker) VisitExprIndex(ctx *parser.ExprIndexContext) any {
+	baseType := tc.visitExpr(ctx.GetBaseExpr())
+
+	listType, isList := baseType.(*types.ListType)
+	if !isList {
+		tc.reportError(type_error.NewIndexWrongBaseType(ctx, baseType))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	innerType := listType.Inner()
+
+	indexTypeRaw := tc.visitExpr(ctx.GetIndexExpr())
+	indexType, ok := indexTypeRaw.CoerceTo(types.Int(indexTypeRaw.Roles().Participants()))
+	if !ok {
+		tc.reportError(type_error.NewInvalidValue(ctx.GetIndexExpr(), indexTypeRaw, types.Int(indexTypeRaw.Roles().Participants())))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	// find roles
+	if innerType.Roles().IsDistributedRole() {
+		for _, role := range innerType.Roles().Participants() {
+			if !indexType.Roles().Contains(role) {
+				tc.reportError(type_error.NewIndexRoleNotEncompassBase(ctx, innerType, indexType.Roles()))
+				return tc.registerType(ctx, types.Invalid())
+			}
+		}
+
+		return tc.registerType(ctx, innerType)
+	} else {
+		intersectingRoles, ok := types.RoleIntersect(innerType.Roles(), indexType.Roles())
+		if !ok {
+			tc.reportError(type_error.NewIndexRoleNotEncompassBase(ctx, innerType, indexType.Roles()))
+			return tc.registerType(ctx, types.Invalid())
+		}
+
+		return tc.registerType(ctx, innerType.ReplaceSharedRoles(intersectingRoles.Participants()))
+	}
+}
+
 func (tc *typeChecker) VisitExprList(ctx *parser.ExprListContext) any {
 	if ctx == nil {
 		return tc.registerType(ctx, types.Invalid())

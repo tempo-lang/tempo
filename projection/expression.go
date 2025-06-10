@@ -286,6 +286,37 @@ func NewExprList(items []Expression, listType Type) Expression {
 	}
 }
 
+type ExprIndex struct {
+	base  Expression
+	index Expression
+}
+
+func (e *ExprIndex) Codegen() jen.Code {
+	return jen.Add(e.base.Codegen()).Index(e.index.Codegen())
+}
+
+func (e *ExprIndex) Type() Type {
+	listType := e.base.Type().(*ListType)
+	return listType.Inner
+}
+
+func (e *ExprIndex) ReturnsValue() bool {
+	return true
+}
+
+func (e *ExprIndex) HasSideEffects() bool {
+	return e.base.HasSideEffects() || e.index.HasSideEffects()
+}
+
+func (e *ExprIndex) IsExpression() {}
+
+func NewExprIndex(base Expression, index Expression) Expression {
+	return &ExprIndex{
+		base:  base,
+		index: index,
+	}
+}
+
 type ExprAsync struct {
 	inner Expression
 }

@@ -151,6 +151,10 @@ func (v *BaseTempoVisitor) VisitExprIdent(ctx *ExprIdentContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitExprIndex(ctx *ExprIndexContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitExprAwait(ctx *ExprAwaitContext) interface{} {
 	return v.VisitChildren(ctx)
 }

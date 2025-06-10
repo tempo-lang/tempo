@@ -1,0 +1,5 @@
+func@(A,B,C) foo() {
+  let x: [Int@[A,B]] = [1,2,3];
+  let i: Int@[B,C] = 1;
+  let y = x[i];
+}

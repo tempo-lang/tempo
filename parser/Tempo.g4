@@ -90,6 +90,7 @@ expr:
 	| ident ROLE_AT roleType exprStructField			# exprStruct
 	| expr funcArgList									# exprCall
 	| expr DOT ident									# exprFieldAccess
+	| baseExpr = expr LSQUARE indexExpr = expr RSQUARE	# exprIndex
 	| LSQUARE (expr (COMMA expr)*)? RSQUARE				# exprList
 	| identAccess										# exprIdent
 	| sender = roleType COM receiver = roleType expr	# exprCom

@@ -1,0 +1,11 @@
+struct@(A,B) Pair {
+  first: Int@A,
+  second: Int@B
+}
+
+func@(A,B,C) foo() {
+  let x: [Pair@(A,B)] = [Pair@(A,B) { first: 10, second: 20 }];
+  let y = x[1@A];
+}
+---
+E40 8:13: index role `A` does not encompass roles in base type `struct@(A,B) Pair`

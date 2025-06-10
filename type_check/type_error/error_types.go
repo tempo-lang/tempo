@@ -52,6 +52,8 @@ const (
 	CodeReturnValueMissing
 	CodeNestedAsync
 	CodeUnknownType
+	CodeIndexWrongBaseType
+	CodeIndexRoleNotEncompassBase
 )
 
 type AnnotationType string
@@ -440,7 +442,7 @@ func (e *NotDistributedType) Annotations() []Annotation {
 
 type NestedAsync struct {
 	baseError
-	asyncCtx *parser.AsyncTypeContext
+	AsyncCtx *parser.AsyncTypeContext
 }
 
 func (e *NestedAsync) Error() string {
@@ -448,7 +450,7 @@ func (e *NestedAsync) Error() string {
 }
 
 func (e *NestedAsync) ParserRule() antlr.ParserRuleContext {
-	return e.asyncCtx
+	return e.AsyncCtx
 }
 
 func (e *NestedAsync) Code() ErrorCode {
@@ -457,6 +459,68 @@ func (e *NestedAsync) Code() ErrorCode {
 
 func NewNestedAsync(asyncCtx *parser.AsyncTypeContext) Error {
 	return &NestedAsync{
-		asyncCtx: asyncCtx,
+		AsyncCtx: asyncCtx,
+	}
+}
+
+type IndexWrongBaseType struct {
+	baseError
+	IndexExpr *parser.ExprIndexContext
+	BaseType  types.Type
+}
+
+func (e *IndexWrongBaseType) Error() string {
+	return fmt.Sprintf("cannot index value of type `%s`", e.BaseType.ToString())
+}
+
+func (e *IndexWrongBaseType) ParserRule() antlr.ParserRuleContext {
+	return e.IndexExpr.GetBaseExpr()
+}
+
+func (e *IndexWrongBaseType) Code() ErrorCode {
+	return CodeIndexWrongBaseType
+}
+
+func NewIndexWrongBaseType(indexExpr *parser.ExprIndexContext, baseType types.Type) Error {
+	return &IndexWrongBaseType{
+		IndexExpr: indexExpr,
+		BaseType:  baseType,
+	}
+}
+
+type IndexRoleNotEncompassBase struct {
+	baseError
+	IndexExpr  *parser.ExprIndexContext
+	BaseType   types.Type
+	IndexRoles *types.Roles
+}
+
+func (e *IndexRoleNotEncompassBase) Error() string {
+
+	var doesDo string
+	if e.IndexRoles.IsLocalRole() {
+		doesDo = "does"
+	} else {
+		doesDo = "do"
+	}
+
+	roles := formatList("role", "roles", e.IndexRoles.Participants(), "and")
+
+	return fmt.Sprintf("index %s %s not encompass roles in base type `%s`", roles, doesDo, e.BaseType.ToString())
+}
+
+func (e *IndexRoleNotEncompassBase) ParserRule() antlr.ParserRuleContext {
+	return e.IndexExpr.GetIndexExpr()
+}
+
+func (e *IndexRoleNotEncompassBase) Code() ErrorCode {
+	return CodeIndexRoleNotEncompassBase
+}
+
+func NewIndexRoleNotEncompassBase(indexExpr *parser.ExprIndexContext, baseType types.Type, indexRoles *types.Roles) Error {
+	return &IndexRoleNotEncompassBase{
+		IndexExpr:  indexExpr,
+		BaseType:   baseType,
+		IndexRoles: indexRoles,
 	}
 }

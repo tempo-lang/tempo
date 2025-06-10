@@ -115,6 +115,9 @@ type TempoListener interface {
 	// EnterExprIdent is called when entering the exprIdent production.
 	EnterExprIdent(c *ExprIdentContext)
 
+	// EnterExprIndex is called when entering the exprIndex production.
+	EnterExprIndex(c *ExprIndexContext)
+
 	// EnterExprAwait is called when entering the exprAwait production.
 	EnterExprAwait(c *ExprAwaitContext)
 
@@ -249,6 +252,9 @@ type TempoListener interface {
 
 	// ExitExprIdent is called when exiting the exprIdent production.
 	ExitExprIdent(c *ExprIdentContext)
+
+	// ExitExprIndex is called when exiting the exprIndex production.
+	ExitExprIndex(c *ExprIndexContext)
 
 	// ExitExprAwait is called when exiting the exprAwait production.
 	ExitExprAwait(c *ExprAwaitContext)

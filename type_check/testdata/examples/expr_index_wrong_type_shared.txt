@@ -1,0 +1,6 @@
+func@(A,B,C) foo() {
+  let x: [Int@[A,B]] = [1,2,3];
+  let y = x[1@C];
+}
+---
+E40 3:13: index role `C` does not encompass roles in base type `Int@[A,B]`
