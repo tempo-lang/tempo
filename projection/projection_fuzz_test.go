@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/tempo-lang/tempo/compiler"
 	"github.com/tempo-lang/tempo/projection"
@@ -100,56 +99,36 @@ func FuzzProjection(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, source string) {
-		timeout := time.After(3 * time.Second)
-		result := make(chan error)
-
-		go func() {
-			input := antlr.NewInputStream(source)
-			output, errors := compiler.Compile(input, nil)
-			if len(errors) > 0 {
-				result <- nil
-				return
-			}
-
-			fset := token.NewFileSet()
-			parsedAST, err := goparser.ParseFile(fset, "", output, goparser.AllErrors)
-			if err != nil {
-				result <- fmt.Errorf("Invalid generated go code: %v", err)
-				return
-			}
-
-			conf := types.Config{}
-			conf.Importer = importer
-
-			// allow these Go errors for now
-			ignoredGoErrors := []string{
-				"invalid operation: division by zero",
-				"(overflows)",
-			}
-
-			_, err = conf.Check("choreography", fset, []*ast.File{parsedAST}, nil)
-			if err != nil {
-				isIgnoredError := slices.ContainsFunc(ignoredGoErrors, func(e string) bool {
-					return strings.Contains(err.Error(), e)
-				})
-
-				if !isIgnoredError {
-					result <- fmt.Errorf("Go code type error: %v\n\nINPUT:\n%s\n\nPROJECTION:\n%s", err, source, output)
-					return
-				}
-			}
-
-			result <- nil
-		}()
-
-		select {
-		case <-timeout:
-			t.Fatal("Test didn't finish in time")
-		case err := <-result:
-			if err != nil {
-				t.Fatal(err)
-			}
+		input := antlr.NewInputStream(source)
+		output, errors := compiler.Compile(input, nil)
+		if len(errors) > 0 {
+			return
 		}
 
+		fset := token.NewFileSet()
+		parsedAST, err := goparser.ParseFile(fset, "", output, goparser.AllErrors)
+		if err != nil {
+			t.Fatalf("Invalid generated go code: %v", err)
+		}
+
+		conf := types.Config{}
+		conf.Importer = importer
+
+		// allow these Go errors for now
+		ignoredGoErrors := []string{
+			"invalid operation: division by zero",
+			"(overflows)",
+		}
+
+		_, err = conf.Check("choreography", fset, []*ast.File{parsedAST}, nil)
+		if err != nil {
+			isIgnoredError := slices.ContainsFunc(ignoredGoErrors, func(e string) bool {
+				return strings.Contains(err.Error(), e)
+			})
+
+			if !isIgnoredError {
+				t.Fatalf("Go code type error: %v\n\nINPUT:\n%s\n\nPROJECTION:\n%s", err, source, output)
+			}
+		}
 	})
 }

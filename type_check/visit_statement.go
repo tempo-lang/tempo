@@ -60,6 +60,11 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 		} else if roleFailed {
 			stmtType = declType.ReplaceSharedRoles(nil)
 		}
+	} else {
+		if _, isUnit := exprType.(*types.UnitType); isUnit {
+			tc.reportError(type_error.NewAssignUnitValue(ctx.Expr()))
+			stmtType = types.Invalid()
+		}
 	}
 
 	if len(stmtType.Roles().Participants()) == 0 {

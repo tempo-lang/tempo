@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@X call(A0: Int@X) {}func@Y A0000(A: Int@Y) {}func@(A)A() {let A0= call@A(00); } ")

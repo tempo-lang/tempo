@@ -78,3 +78,26 @@ func (e *ReturnNotAllRoles) ParserRule() antlr.ParserRuleContext {
 func (e *ReturnNotAllRoles) Code() ErrorCode {
 	return CodeReturnNotAllRoles
 }
+
+type AssignUnitValue struct {
+	baseError
+	Expr parser.IExprContext
+}
+
+func (e *AssignUnitValue) Error() string {
+	return "cannot assign a unit value to a variable"
+}
+
+func (e *AssignUnitValue) ParserRule() antlr.ParserRuleContext {
+	return e.Expr
+}
+
+func (e *AssignUnitValue) Code() ErrorCode {
+	return CodeAssignUnitValue
+}
+
+func NewAssignUnitValue(expr parser.IExprContext) Error {
+	return &AssignUnitValue{
+		Expr: expr,
+	}
+}

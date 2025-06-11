@@ -1,0 +1,6 @@
+func@A call() {}
+func@A foo() {
+  let x = call@A();
+}
+---
+E41 3:11: cannot assign a unit value to a variable
