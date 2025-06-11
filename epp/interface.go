@@ -16,7 +16,9 @@ func (epp *epp) eppInterface(ctx parser.IInterfaceContext) *projection.Choreogra
 
 		for _, method := range ctx.InterfaceMethodsList().AllInterfaceMethod() {
 			funcSig := epp.eppFuncSig(role, method.FuncSig())
-			inf.AddMethod(funcSig, method)
+			if funcSig != nil {
+				inf.AddMethod(funcSig, method)
+			}
 		}
 	}
 

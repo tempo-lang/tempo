@@ -23,6 +23,10 @@ func (epp *epp) eppFuncSig(role string, ctx parser.IFuncSigContext) *projection.
 	funcSym := epp.info.Symbols[ctx.Ident()]
 	funcType := funcSym.Type().(*types.FunctionType)
 
+	if !funcType.Roles().Contains(role) {
+		return nil
+	}
+
 	returnValue := epp.eppType(role, funcType.ReturnType())
 
 	funcSig := projection.NewFuncSig(role, ctx, returnValue)

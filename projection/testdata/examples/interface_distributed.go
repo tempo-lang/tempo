@@ -6,9 +6,11 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 // Projection of interface Action
 type Action_A interface {
 	foo(env *runtime.Env)
+	callA(env *runtime.Env)
 }
 type Action_B interface {
 	foo(env *runtime.Env)
+	callB(env *runtime.Env)
 }
 
 // Projection of choreography start

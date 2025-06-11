@@ -1,5 +1,7 @@
 interface@(A,B) Action {
   func@(A,B) foo();
+  func@A callA();
+  func@B callB();
 }
 
 func@(X,Y) start(action: Action@(X,Y)) {
