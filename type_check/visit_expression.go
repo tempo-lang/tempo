@@ -472,7 +472,7 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 			return tc.registerType(ctx, types.Invalid())
 		}
 
-		substMap, rolesMatch := field.Type().Roles().SubstituteMap(objectType.Roles())
+		substMap, rolesMatch := infSym.Scope().Roles().SubstituteMap(objectType.Roles())
 		if !rolesMatch {
 			return tc.registerType(ctx, types.Invalid())
 		}

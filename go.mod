@@ -7,6 +7,7 @@ toolchain go1.24.3
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/antlr4-go/antlr/v4 v4.13.1
+	github.com/fatih/color v1.18.0
 	github.com/google/go-cmp v0.7.0
 	github.com/spf13/cobra v1.8.1
 	github.com/tliron/commonlog v0.2.19
@@ -15,7 +16,6 @@ require (
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/fatih/color v1.18.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
