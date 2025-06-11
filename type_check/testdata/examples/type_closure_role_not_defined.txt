@@ -1,0 +1,5 @@
+func@(A,B) A(value:Int@A, fn: func@(A)(Int@A)Int@B) Int@B {
+  return fn(value);
+}
+---
+E12 1:50: role `B` is not in scope

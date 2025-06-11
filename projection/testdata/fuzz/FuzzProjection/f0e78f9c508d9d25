@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A,B)A(value:Int@A,fn:func@(A)(Int@A)Int@B)Int@B{return fn(value);}")

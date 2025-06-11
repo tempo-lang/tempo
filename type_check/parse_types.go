@@ -88,6 +88,10 @@ func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (ty
 			return types.Invalid(), err
 		}
 		params = append(params, paramType)
+
+		if unknownRoles := paramType.Roles().SubtractParticipants(roles.Participants()); len(unknownRoles) > 0 {
+			return types.Invalid(), type_error.NewRolesNotInScope(findRoleType(param), unknownRoles)
+		}
 	}
 
 	var returnType types.Type = types.Unit()
@@ -97,6 +101,10 @@ func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (ty
 			return types.Invalid(), err
 		}
 		returnType = ret
+
+		if unknownRoles := returnType.Roles().SubtractParticipants(roles.Participants()); len(unknownRoles) > 0 {
+			return types.Invalid(), type_error.NewRolesNotInScope(findRoleType(ctx.GetReturnType()), unknownRoles)
+		}
 	}
 
 	closureValue := types.Closure(params, returnType, roles.Participants())
