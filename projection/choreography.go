@@ -1,3 +1,5 @@
+// This module includes the data structures that make up choreography projections.
+// Is is also responsible for generating the projected code based on these data structures.
 package projection
 
 import (
@@ -6,6 +8,7 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+// Choreography represents a Tempo choreography from the perspective of each projected role.
 type Choreography struct {
 	Name  string
 	Roles []string

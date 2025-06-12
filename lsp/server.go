@@ -1,3 +1,7 @@
+// This package implements the [Language Server Protocol] for Tempo.
+// It utilizes the [type_check] package to get information about the nodes in the AST.
+//
+// [Language Server Protocol]: https://microsoft.github.io/language-server-protocol/
 package lsp
 
 import (

@@ -1,3 +1,4 @@
+// This package contains the runtime used by Tempo generated source code.
 package runtime
 
 type Env struct {

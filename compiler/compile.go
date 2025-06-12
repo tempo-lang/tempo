@@ -1,3 +1,4 @@
+// This package bundles together all the different stages of compilation into the single convenient [Compile] function.
 package compiler
 
 import (
@@ -9,10 +10,12 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+// Options given to the compiler
 type Options struct {
 	PackageName string
 }
 
+// Compile takes Tempo source code and outputs its projection, or all syntax and type errors.
 func Compile(input antlr.CharStream, options *Options) (output string, errors []error) {
 	// parse source input
 	sourceFile, syntaxErrors := parser.Parse(input)

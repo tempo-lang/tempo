@@ -1,3 +1,4 @@
+// This package exposes the [TypeCheck] function which is responsible for type checking Tempo programs.
 package type_check
 
 import (
@@ -18,6 +19,8 @@ type typeChecker struct {
 	currentTypeHint types.Type
 }
 
+// TypeCheck takes a parsed AST and returns an [Info] object and list of type errors.
+// If the list of errors is empty, then the input program is valid.
 func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []type_error.Error) {
 	tc := new()
 
