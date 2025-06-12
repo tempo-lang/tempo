@@ -10,12 +10,12 @@ Here is a brief list of implemented things.
 - [x] Shared variables
 - [x] Asynchronous values
 - [x] Channels
-- [x] If statements
+- [x] Control flow (if and while statements)
 - [x] Function calls
 - [x] Struct types
 - [x] Interfaces
 - [x] Closures
-- [ ] Lists
+- [x] Lists
 - [ ] Maps
 - [ ] Methods
 - [ ] Co-routines

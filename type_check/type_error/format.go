@@ -22,7 +22,7 @@ func FormatError(w io.Writer, inputStream *antlr.FileStream, err Error, colorOut
 	token := err.ParserRule().GetStart()
 	tokenCol := token.GetColumn()
 
-	lineNrSpace := int(math.Ceil(math.Log10(float64(token.GetLine()))))
+	lineNrSpace := int(math.Ceil(math.Log10(float64(token.GetLine() + 1))))
 	lineNrStr := strings.Repeat(" ", lineNrSpace)
 	errorLength := err.ParserRule().GetStop().GetStop() - err.ParserRule().GetStart().GetStart() + 1
 
