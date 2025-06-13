@@ -1,5 +1,7 @@
 # Tempo Choreographic Programming Language
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/tempo-lang/tempo.svg)](https://pkg.go.dev/github.com/tempo-lang/tempo)
+
 Tempo is a practical choreographic programming language that is compiled to Go source code.
 
 The language is under development, up-to-date examples can be found in the [`simulator`](./simulator/) directory.
@@ -16,8 +18,9 @@ Here is a brief list of implemented things.
 - [x] Interfaces
 - [x] Closures
 - [x] Lists
-- [ ] Maps
+- [ ] Enums
 - [ ] Methods
+- [ ] Maps
 - [ ] Co-routines
 
 ## Installation

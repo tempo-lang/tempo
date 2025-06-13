@@ -1,22 +1,35 @@
 // This package contains the runtime used by Tempo generated source code.
 package runtime
 
+// The environment struct keeps track of the state of the choreography at a single process.
+// The first argument of any generated process function will take an `Env` as its first argument.
+// It is used to interact with the environment such as sending and receiving messages.
 type Env struct {
 	trans   Transport
 	roleSub map[string]string
 }
 
+// The Transport interface specifies the methods needed in order for processes in a choreography to communicate.
+//
+// The [tempo/transports] package contains a set of default implementations.
 type Transport interface {
+	// Send is called by a process to send a value to a set of roles.
 	Send(value any, roles ...string)
+	// Recv is called by a process when it expects to receive a value from a role.
+	//
+	// The `value` argument is an empty pointer with the expected type of the message to receive.
+	// It can be used when deserializing the message to the right code, for example in use with [encoding/json.Unmarshal].
 	Recv(role string, value any) *Async[any]
 }
 
+// New constructs a new environment given a transport implementation.
 func New(trans Transport) *Env {
 	return &Env{
 		trans: trans,
 	}
 }
 
+// Send will use the underlying [Transport] implementation to send the value.
 func Send[T any](env *Env, value T, roles ...string) {
 	subRoles := make([]string, len(roles))
 	for i, role := range roles {
@@ -25,6 +38,7 @@ func Send[T any](env *Env, value T, roles ...string) {
 	env.trans.Send(value, subRoles...)
 }
 
+// Recv will use the underlying [Transport] implementation to receive a value.
 func Recv[T any](env *Env, role string) *Async[T] {
 	role = env.Role(role)
 	var value T
@@ -68,14 +82,17 @@ func (e *Env) Clone() *Env {
 	}
 }
 
-// Async
+// MARK: Async
 
+// An async object represents a value that is not necessarily present yet.
+// The user can call [GetAsync] to wait until the underlying value is present and get it.
 type Async[T any] struct {
 	value    T
 	callback func() T
 	called   bool
 }
 
+// GetAsync will block the thread until the underlying value becomes present and return it.
 func GetAsync[T any](a *Async[T]) T {
 	if a.called {
 		return a.value
@@ -85,6 +102,8 @@ func GetAsync[T any](a *Async[T]) T {
 	return a.value
 }
 
+// FixedAsync wraps a value in a resolved async value.
+// Calling [GetAsync] on the returned value, will immediately yield the underlying value.
 func FixedAsync[T any](value T) *Async[T] {
 	return &Async[T]{
 		value:    value,
@@ -93,6 +112,9 @@ func FixedAsync[T any](value T) *Async[T] {
 	}
 }
 
+// NewAsync constructs an async value.
+// Calling [GetAsync] on the returned value, will call the `callback` closure to obtain the underlying value.
+// The `callback` is guaranteed to ever only be called once.
 func NewAsync[T any](callback func() T) *Async[T] {
 	return &Async[T]{
 		callback: callback,
@@ -100,6 +122,8 @@ func NewAsync[T any](callback func() T) *Async[T] {
 	}
 }
 
+// DowncastAsync will downcast an async any type to a specific type.
+// The program will panic if the any type does not match the specific type.
 func DowncastAsync[T any](async *Async[any]) *Async[T] {
 	if async.called {
 		return FixedAsync(async.value.(T))
@@ -110,12 +134,14 @@ func DowncastAsync[T any](async *Async[any]) *Async[T] {
 	}
 }
 
+// DynAsync erases the type of the async.
 func DynAsync[T any](async *Async[T]) *Async[any] {
 	return MapAsync(async, func(value T) any {
 		return value
 	})
 }
 
+// MapAsync maps an async to a new value using the `mapper` function.
 func MapAsync[T any, U any](async *Async[T], mapper func(value T) U) *Async[U] {
 	if async.called {
 		return FixedAsync(mapper(async.value))

@@ -5,6 +5,8 @@ import (
 	"github.com/tempo-lang/tempo/types"
 )
 
+// CallableEnv describes an environment that can be called.
+// Such as a [FuncSymbol] or a [ClosureEnv].
 type CallableEnv interface {
 	ReturnCtx() parser.IValueTypeContext
 	Scope() *Scope
@@ -25,10 +27,12 @@ func (f *ClosureEnv) ReturnCtx() parser.IValueTypeContext {
 	return f.returnCtx
 }
 
+// Params implements CallableEnv.
 func (f *ClosureEnv) Params() []*FuncParamSymbol {
 	return f.params
 }
 
+// AddParam implements CallableEnv.
 func (f *ClosureEnv) AddParam(param *FuncParamSymbol) {
 	f.params = append(f.params, param)
 }
@@ -43,6 +47,7 @@ func (c *ClosureEnv) Scope() *Scope {
 	return c.scope
 }
 
+// NewClosureEnv constructs a new closure callable environment.
 func NewClosureEnv(scope *Scope, returnType types.Type, returnCtx parser.IValueTypeContext) CallableEnv {
 	return &ClosureEnv{
 		scope:      scope,

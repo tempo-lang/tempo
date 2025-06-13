@@ -1,3 +1,4 @@
+// The transport package provides a set of default [runtime.Transport] implementations.
 package transports
 
 import (
@@ -53,17 +54,21 @@ func (l *localChan) Recv() *runtime.Async[jsonData] {
 	}
 }
 
+// A local queue that is used to obtain [runtime.Transport] implementations for processes to communicate locally using Go's builtin channels.
 type LocalQueue struct {
 	channels map[string]*localChan
 	chanLock sync.Mutex
 }
 
+// NewLocal constructs a new local queue.
 func NewLocal() *LocalQueue {
 	return &LocalQueue{
 		channels: map[string]*localChan{},
 	}
 }
 
+// Role returns a transport implementation given a role name.
+// The role should be the same name as the process using the returned transport implementation.
 func (q *LocalQueue) Role(role string) runtime.Transport {
 	return &localTransport{
 		role:  role,

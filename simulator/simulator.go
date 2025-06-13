@@ -1,3 +1,4 @@
+// Simulator implements a convenice environment for running processes locally.
 package simulator
 
 import (

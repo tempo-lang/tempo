@@ -12,7 +12,7 @@ import (
 
 type typeChecker struct {
 	*antlr.BaseParseTreeVisitor
-	errorListener ErrorListener
+	errors []type_error.Error
 
 	currentScope    *sym_table.Scope
 	info            *Info
@@ -30,17 +30,12 @@ func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []type_error.Error)
 
 	sourceFile.Accept(tc)
 
-	analyzerErrorListener, ok := tc.errorListener.(*DefaultErrorListener)
-	if !ok {
-		panic("analyzer error listener was expected to be DefaultErrorListener")
-	}
-
-	return tc.info, analyzerErrorListener.Errors
+	return tc.info, tc.errors
 }
 
 func new() *typeChecker {
 	return &typeChecker{
-		errorListener:   &DefaultErrorListener{},
+		errors:          []type_error.Error{},
 		currentScope:    nil,
 		currentTypeHint: nil,
 		info:            newInfo(),
@@ -48,7 +43,7 @@ func new() *typeChecker {
 }
 
 func (tc *typeChecker) reportError(err type_error.Error) {
-	tc.errorListener.ReportTypeError(err)
+	tc.errors = append(tc.errors, err)
 }
 
 func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result any) {
