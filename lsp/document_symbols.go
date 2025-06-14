@@ -39,8 +39,8 @@ func documentSymbolsInScope(scope *sym_table.Scope) []protocol.DocumentSymbol {
 			newSym.Kind = protocol.SymbolKindFunction
 			newSym.Range = scopeToRange(sym.Scope())
 			newSym.Children = documentSymbolsInScope(sym.Scope())
-		case *sym_table.InterfaceMethodSymbol:
-			newSym.Kind = protocol.SymbolKindMethod
+		// case *sym_table.InterfaceMethodSymbol:
+		// 	newSym.Kind = protocol.SymbolKindMethod
 		case *sym_table.InterfaceSymbol:
 			newSym.Kind = protocol.SymbolKindInterface
 			newSym.Range = scopeToRange(sym.Scope())

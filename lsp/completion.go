@@ -117,8 +117,8 @@ func symbolToCompletionItem(sym sym_table.Symbol) protocol.CompletionItem {
 		kind = toPtr(protocol.CompletionItemKindField)
 	case *sym_table.VariableSymbol:
 		kind = toPtr(protocol.CompletionItemKindVariable)
-	case *sym_table.InterfaceMethodSymbol:
-		kind = toPtr(protocol.CompletionItemKindMethod)
+	// case *sym_table.InterfaceMethodSymbol:
+	// 	kind = toPtr(protocol.CompletionItemKindMethod)
 	case *sym_table.InterfaceSymbol:
 		kind = toPtr(protocol.CompletionItemKindInterface)
 	}
@@ -163,12 +163,12 @@ func completionItemsForFieldAccess(file *tempoDoc, fieldAccess *parser.ExprField
 		}
 		return completionItems, true
 	case *types.InterfaceType:
-		infSym := file.info.Symbols[fieldType.Ident()].(*sym_table.InterfaceSymbol)
+		// infSym := file.info.Symbols[fieldType.Ident()].(*sym_table.InterfaceSymbol)
 
 		completionItems := []protocol.CompletionItem{}
-		for _, method := range infSym.Methods() {
-			completionItems = append(completionItems, symbolToCompletionItem(method))
-		}
+		// for _, method := range infSym.Methods() {
+		// 	completionItems = append(completionItems, symbolToCompletionItem(method))
+		// }
 		return completionItems, true
 	}
 

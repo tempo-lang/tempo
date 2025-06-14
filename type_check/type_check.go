@@ -42,8 +42,8 @@ func new() *typeChecker {
 	}
 }
 
-func (tc *typeChecker) reportError(err type_error.Error) {
-	tc.errors = append(tc.errors, err)
+func (tc *typeChecker) reportError(err ...type_error.Error) {
+	tc.errors = append(tc.errors, err...)
 }
 
 func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result any) {

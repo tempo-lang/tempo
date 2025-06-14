@@ -345,7 +345,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	structSym, ok := sym.(*sym_table.StructSymbol)
+	defStructType, ok := sym.Type().(*types.StructType)
 	if !ok {
 		tc.reportError(type_error.NewExpectedStructType(sym, ctx))
 		return tc.registerType(ctx, types.Invalid())
@@ -363,58 +363,45 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		tc.reportError(err)
 	}
 
-	for _, defField := range structSym.Fields() {
+	// check that all fields are present
+	for defFieldName := range defStructType.Fields() {
 		found := false
 		for _, exprField := range ctx.ExprStructField().AllIdent() {
-			if exprField.GetText() == defField.SymbolName() {
+			if exprField.GetText() == defFieldName {
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			tc.reportError(type_error.NewMissingStructField(ctx, defField))
+			tc.reportError(type_error.NewMissingStructField(ctx, defFieldName, defStructType))
 		}
 	}
 
-	structRoles := structSym.Type().Roles()
+	// calculate role substitution map
+	structRoles := defStructType.Roles()
 	defRoleSubst, ok := structRoles.SubstituteMap(roles)
 	if !ok {
-		tc.reportError(type_error.NewWrongRoleCount(structSym, ctx.RoleType(), roles))
+		tc.reportError(type_error.NewWrongRoleCount(sym, ctx.RoleType(), roles))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	defFields := map[string]types.Type{}
-	for _, field := range structSym.Fields() {
-		defFields[field.SymbolName()] = field.Type()
-	}
-
-	fieldIdents := ctx.ExprStructField().AllIdent()
-
-	exprFieldsExpr := map[string]parser.IExprContext{}
-	exprFieldsType := map[string]types.Type{}
-	exprFieldsIdent := map[string]parser.IIdentContext{}
-	for i, field := range ctx.ExprStructField().AllExpr() {
-		fieldType := tc.visitExpr(field)
-		exprFieldsExpr[fieldIdents[i].GetText()] = field
-		exprFieldsType[fieldIdents[i].GetText()] = fieldType
-		exprFieldsIdent[fieldIdents[i].GetText()] = fieldIdents[i]
-	}
+	structType := defStructType.SubstituteRoles(defRoleSubst)
 
 	foundError := false
+	fieldIdents := ctx.ExprStructField().AllIdent()
+	for i, fieldExpr := range ctx.ExprStructField().AllExpr() {
+		fieldExprType := tc.visitExpr(fieldExpr)
 
-	for name, exprType := range exprFieldsType {
-		defField, found := defFields[name]
+		fieldType, found := structType.Field(fieldIdents[i].GetText())
 		if !found {
-			tc.reportError(type_error.NewUnexpectedStructField(exprFieldsIdent[name], structSym))
+			tc.reportError(type_error.NewUnexpectedStructField(fieldIdents[i], defStructType))
 			foundError = true
 			continue
 		}
 
-		defSubstType := defField.SubstituteRoles(defRoleSubst)
-
-		if _, ok := exprType.CoerceTo(defSubstType); !ok {
-			tc.reportError(type_error.NewIncompatibleTypes(exprFieldsExpr[name], exprType, defField))
+		if _, ok := fieldExprType.CoerceTo(fieldType); !ok {
+			tc.reportError(type_error.NewIncompatibleTypes(fieldExpr, fieldExprType, fieldType))
 			foundError = true
 			continue
 		}
@@ -424,7 +411,6 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	structType := structSym.Type().SubstituteRoles(defRoleSubst)
 	return tc.registerType(ctx, structType)
 }
 
@@ -439,46 +425,45 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	fieldName := ctx.Ident().GetText()
+
 	switch value := objectType.(type) {
 	case *types.StructType:
-		structSym, ok := tc.currentScope.LookupParent(value.Name()).(*sym_table.StructSymbol)
-		if !ok {
+		sym := tc.info.Symbols[value.Ident()]
+		fieldType, found := value.Field(fieldName)
+		if !found {
+			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, sym))
 			return tc.registerType(ctx, types.Invalid())
 		}
 
-		field := structSym.Scope().Lookup(ctx.Ident().GetText())
-		if field == nil {
-			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, structSym))
-			return tc.registerType(ctx, types.Invalid())
-		}
-
-		substMap, rolesMatch := structSym.Type().Roles().SubstituteMap(objectType.Roles())
-		if !rolesMatch {
-			return tc.registerType(ctx, types.Invalid())
-		}
-
-		fieldType := field.Type().SubstituteRoles(substMap)
 		return tc.registerType(ctx, fieldType)
-
 	case *types.InterfaceType:
-		infSym, ok := tc.currentScope.LookupParent(value.Name()).(*sym_table.InterfaceSymbol)
-		if !ok {
+		sym := tc.info.Symbols[value.Ident()]
+		fieldType, found := value.Field(fieldName)
+		if !found {
+			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, sym))
 			return tc.registerType(ctx, types.Invalid())
 		}
 
-		field := infSym.Scope().Lookup(ctx.Ident().GetText())
-		if field == nil {
-			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, infSym))
-			return tc.registerType(ctx, types.Invalid())
-		}
-
-		substMap, rolesMatch := infSym.Scope().Roles().SubstituteMap(objectType.Roles())
-		if !rolesMatch {
-			return tc.registerType(ctx, types.Invalid())
-		}
-
-		fieldType := field.Type().SubstituteRoles(substMap)
 		return tc.registerType(ctx, fieldType)
+		// infSym, ok := tc.currentScope.LookupParent(value.Name()).(*sym_table.InterfaceSymbol)
+		// if !ok {
+		// 	return tc.registerType(ctx, types.Invalid())
+		// }
+
+		// field := infSym.Scope().Lookup(ctx.Ident().GetText())
+		// if field == nil {
+		// 	tc.reportError(type_error.NewFieldAccessUnknownField(ctx, infSym))
+		// 	return tc.registerType(ctx, types.Invalid())
+		// }
+
+		// substMap, rolesMatch := infSym.Scope().Roles().SubstituteMap(objectType.Roles())
+		// if !rolesMatch {
+		// 	return tc.registerType(ctx, types.Invalid())
+		// }
+
+		// fieldType := field.Type().SubstituteRoles(substMap)
+		// return tc.registerType(ctx, fieldType)
 	}
 
 	tc.reportError(type_error.NewFieldAccessUnexpectedType(ctx, objectType))

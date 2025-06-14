@@ -3,6 +3,8 @@
 // The [Type] interface is implemented by all types in the language.
 package types
 
+import "iter"
+
 func baseCoerceValue(thisValue, otherValue Type) (Type, *bool) {
 	fail := false
 	success := true
@@ -30,6 +32,8 @@ func baseCoerceValue(thisValue, otherValue Type) (Type, *bool) {
 	return nil, nil
 }
 
+type TypeFieldMap map[string]Type
+
 // A common interface for all types on the choreographic level
 type Type interface {
 	// IsSendable describes whether the type can be communicated using the `->` operator.
@@ -50,6 +54,10 @@ type Type interface {
 	Roles() *Roles
 	// IsInvalid returns whether this type is the invalid type.
 	IsInvalid() bool
+	// Fields returns an iterator over all fields that can be accessed on this type.
+	Fields() iter.Seq2[string, Type]
+	// Field returns the field with the given name, the returned boolean indicates whether the field was found.
+	Field(name string) (Type, bool)
 }
 
 type baseType struct{}
@@ -58,7 +66,17 @@ func (*baseType) IsInvalid() bool {
 	return false
 }
 
-type InvalidType struct{}
+func (*baseType) Fields() iter.Seq2[string, Type] {
+	return func(yield func(string, Type) bool) {}
+}
+
+func (*baseType) Field(name string) (Type, bool) {
+	return nil, false
+}
+
+type InvalidType struct {
+	baseType
+}
 
 func (*InvalidType) IsInvalid() bool {
 	return true

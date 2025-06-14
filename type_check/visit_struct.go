@@ -18,7 +18,6 @@ func (tc *typeChecker) VisitStruct(ctx *parser.StructContext) any {
 	ctx.StructFieldList().Accept(tc)
 
 	tc.currentScope = tc.currentScope.Parent()
-
 	return nil
 }
 

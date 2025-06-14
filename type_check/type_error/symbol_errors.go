@@ -117,12 +117,12 @@ func NewExpectedStructType(sym sym_table.Symbol, expr *parser.ExprStructContext)
 
 type UnexpectedStructField struct {
 	baseError
-	ident parser.IIdentContext
-	sym   *sym_table.StructSymbol
+	ident      parser.IIdentContext
+	structType *types.StructType
 }
 
 func (e *UnexpectedStructField) Error() string {
-	return fmt.Sprintf("unexpected field `%s` in struct `%s`", e.ident.GetText(), e.sym.SymbolName())
+	return fmt.Sprintf("unexpected field `%s` in struct `%s`", e.ident.GetText(), e.structType.Name())
 }
 
 func (e *UnexpectedStructField) ParserRule() antlr.ParserRuleContext {
@@ -133,21 +133,22 @@ func (e *UnexpectedStructField) Code() ErrorCode {
 	return CodeUnexpectedStructField
 }
 
-func NewUnexpectedStructField(ident parser.IIdentContext, sym *sym_table.StructSymbol) Error {
+func NewUnexpectedStructField(ident parser.IIdentContext, structType *types.StructType) Error {
 	return &UnexpectedStructField{
-		ident: ident,
-		sym:   sym,
+		ident:      ident,
+		structType: structType,
 	}
 }
 
 type MissingStructField struct {
 	baseError
-	expr  *parser.ExprStructContext
-	field *sym_table.StructFieldSymbol
+	expr       *parser.ExprStructContext
+	field      string
+	structType *types.StructType
 }
 
 func (e *MissingStructField) Error() string {
-	return fmt.Sprintf("missing field `%s` in struct `%s`", e.field.SymbolName(), e.field.Struct().SymbolName())
+	return fmt.Sprintf("missing field `%s` in struct `%s`", e.field, e.structType.Name())
 }
 
 func (e *MissingStructField) ParserRule() antlr.ParserRuleContext {
@@ -158,10 +159,11 @@ func (e *MissingStructField) Code() ErrorCode {
 	return CodeMissingStructField
 }
 
-func NewMissingStructField(expr *parser.ExprStructContext, field *sym_table.StructFieldSymbol) Error {
+func NewMissingStructField(expr *parser.ExprStructContext, field string, structType *types.StructType) Error {
 	return &MissingStructField{
-		expr:  expr,
-		field: field,
+		expr:       expr,
+		field:      field,
+		structType: structType,
 	}
 }
 
