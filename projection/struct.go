@@ -1,12 +1,8 @@
 package projection
 
 import (
-	"fmt"
-
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
-
-	"github.com/dave/jennifer/jen"
 )
 
 type ChoreographyStruct struct {
@@ -20,14 +16,6 @@ func NewChoreographyStruct(name string) *ChoreographyStruct {
 		Name:    name,
 		Roles:   []string{},
 		Structs: map[string]*Struct{},
-	}
-}
-
-func (c *ChoreographyStruct) Codegen(file *jen.File) {
-	file.Commentf("Projection of struct %s", c.Name)
-
-	for _, role := range c.Roles {
-		file.Add(c.Structs[role].Codegen())
 	}
 }
 
@@ -58,26 +46,11 @@ func (s *Struct) AddField(field parser.IStructFieldContext, fieldType Type) {
 	})
 }
 
-func (s *Struct) Codegen() *jen.Statement {
-
-	fields := []jen.Code{}
-
-	for _, field := range s.Fields {
-		fields = append(fields, field.Codegen())
-	}
-
-	return jen.Type().Id(fmt.Sprintf("%s_%s", s.Name, s.Role)).Struct(fields...)
-}
-
 type StructField struct {
 	Struct   *Struct
 	FieldCtx parser.IStructFieldContext
 	Name     string
 	Type     Type
-}
-
-func (f *StructField) Codegen() *jen.Statement {
-	return jen.Id(f.Name).Add(f.Type.Codegen()).Tag(map[string]string{"json": f.Name})
 }
 
 type StructType struct {
@@ -92,10 +65,6 @@ func NewStructType(structType *types.StructType, role string) *StructType {
 		StructType: *structType,
 		role:       role,
 	}
-}
-
-func (s *StructType) Codegen() jen.Code {
-	return jen.Id(fmt.Sprintf("%s_%s", s.Name(), s.Role()))
 }
 
 func (s *StructType) Role() string {

@@ -1,4 +1,4 @@
-package projection_test
+package codegen_go_test
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/tempo-lang/tempo/compiler"
-	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/projection/codegen_go"
 
 	"github.com/antlr4-go/antlr/v4"
 
@@ -25,7 +25,7 @@ type runtimeImporter struct {
 
 // Import implements types.Importer.
 func (r *runtimeImporter) Import(path string) (*types.Package, error) {
-	if path == projection.RUNTIME_PATH {
+	if path == codegen_go.RUNTIME_PATH {
 		return r.pkg, nil
 	}
 	return nil, fmt.Errorf("failed to import %s", path)
@@ -33,7 +33,7 @@ func (r *runtimeImporter) Import(path string) (*types.Package, error) {
 
 func newRuntimeImporter() (*runtimeImporter, error) {
 
-	runtimeSource, err := os.ReadFile("../runtime/runtime.go")
+	runtimeSource, err := os.ReadFile("../../runtime/runtime.go")
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func newRuntimeImporter() (*runtimeImporter, error) {
 	}
 
 	conf := types.Config{}
-	pkg, err := conf.Check(projection.RUNTIME_PATH, fset, []*ast.File{parsedAST}, nil)
+	pkg, err := conf.Check(codegen_go.RUNTIME_PATH, fset, []*ast.File{parsedAST}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func FuzzProjection(f *testing.F) {
 	`)
 
 	// Add valid examples
-	paths, err := filepath.Glob(filepath.Join("testdata", "examples", "*.tempo"))
+	paths, err := filepath.Glob(filepath.Join("..", "testdata", "examples", "*.tempo"))
 	if err != nil {
 		f.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func FuzzProjection(f *testing.F) {
 	}
 
 	// Add type checker examples
-	paths, err = filepath.Glob(filepath.Join("..", "type_check", "testdata", "examples", "*.txt"))
+	paths, err = filepath.Glob(filepath.Join("..", "..", "type_check", "testdata", "examples", "*.txt"))
 	if err != nil {
 		f.Fatal(err)
 	}

@@ -1,16 +1,11 @@
 package projection
 
 import (
-	"fmt"
-
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
-
-	"github.com/dave/jennifer/jen"
 )
 
 type Expression interface {
-	Codegen() jen.Code
 	Type() Type
 	HasSideEffects() bool
 	ReturnsValue() bool
@@ -19,10 +14,6 @@ type Expression interface {
 
 type ExprInt struct {
 	Value int
-}
-
-func (e *ExprInt) Codegen() jen.Code {
-	return jen.Lit(e.Value)
 }
 
 func (e *ExprInt) Type() Type {
@@ -49,10 +40,6 @@ type ExprFloat struct {
 	Value float64
 }
 
-func (e *ExprFloat) Codegen() jen.Code {
-	return jen.Lit(e.Value)
-}
-
 func (e *ExprFloat) Type() Type {
 	return FloatType
 }
@@ -75,10 +62,6 @@ func NewExprFloat(value float64) Expression {
 
 type ExprString struct {
 	Value string
-}
-
-func (e *ExprString) Codegen() jen.Code {
-	return jen.Lit(e.Value)
 }
 
 func (e *ExprString) Type() Type {
@@ -106,10 +89,6 @@ type ExprIdent struct {
 	typeVal Type
 }
 
-func (e *ExprIdent) Codegen() jen.Code {
-	return jen.Id(e.Name)
-}
-
 func (e *ExprIdent) Type() Type {
 	return e.typeVal
 }
@@ -130,14 +109,6 @@ func NewExprIdent(name string, typeVal Type) Expression {
 
 type ExprBool struct {
 	Value bool
-}
-
-func (e *ExprBool) Codegen() jen.Code {
-	if e.Value {
-		return jen.True()
-	} else {
-		return jen.False()
-	}
 }
 
 func (e *ExprBool) Type() Type {
@@ -210,18 +181,10 @@ func ParseOperator(binOp *parser.ExprBinOpContext) Operator {
 }
 
 type ExprBinaryOp struct {
-	operator Operator
-	lhs      Expression
-	rhs      Expression
+	Operator Operator
+	Lhs      Expression
+	Rhs      Expression
 	typeVal  Type
-}
-
-func (e *ExprBinaryOp) Codegen() jen.Code {
-	if _, isList := e.typeVal.(*ListType); isList {
-		return jen.Append(e.lhs.Codegen(), jen.Add(e.rhs.Codegen()).Op("..."))
-	}
-
-	return jen.Add(e.lhs.Codegen()).Op(string(e.operator)).Add(e.rhs.Codegen())
 }
 
 func (e *ExprBinaryOp) Type() Type {
@@ -233,26 +196,22 @@ func (e *ExprBinaryOp) ReturnsValue() bool {
 }
 
 func (e *ExprBinaryOp) HasSideEffects() bool {
-	return e.lhs != nil && e.lhs.HasSideEffects() || e.rhs.HasSideEffects()
+	return e.Lhs != nil && e.Lhs.HasSideEffects() || e.Rhs.HasSideEffects()
 }
 
 func (e *ExprBinaryOp) IsExpression() {}
 
 func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression, typeVal Type) Expression {
 	return &ExprBinaryOp{
-		operator: operator,
-		lhs:      lhs,
-		rhs:      rhs,
+		Operator: operator,
+		Lhs:      lhs,
+		Rhs:      rhs,
 		typeVal:  typeVal,
 	}
 }
 
 type ExprAsync struct {
 	inner Expression
-}
-
-func (e *ExprAsync) Codegen() jen.Code {
-	return RuntimeFunc("FixedAsync").Call(e.inner.Codegen())
 }
 
 func (e *ExprAsync) Type() Type {
@@ -286,10 +245,6 @@ func (e *ExprAwait) Inner() Expression {
 	return e.expr
 }
 
-func (e *ExprAwait) Codegen() jen.Code {
-	return RuntimeFunc("GetAsync").Call(e.Inner().Codegen())
-}
-
 func (e *ExprAwait) Type() Type {
 	return e.typeVal
 }
@@ -309,21 +264,8 @@ func NewExprAwait(inner Expression, typeVal Type) Expression {
 }
 
 type ExprSend struct {
-	expr      Expression
-	receivers []string
-}
-
-func (e *ExprSend) Codegen() jen.Code {
-	args := []jen.Code{
-		jen.Id("env"),
-		e.expr.Codegen(),
-	}
-
-	for _, role := range e.receivers {
-		args = append(args, jen.Lit(role))
-	}
-
-	return RuntimeFunc("Send").Call(args...)
+	Expr      Expression
+	Receivers []string
 }
 
 func (e *ExprSend) ReturnsValue() bool {
@@ -342,19 +284,14 @@ func (e *ExprSend) Type() Type {
 
 func NewExprSend(expr Expression, receivers []string) Expression {
 	return &ExprSend{
-		expr:      expr,
-		receivers: receivers,
+		Expr:      expr,
+		Receivers: receivers,
 	}
 }
 
 type ExprRecv struct {
-	recvType Type
-	sender   string
-}
-
-func (e *ExprRecv) Codegen() jen.Code {
-	recvType := e.recvType.Codegen()
-	return RuntimeFunc("Recv").Types(recvType).Call(jen.Id("env"), jen.Lit(e.sender))
+	RecvType Type
+	Sender   string
 }
 
 func (e *ExprRecv) ReturnsValue() bool {
@@ -368,13 +305,13 @@ func (e *ExprRecv) HasSideEffects() bool {
 func (e *ExprRecv) IsExpression() {}
 
 func (e *ExprRecv) Type() Type {
-	return NewAsyncType(e.recvType)
+	return NewAsyncType(e.RecvType)
 }
 
 func NewExprRecv(recvType Type, sender string) Expression {
 	return &ExprRecv{
-		recvType: recvType,
-		sender:   sender,
+		RecvType: recvType,
+		Sender:   sender,
 	}
 }
 
@@ -384,24 +321,6 @@ type ExprCallFunc struct {
 	Args       []Expression
 	ReturnType Type
 	RoleSubs   *types.RoleSubst
-}
-
-func (e *ExprCallFunc) Codegen() jen.Code {
-	args := []jen.Code{}
-
-	roleSub := []jen.Code{}
-	for _, to := range e.RoleSubs.Roles {
-		from := e.RoleSubs.Subst(to)
-		roleSub = append(roleSub, jen.Lit(from), jen.Lit(to))
-	}
-
-	args = append(args, jen.Id("env").Dot("Subst").Call(roleSub...))
-
-	for _, arg := range e.Args {
-		args = append(args, arg.Codegen())
-	}
-
-	return jen.Add(e.FuncExpr.Codegen()).Call(args...)
 }
 
 func (e *ExprCallFunc) Type() Type {
@@ -435,16 +354,6 @@ type ExprCallClosure struct {
 	ReturnType  Type
 }
 
-func (e *ExprCallClosure) Codegen() jen.Code {
-	args := []jen.Code{}
-
-	for _, arg := range e.Args {
-		args = append(args, arg.Codegen())
-	}
-
-	return jen.Add(e.ClosureExpr.Codegen()).Call(args...)
-}
-
 func (e *ExprCallClosure) Type() Type {
 	return e.ReturnType
 }
@@ -474,20 +383,6 @@ type ExprStruct struct {
 	FieldNames []string
 	Fields     map[string]Expression
 	StructType *StructType
-}
-
-func (e *ExprStruct) Codegen() jen.Code {
-	fields := jen.Dict{}
-
-	for _, fieldName := range e.FieldNames {
-		field := e.Fields[fieldName]
-		expr := field.Codegen()
-		fields[jen.Id(fieldName)] = expr
-	}
-
-	name := fmt.Sprintf("%s_%s", e.StructName, e.StructRole)
-
-	return jen.Id(name).Values(fields)
 }
 
 func (e *ExprStruct) Type() Type {
@@ -523,10 +418,6 @@ type ExprFieldAccess struct {
 	BaseExpr  Expression
 	FieldName string
 	FieldType Type
-}
-
-func (e *ExprFieldAccess) Codegen() jen.Code {
-	return jen.Add(e.BaseExpr.Codegen()).Dot(e.FieldName)
 }
 
 func (e *ExprFieldAccess) Type() Type {

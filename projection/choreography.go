@@ -4,8 +4,6 @@ package projection
 
 import (
 	"github.com/tempo-lang/tempo/parser"
-
-	"github.com/dave/jennifer/jen"
 )
 
 // Choreography represents a Tempo choreography from the perspective of each projected role.
@@ -32,12 +30,4 @@ func (c *Choreography) AddFunc(sig *FuncSig, funcCtx parser.IFuncContext) *Func 
 		Body:         []Statement{},
 	}
 	return c.Funcs[sig.Role]
-}
-
-func (c *Choreography) Codegen(file *jen.File) {
-	file.Commentf("Projection of choreography %s", c.Name)
-
-	for _, role := range c.Roles {
-		file.Add(c.Funcs[role].Codegen())
-	}
 }

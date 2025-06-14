@@ -2,13 +2,10 @@ package projection
 
 import (
 	"fmt"
-
-	"github.com/dave/jennifer/jen"
 )
 
 type Type interface {
 	IsType()
-	Codegen() jen.Code
 }
 
 type BuiltinType string
@@ -21,21 +18,6 @@ const (
 )
 
 func (c BuiltinType) IsType() {}
-
-func (t BuiltinType) Codegen() jen.Code {
-	switch t {
-	case IntType:
-		return jen.Int()
-	case FloatType:
-		return jen.Float64()
-	case StringType:
-		return jen.String()
-	case BoolType:
-		return jen.Bool()
-	default:
-		panic(fmt.Sprintf("unknown builtin type: %s", t))
-	}
-}
 
 type AsyncType struct {
 	Inner Type
@@ -53,17 +35,8 @@ func NewAsyncType(inner Type) Type {
 	}
 }
 
-func (t *AsyncType) Codegen() jen.Code {
-	innerType := t.Inner.Codegen()
-	return jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Async").Types(innerType)
-}
-
 type ListType struct {
 	Inner Type
-}
-
-func (l *ListType) Codegen() jen.Code {
-	return jen.Index().Add(l.Inner.Codegen())
 }
 
 func (l *ListType) IsType() {}
@@ -83,7 +56,3 @@ func UnitType() Type {
 }
 
 func (c *unitType) IsType() {}
-
-func (t *unitType) Codegen() jen.Code {
-	panic("attempt to codegen unit type")
-}

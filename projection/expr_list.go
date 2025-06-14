@@ -1,20 +1,8 @@
 package projection
 
-import (
-	"github.com/dave/jennifer/jen"
-)
-
 type ExprList struct {
-	items    []Expression
+	Items    []Expression
 	listType Type
-}
-
-func (e *ExprList) Codegen() jen.Code {
-	items := make([]jen.Code, len(e.items))
-	for i, item := range e.items {
-		items[i] = item.Codegen()
-	}
-	return jen.Add(e.listType.Codegen()).Values(items...)
 }
 
 func (e *ExprList) Type() Type {
@@ -26,7 +14,7 @@ func (e *ExprList) ReturnsValue() bool {
 }
 
 func (e *ExprList) HasSideEffects() bool {
-	for _, item := range e.items {
+	for _, item := range e.Items {
 		if item.HasSideEffects() {
 			return true
 		}
@@ -38,22 +26,18 @@ func (e *ExprList) IsExpression() {}
 
 func NewExprList(items []Expression, listType Type) Expression {
 	return &ExprList{
-		items:    items,
+		Items:    items,
 		listType: listType,
 	}
 }
 
 type ExprIndex struct {
-	base  Expression
-	index Expression
-}
-
-func (e *ExprIndex) Codegen() jen.Code {
-	return jen.Add(e.base.Codegen()).Index(e.index.Codegen())
+	Base  Expression
+	Index Expression
 }
 
 func (e *ExprIndex) Type() Type {
-	listType := e.base.Type().(*ListType)
+	listType := e.Base.Type().(*ListType)
 	return listType.Inner
 }
 
@@ -62,28 +46,24 @@ func (e *ExprIndex) ReturnsValue() bool {
 }
 
 func (e *ExprIndex) HasSideEffects() bool {
-	return e.base.HasSideEffects() || e.index.HasSideEffects()
+	return e.Base.HasSideEffects() || e.Index.HasSideEffects()
 }
 
 func (e *ExprIndex) IsExpression() {}
 
 func NewExprIndex(base Expression, index Expression) Expression {
 	return &ExprIndex{
-		base:  base,
-		index: index,
+		Base:  base,
+		Index: index,
 	}
 }
 
 type ExprListLength struct {
-	list Expression
-}
-
-func (e *ExprListLength) Codegen() jen.Code {
-	return jen.Len(e.list.Codegen())
+	List Expression
 }
 
 func (e *ExprListLength) HasSideEffects() bool {
-	return e.list.HasSideEffects()
+	return e.List.HasSideEffects()
 }
 
 func (e *ExprListLength) IsExpression() {}
@@ -97,5 +77,5 @@ func (e *ExprListLength) Type() Type {
 }
 
 func NewExprListLength(list Expression) Expression {
-	return &ExprListLength{list: list}
+	return &ExprListLength{List: list}
 }

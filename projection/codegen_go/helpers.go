@@ -1,4 +1,4 @@
-package projection
+package codegen_go
 
 import "github.com/dave/jennifer/jen"
 

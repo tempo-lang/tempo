@@ -1,12 +1,8 @@
 package projection
 
 import (
-	"fmt"
-
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
-
-	"github.com/dave/jennifer/jen"
 )
 
 type ChoreographyInterface struct {
@@ -60,24 +56,6 @@ func (inf *Interface) AddMethod(sig *FuncSig, ctx parser.IInterfaceMethodContext
 	return method
 }
 
-func (c *ChoreographyInterface) Codegen(file *jen.File) {
-	file.Commentf("Projection of interface %s", c.Name)
-
-	for _, role := range c.Roles {
-		file.Add(c.Interfaces[role].Codegen())
-	}
-}
-
-func (inf *Interface) Codegen() *jen.Statement {
-	methods := []jen.Code{}
-
-	for _, method := range inf.Methods {
-		methods = append(methods, method.Codegen(true))
-	}
-
-	return jen.Type().Id(fmt.Sprintf("%s_%s", inf.Name, inf.Role)).Interface(methods...)
-}
-
 type InterfaceType struct {
 	types.InterfaceType
 	role string
@@ -91,10 +69,6 @@ func NewInterfaceType(interfaceType *types.InterfaceType, role string) *Interfac
 }
 
 func (c *InterfaceType) IsType() {}
-
-func (t *InterfaceType) Codegen() jen.Code {
-	return jen.Id(fmt.Sprintf("%s_%s", t.Name(), t.Role()))
-}
 
 func (i *InterfaceType) Role() string {
 	return i.role

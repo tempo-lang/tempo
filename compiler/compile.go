@@ -4,6 +4,7 @@ package compiler
 import (
 	"github.com/tempo-lang/tempo/epp"
 	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/projection/codegen_go"
 	"github.com/tempo-lang/tempo/type_check"
 
 	"github.com/antlr4-go/antlr/v4"
@@ -47,7 +48,7 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 	}
 
 	file := jen.NewFile(packageName)
-	eppFile.Codegen(file)
+	codegen_go.GenSourceFile(file, eppFile)
 
 	output = file.GoString()
 	return
