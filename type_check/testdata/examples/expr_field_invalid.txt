@@ -8,4 +8,4 @@ func@(A,B) foo() {
   let value: Int@A = p.invalid;
 }
 ---
-E22 8:24: unknown field `invalid` in `Point`
+E22 8:24: value of type `struct@(A,B) Point` has not field named `invalid`

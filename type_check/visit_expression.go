@@ -363,7 +363,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		tc.reportError(err)
 	}
 
-	// check that all fields are present
+	// check that all struct fields are present
 	for defFieldName := range defStructType.Fields() {
 		found := false
 		for _, exprField := range ctx.ExprStructField().AllIdent() {
@@ -388,27 +388,22 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 
 	structType := defStructType.SubstituteRoles(defRoleSubst)
 
-	foundError := false
 	fieldIdents := ctx.ExprStructField().AllIdent()
 	for i, fieldExpr := range ctx.ExprStructField().AllExpr() {
 		fieldExprType := tc.visitExpr(fieldExpr)
 
+		// check that field exists in struct
 		fieldType, found := structType.Field(fieldIdents[i].GetText())
 		if !found {
 			tc.reportError(type_error.NewUnexpectedStructField(fieldIdents[i], defStructType))
-			foundError = true
 			continue
 		}
 
+		// check that field expression can coerce to the expected type
 		if _, ok := fieldExprType.CoerceTo(fieldType); !ok {
 			tc.reportError(type_error.NewIncompatibleTypes(fieldExpr, fieldExprType, fieldType))
-			foundError = true
 			continue
 		}
-	}
-
-	if foundError {
-		return tc.registerType(ctx, types.Invalid())
 	}
 
 	return tc.registerType(ctx, structType)
@@ -420,54 +415,19 @@ func (tc *typeChecker) VisitExprStructField(ctx *parser.ExprStructFieldContext) 
 
 func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) any {
 
-	objectType := tc.visitExpr(ctx.Expr())
-	if objectType.IsInvalid() {
+	baseType := tc.visitExpr(ctx.Expr())
+	if baseType.IsInvalid() {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
 	fieldName := ctx.Ident().GetText()
-
-	switch value := objectType.(type) {
-	case *types.StructType:
-		sym := tc.info.Symbols[value.Ident()]
-		fieldType, found := value.Field(fieldName)
-		if !found {
-			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, sym))
-			return tc.registerType(ctx, types.Invalid())
-		}
-
-		return tc.registerType(ctx, fieldType)
-	case *types.InterfaceType:
-		sym := tc.info.Symbols[value.Ident()]
-		fieldType, found := value.Field(fieldName)
-		if !found {
-			tc.reportError(type_error.NewFieldAccessUnknownField(ctx, sym))
-			return tc.registerType(ctx, types.Invalid())
-		}
-
-		return tc.registerType(ctx, fieldType)
-		// infSym, ok := tc.currentScope.LookupParent(value.Name()).(*sym_table.InterfaceSymbol)
-		// if !ok {
-		// 	return tc.registerType(ctx, types.Invalid())
-		// }
-
-		// field := infSym.Scope().Lookup(ctx.Ident().GetText())
-		// if field == nil {
-		// 	tc.reportError(type_error.NewFieldAccessUnknownField(ctx, infSym))
-		// 	return tc.registerType(ctx, types.Invalid())
-		// }
-
-		// substMap, rolesMatch := infSym.Scope().Roles().SubstituteMap(objectType.Roles())
-		// if !rolesMatch {
-		// 	return tc.registerType(ctx, types.Invalid())
-		// }
-
-		// fieldType := field.Type().SubstituteRoles(substMap)
-		// return tc.registerType(ctx, fieldType)
+	fieldType, found := baseType.Field(fieldName)
+	if !found {
+		tc.reportError(type_error.NewFieldAccessUnknownField(ctx, baseType))
+		return tc.registerType(ctx, types.Invalid())
 	}
 
-	tc.reportError(type_error.NewFieldAccessUnexpectedType(ctx, objectType))
-	return tc.registerType(ctx, types.Invalid())
+	return tc.registerType(ctx, fieldType)
 }
 
 func (tc *typeChecker) VisitExprIndex(ctx *parser.ExprIndexContext) any {

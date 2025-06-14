@@ -217,12 +217,12 @@ func (e *StructWrongRoleCount) RelatedInfo() []RelatedInfo {
 
 type FieldAccessUnknownField struct {
 	baseError
-	expr *parser.ExprFieldAccessContext
-	sym  sym_table.Symbol
+	expr     *parser.ExprFieldAccessContext
+	baseType types.Type
 }
 
 func (e *FieldAccessUnknownField) Error() string {
-	return fmt.Sprintf("unknown field `%s` in `%s`", e.expr.Ident().GetText(), e.sym.SymbolName())
+	return fmt.Sprintf("value of type `%s` has not field named `%s`", e.baseType.ToString(), e.expr.Ident().GetText())
 }
 
 func (e *FieldAccessUnknownField) ParserRule() antlr.ParserRuleContext {
@@ -233,36 +233,9 @@ func (e *FieldAccessUnknownField) Code() ErrorCode {
 	return CodeFieldAccessUnknownField
 }
 
-func NewFieldAccessUnknownField(expr *parser.ExprFieldAccessContext, sym sym_table.Symbol) Error {
+func NewFieldAccessUnknownField(expr *parser.ExprFieldAccessContext, baseType types.Type) Error {
 	return &FieldAccessUnknownField{
-		expr: expr,
-		sym:  sym,
-	}
-}
-
-type FieldAccessUnexpectedType struct {
-	baseError
-	fieldAccess *parser.ExprFieldAccessContext
-	objectType  types.Type
-}
-
-func (e *FieldAccessUnexpectedType) Error() string {
-	return fmt.Sprintf("cannot access field of type `%s`", e.objectType.ToString())
-}
-
-func (e *FieldAccessUnexpectedType) IsTypeError() {}
-
-func (e *FieldAccessUnexpectedType) ParserRule() antlr.ParserRuleContext {
-	return e.fieldAccess.Ident()
-}
-
-func (e *FieldAccessUnexpectedType) Code() ErrorCode {
-	return CodeFieldAccessUnexpectedType
-}
-
-func NewFieldAccessUnexpectedType(expr *parser.ExprFieldAccessContext, objectType types.Type) Error {
-	return &FieldAccessUnexpectedType{
-		fieldAccess: expr,
-		objectType:  objectType,
+		expr:     expr,
+		baseType: baseType,
 	}
 }

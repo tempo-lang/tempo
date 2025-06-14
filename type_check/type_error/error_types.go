@@ -36,7 +36,7 @@ const (
 	CodeMissingStructField
 	CodeStructWrongRoleCount
 	CodeFieldAccessUnknownField
-	CodeFieldAccessUnexpectedType
+	_ // CodeFieldAccessUnexpectedType
 	CodeInvalidAssignType
 	CodeReturnNotAllRoles
 	CodeInvalidNumber
