@@ -29,7 +29,7 @@ func (gen *codegen) GenType(t projection.Type) string {
 }
 
 func (gen *codegen) GenAsyncType(t *projection.AsyncType) string {
-	return "[type]"
+	return fmt.Sprintf("Promise<%s>", gen.GenType(t.Inner))
 }
 
 func (gen *codegen) GenBuiltinType(t projection.BuiltinType) string {
@@ -47,11 +47,11 @@ func (gen *codegen) GenBuiltinType(t projection.BuiltinType) string {
 }
 
 func (gen *codegen) GenClosureType(t *projection.ClosureType) string {
-	return "[type]"
+	return "[ClosureType]"
 }
 
 func (gen *codegen) GenFunctionType(t *projection.FunctionType) string {
-	return "[type]"
+	return "[FunctionType]"
 }
 
 func (gen *codegen) GenInterfaceType(t *projection.InterfaceType) string {
@@ -59,7 +59,7 @@ func (gen *codegen) GenInterfaceType(t *projection.InterfaceType) string {
 }
 
 func (gen *codegen) GenListType(t *projection.ListType) string {
-	return "[type]"
+	return "[ListType]"
 }
 
 func (gen *codegen) GenStructType(t *projection.StructType) string {

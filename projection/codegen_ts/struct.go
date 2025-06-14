@@ -15,7 +15,7 @@ func (gen *codegen) GenChoreographyStruct(c *projection.ChoreographyStruct) {
 }
 
 func (gen *codegen) GenStruct(s *projection.Struct) {
-	gen.Writeln("type %s_%s = {", s.Name, s.Role)
+	gen.Writeln("export type %s_%s = {", s.Name, s.Role)
 	gen.IncIndent()
 
 	for _, field := range s.Fields {
