@@ -10,21 +10,28 @@ import (
 type RoleType int
 
 const (
-	ROLE_LOCAL       RoleType = 0
-	ROLE_SHARED      RoleType = 1
+	// ROLE_LOCAL is a type with only a single role participant.
+	ROLE_LOCAL RoleType = 0
+	// ROLE_SHARED is a type with its value shared across multiple role participants.
+	ROLE_SHARED RoleType = 1
+	// ROLE_DISTRIBUTED is a type which spans across multiple roles,
+	// such that different parts of the type live at different roles.
 	ROLE_DISTRIBUTED RoleType = 2
 )
 
+// Roles describes the role participants of a [Type].
 type Roles struct {
 	roleType     RoleType
 	participants []string
 }
 
+// RoleSubst is a substitution map which is used to substitute the roles in a type with a new set of roles.
 type RoleSubst struct {
 	Roles []string
 	Map   map[string]string
 }
 
+// NewRoleSubst constructs a new role substitution.
 func NewRoleSubst() *RoleSubst {
 	return &RoleSubst{
 		Roles: []string{},
@@ -32,6 +39,7 @@ func NewRoleSubst() *RoleSubst {
 	}
 }
 
+// AddRole adds a new substitution to a role substitution map.
 func (r *RoleSubst) AddRole(from, to string) {
 	if _, found := r.Map[from]; found {
 		return
@@ -41,6 +49,7 @@ func (r *RoleSubst) AddRole(from, to string) {
 	r.Map[from] = to
 }
 
+// Subst returns the substitution of the given `from` role participant.
 func (r *RoleSubst) Subst(from string) string {
 	if to, ok := r.Map[from]; ok {
 		return to
@@ -48,6 +57,7 @@ func (r *RoleSubst) Subst(from string) string {
 	return from
 }
 
+// Inverse returns a new role substitution map where all substitutions are reversed.
 func (r *RoleSubst) Inverse() *RoleSubst {
 	inv := NewRoleSubst()
 	for _, role := range r.Roles {
@@ -56,6 +66,7 @@ func (r *RoleSubst) Inverse() *RoleSubst {
 	return inv
 }
 
+// NewRole constructs a new roles object, given a set of participants and whether the role is shared or not.
 func NewRole(participants []string, isShared bool) *Roles {
 	var roleType RoleType
 	if len(participants) == 0 {
@@ -75,14 +86,18 @@ func NewRole(participants []string, isShared bool) *Roles {
 	}
 }
 
+// SingleRole is a convenience constructor to create a roles object with a single participant.
 func SingleRole(name string) *Roles {
 	return NewRole([]string{name}, false)
 }
 
+// EveryoneRole constructs a special roles object which describes a shared role across all active participants in scope.
 func EveryoneRole() *Roles {
 	return NewRole(nil, true)
 }
 
+// RoleIntersect calculates the intersection of participants between a list of roles.
+// It returns a new roles object containing the intersection and a boolean that is false if the intersection is empty.
 func RoleIntersect(roles ...*Roles) (*Roles, bool) {
 	nonEmptyRoles := []*Roles{}
 	for _, role := range roles {
@@ -128,22 +143,27 @@ func RoleIntersect(roles ...*Roles) (*Roles, bool) {
 	return nil, false
 }
 
+// IsLocalRole returns true if the [RoleType] of the roles object is [ROLE_LOCAL].
 func (r *Roles) IsLocalRole() bool {
 	return r.roleType == ROLE_LOCAL
 }
 
+// IsSharedRole returns true if the [RoleType] of the roles object is [ROLE_SHARED].
 func (r *Roles) IsSharedRole() bool {
 	return r.roleType == ROLE_SHARED
 }
 
+// IsDistributedRole returns true if the [RoleType] of the roles object is [ROLE_DISTRIBUTED].
 func (r *Roles) IsDistributedRole() bool {
 	return r.roleType == ROLE_DISTRIBUTED
 }
 
+// Participants returns a copy of the participants involved in the roles object.
 func (r *Roles) Participants() []string {
 	return slices.Clone(r.participants)
 }
 
+// ToString formats the roles object as how it would be written in source code.
 func (r *Roles) ToString() string {
 	roles := misc.JoinStrings(r.participants, ",")
 
@@ -166,6 +186,8 @@ func (r *Roles) ToString() string {
 	}
 }
 
+// SubtractParticipants returns a list of the participants in this roles object,
+// without any of the roles in the `other` list.
 func (r *Roles) SubtractParticipants(other []string) []string {
 	result := []string{}
 
@@ -178,6 +200,11 @@ func (r *Roles) SubtractParticipants(other []string) []string {
 	return result
 }
 
+// Encompass returns true if `this` roles object can be coerced into `other`.
+//
+//   - For [ROLE_SHARED] roles, this is the case if `this` is a superset of `other`.
+//   - For [ROLE_DISTRIBUTED] roles, this is the case if `this` and `other` has the same number of participants,
+//     but each pairwise participant may be different.
 func (r *Roles) Encompass(other *Roles) bool {
 	if (r.IsLocalRole() || r.IsSharedRole()) && other.IsLocalRole() {
 		if r.participants == nil {
@@ -223,6 +250,7 @@ func (r *Roles) Encompass(other *Roles) bool {
 	return false
 }
 
+// Contains returns whether the given role is contained in this roles object.
 func (r *Roles) Contains(role string) bool {
 	if len(r.participants) == 0 {
 		return true
@@ -231,6 +259,9 @@ func (r *Roles) Contains(role string) bool {
 	return slices.Contains(r.participants, role)
 }
 
+// SubstituteMap calculates a role substitution map from `this` roles object to `other`.
+// The substitution fails if the set of participants for each roles object has different lengths.
+// The returned boolean indicates whether the substitution was successfull.
 func (r *Roles) SubstituteMap(other *Roles) (*RoleSubst, bool) {
 	if len(r.participants) != len(other.participants) {
 		return nil, false
@@ -243,6 +274,7 @@ func (r *Roles) SubstituteMap(other *Roles) (*RoleSubst, bool) {
 	return roleSubst, true
 }
 
+// SubstituteRoles returns a new roles object with substitutions for the roles mention in the given role substitution map.
 func (r *Roles) SubstituteRoles(subst *RoleSubst) *Roles {
 	roleSubst := r.Participants()
 	for i := range roleSubst {

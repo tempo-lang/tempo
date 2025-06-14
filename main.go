@@ -1,3 +1,5 @@
+// The main entry for the Tempo compiler binary.
+// This package only consists of a `main` function which immediately calls [cmd.Execute].
 package main
 
 import (
