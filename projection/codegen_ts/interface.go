@@ -8,11 +8,13 @@ import (
 )
 
 func (gen *codegen) GenChoreographyInterface(c *projection.ChoreographyInterface) {
-	gen.Writeln("Projection of interface %s", c.Name)
+	gen.Writeln("// Projection of interface %s", c.Name)
 
 	for _, role := range c.Roles {
 		gen.GenInterface(c.Interfaces[role])
 	}
+
+	gen.Writeln("")
 }
 
 func (gen *codegen) GenInterface(inf *projection.Interface) {
@@ -23,7 +25,11 @@ func (gen *codegen) GenInterface(inf *projection.Interface) {
 
 		params := []string{}
 		for _, param := range method.Params {
-			params = append(params, fmt.Sprintf("%s: %s", param.Name, gen.GenType(param.TypeValue)))
+			if gen.opts.DisableTypes {
+				params = append(params, param.Name)
+			} else {
+				params = append(params, fmt.Sprintf("%s: %s", param.Name, gen.GenType(param.TypeValue)))
+			}
 		}
 
 		returnType := gen.GenType(method.ReturnValue)

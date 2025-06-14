@@ -14,10 +14,6 @@ type codegen struct {
 	w      io.Writer
 }
 
-// func (gen *codegen) Write(format string, args ...any) {
-// 	fmt.Fprintf(gen.w, format, args...)
-// }
-
 func (gen *codegen) Writeln(format string, args ...any) {
 	repeat := strings.Repeat("  ", gen.indent)
 	fmt.Fprintf(gen.w, repeat+format+"\n", args...)
