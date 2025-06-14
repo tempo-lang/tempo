@@ -26,7 +26,7 @@ func (e *ExprInt) Codegen() jen.Code {
 }
 
 func (e *ExprInt) Type() Type {
-	return &BuiltinType{Type: types.Int(nil)}
+	return IntType
 }
 
 func (e *ExprInt) ReturnsValue() bool {
@@ -54,7 +54,7 @@ func (e *ExprFloat) Codegen() jen.Code {
 }
 
 func (e *ExprFloat) Type() Type {
-	return &BuiltinType{Type: types.Float(nil)}
+	return FloatType
 }
 
 func (e *ExprFloat) ReturnsValue() bool {
@@ -82,7 +82,7 @@ func (e *ExprString) Codegen() jen.Code {
 }
 
 func (e *ExprString) Type() Type {
-	return &BuiltinType{Type: types.String(nil)}
+	return StringType
 }
 
 func (e *ExprString) ReturnsValue() bool {
@@ -141,7 +141,7 @@ func (e *ExprBool) Codegen() jen.Code {
 }
 
 func (e *ExprBool) Type() Type {
-	return &BuiltinType{Type: types.Bool(nil)}
+	return BoolType
 }
 
 func (e *ExprBool) ReturnsValue() bool {
@@ -244,76 +244,6 @@ func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression, typeVal 
 		lhs:      lhs,
 		rhs:      rhs,
 		typeVal:  typeVal,
-	}
-}
-
-type ExprList struct {
-	items    []Expression
-	listType Type
-}
-
-func (e *ExprList) Codegen() jen.Code {
-	items := make([]jen.Code, len(e.items))
-	for i, item := range e.items {
-		items[i] = item.Codegen()
-	}
-	return jen.Add(e.listType.Codegen()).Values(items...)
-}
-
-func (e *ExprList) Type() Type {
-	return e.listType
-}
-
-func (e *ExprList) ReturnsValue() bool {
-	return true
-}
-
-func (e *ExprList) HasSideEffects() bool {
-	for _, item := range e.items {
-		if item.HasSideEffects() {
-			return true
-		}
-	}
-	return false
-}
-
-func (e *ExprList) IsExpression() {}
-
-func NewExprList(items []Expression, listType Type) Expression {
-	return &ExprList{
-		items:    items,
-		listType: listType,
-	}
-}
-
-type ExprIndex struct {
-	base  Expression
-	index Expression
-}
-
-func (e *ExprIndex) Codegen() jen.Code {
-	return jen.Add(e.base.Codegen()).Index(e.index.Codegen())
-}
-
-func (e *ExprIndex) Type() Type {
-	listType := e.base.Type().(*ListType)
-	return listType.Inner
-}
-
-func (e *ExprIndex) ReturnsValue() bool {
-	return true
-}
-
-func (e *ExprIndex) HasSideEffects() bool {
-	return e.base.HasSideEffects() || e.index.HasSideEffects()
-}
-
-func (e *ExprIndex) IsExpression() {}
-
-func NewExprIndex(base Expression, index Expression) Expression {
-	return &ExprIndex{
-		base:  base,
-		index: index,
 	}
 }
 

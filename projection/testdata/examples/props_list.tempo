@@ -1,0 +1,4 @@
+func@(A,B,C) list() {
+  let value: [Int@[A,B]] = [1,2,3];
+  let x: Int@[A,B] = value.length;
+}

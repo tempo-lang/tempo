@@ -69,7 +69,18 @@ func (epp *epp) eppType(roleName string, typ types.Type) projection.Type {
 		}
 
 		if builtin, ok := typ.(types.Builtin); ok {
-			return &projection.BuiltinType{Type: builtin}
+			switch builtin.(type) {
+			case *types.BoolType:
+				return projection.BoolType
+			case *types.FloatType:
+				return projection.FloatType
+			case *types.IntType:
+				return projection.IntType
+			case *types.StringType:
+				return projection.StringType
+			default:
+				panic(fmt.Sprintf("unexpected types.Builtin: %#v", builtin))
+			}
 		}
 
 		panic(fmt.Sprintf("failed to epp type: %#v\n", typ))

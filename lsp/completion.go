@@ -3,7 +3,6 @@ package lsp
 import (
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/sym_table"
-	"github.com/tempo-lang/tempo/types"
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/tliron/glsp"
@@ -117,8 +116,6 @@ func symbolToCompletionItem(sym sym_table.Symbol) protocol.CompletionItem {
 		kind = toPtr(protocol.CompletionItemKindField)
 	case *sym_table.VariableSymbol:
 		kind = toPtr(protocol.CompletionItemKindVariable)
-	// case *sym_table.InterfaceMethodSymbol:
-	// 	kind = toPtr(protocol.CompletionItemKindMethod)
 	case *sym_table.InterfaceSymbol:
 		kind = toPtr(protocol.CompletionItemKindInterface)
 	}
@@ -145,34 +142,22 @@ func completionItemsAllInScope(scope *sym_table.Scope) []protocol.CompletionItem
 func completionItemsForFieldAccess(file *tempoDoc, fieldAccess *parser.ExprFieldAccessContext) ([]protocol.CompletionItem, bool) {
 	logger.Infof("Finding completions for ExprFieldAccess")
 
-	fieldType, ok := file.info.Types[fieldAccess.Expr()]
+	exprType, ok := file.info.Types[fieldAccess.Expr()]
 	if !ok {
 		logger.Debugf("")
 		return nil, false
 	}
 
-	switch fieldType := fieldType.(type) {
-	case *types.StructType:
-		scope := file.info.GlobalScope.Innermost(fieldAccess.GetStart())
-
-		structSym := scope.LookupParent(fieldType.Name()).(*sym_table.StructSymbol)
-
-		completionItems := []protocol.CompletionItem{}
-		for _, field := range structSym.Fields() {
-			completionItems = append(completionItems, symbolToCompletionItem(field))
-		}
-		return completionItems, true
-	case *types.InterfaceType:
-		// infSym := file.info.Symbols[fieldType.Ident()].(*sym_table.InterfaceSymbol)
-
-		completionItems := []protocol.CompletionItem{}
-		// for _, method := range infSym.Methods() {
-		// 	completionItems = append(completionItems, symbolToCompletionItem(method))
-		// }
-		return completionItems, true
+	completionItems := []protocol.CompletionItem{}
+	for name, fieldType := range exprType.Fields() {
+		completionItems = append(completionItems, protocol.CompletionItem{
+			Label:  name,
+			Kind:   toPtr(protocol.CompletionItemKindField),
+			Detail: toPtr(fieldType.ToString()),
+		})
 	}
 
-	return nil, false
+	return completionItems, true
 }
 
 func completionItemsForRoleType(file *tempoDoc, roleType parser.IRoleTypeContext) ([]protocol.CompletionItem, bool) {

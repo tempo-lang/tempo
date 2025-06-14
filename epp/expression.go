@@ -213,7 +213,8 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		if exprType.Roles().Contains(roleName) {
 			fieldName := expr.Ident().GetText()
-			return projection.NewExprFieldAccess(baseExpr, fieldName, exprValue), aux
+			fieldExpr := epp.eppField(baseExpr, fieldName, exprValue)
+			return fieldExpr, aux
 		} else {
 			if baseExpr != nil && baseExpr.HasSideEffects() {
 				aux = append(aux, projection.NewStmtExpr(baseExpr))

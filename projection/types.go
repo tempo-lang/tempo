@@ -3,8 +3,6 @@ package projection
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/types"
-
 	"github.com/dave/jennifer/jen"
 )
 
@@ -13,24 +11,29 @@ type Type interface {
 	Codegen() jen.Code
 }
 
-type BuiltinType struct {
-	types.Type
-}
+type BuiltinType string
 
-func (c *BuiltinType) IsType() {}
+const (
+	IntType    BuiltinType = "Int"
+	FloatType  BuiltinType = "Float"
+	StringType BuiltinType = "String"
+	BoolType   BuiltinType = "Bool"
+)
 
-func (t *BuiltinType) Codegen() jen.Code {
-	switch t.Type.(type) {
-	case *types.IntType:
+func (c BuiltinType) IsType() {}
+
+func (t BuiltinType) Codegen() jen.Code {
+	switch t {
+	case IntType:
 		return jen.Int()
-	case *types.FloatType:
+	case FloatType:
 		return jen.Float64()
-	case *types.StringType:
+	case StringType:
 		return jen.String()
-	case *types.BoolType:
+	case BoolType:
 		return jen.Bool()
 	default:
-		panic(fmt.Sprintf("unknown builtin type: %s", t.Type.ToString()))
+		panic(fmt.Sprintf("unknown builtin type: %s", t))
 	}
 }
 
