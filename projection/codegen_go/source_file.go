@@ -1,3 +1,4 @@
+// This module is responsible for generating Go source from a projection.
 package codegen_go
 
 import (

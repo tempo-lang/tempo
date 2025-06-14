@@ -22,7 +22,7 @@ func GenInterface(inf *projection.Interface) *jen.Statement {
 		methods = append(methods, GenFuncSig(method.FuncSig, true))
 	}
 
-	return jen.Type().Id(fmt.Sprintf("%s_%s", inf.Name, inf.Role)).Interface(methods...)
+	return jen.Type().Id(inf.GenName()).Interface(methods...)
 }
 
 func GenInterfaceType(t *projection.InterfaceType) jen.Code {

@@ -1,6 +1,8 @@
 package projection
 
 import (
+	"fmt"
+
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 )
@@ -54,6 +56,10 @@ func (inf *Interface) AddMethod(sig *FuncSig, ctx parser.IInterfaceMethodContext
 	inf.Methods = append(inf.Methods, method)
 
 	return method
+}
+
+func (inf *Interface) GenName() string {
+	return fmt.Sprintf("%s_%s", inf.Name, inf.Role)
 }
 
 type InterfaceType struct {

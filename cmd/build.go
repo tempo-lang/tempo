@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/spf13/cobra"
@@ -13,6 +14,33 @@ import (
 )
 
 var packageName string
+var targetLang TargetLangFlag
+
+type TargetLangFlag string
+
+const ()
+
+// Set implements pflag.Value.
+func (t *TargetLangFlag) Set(v string) error {
+	v = strings.ToLower(v)
+	switch v {
+	case "go", "ts":
+		*t = TargetLangFlag(v)
+		return nil
+	default:
+		return errors.New(`must be one of "go" or "ts"`)
+	}
+}
+
+// String implements pflag.Value.
+func (t *TargetLangFlag) String() string {
+	return string(*t)
+}
+
+// Type implements pflag.Value.
+func (t *TargetLangFlag) Type() string {
+	return "language"
+}
 
 var buildCmd = &cobra.Command{
 	Use:     "build [flags] file",
@@ -44,6 +72,7 @@ var buildCmd = &cobra.Command{
 		}
 		options := compiler.Options{
 			PackageName: packageName,
+			Language:    compiler.CompilerLanguage(targetLang),
 		}
 
 		output, errors := compiler.Compile(input, &options)
@@ -64,5 +93,6 @@ var buildCmd = &cobra.Command{
 
 func init() {
 	buildCmd.Flags().StringVarP(&packageName, "package", "p", "", "The Go package name for the generated code")
+	buildCmd.Flags().VarP(&targetLang, "lang", "l", `Target language, allowed: "go", "ts"`)
 	rootCmd.AddCommand(buildCmd)
 }
