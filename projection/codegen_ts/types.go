@@ -3,10 +3,15 @@ package codegen_ts
 import (
 	"fmt"
 
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
 )
 
 func (gen *codegen) GenType(t projection.Type) string {
+	if t == projection.UnitType() {
+		return "void"
+	}
+
 	switch t := t.(type) {
 	case *projection.AsyncType:
 		return gen.GenAsyncType(t)
@@ -47,11 +52,19 @@ func (gen *codegen) GenBuiltinType(t projection.BuiltinType) string {
 }
 
 func (gen *codegen) GenClosureType(t *projection.ClosureType) string {
-	return "[ClosureType]"
+	params := []string{"env: Env"}
+	for i, param := range t.Params {
+		params = append(params, fmt.Sprintf("arg%d: %s", i, gen.GenType(param)))
+	}
+	return fmt.Sprintf("(%s) => Promise<%s>", misc.JoinStrings(params, ", "), gen.GenType(t.ReturnType))
 }
 
 func (gen *codegen) GenFunctionType(t *projection.FunctionType) string {
-	return "[FunctionType]"
+	params := []string{"env: Env"}
+	for i, param := range t.Params {
+		params = append(params, fmt.Sprintf("arg%d: %s", i, gen.GenType(param)))
+	}
+	return fmt.Sprintf("(%s) => Promise<%s>", misc.JoinStrings(params, ", "), gen.GenType(t.ReturnType))
 }
 
 func (gen *codegen) GenInterfaceType(t *projection.InterfaceType) string {
@@ -59,7 +72,7 @@ func (gen *codegen) GenInterfaceType(t *projection.InterfaceType) string {
 }
 
 func (gen *codegen) GenListType(t *projection.ListType) string {
-	return "[ListType]"
+	return gen.GenType(t.Inner) + "[]"
 }
 
 func (gen *codegen) GenStructType(t *projection.StructType) string {

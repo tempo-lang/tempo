@@ -71,25 +71,41 @@ func (gen *codegen) GenExprBool(e *projection.ExprBool) string {
 }
 
 func (gen *codegen) GenExprCallClosure(e *projection.ExprCallClosure) string {
-	args := []string{}
+	args := []string{"env"}
 	for _, arg := range e.Args {
 		args = append(args, gen.GenExpr(arg))
 	}
 
-	return fmt.Sprintf("%s(%s)", gen.GenExpr(e.ClosureExpr), misc.JoinStrings(args, ", "))
+	out := fmt.Sprintf("%s(%s)", gen.GenExpr(e.ClosureExpr), misc.JoinStrings(args, ", "))
+	if _, isAsync := e.ReturnType.(*projection.AsyncType); !isAsync {
+		out = "await " + out
+	}
+
+	return out
 }
 
 func (gen *codegen) GenExprCallFunc(e *projection.ExprCallFunc) string {
-	args := []string{}
+	args := []string{"env"}
 	for _, arg := range e.Args {
 		args = append(args, gen.GenExpr(arg))
 	}
 
-	return fmt.Sprintf("%s(%s)", gen.GenExpr(e.FuncExpr), misc.JoinStrings(args, ", "))
+	out := fmt.Sprintf("%s(%s)", gen.GenExpr(e.FuncExpr), misc.JoinStrings(args, ", "))
+	if _, isAsync := e.ReturnType.(*projection.AsyncType); !isAsync {
+		out = "await " + out
+	}
+
+	return out
 }
 
 func (gen *codegen) GenExprClosure(e *projection.ExprClosure) string {
 	params := []string{}
+	if gen.opts.DisableTypes {
+		params = append(params, "env")
+	} else {
+		params = append(params, "env: Env")
+	}
+
 	for _, param := range e.Params {
 		if gen.opts.DisableTypes {
 			params = append(params, param.Name)
@@ -98,26 +114,24 @@ func (gen *codegen) GenExprClosure(e *projection.ExprClosure) string {
 		}
 	}
 
-	result := fmt.Sprintf("(%s)", misc.JoinStrings(params, ", "))
+	out := fmt.Sprintf("async (%s)", misc.JoinStrings(params, ", "))
 
 	if e.ReturnType != projection.UnitType() && !gen.opts.DisableTypes {
-		result += fmt.Sprintf(": %s", gen.GenType(e.ReturnType))
+		out += fmt.Sprintf(": Promise<%s>", gen.GenType(e.ReturnType))
 	}
 
-	result += " => {"
+	out += " => {\n"
 	gen.IncIndent()
 
-	// builder := strings.Builder{}
-	// for _, stmt := range e.Body {
-	// 	gen.GenStmt(stmt)
-	// }
-	// result += builder.String()
+	for _, stmt := range e.Body {
+		out += gen.GenStmt(stmt)
+	}
 
 	gen.DecIndent()
 
-	result += "}"
+	out += gen.WriteIndent() + "}"
 
-	return result
+	return out
 }
 
 func (gen *codegen) GenExprFieldAccess(e *projection.ExprFieldAccess) string {

@@ -6,51 +6,45 @@ import (
 	"github.com/tempo-lang/tempo/projection"
 )
 
-func (gen *codegen) GenStmt(s projection.Statement) {
+func (gen *codegen) GenStmt(s projection.Statement) string {
 	switch s := s.(type) {
 	case *projection.StmtAssign:
-		gen.GenStmtAssign(s)
-		return
+		return gen.GenStmtAssign(s)
 	case *projection.StmtExpr:
-		gen.GenStmtExpr(s)
-		return
+		return gen.GenStmtExpr(s)
 	case *projection.StmtIf:
-		gen.GenStmtIf(s)
-		return
+		return gen.GenStmtIf(s)
 	case *projection.StmtReturn:
-		gen.GenStmtReturn(s)
-		return
+		return gen.GenStmtReturn(s)
 	case *projection.StmtVarDecl:
-		gen.GenStmtVarDecl(s)
-		return
+		return gen.GenStmtVarDecl(s)
 	case *projection.StmtWhile:
-		gen.GenStmtWhile(s)
-		return
+		return gen.GenStmtWhile(s)
 	}
 
 	panic(fmt.Sprintf("unexpected projection.Statement: %#v", s))
 }
 
-func (gen *codegen) GenStmtAssign(s *projection.StmtAssign) {
-	gen.Writeln("%s = %s;", s.Name, gen.GenExpr(s.Expr))
+func (gen *codegen) GenStmtAssign(s *projection.StmtAssign) string {
+	return gen.Writeln("%s = %s;", s.Name, gen.GenExpr(s.Expr))
 }
 
-func (gen *codegen) GenStmtExpr(s *projection.StmtExpr) {
-	gen.Writeln("%s;", gen.GenExpr(s.Expr))
+func (gen *codegen) GenStmtExpr(s *projection.StmtExpr) string {
+	return gen.Writeln("%s;", gen.GenExpr(s.Expr))
 }
 
-func (gen *codegen) GenStmtIf(s *projection.StmtIf) {
-	gen.Writeln("[StmtIf]")
+func (gen *codegen) GenStmtIf(s *projection.StmtIf) string {
+	return gen.Writeln("[StmtIf]")
 }
 
-func (gen *codegen) GenStmtReturn(s *projection.StmtReturn) {
-	gen.Writeln("return %s;", gen.GenExpr(s.Expr))
+func (gen *codegen) GenStmtReturn(s *projection.StmtReturn) string {
+	return gen.Writeln("return %s;", gen.GenExpr(s.Expr))
 }
 
-func (gen *codegen) GenStmtVarDecl(s *projection.StmtVarDecl) {
-	gen.Writeln("let %s: %s = %s;", s.Name, gen.GenType(s.Expr.Type()), gen.GenExpr(s.Expr))
+func (gen *codegen) GenStmtVarDecl(s *projection.StmtVarDecl) string {
+	return gen.Writeln("let %s: %s = %s;", s.Name, gen.GenType(s.Expr.Type()), gen.GenExpr(s.Expr))
 }
 
-func (gen *codegen) GenStmtWhile(s *projection.StmtWhile) {
-	gen.Writeln("[StmtWhile]")
+func (gen *codegen) GenStmtWhile(s *projection.StmtWhile) string {
+	return gen.Writeln("[StmtWhile]")
 }

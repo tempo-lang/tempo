@@ -7,16 +7,17 @@ import (
 	"github.com/tempo-lang/tempo/projection"
 )
 
-func (gen *codegen) GenFunc(f *projection.Func) {
-	gen.Writeln("%s {", gen.GenFuncSig(f.FuncSig))
+func (gen *codegen) GenFunc(f *projection.Func) string {
+	out := gen.Writeln("%s {", gen.GenFuncSig(f.FuncSig))
 	gen.IncIndent()
 
 	for _, stmt := range f.Body {
-		gen.GenStmt(stmt)
+		out += gen.GenStmt(stmt)
 	}
 
 	gen.DecIndent()
-	gen.Writeln("}")
+	out += gen.Writeln("}")
+	return out
 }
 
 func (gen *codegen) GenFuncSig(f *projection.FuncSig) string {

@@ -2,9 +2,7 @@
 package compiler
 
 import (
-	"bufio"
 	"fmt"
-	"strings"
 
 	"github.com/tempo-lang/tempo/epp"
 	"github.com/tempo-lang/tempo/parser"
@@ -83,11 +81,7 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 		output = file.GoString()
 		return
 	case LangTS:
-		b := strings.Builder{}
-		buf := bufio.NewWriter(&b)
-		codegen_ts.Codegen(buf, eppFile, nil)
-		buf.Flush()
-		output = b.String()
+		output = codegen_ts.Codegen(eppFile, nil)
 		return
 	default:
 		panic(fmt.Sprintf("unknown language: %v", options.Language))

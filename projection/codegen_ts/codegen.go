@@ -2,7 +2,6 @@ package codegen_ts
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/tempo-lang/tempo/projection"
@@ -11,12 +10,14 @@ import (
 type codegen struct {
 	indent int
 	opts   Options
-	w      io.Writer
 }
 
-func (gen *codegen) Writeln(format string, args ...any) {
-	repeat := strings.Repeat("  ", gen.indent)
-	fmt.Fprintf(gen.w, repeat+format+"\n", args...)
+func (gen *codegen) WriteIndent() string {
+	return strings.Repeat("  ", gen.indent)
+}
+
+func (gen *codegen) Writeln(format string, args ...any) string {
+	return fmt.Sprintf(gen.WriteIndent()+format+"\n", args...)
 }
 
 func (gen *codegen) IncIndent() {
@@ -31,14 +32,13 @@ type Options struct {
 	DisableTypes bool
 }
 
-func Codegen(w io.Writer, sourceFile *projection.SourceFile, opts *Options) {
+func Codegen(sourceFile *projection.SourceFile, opts *Options) string {
 	gen := codegen{
 		indent: 0,
-		w:      w,
 	}
 	if opts != nil {
 		gen.opts = *opts
 	}
 
-	gen.GenSourceFile(sourceFile)
+	return gen.GenSourceFile(sourceFile)
 }

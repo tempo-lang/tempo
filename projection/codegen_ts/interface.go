@@ -7,18 +7,19 @@ import (
 	"github.com/tempo-lang/tempo/projection"
 )
 
-func (gen *codegen) GenChoreographyInterface(c *projection.ChoreographyInterface) {
-	gen.Writeln("// Projection of interface %s", c.Name)
+func (gen *codegen) GenChoreographyInterface(c *projection.ChoreographyInterface) string {
+	out := gen.Writeln("// Projection of interface %s", c.Name)
 
 	for _, role := range c.Roles {
-		gen.GenInterface(c.Interfaces[role])
+		out += gen.GenInterface(c.Interfaces[role])
 	}
 
-	gen.Writeln("")
+	out += gen.Writeln("")
+	return out
 }
 
-func (gen *codegen) GenInterface(inf *projection.Interface) {
-	gen.Writeln("export interface %s {", inf.GenName())
+func (gen *codegen) GenInterface(inf *projection.Interface) string {
+	out := gen.Writeln("export interface %s {", inf.GenName())
 	gen.IncIndent()
 
 	for _, method := range inf.Methods {
@@ -34,9 +35,10 @@ func (gen *codegen) GenInterface(inf *projection.Interface) {
 
 		returnType := gen.GenType(method.ReturnValue)
 
-		gen.Writeln("%s(%s): %s;", method.Name, misc.JoinStrings(params, ", "), returnType)
+		out += gen.Writeln("%s(%s): %s;", method.Name, misc.JoinStrings(params, ", "), returnType)
 	}
 
 	gen.DecIndent()
-	gen.Writeln("}")
+	out += gen.Writeln("}")
+	return out
 }
