@@ -25,12 +25,14 @@ const (
 type Options struct {
 	PackageName string
 	Language    CompilerLanguage
+	RuntimePath string
 }
 
 func DefaultOptions() Options {
 	return Options{
 		PackageName: "choreography",
 		Language:    LangGo,
+		RuntimePath: "./runtime.ts",
 	}
 }
 

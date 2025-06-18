@@ -30,6 +30,7 @@ func (gen *codegen) DecIndent() {
 
 type Options struct {
 	DisableTypes bool
+	RuntimePath  string
 }
 
 func Codegen(sourceFile *projection.SourceFile, opts *Options) string {
