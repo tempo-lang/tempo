@@ -33,12 +33,21 @@ type Options struct {
 	RuntimePath  string
 }
 
+func DefaultOptions() Options {
+	return Options{
+		DisableTypes: false,
+		RuntimePath:  "@tempo-lang/tempo/runtime",
+	}
+}
+
 func Codegen(sourceFile *projection.SourceFile, opts *Options) string {
 	gen := codegen{
 		indent: 0,
 	}
 	if opts != nil {
 		gen.opts = *opts
+	} else {
+		gen.opts = DefaultOptions()
 	}
 
 	return gen.GenSourceFile(sourceFile)

@@ -32,7 +32,7 @@ func DefaultOptions() Options {
 	return Options{
 		PackageName: "choreography",
 		Language:    LangGo,
-		RuntimePath: "./runtime.ts",
+		RuntimePath: "@tempo-lang/tempo/runtime",
 	}
 }
 

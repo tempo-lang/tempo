@@ -1,5 +1,5 @@
 export interface Transport {
-  send<T>(value: T, ...roles: [string]): Promise<void>;
+  send<T>(value: T, ...roles: string[]): Promise<void>;
   recv<T>(role: string): Promise<T>;
 }
 
@@ -14,7 +14,7 @@ export class Env {
     this.roleSubst = {};
   }
 
-  async send<T>(value: T, ...roles: [string]) {
+  async send<T>(value: T, ...roles: string[]) {
     await this.trans.send(value, ...roles);
   }
 

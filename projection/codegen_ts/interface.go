@@ -24,7 +24,7 @@ func (gen *codegen) GenInterface(inf *projection.Interface) string {
 
 	for _, method := range inf.Methods {
 
-		params := []string{}
+		params := []string{"env: Env"}
 		for _, param := range method.Params {
 			if gen.opts.DisableTypes {
 				params = append(params, param.Name)

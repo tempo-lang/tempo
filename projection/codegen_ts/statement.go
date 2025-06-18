@@ -34,7 +34,27 @@ func (gen *codegen) GenStmtExpr(s *projection.StmtExpr) string {
 }
 
 func (gen *codegen) GenStmtIf(s *projection.StmtIf) string {
-	return gen.Writeln("[StmtIf]")
+	out := gen.Writeln("if (%s) {", gen.GenExpr(s.Guard))
+
+	gen.IncIndent()
+	for _, stmt := range s.ThenBranch {
+		out += gen.GenStmt(stmt)
+	}
+	gen.DecIndent()
+
+	if len(s.ElseBranch) > 0 {
+		out += gen.Writeln("} else {")
+
+		gen.IncIndent()
+		for _, stmt := range s.ElseBranch {
+			out += gen.GenStmt(stmt)
+		}
+		gen.DecIndent()
+	}
+
+	out += gen.Writeln("}")
+
+	return out
 }
 
 func (gen *codegen) GenStmtReturn(s *projection.StmtReturn) string {
@@ -46,5 +66,15 @@ func (gen *codegen) GenStmtVarDecl(s *projection.StmtVarDecl) string {
 }
 
 func (gen *codegen) GenStmtWhile(s *projection.StmtWhile) string {
-	return gen.Writeln("[StmtWhile]")
+	out := gen.Writeln("while (%s) {", gen.GenExpr(s.Cond))
+
+	gen.IncIndent()
+	for _, stmt := range s.Stmts {
+		out += gen.GenStmt(stmt)
+	}
+	gen.DecIndent()
+
+	out += gen.Writeln("}")
+
+	return out
 }
