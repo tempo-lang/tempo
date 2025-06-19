@@ -1,19 +1,23 @@
 /**
  * The transport module provides a set of default {@link Transport} implementations.
+ *
+ * @module
  */
 import { Transport } from "../runtime.ts";
+
+export * from "./record.ts";
 
 /**
  * A local queue that is used to obtain {@link Transport} implementations for processes to communicate locally.
  */
 export class LocalQueue {
-  private channels: { [key: string]: LocalChan };
+  #channels: { [key: string]: LocalChan };
 
   /**
    * Constructs a new local queue.
    */
   constructor() {
-    this.channels = {};
+    this.#channels = {};
   }
 
   /**
@@ -25,12 +29,12 @@ export class LocalQueue {
   get(from: string, to: string): LocalChan {
     const key = from + "." + to;
 
-    const chan = this.channels[key];
+    const chan = this.#channels[key];
     if (chan) {
       return chan;
     } else {
       const newChan = new LocalChan();
-      this.channels[key] = newChan;
+      this.#channels[key] = newChan;
       return newChan;
     }
   }
@@ -54,25 +58,25 @@ type ChanPromise<T> = {
  * A local directed channel from a specific role to another.
  */
 class LocalChan {
-  private sendBuf: Promise<any>[];
-  private recvBuf: ChanPromise<any>[];
+  #sendBuf: Promise<any>[];
+  #recvBuf: ChanPromise<any>[];
 
   constructor() {
-    this.sendBuf = [];
-    this.recvBuf = [];
+    this.#sendBuf = [];
+    this.#recvBuf = [];
   }
 
   send<T>(value: T) {
-    const recvProm = this.recvBuf.shift();
+    const recvProm = this.#recvBuf.shift();
     if (recvProm) {
       recvProm.resolve(value);
     } else {
-      this.sendBuf.push(Promise.resolve(value));
+      this.#sendBuf.push(Promise.resolve(value));
     }
   }
 
   recv<T>(): Promise<T> {
-    const sendProm = this.sendBuf.shift();
+    const sendProm = this.#sendBuf.shift();
     if (sendProm) {
       return sendProm;
     } else {
@@ -81,7 +85,7 @@ class LocalChan {
         resolveCallback = resolve;
       });
 
-      this.recvBuf.push({
+      this.#recvBuf.push({
         resolve: resolveCallback,
         promise,
       });
@@ -95,22 +99,22 @@ class LocalChan {
  * Implementation of the {@link Transport} interface for a locally communicating process.
  */
 class LocalTransport implements Transport {
-  role: string;
-  queue: LocalQueue;
+  #role: string;
+  #queue: LocalQueue;
 
   constructor(role: string, queue: LocalQueue) {
-    this.role = role;
-    this.queue = queue;
+    this.#role = role;
+    this.#queue = queue;
   }
 
   send<T>(value: T, ...roles: string[]) {
     for (const receiver of roles) {
-      const chan = this.queue.get(this.role, receiver);
+      const chan = this.#queue.get(this.#role, receiver);
       chan.send(value);
     }
   }
 
   recv<T>(sender: string): Promise<T> {
-    return this.queue.get(sender, this.role).recv();
+    return this.#queue.get(sender, this.#role).recv();
   }
 }

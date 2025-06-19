@@ -26,6 +26,7 @@ func Proc(role string, run func(env *runtime.Env) any) Process {
 	}
 }
 
+// Run simulates the given processes locally.
 func Run(processes ...Process) []Result {
 	queue := transports.NewLocal()
 	results := make([]Result, len(processes))
