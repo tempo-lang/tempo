@@ -1,9 +1,10 @@
 {
   "name": "@tempo-lang/tempo",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "Apache-2.0",
   "exports": {
     "./runtime": "./runtime.ts",
-    "./transports": "./transports/mod.ts"
+    "./transports": "./transports/mod.ts",
+    "./simulator": "./simulator.ts"
   }
 }
