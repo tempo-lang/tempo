@@ -85,7 +85,15 @@ func (gen *codegen) GenExprCallClosure(e *projection.ExprCallClosure) string {
 }
 
 func (gen *codegen) GenExprCallFunc(e *projection.ExprCallFunc) string {
-	args := []string{"env"}
+	roleSub := []string{}
+	for _, to := range e.RoleSubs.Roles {
+		from := e.RoleSubs.Subst(to)
+		roleSub = append(roleSub, fmt.Sprintf("\"%s\"", from), fmt.Sprintf("\"%s\"", to))
+	}
+
+	env := fmt.Sprintf("env.subst(%s)", misc.JoinStrings(roleSub, ", "))
+
+	args := []string{env}
 	for _, arg := range e.Args {
 		args = append(args, gen.GenExpr(arg))
 	}
