@@ -59,7 +59,20 @@ func (gen *codegen) GenExprAwait(e *projection.ExprAwait) string {
 }
 
 func (gen *codegen) GenExprBinaryOp(e *projection.ExprBinaryOp) string {
-	return fmt.Sprintf("%s %s %s", gen.GenExpr(e.Lhs), e.Operator, gen.GenExpr(e.Rhs))
+	op := e.Operator
+
+	switch op {
+	case projection.OpEq:
+		op = "==="
+	case projection.OpNotEq:
+		op = "!=="
+	}
+
+	if _, isList := e.Type().(*projection.ListType); isList && op == projection.OpAdd {
+		return fmt.Sprintf("%s.concat(%s)", gen.GenExpr(e.Lhs), gen.GenExpr(e.Rhs))
+	}
+
+	return fmt.Sprintf("%s %s %s", gen.GenExpr(e.Lhs), op, gen.GenExpr(e.Rhs))
 }
 
 func (gen *codegen) GenExprBool(e *projection.ExprBool) string {

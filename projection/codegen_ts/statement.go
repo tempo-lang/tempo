@@ -58,7 +58,11 @@ func (gen *codegen) GenStmtIf(s *projection.StmtIf) string {
 }
 
 func (gen *codegen) GenStmtReturn(s *projection.StmtReturn) string {
-	return gen.Writeln("return %s;", gen.GenExpr(s.Expr))
+	if s.Expr != nil {
+		return gen.Writeln("return %s;", gen.GenExpr(s.Expr))
+	} else {
+		return gen.Writeln("return;")
+	}
 }
 
 func (gen *codegen) GenStmtVarDecl(s *projection.StmtVarDecl) string {

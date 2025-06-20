@@ -7,9 +7,9 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func binOps_A(env *runtime.Env) {
 	var a int = 1 + 2 - 3*4/5%6
 	_ = a
-	var b bool = true == false
+	var b bool = true == true
 	_ = b
-	var c bool = true != false
+	var c bool = false != false
 	_ = c
 	var d bool = 10 < 20
 	_ = d
