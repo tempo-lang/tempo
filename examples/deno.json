@@ -1,5 +1,8 @@
 {
   "imports": {
-    "@std/assert": "jsr:@std/assert@^1.0.13"
+    "@std/assert": "jsr:@std/assert@^1.0.13",
+    "@std/crypto": "jsr:@std/crypto@^1.0.5",
+    "@std/encoding": "jsr:@std/encoding@^1.0.10",
+    "@std/random": "jsr:@std/random@^0.1.2"
   }
 }

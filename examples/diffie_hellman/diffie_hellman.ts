@@ -4,7 +4,7 @@ import { Env } from '../../typescript/runtime.ts';
 
 // Projection of interface Math
 export interface Math_A {
-  Exp(env: Env, base: number, exp: number): number;
+  Exp(env: Env, base: number, exp: number): Promise<number>;
 }
 
 // Projection of struct Secret

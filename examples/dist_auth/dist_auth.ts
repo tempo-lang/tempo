@@ -4,18 +4,18 @@ import { Env } from '../../typescript/runtime.ts';
 
 // Projection of interface ClientRegistry
 export interface ClientRegistry_A {
-  GetSalt(env: Env, username: string): string;
-  Check(env: Env, hash: string): boolean;
+  GetSalt(env: Env, username: string): Promise<string>;
+  Check(env: Env, hash: string): Promise<boolean>;
 }
 
 // Projection of interface TokenGenerator
 export interface TokenGenerator_A {
-  GenerateToken(env: Env): string;
+  GenerateToken(env: Env): Promise<string>;
 }
 
 // Projection of interface Hasher
 export interface Hasher_A {
-  CalcHash(env: Env, salt: string, password: string): string;
+  CalcHash(env: Env, salt: string, password: string): Promise<string>;
 }
 
 // Projection of struct Credentials

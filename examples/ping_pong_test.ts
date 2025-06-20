@@ -3,19 +3,13 @@ import { simulate } from "../typescript/simulator.ts";
 import { Start_A, Start_B } from "./ping_pong/ping_pong.ts";
 
 Deno.test("simulate ping pong", async () => {
-  const result = await simulate(
-    {
-      role: "A",
-      run: Start_A,
-    },
-    {
-      role: "B",
-      run: Start_B,
-    }
-  );
+  const result = await simulate({
+    A: Start_A,
+    B: Start_B,
+  });
 
-  assertEquals(result, [
-    {
+  assertEquals(result, {
+    A: {
       receives: [
         { sender: "B", value: 3 },
         { sender: "B", value: 1 },
@@ -26,7 +20,7 @@ Deno.test("simulate ping pong", async () => {
         { receivers: ["B"], value: 2 },
       ],
     },
-    {
+    B: {
       receives: [
         { sender: "A", value: 4 },
         { sender: "A", value: 2 },
@@ -37,5 +31,5 @@ Deno.test("simulate ping pong", async () => {
         { receivers: ["A"], value: 1 },
       ],
     },
-  ]);
+  });
 });

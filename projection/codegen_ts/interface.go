@@ -35,7 +35,7 @@ func (gen *codegen) GenInterface(inf *projection.Interface) string {
 
 		returnType := gen.GenType(method.ReturnValue)
 
-		out += gen.Writeln("%s(%s): %s;", method.Name, misc.JoinStrings(params, ", "), returnType)
+		out += gen.Writeln("%s(%s): Promise<%s>;", method.Name, misc.JoinStrings(params, ", "), returnType)
 	}
 
 	gen.DecIndent()
