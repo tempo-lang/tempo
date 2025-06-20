@@ -1,11 +1,11 @@
-package simulator_test
+package examples_test
 
 import (
 	"testing"
 
+	"github.com/tempo-lang/tempo/examples/ping_pong"
 	"github.com/tempo-lang/tempo/runtime"
 	"github.com/tempo-lang/tempo/simulator"
-	"github.com/tempo-lang/tempo/simulator/ping_pong"
 	"github.com/tempo-lang/tempo/transports"
 
 	"github.com/google/go-cmp/cmp"

@@ -1,3 +1,3 @@
-package simulator
+package examples
 
 //go:generate ./generate.sh

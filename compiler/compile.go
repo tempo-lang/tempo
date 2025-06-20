@@ -23,16 +23,18 @@ const (
 
 // Options given to the compiler
 type Options struct {
-	PackageName string
-	Language    CompilerLanguage
-	RuntimePath string
+	PackageName  string
+	Language     CompilerLanguage
+	RuntimePath  string
+	DisableTypes bool
 }
 
 func DefaultOptions() Options {
 	return Options{
-		PackageName: "choreography",
-		Language:    LangGo,
-		RuntimePath: "@tempo-lang/tempo/runtime",
+		PackageName:  "choreography",
+		Language:     LangGo,
+		RuntimePath:  "@tempo-lang/tempo/runtime",
+		DisableTypes: false,
 	}
 }
 
@@ -83,7 +85,11 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 		output = file.GoString()
 		return
 	case LangTS:
-		output = codegen_ts.Codegen(eppFile, nil)
+		tsOpts := codegen_ts.Options{
+			DisableTypes: options.DisableTypes,
+			RuntimePath:  options.RuntimePath,
+		}
+		output = codegen_ts.Codegen(eppFile, &tsOpts)
 		return
 	default:
 		panic(fmt.Sprintf("unknown language: %v", options.Language))

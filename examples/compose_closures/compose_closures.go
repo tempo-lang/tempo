@@ -5,8 +5,8 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography compose
 func compose_A(env *runtime.Env, f func(int)) func(int) {
-	return func(in int) {
-		f(in)
+	return func(input int) {
+		f(input)
 	}
 }
 func compose_B(env *runtime.Env, f func() int, g func(int)) func() {
@@ -29,14 +29,14 @@ func incAndSend_Y(env *runtime.Env) int {
 }
 
 // Projection of choreography Start
-func Start_A(env *runtime.Env, in int) {
+func Start_A(env *runtime.Env, input int) {
 	var f func(int) = func(value int) {
 		incAndSend_X(env.Subst("A", "X", "B", "Y"), value)
 	}
 	_ = f
 	var c func(int) = compose_A(env.Subst("A", "A", "B", "B", "C", "C"), f)
 	_ = c
-	c(in)
+	c(input)
 }
 func Start_B(env *runtime.Env) {
 	var f func() int = func() int {

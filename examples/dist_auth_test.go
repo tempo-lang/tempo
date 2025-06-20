@@ -1,4 +1,4 @@
-package simulator_test
+package examples_test
 
 import (
 	"crypto/sha256"
@@ -7,9 +7,9 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/tempo-lang/tempo/examples/dist_auth"
 	"github.com/tempo-lang/tempo/runtime"
 	"github.com/tempo-lang/tempo/simulator"
-	"github.com/tempo-lang/tempo/simulator/dist_auth"
 	"github.com/tempo-lang/tempo/transports"
 
 	"github.com/google/go-cmp/cmp"

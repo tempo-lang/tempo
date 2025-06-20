@@ -1,6 +1,6 @@
 func@(A,B,C) compose(f: func@(A,B)(Int@A)Int@B, g: func@(B,C)(Int@B)Int@C) func@(A,B,C)(Int@A)Int@C {
-  return func@(A,B,C) (in: Int@A) Int@C {
-    return g(f(in));
+  return func@(A,B,C) (input: Int@A) Int@C {
+    return g(f(input));
   };
 }
 
@@ -8,10 +8,10 @@ func@(X,Y) incAndSend(value: Int@X) Int@Y {
   return await X->Y (value+1);
 }
 
-func@(A,B,C) Start(in: Int@A) Int@C {
+func@(A,B,C) Start(input: Int@A) Int@C {
   let f = incAndSend@(A,B);
   let g = incAndSend@(B,C);
   let c = compose@(A,B,C)(f, g);
 
-  return c(in);
+  return c(input);
 }

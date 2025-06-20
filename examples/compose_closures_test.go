@@ -1,12 +1,12 @@
-package simulator_test
+package examples_test
 
 import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/tempo-lang/tempo/examples/compose_closures"
 	"github.com/tempo-lang/tempo/runtime"
 	"github.com/tempo-lang/tempo/simulator"
-	"github.com/tempo-lang/tempo/simulator/compose_closures"
 	"github.com/tempo-lang/tempo/transports"
 )
 
