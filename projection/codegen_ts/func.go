@@ -22,7 +22,13 @@ func (gen *codegen) GenFunc(f *projection.Func) string {
 
 func (gen *codegen) GenFuncSig(f *projection.FuncSig) string {
 
-	params := []string{"env: Env"}
+	params := []string{}
+	if gen.opts.DisableTypes {
+		params = append(params, "env")
+	} else {
+		params = append(params, "env: Env")
+	}
+
 	for _, param := range f.Params {
 		if gen.opts.DisableTypes {
 			params = append(params, param.Name)

@@ -16,7 +16,7 @@ import (
 var packageName string
 var targetLang TargetLangFlag
 var runtimePath string
-var disableTypes bool
+var disableTypes *bool
 
 type TargetLangFlag string
 
@@ -76,7 +76,7 @@ var buildCmd = &cobra.Command{
 			PackageName:  packageName,
 			Language:     compiler.CompilerLanguage(targetLang),
 			RuntimePath:  runtimePath,
-			DisableTypes: disableTypes,
+			DisableTypes: *disableTypes,
 		}
 
 		output, errors := compiler.Compile(input, &options)
@@ -99,6 +99,6 @@ func init() {
 	buildCmd.Flags().StringVarP(&packageName, "package", "p", "choreography", "The Go package name for the generated code")
 	buildCmd.Flags().VarP(&targetLang, "lang", "l", `Target language, allowed: "go", "ts"`)
 	buildCmd.Flags().StringVarP(&runtimePath, "runtime", "r", "@tempo-lang/tempo/runtime", "The path to the Typescript runtime module")
-	disableTypes = *buildCmd.Flags().Bool("disable-types", false, "if true pure Javascript will be generated rather than Typescript")
+	disableTypes = buildCmd.Flags().Bool("disable-types", false, "if true pure Javascript will be generated rather than Typescript")
 	rootCmd.AddCommand(buildCmd)
 }
