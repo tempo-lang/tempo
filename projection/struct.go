@@ -53,6 +53,7 @@ type StructField struct {
 	Type     Type
 }
 
+// A record that combines multiple values with potentially different types, identified by names.
 type StructType struct {
 	types.StructType
 	role string

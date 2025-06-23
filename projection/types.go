@@ -8,13 +8,18 @@ type Type interface {
 	IsType()
 }
 
+// A primitive builtin type
 type BuiltinType string
 
 const (
-	IntType    BuiltinType = "Int"
-	FloatType  BuiltinType = "Float"
+	// A signed integer with at least 32 bit resolution.
+	IntType BuiltinType = "Int"
+	// A floating point number with at least 32 bit resolution.
+	FloatType BuiltinType = "Float"
+	// A string that supports unicode symbols.
 	StringType BuiltinType = "String"
-	BoolType   BuiltinType = "Bool"
+	// A boolean value that can only either be `true` or `false`.
+	BoolType BuiltinType = "Bool"
 )
 
 func (c BuiltinType) IsType() {}
@@ -35,6 +40,7 @@ func NewAsyncType(inner Type) Type {
 	}
 }
 
+// A variable size list containing values of the underlying type.
 type ListType struct {
 	Inner Type
 }

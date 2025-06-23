@@ -1,5 +1,7 @@
 package projection
 
+// Construct a new list with a static list of items.
+// All items have the same type.
 type ExprList struct {
 	Items    []Expression
 	listType Type
@@ -31,6 +33,7 @@ func NewExprList(items []Expression, listType Type) Expression {
 	}
 }
 
+// Returns the element given by `Index` from the list given by `Base` (zero indexed).
 type ExprIndex struct {
 	Base  Expression
 	Index Expression
@@ -58,6 +61,7 @@ func NewExprIndex(base Expression, index Expression) Expression {
 	}
 }
 
+// Returns the length of the list as an [IntType].
 type ExprListLength struct {
 	List Expression
 }

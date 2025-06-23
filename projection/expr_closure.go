@@ -1,5 +1,7 @@
 package projection
 
+// Construct a new closure and returns it.
+// The closure can capture symbols from parent scopes by reference.
 type ExprClosure struct {
 	Params      []ClosureParam
 	ReturnType  Type

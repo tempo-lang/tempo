@@ -1,5 +1,7 @@
 // This module includes the data structures that make up choreography projections.
-// Is is also responsible for generating the projected code based on these data structures.
+// The data structures are used for generating the projected code.
+//
+// The [SourceFile] is contains the root of a choreography projection.
 package projection
 
 import (
