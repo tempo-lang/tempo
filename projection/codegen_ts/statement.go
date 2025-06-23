@@ -66,7 +66,11 @@ func (gen *codegen) GenStmtReturn(s *projection.StmtReturn) string {
 }
 
 func (gen *codegen) GenStmtVarDecl(s *projection.StmtVarDecl) string {
-	return gen.Writeln("let %s: %s = %s;", s.Name, gen.GenType(s.Expr.Type()), gen.GenExpr(s.Expr))
+	if gen.opts.DisableTypes {
+		return gen.Writeln("let %s = %s;", s.Name, gen.GenExpr(s.Expr))
+	} else {
+		return gen.Writeln("let %s: %s = %s;", s.Name, gen.GenType(s.Expr.Type()), gen.GenExpr(s.Expr))
+	}
 }
 
 func (gen *codegen) GenStmtWhile(s *projection.StmtWhile) string {
