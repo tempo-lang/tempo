@@ -69,10 +69,18 @@ func (gen *codegen) GenExprBinaryOp(e *projection.ExprBinaryOp) string {
 	}
 
 	if _, isList := e.Type().(*projection.ListType); isList && op == projection.OpAdd {
-		return fmt.Sprintf("%s.concat(%s)", gen.GenExpr(e.Lhs), gen.GenExpr(e.Rhs))
+		return fmt.Sprintf("(%s).concat(%s)", gen.GenExpr(e.Lhs), gen.GenExpr(e.Rhs))
 	}
 
-	return fmt.Sprintf("%s %s %s", gen.GenExpr(e.Lhs), op, gen.GenExpr(e.Rhs))
+	result := fmt.Sprintf("%s %s %s", gen.GenExpr(e.Lhs), op, gen.GenExpr(e.Rhs))
+
+	if builtin, isBuiltin := e.Type().(projection.BuiltinType); isBuiltin {
+		if builtin == projection.IntType && op == projection.OpDiv || op == projection.OpMod {
+			return fmt.Sprintf("Math.floor(%s)", result)
+		}
+	}
+
+	return result
 }
 
 func (gen *codegen) GenExprBool(e *projection.ExprBool) string {
