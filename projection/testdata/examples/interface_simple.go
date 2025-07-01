@@ -10,6 +10,6 @@ type Sum_X interface {
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env, x Sum_X) {
-	var value int = runtime.Copy(x.sum(env.Subst("A", "X"), runtime.Copy(10), runtime.Copy(20)))
+	var value int = x.sum(env.Subst("A", "X"), 10, 20)
 	_ = value
 }

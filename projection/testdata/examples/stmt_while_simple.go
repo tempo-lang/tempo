@@ -5,7 +5,7 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography countdown
 func countdown_A(env *runtime.Env) {
-	var x int = runtime.Copy(10)
+	var x int = 10
 	_ = x
 	for x > 0 {
 		x = runtime.Copy(x - 1)

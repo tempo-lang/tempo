@@ -5,12 +5,12 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography constants
 func constants_A(env *runtime.Env) {
-	var intValue int = runtime.Copy(123)
+	var intValue int = 123
 	_ = intValue
-	var floatValue float64 = runtime.Copy(123.0)
+	var floatValue float64 = 123.0
 	_ = floatValue
-	var booleanValue bool = runtime.Copy(true)
+	var booleanValue bool = true
 	_ = booleanValue
-	var stringValue string = runtime.Copy("Hello")
+	var stringValue string = "Hello"
 	_ = stringValue
 }

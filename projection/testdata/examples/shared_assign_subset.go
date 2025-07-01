@@ -5,20 +5,20 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var shared int = runtime.Copy(10)
+	var shared int = 10
 	_ = shared
-	var x int = runtime.Copy(20)
+	var x int = 20
 	_ = x
 	x = runtime.Copy(shared)
 }
 func foo_B(env *runtime.Env) {
-	var shared int = runtime.Copy(10)
+	var shared int = 10
 	_ = shared
-	var x int = runtime.Copy(20)
+	var x int = 20
 	_ = x
 	x = runtime.Copy(shared)
 }
 func foo_C(env *runtime.Env) {
-	var shared int = runtime.Copy(10)
+	var shared int = 10
 	_ = shared
 }

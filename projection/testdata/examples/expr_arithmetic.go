@@ -5,12 +5,12 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var x int = runtime.Copy(2 + 3 - 4*5/6%7)
+	var x int = 2 + 3 - 4*5/6%7
 	_ = x
-	var y string = runtime.Copy("hello" + " world")
+	var y string = "hello" + " world"
 	_ = y
-	var z float64 = runtime.Copy(2.0 + 3.0 - 4.0*5.0/6.0)
+	var z float64 = 2.0 + 3.0 - 4.0*5.0/6.0
 	_ = z
-	var w bool = runtime.Copy(true && false || true)
+	var w bool = true && false || true
 	_ = w
 }

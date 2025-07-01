@@ -5,15 +5,15 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography list
 func list_A(env *runtime.Env) {
-	var value []int = runtime.Copy([]int{1, 2, 3})
+	var value []int = []int{1, 2, 3}
 	_ = value
-	var x int = runtime.Copy(len(value))
+	var x int = len(value)
 	_ = x
 }
 func list_B(env *runtime.Env) {
-	var value []int = runtime.Copy([]int{1, 2, 3})
+	var value []int = []int{1, 2, 3}
 	_ = value
-	var x int = runtime.Copy(len(value))
+	var x int = len(value)
 	_ = x
 }
 func list_C(env *runtime.Env) {}

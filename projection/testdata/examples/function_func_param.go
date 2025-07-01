@@ -21,13 +21,13 @@ func send_G(env *runtime.Env) int {
 
 // Projection of choreography bar
 func bar_X(env *runtime.Env) {
-	foo_A(env.Subst("X", "A", "Y", "B"), runtime.Copy(10), runtime.Copy(func(value int) {
+	foo_A(env.Subst("X", "A", "Y", "B"), 10, func(value int) {
 		send_F(env.Subst("X", "F", "Y", "G"), value)
-	}))
+	})
 }
 func bar_Y(env *runtime.Env) {
-	var result int = runtime.Copy(foo_B(env.Subst("X", "A", "Y", "B"), runtime.Copy(func() int {
+	var result int = foo_B(env.Subst("X", "A", "Y", "B"), func() int {
 		return send_G(env.Subst("X", "F", "Y", "G"))
-	})))
+	})
 	_ = result
 }

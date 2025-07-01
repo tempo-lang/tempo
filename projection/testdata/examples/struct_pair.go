@@ -13,12 +13,12 @@ type Pair_B struct {
 
 // Projection of choreography foo
 func foo_X(env *runtime.Env) {
-	var p Pair_A = runtime.Copy(Pair_A{num: 1})
+	var p Pair_A = Pair_A{num: 1}
 	_ = p
 	var x int = runtime.Copy(p.num)
 	_ = x
 }
 func foo_Y(env *runtime.Env) {
-	var p Pair_B = runtime.Copy(Pair_B{logic: true})
+	var p Pair_B = Pair_B{logic: true}
 	_ = p
 }

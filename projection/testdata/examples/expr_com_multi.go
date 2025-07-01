@@ -5,17 +5,17 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var x int = runtime.Copy(10)
+	var x int = 10
 	_ = x
 	runtime.Send(env, x, "B", "C")
 	var y int = runtime.Copy(x)
 	_ = y
 }
 func foo_B(env *runtime.Env) {
-	var y int = runtime.Copy(runtime.GetAsync(runtime.Recv[int](env, "A")))
+	var y int = runtime.GetAsync(runtime.Recv[int](env, "A"))
 	_ = y
 }
 func foo_C(env *runtime.Env) {
-	var y int = runtime.Copy(runtime.GetAsync(runtime.Recv[int](env, "A")))
+	var y int = runtime.GetAsync(runtime.Recv[int](env, "A"))
 	_ = y
 }
