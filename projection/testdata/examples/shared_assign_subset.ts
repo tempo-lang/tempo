@@ -4,16 +4,16 @@ import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of choreography foo
 export async function foo_A(env: Env) {
-  let shared: number = env.copy(10);
-  let x: number = env.copy(20);
+  let shared: number = 10;
+  let x: number = 20;
   x = env.copy(shared);
 }
 export async function foo_B(env: Env) {
-  let shared: number = env.copy(10);
-  let x: number = env.copy(20);
+  let shared: number = 10;
+  let x: number = 20;
   x = env.copy(shared);
 }
 export async function foo_C(env: Env) {
-  let shared: number = env.copy(10);
+  let shared: number = 10;
 }
 

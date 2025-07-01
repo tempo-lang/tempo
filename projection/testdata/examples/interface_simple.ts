@@ -9,6 +9,6 @@ export interface Sum_X {
 
 // Projection of choreography foo
 export async function foo_A(env: Env, x: Sum_X) {
-  let value: number = env.copy(await x.sum(env.subst("A", "X"), env.copy(10), env.copy(20)));
+  let value: number = await x.sum(env.subst("A", "X"), 10, 20);
 }
 

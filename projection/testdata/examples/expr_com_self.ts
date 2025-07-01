@@ -5,6 +5,6 @@ import { Env } from '../../../typescript/runtime.ts';
 // Projection of choreography foo
 export async function foo_A(env: Env) {
   env.send(10, "A");
-  let x: number = env.copy(await env.recv("A"));
+  let x: number = await env.recv("A");
 }
 

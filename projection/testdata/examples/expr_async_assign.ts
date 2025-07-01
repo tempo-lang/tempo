@@ -7,7 +7,7 @@ export async function foo_A(env: Env) {
   env.send(10, "B");
 }
 export async function foo_B(env: Env) {
-  let value: Promise<number> = env.copy(env.recv("A"));
-  let another: number = env.copy(await value);
+  let value: Promise<number> = env.recv("A");
+  let another: number = await value;
 }
 

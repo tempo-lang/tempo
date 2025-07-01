@@ -4,9 +4,9 @@ import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of choreography foo
 export async function foo_A(env: Env) {
-  let x: number = env.copy(Math.floor(Math.floor(2 + 3 - 4 * 5 / 6) % 7));
-  let y: string = env.copy("hello" + " world");
-  let z: number = env.copy(2.000000 + 3.000000 - 4.000000 * 5.000000 / 6.000000);
-  let w: boolean = env.copy(true && false || true);
+  let x: number = Math.floor(Math.floor(2 + 3 - 4 * 5 / 6) % 7);
+  let y: string = "hello" + " world";
+  let z: number = 2.000000 + 3.000000 - 4.000000 * 5.000000 / 6.000000;
+  let w: boolean = true && false || true;
 }
 

@@ -12,10 +12,10 @@ export type Pair_B = {
 
 // Projection of choreography foo
 export async function foo_X(env: Env) {
-  let p: Pair_A = env.copy({ num: 1 });
+  let p: Pair_A = { num: 1 };
   let x: number = env.copy(p.num);
 }
 export async function foo_Y(env: Env) {
-  let p: Pair_B = env.copy({ logic: true });
+  let p: Pair_B = { logic: true };
 }
 

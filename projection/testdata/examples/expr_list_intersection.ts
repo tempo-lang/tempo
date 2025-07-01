@@ -4,14 +4,14 @@ import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of choreography foo
 export async function foo_A(env: Env) {
-  let x: string = env.copy("AB");
+  let x: string = "AB";
 }
 export async function foo_B(env: Env) {
-  let x: string = env.copy("AB");
-  let y: string = env.copy("BC");
+  let x: string = "AB";
+  let y: string = "BC";
   let z: string[] = env.copy([x, y]);
 }
 export async function foo_C(env: Env) {
-  let y: string = env.copy("BC");
+  let y: string = "BC";
 }
 

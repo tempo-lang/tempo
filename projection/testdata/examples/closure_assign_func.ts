@@ -12,13 +12,13 @@ export async function call2_Y(env: Env, param: number) {
 
 // Projection of choreography foo
 export async function foo_A(env: Env) {
-  let x: (env: Env, arg0: number) => Promise<void> = env.copy(async (env: Env, val: number) => {
+  let x: (env: Env, arg0: number) => Promise<void> = async (env: Env, val: number) => {
     await call_X(env.subst("A", "X"), val);
-  });
-  x = env.copy(async (env: Env, param: number) => {
+  };
+  x = async (env: Env, param: number) => {
     await call2_Y(env.subst("A", "Y"), param);
-  });
-  await x(env, env.copy(10));
+  };
+  await x(env, 10);
 }
 export async function foo_B(env: Env) {
 }

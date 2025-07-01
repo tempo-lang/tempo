@@ -2,6 +2,7 @@ package codegen_ts
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
@@ -225,5 +226,59 @@ func (gen *codegen) GenExprStruct(e *projection.ExprStruct) string {
 }
 
 func (gen *codegen) GenExprCopy(e *projection.ExprPassValue) string {
-	return fmt.Sprintf("env.copy(%s)", gen.GenExpr(e.Inner))
+	if CopyNecessary(e.Inner) {
+		return fmt.Sprintf("env.copy(%s)", gen.GenExpr(e.Inner))
+	} else {
+		return gen.GenExpr(e.Inner)
+	}
+}
+
+func CopyNecessary(e projection.Expression) bool {
+	switch e := e.(type) {
+	case *projection.ExprAsync:
+		return false
+	case *projection.ExprAwait:
+		return false
+	case *projection.ExprBinaryOp:
+		return CopyNecessary(e.Lhs) || CopyNecessary(e.Rhs)
+	case *projection.ExprBool:
+		return false
+	case *projection.ExprCallClosure:
+		return false
+	case *projection.ExprCallFunc:
+		return false
+	case *projection.ExprClosure:
+		return false
+	case *projection.ExprFieldAccess:
+		return true
+	case *projection.ExprFloat:
+		return false
+	case *projection.ExprIdent:
+		return true
+	case *projection.ExprIndex:
+		return true
+	case *projection.ExprInt:
+		return false
+	case *projection.ExprList:
+		return slices.ContainsFunc(e.Items, CopyNecessary)
+	case *projection.ExprListLength:
+		return false
+	case *projection.ExprPassValue:
+		return CopyNecessary(e.Inner)
+	case *projection.ExprRecv:
+		return false
+	case *projection.ExprSend:
+		return false
+	case *projection.ExprString:
+		return false
+	case *projection.ExprStruct:
+		for _, expr := range e.Fields {
+			if CopyNecessary(expr) {
+				return true
+			}
+		}
+		return false
+	default:
+		panic(fmt.Sprintf("unexpected projection.Expression: %#v", e))
+	}
 }

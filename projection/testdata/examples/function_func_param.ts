@@ -20,13 +20,13 @@ export async function send_G(env: Env): Promise<number> {
 
 // Projection of choreography bar
 export async function bar_X(env: Env) {
-  await foo_A(env.subst("X", "A", "Y", "B"), env.copy(10), env.copy(async (env: Env, value: number) => {
+  await foo_A(env.subst("X", "A", "Y", "B"), 10, async (env: Env, value: number) => {
     await send_F(env.subst("X", "F", "Y", "G"), value);
-  }));
+  });
 }
 export async function bar_Y(env: Env) {
-  let result: number = env.copy(await foo_B(env.subst("X", "A", "Y", "B"), env.copy(async (env: Env): Promise<number> => {
+  let result: number = await foo_B(env.subst("X", "A", "Y", "B"), async (env: Env): Promise<number> => {
     return await send_G(env.subst("X", "F", "Y", "G"));
-  })));
+  });
 }
 

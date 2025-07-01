@@ -22,11 +22,11 @@ export type Bar_Y = {
 
 // Projection of choreography foo
 export async function foo_P(env: Env) {
-  let x: number = env.copy(10);
+  let x: number = 10;
   let nested: Foo_A = env.copy({ first: { num: x }, second: { logic: false } });
 }
 export async function foo_Q(env: Env) {
-  let y: number = env.copy(20);
+  let y: number = 20;
   let nested: Foo_B = env.copy({ first: { logic: true }, second: { num: y } });
 }
 

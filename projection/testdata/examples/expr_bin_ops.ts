@@ -4,12 +4,12 @@ import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of choreography binOps
 export async function binOps_A(env: Env) {
-  let a: number = env.copy(Math.floor(Math.floor(1 + 2 - 3 * 4 / 5) % 6));
-  let b: boolean = env.copy(true === true);
-  let c: boolean = env.copy(false !== false);
-  let d: boolean = env.copy(10 < 20);
-  let e: boolean = env.copy(10 <= 20);
-  let f: boolean = env.copy(10 > 20);
-  let g: boolean = env.copy(10 >= 20);
+  let a: number = Math.floor(Math.floor(1 + 2 - 3 * 4 / 5) % 6);
+  let b: boolean = true === true;
+  let c: boolean = false !== false;
+  let d: boolean = 10 < 20;
+  let e: boolean = 10 <= 20;
+  let f: boolean = 10 > 20;
+  let g: boolean = 10 >= 20;
 }
 
