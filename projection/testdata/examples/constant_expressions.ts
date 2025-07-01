@@ -4,9 +4,9 @@ import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of choreography constants
 export async function constants_A(env: Env) {
-  let intValue: number = 123;
-  let floatValue: number = 123.000000;
-  let booleanValue: boolean = true;
-  let stringValue: string = "Hello";
+  let intValue: number = env.copy(123);
+  let floatValue: number = env.copy(123.000000);
+  let booleanValue: boolean = env.copy(true);
+  let stringValue: string = env.copy("Hello");
 }
 

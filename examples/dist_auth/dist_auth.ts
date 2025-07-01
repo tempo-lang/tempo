@@ -37,34 +37,34 @@ export type AuthResult_S = {
 // Projection of choreography Authenticate
 export async function Authenticate_Client(env: Env, credentials: Credentials_A, hasher: Hasher_A): Promise<AuthResult_C> {
   env.send(credentials.Username, "IP");
-  let salt: Promise<string> = env.recv("IP");
-  let tmp0: Promise<string> = Promise.resolve(await hasher.CalcHash(env.subst("Client", "A"), await salt, credentials.Password));
+  let salt: Promise<string> = env.copy(env.recv("IP"));
+  let tmp0: Promise<string> = Promise.resolve(await hasher.CalcHash(env.subst("Client", "A"), env.copy(await salt), env.copy(credentials.Password)));
   env.send(await tmp0, "IP");
-  let valid: Promise<boolean> = env.recv("IP");
+  let valid: Promise<boolean> = env.copy(env.recv("IP"));
   if (await valid) {
-    let token: Promise<string> = env.recv("IP");
+    let token: Promise<string> = env.copy(env.recv("IP"));
     return { Success: true, Token: await token };
   } else {
     return { Success: false, Token: "" };
   }
 }
 export async function Authenticate_Service(env: Env): Promise<AuthResult_S> {
-  let valid: Promise<boolean> = env.recv("IP");
+  let valid: Promise<boolean> = env.copy(env.recv("IP"));
   if (await valid) {
-    let token: Promise<string> = env.recv("IP");
+    let token: Promise<string> = env.copy(env.recv("IP"));
     return { Success: true, Token: await token };
   } else {
     return { Success: false, Token: "" };
   }
 }
 export async function Authenticate_IP(env: Env, registry: ClientRegistry_A, tokenGen: TokenGenerator_A) {
-  let username: Promise<string> = env.recv("Client");
-  let tmp1: Promise<string> = Promise.resolve(await registry.GetSalt(env.subst("IP", "A"), await username));
+  let username: Promise<string> = env.copy(env.recv("Client"));
+  let tmp1: Promise<string> = Promise.resolve(await registry.GetSalt(env.subst("IP", "A"), env.copy(await username)));
   env.send(await tmp1, "Client");
-  let hash: Promise<string> = env.recv("Client");
-  let tmp2: Promise<boolean> = Promise.resolve(await registry.Check(env.subst("IP", "A"), await hash));
+  let hash: Promise<string> = env.copy(env.recv("Client"));
+  let tmp2: Promise<boolean> = Promise.resolve(await registry.Check(env.subst("IP", "A"), env.copy(await hash)));
   env.send(await tmp2, "Client", "Service");
-  let valid: Promise<boolean> = tmp2;
+  let valid: Promise<boolean> = env.copy(tmp2);
   if (await valid) {
     let tmp3: Promise<string> = Promise.resolve(await tokenGen.GenerateToken(env.subst("IP", "A")));
     env.send(await tmp3, "Client", "Service");

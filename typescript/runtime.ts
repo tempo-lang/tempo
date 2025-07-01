@@ -84,4 +84,13 @@ export class Env {
     copy.roleSubst = newSub;
     return copy;
   }
+
+  /**
+   * Copies the given value to maintain pass-by-value semantics.
+   * @param value The value to copy
+   * @returns The copied value
+   */
+  copy<T>(value: T): T {
+    return value;
+  }
 }

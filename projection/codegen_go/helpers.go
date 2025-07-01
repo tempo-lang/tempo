@@ -1,6 +1,8 @@
 package codegen_go
 
-import "github.com/dave/jennifer/jen"
+import (
+	"github.com/dave/jennifer/jen"
+)
 
 const RUNTIME_PATH = "github.com/tempo-lang/tempo/runtime"
 

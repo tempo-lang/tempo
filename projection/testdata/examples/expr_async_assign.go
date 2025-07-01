@@ -8,8 +8,8 @@ func foo_A(env *runtime.Env) {
 	runtime.Send(env, 10, "B")
 }
 func foo_B(env *runtime.Env) {
-	var value *runtime.Async[int] = runtime.Recv[int](env, "A")
+	var value *runtime.Async[int] = runtime.Copy(runtime.Recv[int](env, "A"))
 	_ = value
-	var another int = runtime.GetAsync(value)
+	var another int = runtime.Copy(runtime.GetAsync(value))
 	_ = another
 }

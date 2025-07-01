@@ -5,10 +5,10 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var x []int = append([]int{1, 2, 3}, []int{4, 5, 6}...)
+	var x []int = runtime.Copy(append([]int{1, 2, 3}, []int{4, 5, 6}...))
 	_ = x
 }
 func foo_B(env *runtime.Env) {
-	var x []int = append([]int{1, 2, 3}, []int{4, 5, 6}...)
+	var x []int = runtime.Copy(append([]int{1, 2, 3}, []int{4, 5, 6}...))
 	_ = x
 }

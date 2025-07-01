@@ -18,32 +18,32 @@ type Secret_B struct {
 
 // Projection of choreography DiffieHellman
 func DiffieHellman_A(env *runtime.Env, mathA Math_A) Secret_A {
-	var p int = 23
+	var p int = runtime.Copy(23)
 	_ = p
-	var g int = 5
+	var g int = runtime.Copy(5)
 	_ = g
-	var a int = 4
+	var a int = runtime.Copy(4)
 	_ = a
-	var tmp0 *runtime.Async[int] = runtime.FixedAsync(mathA.Exp(env.Subst("A", "A"), g, a) % p)
+	var tmp0 *runtime.Async[int] = runtime.FixedAsync(mathA.Exp(env.Subst("A", "A"), runtime.Copy(g), runtime.Copy(a)) % p)
 	runtime.Send(env, runtime.GetAsync(tmp0), "B")
-	var B *runtime.Async[int] = runtime.Recv[int](env, "B")
+	var B *runtime.Async[int] = runtime.Copy(runtime.Recv[int](env, "B"))
 	_ = B
-	var sA int = mathA.Exp(env.Subst("A", "A"), runtime.GetAsync(B), a) % p
+	var sA int = runtime.Copy(mathA.Exp(env.Subst("A", "A"), runtime.Copy(runtime.GetAsync(B)), runtime.Copy(a)) % p)
 	_ = sA
 	return Secret_A{A: sA}
 }
 func DiffieHellman_B(env *runtime.Env, mathB Math_A) Secret_B {
-	var p int = 23
+	var p int = runtime.Copy(23)
 	_ = p
-	var g int = 5
+	var g int = runtime.Copy(5)
 	_ = g
-	var b int = 3
+	var b int = runtime.Copy(3)
 	_ = b
-	var A *runtime.Async[int] = runtime.Recv[int](env, "A")
+	var A *runtime.Async[int] = runtime.Copy(runtime.Recv[int](env, "A"))
 	_ = A
-	var tmp1 *runtime.Async[int] = runtime.FixedAsync(mathB.Exp(env.Subst("B", "A"), g, b) % p)
+	var tmp1 *runtime.Async[int] = runtime.FixedAsync(mathB.Exp(env.Subst("B", "A"), runtime.Copy(g), runtime.Copy(b)) % p)
 	runtime.Send(env, runtime.GetAsync(tmp1), "A")
-	var sB int = mathB.Exp(env.Subst("B", "A"), runtime.GetAsync(A), b) % p
+	var sB int = runtime.Copy(mathB.Exp(env.Subst("B", "A"), runtime.Copy(runtime.GetAsync(A)), runtime.Copy(b)) % p)
 	_ = sB
 	return Secret_B{B: sB}
 }

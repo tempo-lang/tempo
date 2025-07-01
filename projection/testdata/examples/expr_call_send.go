@@ -13,11 +13,11 @@ func send_Y(env *runtime.Env) int {
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var x int = 10
+	var x int = runtime.Copy(10)
 	_ = x
-	send_X(env.Subst("A", "X", "B", "Y"), x)
+	send_X(env.Subst("A", "X", "B", "Y"), runtime.Copy(x))
 }
 func foo_B(env *runtime.Env) {
-	var Y int = send_Y(env.Subst("A", "X", "B", "Y"))
+	var Y int = runtime.Copy(send_Y(env.Subst("A", "X", "B", "Y")))
 	_ = Y
 }

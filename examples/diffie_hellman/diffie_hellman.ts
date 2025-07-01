@@ -17,23 +17,23 @@ export type Secret_B = {
 
 // Projection of choreography DiffieHellman
 export async function DiffieHellman_A(env: Env, mathA: Math_A): Promise<Secret_A> {
-  let p: number = 23;
-  let g: number = 5;
-  let a: number = 4;
-  let tmp0: Promise<number> = Promise.resolve(await mathA.Exp(env.subst("A", "A"), g, a) % p);
+  let p: number = env.copy(23);
+  let g: number = env.copy(5);
+  let a: number = env.copy(4);
+  let tmp0: Promise<number> = Promise.resolve(Math.floor(await mathA.Exp(env.subst("A", "A"), env.copy(g), env.copy(a)) % p));
   env.send(await tmp0, "B");
-  let B: Promise<number> = env.recv("B");
-  let sA: number = await mathA.Exp(env.subst("A", "A"), await B, a) % p;
+  let B: Promise<number> = env.copy(env.recv("B"));
+  let sA: number = env.copy(Math.floor(await mathA.Exp(env.subst("A", "A"), env.copy(await B), env.copy(a)) % p));
   return { A: sA };
 }
 export async function DiffieHellman_B(env: Env, mathB: Math_A): Promise<Secret_B> {
-  let p: number = 23;
-  let g: number = 5;
-  let b: number = 3;
-  let A: Promise<number> = env.recv("A");
-  let tmp1: Promise<number> = Promise.resolve(await mathB.Exp(env.subst("B", "A"), g, b) % p);
+  let p: number = env.copy(23);
+  let g: number = env.copy(5);
+  let b: number = env.copy(3);
+  let A: Promise<number> = env.copy(env.recv("A"));
+  let tmp1: Promise<number> = Promise.resolve(Math.floor(await mathB.Exp(env.subst("B", "A"), env.copy(g), env.copy(b)) % p));
   env.send(await tmp1, "A");
-  let sB: number = await mathB.Exp(env.subst("B", "A"), await A, b) % p;
+  let sB: number = env.copy(Math.floor(await mathB.Exp(env.subst("B", "A"), env.copy(await A), env.copy(b)) % p));
   return { B: sB };
 }
 

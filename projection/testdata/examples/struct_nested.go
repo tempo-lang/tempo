@@ -23,20 +23,20 @@ type Bar_Y struct {
 
 // Projection of choreography foo
 func foo_P(env *runtime.Env) {
-	var x int = 10
+	var x int = runtime.Copy(10)
 	_ = x
-	var nested Foo_A = Foo_A{
+	var nested Foo_A = runtime.Copy(Foo_A{
 		first:  Bar_X{num: x},
 		second: Bar_Y{logic: false},
-	}
+	})
 	_ = nested
 }
 func foo_Q(env *runtime.Env) {
-	var y int = 20
+	var y int = runtime.Copy(20)
 	_ = y
-	var nested Foo_B = Foo_B{
+	var nested Foo_B = runtime.Copy(Foo_B{
 		first:  Bar_Y{logic: true},
 		second: Bar_X{num: y},
-	}
+	})
 	_ = nested
 }

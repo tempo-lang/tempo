@@ -6,12 +6,12 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 // Projection of choreography compose
 func compose_A(env *runtime.Env, f func(int)) func(int) {
 	return func(input int) {
-		f(input)
+		f(runtime.Copy(input))
 	}
 }
 func compose_B(env *runtime.Env, f func() int, g func(int)) func() {
 	return func() {
-		g(f())
+		g(runtime.Copy(f()))
 	}
 }
 func compose_C(env *runtime.Env, g func() int) func() int {
@@ -30,33 +30,33 @@ func incAndSend_Y(env *runtime.Env) int {
 
 // Projection of choreography Start
 func Start_A(env *runtime.Env, input int) {
-	var f func(int) = func(value int) {
+	var f func(int) = runtime.Copy(func(value int) {
 		incAndSend_X(env.Subst("A", "X", "B", "Y"), value)
-	}
+	})
 	_ = f
-	var c func(int) = compose_A(env.Subst("A", "A", "B", "B", "C", "C"), f)
+	var c func(int) = runtime.Copy(compose_A(env.Subst("A", "A", "B", "B", "C", "C"), runtime.Copy(f)))
 	_ = c
-	c(input)
+	c(runtime.Copy(input))
 }
 func Start_B(env *runtime.Env) {
-	var f func() int = func() int {
+	var f func() int = runtime.Copy(func() int {
 		return incAndSend_Y(env.Subst("A", "X", "B", "Y"))
-	}
+	})
 	_ = f
-	var g func(int) = func(value int) {
+	var g func(int) = runtime.Copy(func(value int) {
 		incAndSend_X(env.Subst("B", "X", "C", "Y"), value)
-	}
+	})
 	_ = g
-	var c func() = compose_B(env.Subst("A", "A", "B", "B", "C", "C"), f, g)
+	var c func() = runtime.Copy(compose_B(env.Subst("A", "A", "B", "B", "C", "C"), runtime.Copy(f), runtime.Copy(g)))
 	_ = c
 	c()
 }
 func Start_C(env *runtime.Env) int {
-	var g func() int = func() int {
+	var g func() int = runtime.Copy(func() int {
 		return incAndSend_Y(env.Subst("B", "X", "C", "Y"))
-	}
+	})
 	_ = g
-	var c func() int = compose_C(env.Subst("A", "A", "B", "B", "C", "C"), g)
+	var c func() int = runtime.Copy(compose_C(env.Subst("A", "A", "B", "B", "C", "C"), runtime.Copy(g)))
 	_ = c
 	return c()
 }

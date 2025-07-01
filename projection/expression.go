@@ -17,6 +17,36 @@ type Expression interface {
 	IsExpression()
 }
 
+// A meta expression that indicates that the inner expression should be passed to a new variable or parameter.
+// This can be used in codegen to obtain pass-by-value semantics,
+// by manually copying the value, if the host language does not use that by default.
+type ExprPassValue struct {
+	Inner Expression
+}
+
+func (e *ExprPassValue) Type() Type {
+	return e.Inner.Type()
+}
+
+func (e *ExprPassValue) ReturnsValue() bool {
+	return e.Inner.ReturnsValue()
+}
+
+func (e *ExprPassValue) HasSideEffects() bool {
+	return e.Inner.HasSideEffects()
+}
+
+func (e *ExprPassValue) IsExpression() {}
+
+// NewExprPassValue constructs a new [ExprPassValue].
+func NewExprPassValue(inner Expression) Expression {
+	return &ExprPassValue{
+		Inner: inner,
+	}
+}
+
+// MARK: Literal expressions
+
 // An expression that constructs a constant [IntType] value when evaluated.
 type ExprInt struct {
 	Value int
@@ -92,6 +122,31 @@ func NewExprString(value string) Expression {
 	}
 }
 
+// An expression that constructs a constant [BoolType] value when evaluated.
+type ExprBool struct {
+	Value bool
+}
+
+func (e *ExprBool) Type() Type {
+	return BoolType
+}
+
+func (e *ExprBool) ReturnsValue() bool {
+	return true
+}
+
+func (e *ExprBool) HasSideEffects() bool {
+	return false
+}
+
+func (e *ExprBool) IsExpression() {}
+
+func NewExprBool(value bool) Expression {
+	return &ExprBool{Value: value}
+}
+
+// MARK: Ident
+
 // An expression that returns the value of symbol with the given name.
 type ExprIdent struct {
 	Name    string
@@ -116,28 +171,7 @@ func NewExprIdent(name string, typeVal Type) Expression {
 	return &ExprIdent{Name: name, typeVal: typeVal}
 }
 
-// An expression that constructs a constant [BoolType] value when evaluated.
-type ExprBool struct {
-	Value bool
-}
-
-func (e *ExprBool) Type() Type {
-	return BoolType
-}
-
-func (e *ExprBool) ReturnsValue() bool {
-	return true
-}
-
-func (e *ExprBool) HasSideEffects() bool {
-	return false
-}
-
-func (e *ExprBool) IsExpression() {}
-
-func NewExprBool(value bool) Expression {
-	return &ExprBool{Value: value}
-}
+// MARK: Operators
 
 // An operator used in a binary operation.
 type Operator string
@@ -237,6 +271,8 @@ func NewExprBinaryOp(operator Operator, lhs Expression, rhs Expression, typeVal 
 	}
 }
 
+// MARK: Async
+
 // Converts the inner expression to a resolved async value.
 type ExprAsync struct {
 	inner Expression
@@ -291,6 +327,8 @@ func (e *ExprAwait) IsExpression() {}
 func NewExprAwait(inner Expression, typeVal Type) Expression {
 	return &ExprAwait{expr: inner, typeVal: typeVal}
 }
+
+// MARK: Communication
 
 // Send the value of the inner expression to a set of recipients.
 // The recipient set cannot be empty but can contain the sender.
@@ -347,6 +385,8 @@ func NewExprRecv(recvType Type, sender string) Expression {
 		Sender:   sender,
 	}
 }
+
+// MARK: Callable
 
 type ExprCallFunc struct {
 	FuncExpr   Expression
@@ -409,6 +449,8 @@ func NewExprCallClosure(closureExpr Expression, role string, args []Expression, 
 		ReturnType:  returnType,
 	}
 }
+
+// MARK: Structs
 
 // Construct an instance of the struct with the given name.
 type ExprStruct struct {

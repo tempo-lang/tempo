@@ -4,9 +4,9 @@ import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of choreography countdown
 export async function countdown_A(env: Env) {
-  let x: number = 10;
+  let x: number = env.copy(10);
   while (x > 0) {
-    x = x - 1;
+    x = env.copy(x - 1);
   }
 }
 

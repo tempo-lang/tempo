@@ -5,18 +5,18 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography binOps
 func binOps_A(env *runtime.Env) {
-	var a int = 1 + 2 - 3*4/5%6
+	var a int = runtime.Copy(1 + 2 - 3*4/5%6)
 	_ = a
-	var b bool = true == true
+	var b bool = runtime.Copy(true == true)
 	_ = b
-	var c bool = false != false
+	var c bool = runtime.Copy(false != false)
 	_ = c
-	var d bool = 10 < 20
+	var d bool = runtime.Copy(10 < 20)
 	_ = d
-	var e bool = 10 <= 20
+	var e bool = runtime.Copy(10 <= 20)
 	_ = e
-	var f bool = 10 > 20
+	var f bool = runtime.Copy(10 > 20)
 	_ = f
-	var g bool = 10 >= 20
+	var g bool = runtime.Copy(10 >= 20)
 	_ = g
 }

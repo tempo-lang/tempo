@@ -7,22 +7,22 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func ShiftRoles_A(env *runtime.Env, count int) {
 	if count > 0 {
 		runtime.Send(env, count, "B")
-		ShiftRoles_D(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
+		ShiftRoles_D(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), runtime.Copy(count-1))
 	}
 }
 func ShiftRoles_B(env *runtime.Env, count int) {
 	if count > 0 {
 		_ = runtime.GetAsync(runtime.Recv[int](env, "A"))
-		ShiftRoles_A(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
+		ShiftRoles_A(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), runtime.Copy(count-1))
 	}
 }
 func ShiftRoles_C(env *runtime.Env, count int) {
 	if count > 0 {
-		ShiftRoles_B(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
+		ShiftRoles_B(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), runtime.Copy(count-1))
 	}
 }
 func ShiftRoles_D(env *runtime.Env, count int) {
 	if count > 0 {
-		ShiftRoles_C(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
+		ShiftRoles_C(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), runtime.Copy(count-1))
 	}
 }

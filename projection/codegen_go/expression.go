@@ -45,6 +45,8 @@ func GenExpression(expr projection.Expression) jen.Code {
 		return GenExprString(e)
 	case *projection.ExprStruct:
 		return GenExprStruct(e)
+	case *projection.ExprPassValue:
+		return GenExprCopy(e)
 	default:
 		panic(fmt.Sprintf("unexpected projection.Expression: %#v", e))
 	}
@@ -57,12 +59,15 @@ func GenExprInt(e *projection.ExprInt) jen.Code {
 func GenExprFloat(e *projection.ExprFloat) jen.Code {
 	return jen.Lit(e.Value)
 }
+
 func GenExprString(e *projection.ExprString) jen.Code {
 	return jen.Lit(e.Value)
 }
+
 func GenExprIdent(e *projection.ExprIdent) jen.Code {
 	return jen.Id(e.Name)
 }
+
 func GenExprBool(e *projection.ExprBool) jen.Code {
 	if e.Value {
 		return jen.True()
@@ -70,6 +75,7 @@ func GenExprBool(e *projection.ExprBool) jen.Code {
 		return jen.False()
 	}
 }
+
 func GenExprBinaryOp(e *projection.ExprBinaryOp) jen.Code {
 	if _, isList := e.Type().(*projection.ListType); isList {
 		return jen.Append(GenExpression(e.Lhs), jen.Add(GenExpression(e.Rhs)).Op("..."))
@@ -77,12 +83,15 @@ func GenExprBinaryOp(e *projection.ExprBinaryOp) jen.Code {
 
 	return jen.Add(GenExpression(e.Lhs)).Op(string(e.Operator)).Add(GenExpression(e.Rhs))
 }
+
 func GenExprAsync(e *projection.ExprAsync) jen.Code {
 	return RuntimeFunc("FixedAsync").Call(GenExpression(e.Inner()))
 }
+
 func GenExprAwait(e *projection.ExprAwait) jen.Code {
 	return RuntimeFunc("GetAsync").Call(GenExpression(e.Inner()))
 }
+
 func GenExprSend(e *projection.ExprSend) jen.Code {
 	args := []jen.Code{
 		jen.Id("env"),
@@ -95,10 +104,12 @@ func GenExprSend(e *projection.ExprSend) jen.Code {
 
 	return RuntimeFunc("Send").Call(args...)
 }
+
 func GenExprRecv(e *projection.ExprRecv) jen.Code {
 	recvType := GenType(e.RecvType)
 	return RuntimeFunc("Recv").Types(recvType).Call(jen.Id("env"), jen.Lit(e.Sender))
 }
+
 func GenExprCallFunc(e *projection.ExprCallFunc) jen.Code {
 	args := []jen.Code{}
 
@@ -116,6 +127,7 @@ func GenExprCallFunc(e *projection.ExprCallFunc) jen.Code {
 
 	return jen.Add(GenExpression(e.FuncExpr)).Call(args...)
 }
+
 func GenExprCallClosure(e *projection.ExprCallClosure) jen.Code {
 	args := []jen.Code{}
 
@@ -125,6 +137,7 @@ func GenExprCallClosure(e *projection.ExprCallClosure) jen.Code {
 
 	return jen.Add(GenExpression(e.ClosureExpr)).Call(args...)
 }
+
 func GenExprStruct(e *projection.ExprStruct) jen.Code {
 	fields := jen.Dict{}
 
@@ -138,6 +151,11 @@ func GenExprStruct(e *projection.ExprStruct) jen.Code {
 
 	return jen.Id(name).Values(fields)
 }
+
 func GenExprFieldAccess(e *projection.ExprFieldAccess) jen.Code {
 	return jen.Add(GenExpression(e.BaseExpr)).Dot(e.FieldName)
+}
+
+func GenExprCopy(e *projection.ExprPassValue) jen.Code {
+	return RuntimeFunc("Copy").Call(GenExpression(e.Inner))
 }

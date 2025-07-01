@@ -6,23 +6,23 @@ import { Env } from '../../typescript/runtime.ts';
 export async function ShiftRoles_A(env: Env, count: number) {
   if (count > 0) {
     env.send(count, "B");
-    await ShiftRoles_D(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), count - 1);
+    await ShiftRoles_D(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), env.copy(count - 1));
   }
 }
 export async function ShiftRoles_B(env: Env, count: number) {
   if (count > 0) {
     await env.recv("A");
-    await ShiftRoles_A(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), count - 1);
+    await ShiftRoles_A(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), env.copy(count - 1));
   }
 }
 export async function ShiftRoles_C(env: Env, count: number) {
   if (count > 0) {
-    await ShiftRoles_B(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), count - 1);
+    await ShiftRoles_B(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), env.copy(count - 1));
   }
 }
 export async function ShiftRoles_D(env: Env, count: number) {
   if (count > 0) {
-    await ShiftRoles_C(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), count - 1);
+    await ShiftRoles_C(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), env.copy(count - 1));
   }
 }
 

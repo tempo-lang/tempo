@@ -5,20 +5,20 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography shareSubset
 func shareSubset_A(env *runtime.Env) {
-	var x int = 10
+	var x int = runtime.Copy(10)
 	_ = x
-	var y int = x
+	var y int = runtime.Copy(x)
 	_ = y
-	var z int = y
+	var z int = runtime.Copy(y)
 	_ = z
 }
 func shareSubset_B(env *runtime.Env) {
-	var x int = 10
+	var x int = runtime.Copy(10)
 	_ = x
-	var y int = x
+	var y int = runtime.Copy(x)
 	_ = y
 }
 func shareSubset_C(env *runtime.Env) {
-	var x int = 10
+	var x int = runtime.Copy(10)
 	_ = x
 }

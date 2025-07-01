@@ -121,7 +121,7 @@ func (epp *epp) storeExpression(roleName string, expr projection.Expression, sto
 		expr = projection.NewExprAsync(expr)
 	}
 
-	return expr
+	return projection.NewExprPassValue(expr)
 }
 
 func (epp *epp) convertFuncToClosure(roleName string, funcExpr projection.Expression) projection.Expression {

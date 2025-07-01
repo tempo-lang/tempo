@@ -6,21 +6,21 @@ import { Env } from '../../typescript/runtime.ts';
 export async function pingPong_A(env: Env, count: number) {
   if (count > 0) {
     env.send(count, "B");
-    await pingPong_B(env.subst("B", "A", "A", "B"), count - 1);
+    await pingPong_B(env.subst("B", "A", "A", "B"), env.copy(count - 1));
   }
 }
 export async function pingPong_B(env: Env, count: number) {
   if (count > 0) {
     await env.recv("A");
-    await pingPong_A(env.subst("B", "A", "A", "B"), count - 1);
+    await pingPong_A(env.subst("B", "A", "A", "B"), env.copy(count - 1));
   }
 }
 
 // Projection of choreography Start
 export async function Start_A(env: Env) {
-  await pingPong_A(env.subst("A", "A", "B", "B"), 4);
+  await pingPong_A(env.subst("A", "A", "B", "B"), env.copy(4));
 }
 export async function Start_B(env: Env) {
-  await pingPong_B(env.subst("A", "A", "B", "B"), 4);
+  await pingPong_B(env.subst("A", "A", "B", "B"), env.copy(4));
 }
 

@@ -11,13 +11,13 @@ func call2_Y(env *runtime.Env, param int) {}
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env) {
-	var x func(int) = func(val int) {
+	var x func(int) = runtime.Copy(func(val int) {
 		call_X(env.Subst("A", "X"), val)
-	}
+	})
 	_ = x
-	x = func(param int) {
+	x = runtime.Copy(func(param int) {
 		call2_Y(env.Subst("A", "Y"), param)
-	}
-	x(10)
+	})
+	x(runtime.Copy(10))
 }
 func foo_B(env *runtime.Env) {}
