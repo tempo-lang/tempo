@@ -4,7 +4,7 @@ import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of choreography foo
 export async function foo_A(env: Env, value: number, fn: (env: Env, arg0: number) => Promise<void>) {
-  await fn(env, env.copy(value));
+  await fn(env, value);
 }
 export async function foo_B(env: Env, fn: (env: Env) => Promise<number>): Promise<number> {
   return await fn(env);

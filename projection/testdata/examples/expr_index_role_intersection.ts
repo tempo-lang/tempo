@@ -9,7 +9,7 @@ export async function foo_A(env: Env) {
 export async function foo_B(env: Env) {
   let x: number[] = [1, 2, 3];
   let i: number = 1;
-  let y: number = env.copy(x[i]);
+  let y: number = x[i];
 }
 export async function foo_C(env: Env) {
   let i: number = 1;

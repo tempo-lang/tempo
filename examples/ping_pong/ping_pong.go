@@ -7,20 +7,20 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func pingPong_A(env *runtime.Env, count int) {
 	if count > 0 {
 		runtime.Send(env, count, "B")
-		pingPong_B(env.Subst("B", "A", "A", "B"), runtime.Copy(count-1))
+		pingPong_B(env.Subst("B", "A", "A", "B"), count-1)
 	}
 }
 func pingPong_B(env *runtime.Env, count int) {
 	if count > 0 {
 		_ = runtime.GetAsync(runtime.Recv[int](env, "A"))
-		pingPong_A(env.Subst("B", "A", "A", "B"), runtime.Copy(count-1))
+		pingPong_A(env.Subst("B", "A", "A", "B"), count-1)
 	}
 }
 
 // Projection of choreography Start
 func Start_A(env *runtime.Env) {
-	pingPong_A(env.Subst("A", "A", "B", "B"), runtime.Copy(4))
+	pingPong_A(env.Subst("A", "A", "B", "B"), 4)
 }
 func Start_B(env *runtime.Env) {
-	pingPong_B(env.Subst("A", "A", "B", "B"), runtime.Copy(4))
+	pingPong_B(env.Subst("A", "A", "B", "B"), 4)
 }

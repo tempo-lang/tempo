@@ -6,7 +6,7 @@ import { Env } from '../../../typescript/runtime.ts';
 export async function countdown_A(env: Env) {
   let x: number = 10;
   while (x > 0) {
-    x = env.copy(x - 1);
+    x = x - 1;
   }
 }
 

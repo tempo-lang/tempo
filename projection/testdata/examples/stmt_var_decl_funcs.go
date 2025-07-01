@@ -14,7 +14,7 @@ func foo_A(env *runtime.Env) {
 	_ = x
 	var val int = 10
 	_ = val
-	x(runtime.Copy(val))
+	x(val)
 }
 func foo_B(env *runtime.Env) {
 	var y func(int) = func(val int) {
@@ -23,5 +23,5 @@ func foo_B(env *runtime.Env) {
 	_ = y
 	var val int = 10
 	_ = val
-	y(runtime.Copy(val))
+	y(val)
 }

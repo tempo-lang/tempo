@@ -8,16 +8,16 @@ func foo_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
 	runtime.Send(env, x, "B")
-	var y int = runtime.Copy(x)
+	var y int = x
 	_ = y
-	var z int = runtime.Copy(y)
+	var z int = y
 	_ = z
 }
 func foo_B(env *runtime.Env) {
 	var y int = runtime.GetAsync(runtime.Recv[int](env, "A"))
 	_ = y
 	runtime.Send(env, y, "C")
-	var z int = runtime.Copy(y)
+	var z int = y
 	_ = z
 }
 func foo_C(env *runtime.Env) {

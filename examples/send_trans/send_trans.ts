@@ -4,17 +4,17 @@ import { Env } from '../../typescript/runtime.ts';
 
 // Projection of choreography Trans
 export async function Trans_A(env: Env) {
-  let x: number = env.copy(10);
+  let x: number = 10;
   env.send(x, "B");
-  let y: number = env.copy(x);
-  let z: number = env.copy(y);
+  let y: number = x;
+  let z: number = y;
 }
 export async function Trans_B(env: Env) {
-  let y: number = env.copy(await env.recv("A"));
+  let y: number = await env.recv("A");
   env.send(y, "C");
-  let z: number = env.copy(y);
+  let z: number = y;
 }
 export async function Trans_C(env: Env) {
-  let z: number = env.copy(await env.recv("B"));
+  let z: number = await env.recv("B");
 }
 

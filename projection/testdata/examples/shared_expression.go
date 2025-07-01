@@ -13,7 +13,7 @@ func foo_B(env *runtime.Env) {
 	_ = x
 	var y int = 20
 	_ = y
-	var z int = runtime.Copy(x + y)
+	var z int = x + y
 	_ = z
 }
 func foo_C(env *runtime.Env) {

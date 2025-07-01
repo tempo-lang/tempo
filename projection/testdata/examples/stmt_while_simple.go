@@ -8,6 +8,6 @@ func countdown_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
 	for x > 0 {
-		x = runtime.Copy(x - 1)
+		x = x - 1
 	}
 }

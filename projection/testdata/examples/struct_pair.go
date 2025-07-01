@@ -15,7 +15,7 @@ type Pair_B struct {
 func foo_X(env *runtime.Env) {
 	var p Pair_A = Pair_A{num: 1}
 	_ = p
-	var x int = runtime.Copy(p.num)
+	var x int = p.num
 	_ = x
 }
 func foo_Y(env *runtime.Env) {

@@ -5,7 +5,7 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography foo
 func foo_A(env *runtime.Env, value int, fn func(int)) {
-	fn(runtime.Copy(value))
+	fn(value)
 }
 func foo_B(env *runtime.Env, fn func() int) int {
 	return fn()

@@ -7,6 +7,6 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func foo_A(env *runtime.Env) {
 	var x int = 32
 	_ = x
-	var y int = runtime.Copy(x)
+	var y int = x
 	_ = y
 }

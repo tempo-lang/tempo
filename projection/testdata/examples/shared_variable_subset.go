@@ -7,15 +7,15 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func shareSubset_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
-	var y int = runtime.Copy(x)
+	var y int = x
 	_ = y
-	var z int = runtime.Copy(y)
+	var z int = y
 	_ = z
 }
 func shareSubset_B(env *runtime.Env) {
 	var x int = 10
 	_ = x
-	var y int = runtime.Copy(x)
+	var y int = x
 	_ = y
 }
 func shareSubset_C(env *runtime.Env) {

@@ -15,7 +15,7 @@ func send_Y(env *runtime.Env) int {
 func foo_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
-	send_X(env.Subst("A", "X", "B", "Y"), runtime.Copy(x))
+	send_X(env.Subst("A", "X", "B", "Y"), x)
 }
 func foo_B(env *runtime.Env) {
 	var Y int = send_Y(env.Subst("A", "X", "B", "Y"))

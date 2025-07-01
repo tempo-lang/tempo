@@ -6,7 +6,7 @@ import { Env } from '../../../typescript/runtime.ts';
 export async function foo_A(env: Env) {
   let x: number = 10;
   env.send(x, "B", "C");
-  let y: number = env.copy(x);
+  let y: number = x;
 }
 export async function foo_B(env: Env) {
   let y: number = await env.recv("A");

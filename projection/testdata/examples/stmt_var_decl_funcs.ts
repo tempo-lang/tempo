@@ -12,13 +12,13 @@ export async function foo_A(env: Env) {
     await call_X(env.subst("A", "X"), val);
   };
   let val: number = 10;
-  await x(env, env.copy(val));
+  await x(env, val);
 }
 export async function foo_B(env: Env) {
   let y: (env: Env, arg0: number) => Promise<void> = async (env: Env, val: number) => {
     await call_X(env.subst("B", "X"), val);
   };
   let val: number = 10;
-  await y(env, env.copy(val));
+  await y(env, val);
 }
 

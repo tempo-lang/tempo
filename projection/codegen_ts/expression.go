@@ -226,7 +226,7 @@ func (gen *codegen) GenExprStruct(e *projection.ExprStruct) string {
 }
 
 func (gen *codegen) GenExprCopy(e *projection.ExprPassValue) string {
-	if CopyNecessary(e.Inner) {
+	if CopyNecessary(e.Inner) && !ValueBasedType(e.Inner.Type()) {
 		return fmt.Sprintf("env.copy(%s)", gen.GenExpr(e.Inner))
 	} else {
 		return gen.GenExpr(e.Inner)
@@ -281,4 +281,24 @@ func CopyNecessary(e projection.Expression) bool {
 	default:
 		panic(fmt.Sprintf("unexpected projection.Expression: %#v", e))
 	}
+}
+
+func ValueBasedType(t projection.Type) bool {
+	switch t.(type) {
+	case *projection.AsyncType:
+		return true
+	case projection.BuiltinType:
+		return true
+	case *projection.ClosureType:
+		return false
+	case *projection.FunctionType:
+		return true
+	case *projection.InterfaceType:
+		return false
+	case *projection.ListType:
+		return false
+	case *projection.StructType:
+		return false
+	}
+	panic(fmt.Sprintf("unexpected projection.Type: %#v", t))
 }

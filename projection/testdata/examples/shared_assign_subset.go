@@ -9,14 +9,14 @@ func foo_A(env *runtime.Env) {
 	_ = shared
 	var x int = 20
 	_ = x
-	x = runtime.Copy(shared)
+	x = shared
 }
 func foo_B(env *runtime.Env) {
 	var shared int = 10
 	_ = shared
 	var x int = 20
 	_ = x
-	x = runtime.Copy(shared)
+	x = shared
 }
 func foo_C(env *runtime.Env) {
 	var shared int = 10

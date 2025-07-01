@@ -13,7 +13,7 @@ export async function send_Y(env: Env): Promise<number> {
 // Projection of choreography foo
 export async function foo_A(env: Env) {
   let x: number = 10;
-  await send_X(env.subst("A", "X", "B", "Y"), env.copy(x));
+  await send_X(env.subst("A", "X", "B", "Y"), x);
 }
 export async function foo_B(env: Env) {
   let Y: number = await send_Y(env.subst("A", "X", "B", "Y"));

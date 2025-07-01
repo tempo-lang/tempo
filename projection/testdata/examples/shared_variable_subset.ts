@@ -5,12 +5,12 @@ import { Env } from '../../../typescript/runtime.ts';
 // Projection of choreography shareSubset
 export async function shareSubset_A(env: Env) {
   let x: number = 10;
-  let y: number = env.copy(x);
-  let z: number = env.copy(y);
+  let y: number = x;
+  let z: number = y;
 }
 export async function shareSubset_B(env: Env) {
   let x: number = 10;
-  let y: number = env.copy(x);
+  let y: number = x;
 }
 export async function shareSubset_C(env: Env) {
   let x: number = 10;
