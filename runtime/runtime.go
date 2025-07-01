@@ -1,6 +1,10 @@
 // This package contains the runtime used by Tempo generated source code.
 package runtime
 
+import (
+	"reflect"
+)
+
 // The environment struct keeps track of the state of the choreography at a single process.
 // The first argument of any generated process function will take an `Env` as its first argument.
 // It is used to interact with the environment such as sending and receiving messages.
@@ -95,11 +99,11 @@ type Async[T any] struct {
 // GetAsync will block the thread until the underlying value becomes present and return it.
 func GetAsync[T any](a *Async[T]) T {
 	if a.called {
-		return a.value
+		return Copy(a.value)
 	}
 	a.value = a.callback()
 	a.called = true
-	return a.value
+	return Copy(a.value)
 }
 
 // FixedAsync wraps a value in a resolved async value.
@@ -150,4 +154,40 @@ func MapAsync[T any, U any](async *Async[T], mapper func(value T) U) *Async[U] {
 			return mapper(GetAsync(async))
 		})
 	}
+}
+
+// MARK: Copy
+
+// Copy makes a semantically deep copy of the value to maintain value semantics.
+// Immutable values are not necessarily copied since they effectively have value semantics.
+func Copy[T any](value T) T {
+	v := reflect.ValueOf(value)
+	t := v.Type()
+	kind := t.Kind()
+	switch kind {
+	case reflect.Slice:
+		if t.Elem().Kind() != reflect.Slice && t.Elem().Kind() != reflect.Struct {
+			// return shallow copy
+			sliceCopy := reflect.MakeSlice(t, v.Len(), v.Len())
+			reflect.Copy(sliceCopy, v)
+			return sliceCopy.Interface().(T)
+		} else {
+			sliceCopy := reflect.MakeSlice(t, v.Len(), v.Len())
+			for i := 0; i < v.Len(); i++ {
+				elemCopy := Copy(v.Index(i).Interface())
+				sliceCopy.Index(i).Set(reflect.ValueOf(elemCopy))
+			}
+			return sliceCopy.Interface().(T)
+		}
+	case reflect.Struct:
+		structCopy := reflect.New(t)
+		for i := 0; i < v.NumField(); i++ {
+			elemCopy := Copy(v.Field(i).Interface())
+			structCopy.Elem().Field(i).Set(reflect.ValueOf(elemCopy))
+		}
+		return structCopy.Elem().Interface().(T)
+	}
+
+	// implicit copy base type
+	return value
 }

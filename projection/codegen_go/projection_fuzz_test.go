@@ -1,7 +1,6 @@
 package codegen_go_test
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -14,13 +13,15 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 
 	"go/ast"
+	"go/importer"
 	goparser "go/parser"
 	"go/token"
 	"go/types"
 )
 
 type runtimeImporter struct {
-	pkg *types.Package
+	pkg             *types.Package
+	defaultImporter types.Importer
 }
 
 // Import implements types.Importer.
@@ -28,7 +29,8 @@ func (r *runtimeImporter) Import(path string) (*types.Package, error) {
 	if path == codegen_go.RUNTIME_PATH {
 		return r.pkg, nil
 	}
-	return nil, fmt.Errorf("failed to import %s", path)
+	// return nil, fmt.Errorf("failed to import %s", path)
+	return r.defaultImporter.Import(path)
 }
 
 func newRuntimeImporter() (*runtimeImporter, error) {
@@ -45,6 +47,8 @@ func newRuntimeImporter() (*runtimeImporter, error) {
 	}
 
 	conf := types.Config{}
+	conf.Importer = importer.ForCompiler(fset, "gc", nil)
+
 	pkg, err := conf.Check(codegen_go.RUNTIME_PATH, fset, []*ast.File{parsedAST}, nil)
 	if err != nil {
 		return nil, err
