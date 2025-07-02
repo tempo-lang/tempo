@@ -1,0 +1,7 @@
+func@(A,B,C) foo() {
+  let x = [1@[A,B], 2, 3];
+  let i = 0@[B,C];
+  x[i] = 100;
+}
+---
+E6 4:5: type `Int@[B,C]` does not match expected type `Int@[A,B]`

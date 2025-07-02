@@ -119,6 +119,14 @@ func (v *BaseTempoVisitor) VisitStmtExpr(ctx *StmtExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitAssignField(ctx *AssignFieldContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitAssignIndex(ctx *AssignIndexContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitExprBinOp(ctx *ExprBinOpContext) interface{} {
 	return v.VisitChildren(ctx)
 }

@@ -217,25 +217,25 @@ func (e *StructWrongRoleCount) RelatedInfo() []RelatedInfo {
 
 type FieldAccessUnknownField struct {
 	baseError
-	expr     *parser.ExprFieldAccessContext
-	baseType types.Type
+	FieldIdent parser.IIdentContext
+	BaseType   types.Type
 }
 
 func (e *FieldAccessUnknownField) Error() string {
-	return fmt.Sprintf("value of type `%s` has not field named `%s`", e.baseType.ToString(), e.expr.Ident().GetText())
+	return fmt.Sprintf("value of type `%s` has not field named `%s`", e.BaseType.ToString(), e.FieldIdent.GetText())
 }
 
 func (e *FieldAccessUnknownField) ParserRule() antlr.ParserRuleContext {
-	return e.expr.Ident()
+	return e.FieldIdent
 }
 
 func (e *FieldAccessUnknownField) Code() ErrorCode {
 	return CodeFieldAccessUnknownField
 }
 
-func NewFieldAccessUnknownField(expr *parser.ExprFieldAccessContext, baseType types.Type) Error {
+func NewFieldAccessUnknownField(fieldIdent parser.IIdentContext, baseType types.Type) Error {
 	return &FieldAccessUnknownField{
-		expr:     expr,
-		baseType: baseType,
+		FieldIdent: fieldIdent,
+		BaseType:   baseType,
 	}
 }

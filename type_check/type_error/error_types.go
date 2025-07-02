@@ -466,8 +466,8 @@ func NewNestedAsync(asyncCtx *parser.AsyncTypeContext) Error {
 
 type IndexWrongBaseType struct {
 	baseError
-	IndexExpr *parser.ExprIndexContext
-	BaseType  types.Type
+	BaseRule antlr.ParserRuleContext
+	BaseType types.Type
 }
 
 func (e *IndexWrongBaseType) Error() string {
@@ -475,17 +475,17 @@ func (e *IndexWrongBaseType) Error() string {
 }
 
 func (e *IndexWrongBaseType) ParserRule() antlr.ParserRuleContext {
-	return e.IndexExpr.GetBaseExpr()
+	return e.BaseRule
 }
 
 func (e *IndexWrongBaseType) Code() ErrorCode {
 	return CodeIndexWrongBaseType
 }
 
-func NewIndexWrongBaseType(indexExpr *parser.ExprIndexContext, baseType types.Type) Error {
+func NewIndexWrongBaseType(baseRule antlr.ParserRuleContext, baseType types.Type) Error {
 	return &IndexWrongBaseType{
-		IndexExpr: indexExpr,
-		BaseType:  baseType,
+		BaseRule: baseRule,
+		BaseType: baseType,
 	}
 }
 

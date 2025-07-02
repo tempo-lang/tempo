@@ -78,6 +78,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 }
 
 func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
+
 	sym, err := tc.lookupSymbol(ctx.Ident())
 	if err != nil {
 		tc.reportError(err)
@@ -89,16 +90,73 @@ func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 
 	if !sym.IsAssignable() {
 		tc.reportError(type_error.NewUnassignableSymbol(ctx, sym.Type()))
-	} else {
-		exprType := tc.visitExpr(ctx.Expr())
-		if _, ok := exprType.CoerceTo(sym.Type()); !ok {
-			tc.reportError(type_error.NewInvalidAssignType(ctx.Expr(), sym.Type(), exprType))
-		}
+		return false
 	}
 
 	tc.checkExprInScope(ctx.Ident(), sym.Type().Roles())
 
+	assignType := tc.stmtAssignType(ctx, sym)
+
+	exprType := tc.visitExpr(ctx.Expr())
+
+	if _, ok := exprType.CoerceTo(assignType); !ok {
+		tc.reportError(type_error.NewInvalidAssignType(ctx.Expr(), sym.Type(), exprType))
+	}
+
 	return false
+}
+
+func (tc *typeChecker) stmtAssignType(ctx *parser.StmtAssignContext, sym sym_table.Symbol) types.Type {
+	trailIndexExprs := []parser.IExprContext{}
+
+	assignType := sym.Type()
+	for _, access := range ctx.AllAssignSpecifier() {
+		switch access := access.(type) {
+		case *parser.AssignFieldContext:
+			if structType, ok := assignType.(*types.StructType); ok {
+				if field, ok := structType.Field(access.Ident().GetText()); ok {
+					assignType = field
+				} else {
+					tc.reportError(type_error.NewFieldAccessUnknownField(access.Ident(), assignType))
+					return types.Invalid()
+				}
+			} else {
+				tc.reportError(type_error.NewFieldAccessUnknownField(access.Ident(), assignType))
+				return types.Invalid()
+			}
+		case *parser.AssignIndexContext:
+			if listType, ok := assignType.(*types.ListType); ok {
+				assignType = listType.Inner()
+
+				tc.visitExpr(access.Expr())
+				trailIndexExprs = append(trailIndexExprs, access.Expr())
+			} else {
+				tc.reportError(type_error.NewIndexWrongBaseType(access, assignType))
+				return types.Invalid()
+			}
+		default:
+			// parser error
+			return types.Invalid()
+		}
+	}
+
+	globalIndexType := types.Int(assignType.Roles().Participants())
+	for _, indexExpr := range trailIndexExprs {
+		indexType := tc.info.Types[indexExpr]
+		if _, ok := indexType.CoerceTo(globalIndexType); !ok {
+			tc.reportError(type_error.NewInvalidValue(indexExpr, indexType, globalIndexType))
+		}
+	}
+
+	return assignType
+}
+
+func (tc *typeChecker) VisitAssignField(ctx *parser.AssignFieldContext) any {
+	return nil
+}
+
+func (tc *typeChecker) VisitAssignIndex(ctx *parser.AssignIndexContext) any {
+	return nil
 }
 
 func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {

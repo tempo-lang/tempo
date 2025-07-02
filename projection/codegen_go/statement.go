@@ -38,7 +38,20 @@ func GenStmtVarDecl(decl *projection.StmtVarDecl) jen.Statement {
 }
 
 func GenStmtAssign(s *projection.StmtAssign) jen.Statement {
-	return []jen.Code{jen.Id(s.Name).Op("=").Add(GenExpression(s.Expr))}
+	base := jen.Id(s.Name)
+	for _, specifier := range s.Specifiers {
+		switch specifier.Kind {
+		case projection.AssignField:
+			base = base.Dot(specifier.FieldName)
+		case projection.AssignIndex:
+			indexExpr := GenExpression(specifier.IndexExpr)
+			base = base.Index(indexExpr)
+		default:
+			panic(fmt.Sprintf("unexpected projection.AssignSpecifierKind: %#v", specifier.Kind))
+		}
+	}
+
+	return []jen.Code{base.Op("=").Add(GenExpression(s.Expr))}
 }
 
 func GenStmtExpr(s *projection.StmtExpr) jen.Statement {

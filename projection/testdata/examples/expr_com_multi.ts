@@ -9,9 +9,9 @@ export async function foo_A(env: Env) {
   let y: number = x;
 }
 export async function foo_B(env: Env) {
-  let y: number = await env.recv("A");
+  let y: number = await env.recv<number>("A");
 }
 export async function foo_C(env: Env) {
-  let y: number = await env.recv("A");
+  let y: number = await env.recv<number>("A");
 }
 

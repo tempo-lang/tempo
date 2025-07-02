@@ -15,7 +15,7 @@ export async function send_F(env: Env, value: number) {
   env.send(value, "G");
 }
 export async function send_G(env: Env): Promise<number> {
-  return await env.recv("F");
+  return await env.recv<number>("F");
 }
 
 // Projection of choreography bar

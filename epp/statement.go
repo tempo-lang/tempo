@@ -6,6 +6,7 @@ import (
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/sym_table"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []projection.Statement) {
@@ -14,17 +15,40 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 	switch stmt := stmt.(type) {
 	case *parser.StmtAssignContext:
 		sym := epp.info.Symbols[stmt.Ident()]
+		assignType := sym.Type()
+		specifiers := []projection.AssignSpecifier{}
+		for _, specifier := range stmt.AllAssignSpecifier() {
+			switch specifier := specifier.(type) {
+			case *parser.AssignFieldContext:
+				specifiers = append(specifiers, projection.AssignSpecifier{
+					Kind:      projection.AssignField,
+					FieldName: specifier.Ident().GetText(),
+				})
+				assignType, _ = assignType.Field(specifier.Ident().GetText())
+			case *parser.AssignIndexContext:
+				indexExpr, aux := epp.eppExpression(roleName, specifier.Expr())
+				result = append(result, aux...)
+				specifiers = append(specifiers, projection.AssignSpecifier{
+					Kind:      projection.AssignIndex,
+					IndexExpr: indexExpr,
+				})
+				assignType = assignType.(*types.ListType).Inner()
+			default:
+				panic(fmt.Sprintf("unexpected parser.IAssignSpecifierContext: %#v", specifier))
+			}
+		}
 
 		expr, aux := epp.eppExpression(roleName, stmt.Expr())
-		result = aux
+		result = append(result, aux...)
 
-		if sym.Type().Roles().Contains(roleName) {
+		if assignType.Roles().Contains(roleName) {
 
-			varibleType := epp.eppType(roleName, sym.Type())
+			varibleType := epp.eppType(roleName, assignType)
 			expr = epp.storeExpression(roleName, expr, varibleType)
 
 			varName := stmt.Ident().GetText()
-			result = append(result, projection.NewStmtAssign(varName, expr))
+
+			result = append(result, projection.NewStmtAssign(varName, specifiers, expr))
 			return
 		} else if expr != nil && expr.HasSideEffects() {
 			result = append(result, projection.NewStmtExpr(expr))

@@ -64,8 +64,12 @@ stmt:
 	| IF expr thenScope = scope (ELSE elseScope = scope)?	# stmtIf
 	| WHILE expr scope										# stmtWhile
 	| RETURN expr? END										# stmtReturn
-	| ident IS expr END										# stmtAssign
+	| ident assignSpecifier* IS expr END					# stmtAssign
 	| expr END												# stmtExpr;
+
+assignSpecifier:
+	DOT ident				# assignField
+	| LSQUARE expr RSQUARE	# assignIndex;
 
 // expressions
 expr:

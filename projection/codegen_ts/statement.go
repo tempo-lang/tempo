@@ -26,7 +26,20 @@ func (gen *codegen) GenStmt(s projection.Statement) string {
 }
 
 func (gen *codegen) GenStmtAssign(s *projection.StmtAssign) string {
-	return gen.Writeln("%s = %s;", s.Name, gen.GenExpr(s.Expr))
+	base := s.Name
+	for _, specifier := range s.Specifiers {
+		switch specifier.Kind {
+		case projection.AssignField:
+			base = fmt.Sprintf("%s.%s", base, specifier.FieldName)
+		case projection.AssignIndex:
+			indexExpr := gen.GenExpr(specifier.IndexExpr)
+			base = fmt.Sprintf("%s[%s]", base, indexExpr)
+		default:
+			panic(fmt.Sprintf("unexpected projection.AssignSpecifierKind: %#v", specifier.Kind))
+		}
+	}
+
+	return gen.Writeln("%s = %s;", base, gen.GenExpr(s.Expr))
 }
 
 func (gen *codegen) GenStmtExpr(s *projection.StmtExpr) string {

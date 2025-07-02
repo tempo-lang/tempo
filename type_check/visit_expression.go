@@ -390,13 +390,21 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 
 	fieldIdents := ctx.ExprStructField().AllIdent()
 	for i, fieldExpr := range ctx.ExprStructField().AllExpr() {
-		fieldExprType := tc.visitExpr(fieldExpr)
-
 		// check that field exists in struct
-		fieldType, found := structType.Field(fieldIdents[i].GetText())
-		if !found {
+		fieldType, fieldFound := structType.Field(fieldIdents[i].GetText())
+		if !fieldFound {
 			tc.reportError(type_error.NewUnexpectedStructField(fieldIdents[i], defStructType))
 			continue
+		}
+
+		var fieldExprType types.Type
+		if fieldFound {
+			oldHint := tc.currentTypeHint
+			tc.currentTypeHint = fieldType
+			fieldExprType = tc.visitExpr(fieldExpr)
+			tc.currentTypeHint = oldHint
+		} else {
+			fieldExprType = tc.visitExpr(fieldExpr)
 		}
 
 		// check that field expression can coerce to the expected type
@@ -423,7 +431,7 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 	fieldName := ctx.Ident().GetText()
 	fieldType, found := baseType.Field(fieldName)
 	if !found {
-		tc.reportError(type_error.NewFieldAccessUnknownField(ctx, baseType))
+		tc.reportError(type_error.NewFieldAccessUnknownField(ctx.Ident(), baseType))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -435,7 +443,7 @@ func (tc *typeChecker) VisitExprIndex(ctx *parser.ExprIndexContext) any {
 
 	listType, isList := baseType.(*types.ListType)
 	if !isList {
-		tc.reportError(type_error.NewIndexWrongBaseType(ctx, baseType))
+		tc.reportError(type_error.NewIndexWrongBaseType(ctx.GetBaseExpr(), baseType))
 		return tc.registerType(ctx, types.Invalid())
 	}
 

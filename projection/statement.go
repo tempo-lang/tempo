@@ -28,16 +28,31 @@ func (decl *StmtVarDecl) IsStatement() {}
 
 // Evaluates the expression and assigns the result to the variable identified by `Name`.
 type StmtAssign struct {
-	Name string
-	Expr Expression
+	Name       string
+	Specifiers []AssignSpecifier
+	Expr       Expression
+}
+
+type AssignSpecifierKind int
+
+const (
+	AssignField AssignSpecifierKind = iota
+	AssignIndex
+)
+
+type AssignSpecifier struct {
+	Kind      AssignSpecifierKind
+	FieldName string
+	IndexExpr Expression
 }
 
 func (s *StmtAssign) IsStatement() {}
 
-func NewStmtAssign(name string, expr Expression) Statement {
+func NewStmtAssign(name string, specifiers []AssignSpecifier, expr Expression) Statement {
 	return &StmtAssign{
-		Name: name,
-		Expr: expr,
+		Name:       name,
+		Specifiers: specifiers,
+		Expr:       expr,
 	}
 }
 

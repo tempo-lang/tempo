@@ -71,7 +71,7 @@ func (*baseType) Fields() iter.Seq2[string, Type] {
 }
 
 func (*baseType) Field(name string) (Type, bool) {
-	return nil, false
+	return Invalid(), false
 }
 
 type InvalidType struct {

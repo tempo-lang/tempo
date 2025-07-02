@@ -200,7 +200,7 @@ func (gen *codegen) GenExprListLength(e *projection.ExprListLength) string {
 }
 
 func (gen *codegen) GenExprRecv(e *projection.ExprRecv) string {
-	return fmt.Sprintf("env.recv(\"%s\")", e.Sender)
+	return fmt.Sprintf("env.recv<%s>(\"%s\")", gen.GenType(e.RecvType), e.Sender)
 }
 
 func (gen *codegen) GenExprSend(e *projection.ExprSend) string {
