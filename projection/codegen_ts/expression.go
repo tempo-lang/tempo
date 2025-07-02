@@ -200,7 +200,11 @@ func (gen *codegen) GenExprListLength(e *projection.ExprListLength) string {
 }
 
 func (gen *codegen) GenExprRecv(e *projection.ExprRecv) string {
-	return fmt.Sprintf("env.recv<%s>(\"%s\")", gen.GenType(e.RecvType), e.Sender)
+	if gen.opts.DisableTypes {
+		return fmt.Sprintf("env.recv(\"%s\")", e.Sender)
+	} else {
+		return fmt.Sprintf("env.recv<%s>(\"%s\")", gen.GenType(e.RecvType), e.Sender)
+	}
 }
 
 func (gen *codegen) GenExprSend(e *projection.ExprSend) string {
