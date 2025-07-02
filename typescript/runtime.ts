@@ -91,6 +91,29 @@ export class Env {
    * @returns The copied value
    */
   copy<T>(value: T): T {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    // Recursively copy each element of the array
+    if (Array.isArray(value)) {
+      const result = new Array(value.length);
+      for (const i in value) {
+        result[i] = this.copy(value[i]);
+      }
+      return result as T;
+    }
+
+    // Recursively copy objects
+    if (typeof value === "object") {
+      const result: any = {};
+      for (const [key, elem] of Object.entries(value)) {
+        result[key] = this.copy(elem);
+      }
+      return result as T;
+    }
+
+    // All other types are returned as is
     return value;
   }
 }
