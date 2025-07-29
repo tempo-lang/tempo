@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of struct Pair
+// Projection of struct `Pair`
 export type Pair_A = {
   num: number;
 }
@@ -10,7 +10,7 @@ export type Pair_B = {
   logic: boolean;
 }
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 export async function foo_X(env: Env) {
   let p: Pair_A = { num: 1 };
   let x: number = p.num;

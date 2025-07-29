@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of interface Action
+// Projection of interface `Action`
 export interface Action_A {
   foo(env: Env): Promise<void>;
   callA(env: Env): Promise<void>;
@@ -12,7 +12,7 @@ export interface Action_B {
   callB(env: Env): Promise<void>;
 }
 
-// Projection of choreography start
+// Projection of choreography `start`
 export async function start_X(env: Env, action: Action_A) {
   await action.foo(env.subst("X", "A", "Y", "B"));
 }

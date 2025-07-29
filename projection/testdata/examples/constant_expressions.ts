@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography constants
+// Projection of choreography `constants`
 export async function constants_A(env: Env) {
   let intValue: number = 123;
   let floatValue: number = 123.000000;

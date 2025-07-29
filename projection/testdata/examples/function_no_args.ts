@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 export async function foo_X(env: Env) {
 }
 export async function foo_Y(env: Env) {

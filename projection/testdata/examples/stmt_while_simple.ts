@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography countdown
+// Projection of choreography `countdown`
 export async function countdown_A(env: Env) {
   let x: number = 10;
   while (x > 0) {

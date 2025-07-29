@@ -2,11 +2,11 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography call
+// Projection of choreography `call`
 export async function call_X(env: Env, val: number) {
 }
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 export async function foo_A(env: Env) {
   let x: (env: Env, arg0: number) => Promise<void> = async (env: Env, val: number) => {
     await call_X(env.subst("A", "X"), val);

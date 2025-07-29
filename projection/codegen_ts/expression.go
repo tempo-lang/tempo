@@ -48,6 +48,8 @@ func (gen *codegen) GenExpr(expr projection.Expression) string {
 		return gen.GenExprStruct(e)
 	case *projection.ExprPassValue:
 		return gen.GenExprCopy(e)
+	case *projection.ExprSelf:
+		return gen.GenExprSelf(e)
 	}
 
 	panic(fmt.Sprintf("unexpected projection.Expression: %#v", expr))
@@ -227,6 +229,10 @@ func (gen *codegen) GenExprStruct(e *projection.ExprStruct) string {
 	}
 
 	return fmt.Sprintf("{ %s }", misc.JoinStrings(fields, ", "))
+}
+
+func (gen *codegen) GenExprSelf(e *projection.ExprSelf) string {
+	return "self"
 }
 
 func (gen *codegen) GenExprCopy(e *projection.ExprPassValue) string {

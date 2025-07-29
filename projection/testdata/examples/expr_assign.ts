@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography assign
+// Projection of choreography `assign`
 export async function assign_A(env: Env) {
   let x: number = 10;
   x = 20;

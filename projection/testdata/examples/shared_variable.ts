@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography shared
+// Projection of choreography `shared`
 export async function shared_A(env: Env) {
   let x: number = 10;
 }

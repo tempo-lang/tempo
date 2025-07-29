@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography list
+// Projection of choreography `list`
 export async function list_A(env: Env) {
   let value: number[] = [1, 2, 3];
   let x: number = value.length;

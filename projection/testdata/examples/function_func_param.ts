@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 export async function foo_A(env: Env, value: number, fn: (env: Env, arg0: number) => Promise<void>) {
   await fn(env, value);
 }
@@ -10,7 +10,7 @@ export async function foo_B(env: Env, fn: (env: Env) => Promise<number>): Promis
   return await fn(env);
 }
 
-// Projection of choreography send
+// Projection of choreography `send`
 export async function send_F(env: Env, value: number) {
   env.send(value, "G");
 }
@@ -18,7 +18,7 @@ export async function send_G(env: Env): Promise<number> {
   return await env.recv<number>("F");
 }
 
-// Projection of choreography bar
+// Projection of choreography `bar`
 export async function bar_X(env: Env) {
   await foo_A(env.subst("X", "A", "Y", "B"), 10, async (env: Env, value: number) => {
     await send_F(env.subst("X", "F", "Y", "G"), value);

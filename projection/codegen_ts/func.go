@@ -20,8 +20,7 @@ func (gen *codegen) GenFunc(f *projection.Func) string {
 	return out
 }
 
-func (gen *codegen) GenFuncSig(f *projection.FuncSig) string {
-
+func (gen *codegen) GenFuncParams(f *projection.FuncSig) string {
 	params := []string{}
 	if gen.opts.DisableTypes {
 		params = append(params, "env")
@@ -37,7 +36,12 @@ func (gen *codegen) GenFuncSig(f *projection.FuncSig) string {
 		}
 	}
 
-	result := fmt.Sprintf("export async function %s_%s(%s)", f.Name, f.Role, misc.JoinStrings(params, ", "))
+	return misc.JoinStrings(params, ", ")
+}
+
+func (gen *codegen) GenFuncSig(f *projection.FuncSig) string {
+	params := gen.GenFuncParams(f)
+	result := fmt.Sprintf("export async function %s_%s(%s)", f.Name, f.Role, params)
 
 	if f.ReturnValue != projection.UnitType() && !gen.opts.DisableTypes {
 		result += fmt.Sprintf(": Promise<%s>", gen.GenType(f.ReturnValue))

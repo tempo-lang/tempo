@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 export async function foo_A(env: Env) {
   let x: number = Math.floor(Math.floor(2 + 3 - 4 * 5 / 6) % 7);
   let y: string = "hello" + " world";

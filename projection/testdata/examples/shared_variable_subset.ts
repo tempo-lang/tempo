@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of choreography shareSubset
+// Projection of choreography `shareSubset`
 export async function shareSubset_A(env: Env) {
   let x: number = 10;
   let y: number = x;

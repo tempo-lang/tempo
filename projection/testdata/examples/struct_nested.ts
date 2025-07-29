@@ -2,7 +2,7 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of struct Foo
+// Projection of struct `Foo`
 export type Foo_A = {
   first: Bar_X;
   second: Bar_Y;
@@ -12,7 +12,7 @@ export type Foo_B = {
   second: Bar_X;
 }
 
-// Projection of struct Bar
+// Projection of struct `Bar`
 export type Bar_X = {
   num: number;
 }
@@ -20,7 +20,7 @@ export type Bar_Y = {
   logic: boolean;
 }
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 export async function foo_P(env: Env) {
   let x: number = 10;
   let nested: Foo_A = env.copy({ first: { num: x }, second: { logic: false } });

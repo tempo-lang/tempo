@@ -2,10 +2,27 @@
 
 import { Env } from '../../../typescript/runtime.ts';
 
-// Projection of struct Pair
+// Projection of struct `Pair`
 export type Pair_A = {
   x: number;
 }
 export type Pair_B = {
   y: number;
 }
+
+// Implementation of struct `Pair`
+function Pair_A_methods(self: Pair_A) {
+  return {
+    async swap(env: Env): Promise<Pair_B> {
+      return { y: self.x };
+    },
+  };
+}
+function Pair_B_methods(self: Pair_B) {
+  return {
+    async swap(env: Env): Promise<Pair_A> {
+      return { x: self.y };
+    },
+  };
+}
+
