@@ -1,6 +1,8 @@
 package sym_table
 
 import (
+	"iter"
+
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 )
@@ -72,7 +74,7 @@ func (f *FuncSymbol) FuncSig() parser.IFuncSigContext {
 	return f.funcCtx
 }
 
-func (f *FuncSymbol) FuncValue() *types.FunctionType {
+func (f *FuncSymbol) FuncType() *types.FunctionType {
 	return f.Type().(*types.FunctionType)
 }
 
@@ -93,7 +95,7 @@ func (f *FuncSymbol) AddParam(param *FuncParamSymbol) {
 }
 
 func (f *FuncSymbol) ReturnType() types.Type {
-	return f.FuncValue().ReturnType()
+	return f.FuncType().ReturnType()
 }
 
 func (f *FuncSymbol) ReturnCtx() parser.IValueTypeContext {
@@ -158,6 +160,7 @@ type StructSymbol struct {
 	structCtx parser.IStructContext
 	scope     *Scope
 	fields    []*StructFieldSymbol
+	methods   []*FuncSymbol
 }
 
 type StructFieldSymbol struct {
@@ -173,6 +176,7 @@ func NewStructSymbol(structCtx parser.IStructContext, scope *Scope, structType t
 		structCtx:  structCtx,
 		scope:      scope,
 		fields:     []*StructFieldSymbol{},
+		methods:    []*FuncSymbol{},
 	}
 }
 
@@ -188,11 +192,34 @@ func (s *StructSymbol) Fields() []*StructFieldSymbol {
 	return s.fields
 }
 
+func (s *StructSymbol) Field(name string) (*StructFieldSymbol, bool) {
+	for _, field := range s.fields {
+		if field.SymbolName() == name {
+			return field, true
+		}
+	}
+	return nil, false
+}
+
+func (s *StructSymbol) Methods() []*FuncSymbol {
+	return s.methods
+}
+
+func (s *StructSymbol) Method(name string) (*FuncSymbol, bool) {
+	for _, method := range s.methods {
+		if method.SymbolName() == name {
+			return method, true
+		}
+	}
+	return nil, false
+}
+
 func (s *StructSymbol) AddField(field *StructFieldSymbol) {
 	s.fields = append(s.fields, field)
+}
 
-	stType := s.baseSymbol.symType.(*types.StructType)
-	stType.AddField(field.SymbolName(), field.fieldType)
+func (s *StructSymbol) AddMethod(method *FuncSymbol) {
+	s.methods = append(s.methods, method)
 }
 
 func NewStructFieldSymbol(field parser.IStructFieldContext, parentStruct *StructSymbol, fieldType types.Type) Symbol {
@@ -220,6 +247,7 @@ type InterfaceSymbol struct {
 	baseSymbol
 	interfaceCtx parser.IInterfaceContext
 	scope        *Scope
+	methods      map[string]*FuncSymbol
 }
 
 func NewInterfaceSymbol(interfaceCtx parser.IInterfaceContext, scope *Scope, interfaceType types.Type) Symbol {
@@ -227,6 +255,7 @@ func NewInterfaceSymbol(interfaceCtx parser.IInterfaceContext, scope *Scope, int
 		baseSymbol:   newBaseSymbol(interfaceCtx.Ident(), interfaceType, scope.Parent()),
 		interfaceCtx: interfaceCtx,
 		scope:        scope,
+		methods:      map[string]*FuncSymbol{},
 	}
 }
 
@@ -236,4 +265,22 @@ func (i *InterfaceSymbol) IsAssignable() bool {
 
 func (i *InterfaceSymbol) Scope() *Scope {
 	return i.scope
+}
+
+func (i *InterfaceSymbol) Methods() iter.Seq2[string, *FuncSymbol] {
+	return func(yield func(string, *FuncSymbol) bool) {
+		for name, method := range i.methods {
+			if !yield(name, method) {
+				return
+			}
+		}
+	}
+}
+
+func (i *InterfaceSymbol) Method(name string) *FuncSymbol {
+	return i.methods[name]
+}
+
+func (i *InterfaceSymbol) AddMethod(fnSym *FuncSymbol) {
+	i.methods[fnSym.SymbolName()] = fnSym
 }

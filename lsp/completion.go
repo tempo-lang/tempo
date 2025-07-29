@@ -149,7 +149,7 @@ func completionItemsForFieldAccess(file *tempoDoc, fieldAccess *parser.ExprField
 	}
 
 	completionItems := []protocol.CompletionItem{}
-	for name, fieldType := range exprType.Fields() {
+	for name, fieldType := range file.info.Fields(exprType) {
 		completionItems = append(completionItems, protocol.CompletionItem{
 			Label:  name,
 			Kind:   toPtr(protocol.CompletionItemKindField),

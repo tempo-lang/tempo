@@ -114,8 +114,9 @@ func (tc *typeChecker) stmtAssignType(ctx *parser.StmtAssignContext, sym sym_tab
 		switch access := access.(type) {
 		case *parser.AssignFieldContext:
 			if structType, ok := assignType.(*types.StructType); ok {
-				if field, ok := structType.Field(access.Ident().GetText()); ok {
-					assignType = field
+				stSym := tc.info.Symbols[structType.Ident()].(*sym_table.StructSymbol)
+				if field, ok := stSym.Field(access.Ident().GetText()); ok {
+					assignType = field.Type().SubstituteRoles(structType.SubstMap())
 				} else {
 					tc.reportError(type_error.NewFieldAccessUnknownField(access.Ident(), assignType))
 					return types.Invalid()

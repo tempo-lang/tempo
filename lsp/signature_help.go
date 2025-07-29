@@ -78,8 +78,8 @@ func funcSignatureHelp(params *protocol.SignatureHelpParams, info *type_check.In
 	}
 
 	funcLabel := fmt.Sprintf("func@%s %s(%s)", funcSym.Roles().SubstituteRoles(roleSubst).ToString(), funcSym.SymbolName(), misc.JoinStrings(paramLabels, ", "))
-	if funcSym.FuncValue().ReturnType() != types.Unit() {
-		funcLabel = funcLabel + " " + funcSym.FuncValue().ReturnType().SubstituteRoles(roleSubst).ToString()
+	if funcSym.FuncType().ReturnType() != types.Unit() {
+		funcLabel = funcLabel + " " + funcSym.FuncType().ReturnType().SubstituteRoles(roleSubst).ToString()
 	}
 
 	return &protocol.SignatureHelp{

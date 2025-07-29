@@ -24,7 +24,7 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 					Kind:      projection.AssignField,
 					FieldName: specifier.Ident().GetText(),
 				})
-				assignType, _ = assignType.Field(specifier.Ident().GetText())
+				assignType, _ = epp.info.Field(assignType, specifier.Ident().GetText())
 			case *parser.AssignIndexContext:
 				indexExpr, aux := epp.eppExpression(roleName, specifier.Expr())
 				result = append(result, aux...)

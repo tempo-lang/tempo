@@ -18,3 +18,17 @@ func (self Pair_A) swap(env *runtime.Env) Pair_B {
 func (self Pair_B) swap(env *runtime.Env) Pair_A {
 	return Pair_A{x: self.y}
 }
+
+// Projection of choreography `main`
+func main_X(env *runtime.Env) {
+	var pair Pair_A = Pair_A{x: 10}
+	_ = pair
+	var pair2 Pair_B = pair.swap(env.Subst("X", "A", "Y", "B"))
+	_ = pair2
+}
+func main_Y(env *runtime.Env) {
+	var pair Pair_B = Pair_B{y: 20}
+	_ = pair
+	var pair2 Pair_A = pair.swap(env.Subst("X", "A", "Y", "B"))
+	_ = pair2
+}

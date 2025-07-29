@@ -363,18 +363,20 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		tc.reportError(err)
 	}
 
+	stSym := sym.(*sym_table.StructSymbol)
+
 	// check that all struct fields are present
-	for defFieldName := range defStructType.Fields() {
+	for _, defField := range stSym.Fields() {
 		found := false
 		for _, exprField := range ctx.ExprStructField().AllIdent() {
-			if exprField.GetText() == defFieldName {
+			if exprField.GetText() == defField.SymbolName() {
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			tc.reportError(type_error.NewMissingStructField(ctx, defFieldName, defStructType))
+			tc.reportError(type_error.NewMissingStructField(ctx, defField.SymbolName(), defStructType))
 		}
 	}
 
@@ -391,7 +393,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	fieldIdents := ctx.ExprStructField().AllIdent()
 	for i, fieldExpr := range ctx.ExprStructField().AllExpr() {
 		// check that field exists in struct
-		fieldType, fieldFound := structType.Field(fieldIdents[i].GetText())
+		fieldType, fieldFound := tc.info.Field(structType, fieldIdents[i].GetText())
 		if !fieldFound {
 			tc.reportError(type_error.NewUnexpectedStructField(fieldIdents[i], defStructType))
 			continue
@@ -429,7 +431,7 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 	}
 
 	fieldName := ctx.Ident().GetText()
-	fieldType, found := baseType.Field(fieldName)
+	fieldType, found := tc.info.Field(baseType, fieldName)
 	if !found {
 		tc.reportError(type_error.NewFieldAccessUnknownField(ctx.Ident(), baseType))
 		return tc.registerType(ctx, types.Invalid())

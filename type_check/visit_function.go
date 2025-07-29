@@ -24,7 +24,7 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 	// nil if parser error
 	if ctx.Scope() != nil {
 		returnsValue := ctx.Scope().Accept(tc) == true
-		if !returnsValue && sym.FuncValue().ReturnType() != types.Unit() {
+		if !returnsValue && sym.FuncType().ReturnType() != types.Unit() {
 			tc.reportError(type_error.NewFunctionMissingReturn(sym))
 		}
 	}
@@ -64,7 +64,9 @@ func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any 
 	return nil
 }
 
-func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr.ParserRuleContext) (sym_table.Symbol, bool) {
+// addFuncSymbol creates a new function symbol and stores it in the current scope.
+// It returns the new symbol along with a success boolean.
+func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr.ParserRuleContext) (funcSym sym_table.Symbol, success bool) {
 	fnType, errors := tc.parseFuncType(fn)
 	for _, err := range errors {
 		tc.reportError(err)
@@ -94,7 +96,7 @@ func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr
 
 	tc.currentScope = tc.currentScope.Parent()
 
-	funcSym := sym_table.NewFuncSymbol(fn, funcScope, fnType)
+	funcSym = sym_table.NewFuncSymbol(fn, funcScope, fnType)
 	funcScope.SetCallableEnv(funcSym.(*sym_table.FuncSymbol))
 	tc.insertSymbol(funcSym)
 

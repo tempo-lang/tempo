@@ -9,3 +9,8 @@ struct@(A,B) Pair {
     };
   }
 }
+
+func@(X,Y) main() {
+  let pair = Pair@(X,Y) { x: 10, y: 20 };
+  let pair2: Pair@(Y,X) = pair.swap();
+}

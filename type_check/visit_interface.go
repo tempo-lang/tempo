@@ -3,7 +3,6 @@ package type_check
 import (
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/sym_table"
-	"github.com/tempo-lang/tempo/types"
 )
 
 func (tc *typeChecker) VisitInterface(ctx *parser.InterfaceContext) any {
@@ -40,7 +39,7 @@ func (tc *typeChecker) VisitInterfaceMethod(ctx *parser.InterfaceMethodContext) 
 	funcSym := sym.(*sym_table.FuncSymbol)
 
 	infSym := tc.currentScope.GetInterface()
-	infSym.Type().(*types.InterfaceType).AddField(funcSym.SymbolName(), funcSym.Type())
+	infSym.AddMethod(funcSym)
 
 	tc.checkRolesInScope(ctx.FuncSig().RoleType())
 

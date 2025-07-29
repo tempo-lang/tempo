@@ -253,7 +253,7 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, t
 		tc.reportError(err)
 	}
 
-	return types.NewStructType(ctx.Ident(), roles.Participants(), types.TypeFieldMap{}), nil
+	return types.NewStructType(ctx.Ident(), roles.Participants()), nil
 }
 
 func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.Type, type_error.Error) {
@@ -272,7 +272,7 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.T
 		tc.reportError(err)
 	}
 
-	return types.Interface(ctx.Ident(), roles.Participants(), types.TypeFieldMap{}), nil
+	return types.Interface(ctx.Ident(), roles.Participants()), nil
 }
 
 func findRoleType(ctx parser.IValueTypeContext) parser.IRoleTypeContext {

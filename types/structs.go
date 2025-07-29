@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"iter"
 
 	"github.com/tempo-lang/tempo/parser"
 )
@@ -11,7 +10,7 @@ type StructType struct {
 	baseType
 	structIdent  parser.IIdentContext
 	participants []string
-	fields       TypeFieldMap
+	substMap     *RoleSubst
 }
 
 func (t *StructType) SubstituteRoles(substMap *RoleSubst) Type {
@@ -20,12 +19,10 @@ func (t *StructType) SubstituteRoles(substMap *RoleSubst) Type {
 		newParticipants = append(newParticipants, substMap.Subst(from))
 	}
 
-	newFields := TypeFieldMap{}
-	for name, fieldType := range t.fields {
-		newFields[name] = fieldType.SubstituteRoles(substMap)
-	}
+	newStruct := NewStructType(t.structIdent, newParticipants).(*StructType)
+	newStruct.substMap = t.substMap.ApplySubst(substMap)
 
-	return NewStructType(t.structIdent, newParticipants, newFields)
+	return newStruct
 }
 
 func (t *StructType) ReplaceSharedRoles(participants []string) Type {
@@ -49,6 +46,10 @@ func (t *StructType) Roles() *Roles {
 	return NewRole(t.participants, false)
 }
 
+func (t *StructType) SubstMap() *RoleSubst {
+	return t.substMap
+}
+
 func (t *StructType) IsSendable() bool {
 	return true
 }
@@ -61,8 +62,13 @@ func (t *StructType) ToString() string {
 	return fmt.Sprintf("struct@%s %s", t.Roles().ToString(), t.structIdent.GetText())
 }
 
-func NewStructType(structIdent parser.IIdentContext, participants []string, fields TypeFieldMap) Type {
-	return &StructType{structIdent: structIdent, participants: participants, fields: fields}
+func NewStructType(structIdent parser.IIdentContext, participants []string) Type {
+	substMap := NewRoleSubst()
+	for _, role := range participants {
+		substMap.AddRole(role, role)
+	}
+
+	return &StructType{structIdent: structIdent, participants: participants, substMap: substMap}
 }
 
 func (t *StructType) Name() string {
@@ -71,25 +77,4 @@ func (t *StructType) Name() string {
 
 func (t *StructType) Ident() parser.IIdentContext {
 	return t.structIdent
-}
-
-func (t *StructType) Fields() iter.Seq2[string, Type] {
-	return func(yield func(string, Type) bool) {
-		for k, v := range t.fields {
-			if !yield(k, v) {
-				return
-			}
-		}
-	}
-}
-
-func (t *StructType) Field(name string) (Type, bool) {
-	field, found := t.fields[name]
-	return field, found
-}
-
-// AddField is a special method that populates the fields of the struct type after it has been instantiated.
-// Since types should generally not be mutated, using this method requires special care.
-func (t *StructType) AddField(name string, fieldType Type) {
-	t.fields[name] = fieldType
 }

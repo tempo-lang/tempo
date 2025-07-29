@@ -3,8 +3,6 @@
 // The [Type] interface is implemented by all types in the language.
 package types
 
-import "iter"
-
 func baseCoerceValue(thisValue, otherValue Type) (Type, *bool) {
 	fail := false
 	success := true
@@ -54,10 +52,6 @@ type Type interface {
 	Roles() *Roles
 	// IsInvalid returns whether this type is the invalid type.
 	IsInvalid() bool
-	// Fields returns an iterator over all fields that can be accessed on this type.
-	Fields() iter.Seq2[string, Type]
-	// Field returns the field with the given name, the returned boolean indicates whether the field was found.
-	Field(name string) (Type, bool)
 }
 
 type baseType struct{}
@@ -66,17 +60,7 @@ func (*baseType) IsInvalid() bool {
 	return false
 }
 
-func (*baseType) Fields() iter.Seq2[string, Type] {
-	return func(yield func(string, Type) bool) {}
-}
-
-func (*baseType) Field(name string) (Type, bool) {
-	return Invalid(), false
-}
-
-type InvalidType struct {
-	baseType
-}
+type InvalidType struct{}
 
 func (*InvalidType) IsInvalid() bool {
 	return true

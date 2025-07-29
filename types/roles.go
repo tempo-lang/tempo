@@ -66,6 +66,15 @@ func (r *RoleSubst) Inverse() *RoleSubst {
 	return inv
 }
 
+// ApplySubst returns a new role substitution which has the samme effect as applying the original followed by the other.
+func (r *RoleSubst) ApplySubst(other *RoleSubst) *RoleSubst {
+	result := NewRoleSubst()
+	for _, role := range r.Roles {
+		result.AddRole(role, other.Subst(r.Map[role]))
+	}
+	return result
+}
+
 // NewRole constructs a new roles object, given a set of participants and whether the role is shared or not.
 func NewRole(participants []string, isShared bool) *Roles {
 	var roleType RoleType
