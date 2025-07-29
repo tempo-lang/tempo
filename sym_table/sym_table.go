@@ -186,6 +186,7 @@ func (scope *Scope) SetStruct(structSym *StructSymbol) {
 }
 
 // GetStruct gets the [StructSymbol] if this scope was created for a struct.
+// Returns nil otherwise.
 func (scope *Scope) GetStruct() *StructSymbol {
 	s := scope
 	for s.structSym == nil && s.parent != nil {
@@ -200,6 +201,7 @@ func (scope *Scope) SetInterface(interfaceSym *InterfaceSymbol) {
 }
 
 // GetInterface gets the [InterfaceSymbol] if this scope was created for an interface.
+// Returns nil otherwise.
 func (scope *Scope) GetInterface() *InterfaceSymbol {
 	s := scope
 	for s.interfaceSym == nil && s.parent != nil {

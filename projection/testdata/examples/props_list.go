@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography list
+// Projection of choreography `list`
 func list_A(env *runtime.Env) {
 	var value []int = []int{1, 2, 3}
 	_ = value

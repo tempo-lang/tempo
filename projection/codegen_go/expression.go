@@ -48,6 +48,8 @@ func GenExpression(expr projection.Expression) jen.Code {
 		return GenExprStruct(e)
 	case *projection.ExprPassValue:
 		return GenExprCopy(e)
+	case *projection.ExprSelf:
+		return GenExprSelf(e)
 	default:
 		panic(fmt.Sprintf("unexpected projection.Expression: %#v", e))
 	}
@@ -155,6 +157,10 @@ func GenExprStruct(e *projection.ExprStruct) jen.Code {
 
 func GenExprFieldAccess(e *projection.ExprFieldAccess) jen.Code {
 	return jen.Add(GenExpression(e.BaseExpr)).Dot(e.FieldName)
+}
+
+func GenExprSelf(e *projection.ExprSelf) jen.Code {
+	return jen.Id("self")
 }
 
 func GenExprCopy(e *projection.ExprPassValue) jen.Code {

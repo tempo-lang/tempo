@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 func foo_A(env *runtime.Env) {
 	var x int = 2 + 3 - 4*5/6%7
 	_ = x

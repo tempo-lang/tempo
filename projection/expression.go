@@ -512,10 +512,35 @@ func (e *ExprFieldAccess) HasSideEffects() bool {
 
 func (e *ExprFieldAccess) IsExpression() {}
 
-func NewExprFieldAccess(structExpr Expression, fieldName string, typ Type) Expression {
+func NewExprFieldAccess(baseExpr Expression, fieldName string, typ Type) Expression {
 	return &ExprFieldAccess{
-		BaseExpr:  structExpr,
+		BaseExpr:  baseExpr,
 		FieldName: fieldName,
 		FieldType: typ,
+	}
+}
+
+// ExprSelf returns a pointer to the struct of which the current method is a part of.
+type ExprSelf struct {
+	SelfType Type
+}
+
+func (e *ExprSelf) Type() Type {
+	return e.SelfType
+}
+
+func (e *ExprSelf) ReturnsValue() bool {
+	return true
+}
+
+func (e *ExprSelf) HasSideEffects() bool {
+	return false
+}
+
+func (e *ExprSelf) IsExpression() {}
+
+func NewExprSelf(typ Type) Expression {
+	return &ExprSelf{
+		SelfType: typ,
 	}
 }

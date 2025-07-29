@@ -8,14 +8,30 @@ import (
 )
 
 func GenChoreographyStruct(file *jen.File, c *projection.ChoreographyStruct) {
-	file.Commentf("Projection of struct %s", c.Name)
+	file.Commentf("Projection of struct `%s`", c.Name)
 
+	hasMethods := false
 	for _, role := range c.Roles {
-		file.Add(GenStruct(c.Structs[role]))
+		file.Add(GenStructDecl(c.Structs[role]))
+
+		if len(c.Structs[role].Methods) > 0 {
+			hasMethods = true
+		}
+	}
+
+	if hasMethods {
+		file.Commentf("Implementation of struct `%s`", c.Name)
+		for _, role := range c.Roles {
+			file.Add(GenStructMethods(c.Structs[role]))
+		}
 	}
 }
 
-func GenStruct(s *projection.Struct) *jen.Statement {
+func structTypeName(s *projection.Struct) string {
+	return fmt.Sprintf("%s_%s", s.Name, s.Role)
+}
+
+func GenStructDecl(s *projection.Struct) *jen.Statement {
 
 	fields := []jen.Code{}
 
@@ -23,7 +39,7 @@ func GenStruct(s *projection.Struct) *jen.Statement {
 		fields = append(fields, GenStructField(&field))
 	}
 
-	return jen.Type().Id(fmt.Sprintf("%s_%s", s.Name, s.Role)).Struct(fields...)
+	return jen.Type().Id(structTypeName(s)).Struct(fields...)
 }
 
 func GenStructType(s *projection.StructType) jen.Code {
@@ -32,4 +48,30 @@ func GenStructType(s *projection.StructType) jen.Code {
 
 func GenStructField(f *projection.StructField) *jen.Statement {
 	return jen.Id(f.Name).Add(GenType(f.Type)).Tag(map[string]string{"json": f.Name})
+}
+
+func GenStructMethods(s *projection.Struct) *jen.Statement {
+	result := jen.Empty()
+
+	for _, method := range s.Methods {
+		params := FuncSigParams(method.FuncSig)
+
+		fn := jen.Func().Params(jen.Id("self").Id(structTypeName(s))).Id(method.FuncSig.Name).Params(params...)
+
+		if method.FuncSig.ReturnValue != projection.UnitType() {
+			fn = fn.Add(GenType(method.FuncSig.ReturnValue))
+		}
+
+		fn = fn.BlockFunc(func(block *jen.Group) {
+			for _, bodyStmt := range method.Body {
+				for _, stmt := range GenStatement(bodyStmt) {
+					block.Add(stmt)
+				}
+			}
+		})
+
+		result.Add(fn)
+	}
+
+	return result
 }

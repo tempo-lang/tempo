@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography constants
+// Projection of choreography `constants`
 func constants_A(env *runtime.Env) {
 	var intValue int = 123
 	_ = intValue

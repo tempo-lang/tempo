@@ -48,6 +48,14 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		if exprType.Roles().Contains(roleName) {
 			name := sym.SymbolName()
+
+			// check if identifier is struct attribute
+			structScope := epp.info.GlobalScope.Innermost(expr.GetStart()).GetStruct()
+			if structScope != nil && sym.Parent() == structScope.Scope() {
+				selfExpr := projection.NewExprSelf(epp.eppType(roleName, structScope.Type()))
+				return projection.NewExprFieldAccess(selfExpr, name, exprValue), []projection.Statement{}
+			}
+
 			switch sym := sym.(type) {
 			case *sym_table.FuncSymbol:
 				funcType := exprValue.(*projection.FunctionType)
@@ -89,7 +97,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		exprValue := projection.NewExprAsync(inner)
 		if roleName == senderRole {
 			if inner.HasSideEffects() {
-				tmpName := epp.nextTmpName()
+				tmpName := epp.nextTmpName("")
 				aux = append(aux, projection.NewStmtVarDecl(tmpName, exprValue, false))
 				exprValue = projection.NewExprIdent(tmpName, exprValue.Type())
 				aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(projection.NewExprAwait(exprValue, inner.Type()), receiverRoles)))

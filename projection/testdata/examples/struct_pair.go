@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of struct Pair
+// Projection of struct `Pair`
 type Pair_A struct {
 	num int `json:"num"`
 }
@@ -11,7 +11,7 @@ type Pair_B struct {
 	logic bool `json:"logic"`
 }
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 func foo_X(env *runtime.Env) {
 	var p Pair_A = Pair_A{num: 1}
 	_ = p

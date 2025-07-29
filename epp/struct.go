@@ -19,6 +19,16 @@ func (epp *epp) eppStruct(st parser.IStructContext) *projection.ChoreographyStru
 				str.AddField(field, fieldType)
 			}
 		}
+
+		for _, method := range st.GetBody().AllFunc_() {
+			funcSig := epp.eppFuncSig(role, method.FuncSig())
+			m := str.AddMethod(funcSig, method)
+
+			for _, stmt := range method.Scope().AllStmt() {
+				eppStmts := epp.EppStmt(role, stmt)
+				m.AddStmt(eppStmts...)
+			}
+		}
 	}
 
 	return result

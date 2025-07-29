@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography binOps
+// Projection of choreography `binOps`
 func binOps_A(env *runtime.Env) {
 	var a int = 1 + 2 - 3*4/5%6
 	_ = a

@@ -1,0 +1,11 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+
+  func@(A,B) swap() Pair@(B,A) {
+    return Pair@(B,A) {
+      x: y,
+      y: x
+    };
+  }
+}

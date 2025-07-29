@@ -30,8 +30,11 @@ func EndpointProject(info *type_check.Info, sourceFile parser.ISourceFileContext
 	return newEpp(info).eppSourceFile(sourceFile)
 }
 
-func (epp *epp) nextTmpName() string {
+func (epp *epp) nextTmpName(hint string) string {
 	name := fmt.Sprintf("tmp%d", epp.tmpValue)
+	if hint != "" {
+		name = fmt.Sprintf("%s_tmp%d", hint, epp.tmpValue)
+	}
 	epp.tmpValue += 1
 	return name
 }

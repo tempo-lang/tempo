@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of interface Action
+// Projection of interface `Action`
 type Action_A interface {
 	foo(env *runtime.Env)
 	callA(env *runtime.Env)
@@ -13,7 +13,7 @@ type Action_B interface {
 	callB(env *runtime.Env)
 }
 
-// Projection of choreography start
+// Projection of choreography `start`
 func start_X(env *runtime.Env, action Action_A) {
 	action.foo(env.Subst("X", "A", "Y", "B"))
 }

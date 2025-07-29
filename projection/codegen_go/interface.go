@@ -8,7 +8,7 @@ import (
 )
 
 func GenChoreographyInterface(file *jen.File, c *projection.ChoreographyInterface) {
-	file.Commentf("Projection of interface %s", c.Name)
+	file.Commentf("Projection of interface `%s`", c.Name)
 
 	for _, role := range c.Roles {
 		file.Add(GenInterface(c.Interfaces[role]))

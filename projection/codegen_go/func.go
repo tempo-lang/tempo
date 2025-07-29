@@ -21,13 +21,18 @@ func GenFunc(f *projection.Func) *jen.Statement {
 	return result
 }
 
-func GenFuncSig(f *projection.FuncSig, isInterfaceMethod bool) *jen.Statement {
+func FuncSigParams(f *projection.FuncSig) []jen.Code {
 	params := []jen.Code{
 		jen.Id("env").Add(jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Env")),
 	}
 	for _, param := range f.Params {
 		params = append(params, jen.Id(param.Name).Add(GenType(param.TypeValue)))
 	}
+	return params
+}
+
+func GenFuncSig(f *projection.FuncSig, isInterfaceMethod bool) *jen.Statement {
+	params := FuncSigParams(f)
 
 	var result *jen.Statement
 	if isInterfaceMethod {

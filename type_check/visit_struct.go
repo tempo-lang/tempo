@@ -26,6 +26,14 @@ func (tc *typeChecker) VisitStructBody(ctx *parser.StructBodyContext) any {
 		field.Accept(tc)
 	}
 
+	for _, method := range ctx.AllFunc_() {
+		tc.addFuncSymbol(method.FuncSig(), method.Scope())
+	}
+
+	for _, method := range ctx.AllFunc_() {
+		method.Accept(tc)
+	}
+
 	return nil
 }
 

@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography countdown
+// Projection of choreography `countdown`
 func countdown_A(env *runtime.Env) {
 	var x int = 10
 	_ = x

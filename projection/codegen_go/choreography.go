@@ -6,7 +6,7 @@ import (
 )
 
 func GenChoreography(file *jen.File, c *projection.Choreography) {
-	file.Commentf("Projection of choreography %s", c.Name)
+	file.Commentf("Projection of choreography `%s`", c.Name)
 
 	for _, role := range c.Roles {
 		file.Add(GenFunc(c.Funcs[role]))

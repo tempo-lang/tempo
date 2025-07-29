@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography shared
+// Projection of choreography `shared`
 func shared_A(env *runtime.Env) {
 	var x int = 10
 	_ = x

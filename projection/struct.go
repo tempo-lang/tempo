@@ -24,6 +24,7 @@ type Struct struct {
 	Name      string
 	Role      string
 	Fields    []StructField
+	Methods   []*StructMethod
 }
 
 func (c *ChoreographyStruct) AddStruct(role string, structCtx parser.IStructContext) *Struct {
@@ -46,11 +47,36 @@ func (s *Struct) AddField(field parser.IStructFieldContext, fieldType Type) {
 	})
 }
 
+func (s *Struct) AddMethod(sig *FuncSig, funcCtx parser.IFuncContext) *StructMethod {
+	method := &StructMethod{
+		Struct:  s,
+		FuncSig: sig,
+		FuncCtx: funcCtx,
+		Body:    []Statement{},
+	}
+
+	s.Methods = append(s.Methods, method)
+
+	return method
+}
+
 type StructField struct {
 	Struct   *Struct
 	FieldCtx parser.IStructFieldContext
 	Name     string
 	Type     Type
+}
+
+type StructMethod struct {
+	Struct  *Struct
+	FuncSig *FuncSig
+	FuncCtx parser.IFuncContext
+	Body    []Statement
+}
+
+func (m *StructMethod) AddStmt(stmt ...Statement) *StructMethod {
+	m.Body = append(m.Body, stmt...)
+	return m
 }
 
 // A record that combines multiple values with potentially different types, identified by names.

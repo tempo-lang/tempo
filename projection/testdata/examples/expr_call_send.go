@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography send
+// Projection of choreography `send`
 func send_X(env *runtime.Env, value int) {
 	runtime.Send(env, value, "Y")
 }
@@ -11,7 +11,7 @@ func send_Y(env *runtime.Env) int {
 	return runtime.GetAsync(runtime.Recv[int](env, "X"))
 }
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 func foo_A(env *runtime.Env) {
 	var x int = 10
 	_ = x

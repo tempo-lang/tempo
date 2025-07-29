@@ -3,7 +3,7 @@ package choreography
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography foo
+// Projection of choreography `foo`
 func foo_X(env *runtime.Env) {}
 func foo_Y(env *runtime.Env) {}
 func foo_Z(env *runtime.Env) {}
