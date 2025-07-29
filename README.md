@@ -23,6 +23,7 @@ Here is a brief list of implemented things.
 - [ ] Methods
 - [ ] Maps
 - [ ] Co-routines
+- [ ] Unit tests
 
 ## Installation
 
@@ -69,7 +70,7 @@ func@(A,B) callback() async Int@A {
   return B->A 10;
 }
 
-let list: async@(A,B) [Int]@A = [1, callback(), 3]
+let list: [async Int@A] = [1, callback(), 3]
 await list // will wait for all elements in the list to finish
 ```
 

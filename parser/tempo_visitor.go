@@ -40,8 +40,8 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#struct.
 	VisitStruct(ctx *StructContext) interface{}
 
-	// Visit a parse tree produced by TempoParser#structFieldList.
-	VisitStructFieldList(ctx *StructFieldListContext) interface{}
+	// Visit a parse tree produced by TempoParser#structBody.
+	VisitStructBody(ctx *StructBodyContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#structField.
 	VisitStructField(ctx *StructFieldContext) interface{}

@@ -40,8 +40,8 @@ type TempoListener interface {
 	// EnterStruct is called when entering the struct production.
 	EnterStruct(c *StructContext)
 
-	// EnterStructFieldList is called when entering the structFieldList production.
-	EnterStructFieldList(c *StructFieldListContext)
+	// EnterStructBody is called when entering the structBody production.
+	EnterStructBody(c *StructBodyContext)
 
 	// EnterStructField is called when entering the structField production.
 	EnterStructField(c *StructFieldContext)
@@ -184,8 +184,8 @@ type TempoListener interface {
 	// ExitStruct is called when exiting the struct production.
 	ExitStruct(c *StructContext)
 
-	// ExitStructFieldList is called when exiting the structFieldList production.
-	ExitStructFieldList(c *StructFieldListContext)
+	// ExitStructBody is called when exiting the structBody production.
+	ExitStructBody(c *StructBodyContext)
 
 	// ExitStructField is called when exiting the structField production.
 	ExitStructField(c *StructFieldContext)

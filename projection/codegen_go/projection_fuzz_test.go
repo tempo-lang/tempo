@@ -106,7 +106,7 @@ func FuzzProjection(f *testing.F) {
 		input := antlr.NewInputStream(source)
 		output, errors := compiler.Compile(input, nil)
 		if len(errors) > 0 {
-			return
+			t.Skip()
 		}
 
 		fset := token.NewFileSet()

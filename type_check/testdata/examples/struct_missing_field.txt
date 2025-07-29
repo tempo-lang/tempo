@@ -1,6 +1,6 @@
 struct@(A,B) Pair {
-  fst: Int@A,
-  snd: Int@B
+  fst: Int@A;
+  snd: Int@B;
 }
 
 func@(A,B) foo() {

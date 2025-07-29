@@ -1,6 +1,6 @@
 struct@(A,B) Pair {
-  num: Int@A,
-  logic: Bool@B
+  num: Int@A;
+  logic: Bool@B;
 }
 
 func@(X,Y) foo() {

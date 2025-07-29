@@ -1,6 +1,6 @@
 struct@(A,B) Point {
-  x: Int@A,
-  y: Int@B
+  x: Int@A;
+  y: Int@B;
 }
 
 func@(A,B) foo() {

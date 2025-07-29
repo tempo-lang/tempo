@@ -15,13 +15,13 @@ func (tc *typeChecker) VisitStruct(ctx *parser.StructContext) any {
 
 	tc.currentScope = structSym.Scope()
 
-	ctx.StructFieldList().Accept(tc)
+	ctx.GetBody().Accept(tc)
 
 	tc.currentScope = tc.currentScope.Parent()
 	return nil
 }
 
-func (tc *typeChecker) VisitStructFieldList(ctx *parser.StructFieldListContext) any {
+func (tc *typeChecker) VisitStructBody(ctx *parser.StructBodyContext) any {
 	for _, field := range ctx.AllStructField() {
 		field.Accept(tc)
 	}

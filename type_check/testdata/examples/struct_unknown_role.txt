@@ -1,5 +1,5 @@
 struct@(A) Foo {
-  value: Int@B
+  value: Int@B;
 }
 ---
 E12 2:14: role `B` is not in scope

@@ -3,8 +3,8 @@ interface@A Math {
 }
 
 struct@(A,B) Secret {
-  A: Int@A,
-  B: Int@B
+  A: Int@A;
+  B: Int@B;
 }
 
 func@(A,B) DiffieHellman(mathA: Math@A, mathB: Math@B) Secret@(A,B) {

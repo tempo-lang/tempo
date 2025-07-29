@@ -1,11 +1,11 @@
 struct@(A,B) Foo {
-  first: Bar@(A,B),
-  second: Bar@(B,A)
+  first: Bar@(A,B);
+  second: Bar@(B,A);
 }
 
 struct@(X,Y) Bar {
-  num: Int@X,
-  logic: Bool@Y
+  num: Int@X;
+  logic: Bool@Y;
 }
 
 func@(P,Q) foo() {

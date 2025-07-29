@@ -86,11 +86,11 @@ func (s *BaseTempoListener) EnterStruct(ctx *StructContext) {}
 // ExitStruct is called when production struct is exited.
 func (s *BaseTempoListener) ExitStruct(ctx *StructContext) {}
 
-// EnterStructFieldList is called when production structFieldList is entered.
-func (s *BaseTempoListener) EnterStructFieldList(ctx *StructFieldListContext) {}
+// EnterStructBody is called when production structBody is entered.
+func (s *BaseTempoListener) EnterStructBody(ctx *StructBodyContext) {}
 
-// ExitStructFieldList is called when production structFieldList is exited.
-func (s *BaseTempoListener) ExitStructFieldList(ctx *StructFieldListContext) {}
+// ExitStructBody is called when production structBody is exited.
+func (s *BaseTempoListener) ExitStructBody(ctx *StructBodyContext) {}
 
 // EnterStructField is called when production structField is entered.
 func (s *BaseTempoListener) EnterStructField(ctx *StructFieldContext) {}

@@ -12,7 +12,7 @@ func (epp *epp) eppStruct(st parser.IStructContext) *projection.ChoreographyStru
 	for _, role := range sym.Type().Roles().Participants() {
 		str := result.AddStruct(role, st)
 
-		for _, field := range st.StructFieldList().AllStructField() {
+		for _, field := range st.GetBody().AllStructField() {
 			fieldSym := epp.info.Symbols[field.Ident()]
 			if fieldSym.Type().Roles().Contains(role) {
 				fieldType := epp.eppType(role, fieldSym.Type())

@@ -1,11 +1,11 @@
 struct@(A,B) Pair {
-  x: Int@A,
-  y: Int@B
+  x: Int@A;
+  y: Int@B;
 }
 
 struct@(A,B,C) Foo {
-  pairs: [Pair@(A,B)],
-  z: Int@C
+  pairs: [Pair@(A,B)];
+  z: Int@C;
 }
 
 func@(X,Y,Z) main() {

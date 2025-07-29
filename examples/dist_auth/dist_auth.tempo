@@ -1,11 +1,11 @@
 struct@A Credentials {
-  Username: String@A,
-  Password: String@A
+  Username: String@A;
+  Password: String@B;
 }
 
 struct@(C,S) AuthResult {
-  Success: Bool@[C,S],
-  Token: String@[C,S]
+  Success: Bool@[C,S];
+  Token: String@[C,S];
 }
 
 interface@A ClientRegistry {

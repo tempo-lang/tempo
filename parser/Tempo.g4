@@ -28,12 +28,11 @@ closureSig:
 	FUNC ROLE_AT roleType params = funcParamList returnType = valueType?;
 
 // struct
-struct: STRUCT ROLE_AT roleType ident structFieldList;
+struct: STRUCT ROLE_AT roleType ident body = structBody;
 
-structFieldList:
-	LCURLY (structField (COMMA structField)*)? RCURLY;
+structBody: LCURLY (structField | func)* RCURLY;
 
-structField: ident COLON valueType;
+structField: ident COLON valueType END;
 
 // interface
 interface:

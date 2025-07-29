@@ -51,7 +51,7 @@ func (v *BaseTempoVisitor) VisitStruct(ctx *StructContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseTempoVisitor) VisitStructFieldList(ctx *StructFieldListContext) interface{} {
+func (v *BaseTempoVisitor) VisitStructBody(ctx *StructBodyContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
