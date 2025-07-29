@@ -89,7 +89,7 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 			DisableTypes: options.DisableTypes,
 			RuntimePath:  options.RuntimePath,
 		}
-		output = codegen_ts.Codegen(eppFile, &tsOpts)
+		output = codegen_ts.Codegen(info, eppFile, &tsOpts)
 		return
 	default:
 		panic(fmt.Sprintf("unknown language: %v", options.Language))

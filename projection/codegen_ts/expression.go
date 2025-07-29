@@ -6,6 +6,7 @@ import (
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/sym_table"
 )
 
 func (gen *codegen) GenExpr(expr projection.Expression) string {
@@ -169,6 +170,22 @@ func (gen *codegen) GenExprClosure(e *projection.ExprClosure) string {
 }
 
 func (gen *codegen) GenExprFieldAccess(e *projection.ExprFieldAccess) string {
+	if stType, ok := e.BaseExpr.Type().(*projection.StructType); ok {
+		stSym := gen.info.Symbols[stType.Ident()].(*sym_table.StructSymbol)
+
+		isMethod := false
+		for _, method := range stSym.Methods() {
+			if method.SymbolName() == e.FieldName {
+				isMethod = true
+				break
+			}
+		}
+
+		if isMethod {
+			return fmt.Sprintf("%s_methods(%s).%s", gen.GenType(stType), gen.GenExpr(e.BaseExpr), e.FieldName)
+		}
+	}
+
 	return fmt.Sprintf("%s.%s", gen.GenExpr(e.BaseExpr), e.FieldName)
 }
 

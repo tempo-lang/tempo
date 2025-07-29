@@ -5,11 +5,13 @@ import (
 	"strings"
 
 	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/type_check"
 )
 
 type codegen struct {
 	indent int
 	opts   Options
+	info   *type_check.Info
 }
 
 func (gen *codegen) WriteIndent() string {
@@ -40,9 +42,10 @@ func DefaultOptions() Options {
 	}
 }
 
-func Codegen(sourceFile *projection.SourceFile, opts *Options) string {
+func Codegen(info *type_check.Info, sourceFile *projection.SourceFile, opts *Options) string {
 	gen := codegen{
 		indent: 0,
+		info:   info,
 	}
 	if opts != nil {
 		gen.opts = *opts

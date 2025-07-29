@@ -29,10 +29,10 @@ function Pair_B_methods(self: Pair_B) {
 // Projection of choreography `main`
 export async function main_X(env: Env) {
   let pair: Pair_A = { x: 10 };
-  let pair2: Pair_B = await pair.swap(env.subst("X", "A", "Y", "B"));
+  let pair2: Pair_B = await Pair_A_methods(pair).swap(env.subst("X", "A", "Y", "B"));
 }
 export async function main_Y(env: Env) {
   let pair: Pair_B = { y: 20 };
-  let pair2: Pair_A = await pair.swap(env.subst("X", "A", "Y", "B"));
+  let pair2: Pair_A = await Pair_B_methods(pair).swap(env.subst("X", "A", "Y", "B"));
 }
 
