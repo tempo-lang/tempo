@@ -15,10 +15,10 @@ func (gen *codegen) GenSourceFile(s *projection.SourceFile) string {
 		for _, inf := range s.Interfaces {
 			out += gen.GenChoreographyInterface(inf)
 		}
+	}
 
-		for _, st := range s.Structs {
-			out += gen.GenChoreographyStruct(st)
-		}
+	for _, st := range s.Structs {
+		out += gen.GenChoreographyStruct(st)
 	}
 
 	for _, chor := range s.Chors {

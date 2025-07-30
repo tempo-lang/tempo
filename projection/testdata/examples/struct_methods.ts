@@ -16,6 +16,10 @@ function Pair_A_methods(self: Pair_A) {
     async swap(env: Env): Promise<Pair_B> {
       return { y: self.x };
     },
+    async exchange(env: Env): Promise<Pair_A> {
+      env.send(self.x, "B");
+      return { x: await env.recv<number>("B") };
+    },
   };
 }
 function Pair_B_methods(self: Pair_B) {
@@ -23,16 +27,22 @@ function Pair_B_methods(self: Pair_B) {
     async swap(env: Env): Promise<Pair_A> {
       return { x: self.y };
     },
+    async exchange(env: Env): Promise<Pair_B> {
+      env.send(self.y, "A");
+      return { y: await env.recv<number>("A") };
+    },
   };
 }
 
 // Projection of choreography `main`
 export async function main_X(env: Env) {
   let pair: Pair_A = { x: 10 };
-  let pair2: Pair_B = await Pair_A_methods(pair).swap(env.subst("X", "A", "Y", "B"));
+  let pair_swapped: Pair_B = await Pair_A_methods(pair).swap(env.subst("X", "A", "Y", "B"));
+  let pair_exchanged: Pair_A = await Pair_A_methods(pair).exchange(env.subst("X", "A", "Y", "B"));
 }
 export async function main_Y(env: Env) {
   let pair: Pair_B = { y: 20 };
-  let pair2: Pair_A = await Pair_B_methods(pair).swap(env.subst("X", "A", "Y", "B"));
+  let pair_swapped: Pair_A = await Pair_B_methods(pair).swap(env.subst("X", "A", "Y", "B"));
+  let pair_exchanged: Pair_B = await Pair_B_methods(pair).exchange(env.subst("X", "A", "Y", "B"));
 }
 

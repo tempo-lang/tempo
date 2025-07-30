@@ -7,18 +7,24 @@ import (
 )
 
 func (gen *codegen) GenChoreographyStruct(c *projection.ChoreographyStruct) string {
-	out := gen.Writeln("// Projection of struct `%s`", c.Name)
+	out := ""
+	if !gen.opts.DisableTypes {
+		out += gen.Writeln("// Projection of struct `%s`", c.Name)
+
+		for _, role := range c.Roles {
+			out += gen.GenStructDecl(c.Structs[role])
+
+		}
+
+		out += gen.Writeln("")
+	}
 
 	hasMethods := false
 	for _, role := range c.Roles {
-		out += gen.GenStructDecl(c.Structs[role])
-
 		if len(c.Structs[role].Methods) > 0 {
 			hasMethods = true
 		}
 	}
-
-	out += gen.Writeln("")
 
 	if hasMethods {
 		out += gen.Writeln("// Implementation of struct `%s`", c.Name)
@@ -49,7 +55,12 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 func (gen *codegen) GenStructMethods(s *projection.Struct) string {
 	out := ""
 
-	out += gen.Writeln("function %s_%s_methods(self: %s_%s) {", s.Name, s.Role, s.Name, s.Role)
+	if gen.opts.DisableTypes {
+		out += gen.Writeln("function %s_%s_methods(self) {", s.Name, s.Role)
+	} else {
+		out += gen.Writeln("function %s_%s_methods(self: %s_%s) {", s.Name, s.Role, s.Name, s.Role)
+	}
+
 	gen.IncIndent()
 	out += gen.Writeln("return {")
 	gen.IncIndent()

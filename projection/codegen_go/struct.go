@@ -22,7 +22,9 @@ func GenChoreographyStruct(file *jen.File, c *projection.ChoreographyStruct) {
 	if hasMethods {
 		file.Commentf("Implementation of struct `%s`", c.Name)
 		for _, role := range c.Roles {
-			file.Add(GenStructMethods(c.Structs[role]))
+			for _, stmt := range GenStructMethods(c.Structs[role]) {
+				file.Add(stmt)
+			}
 		}
 	}
 }
@@ -50,8 +52,8 @@ func GenStructField(f *projection.StructField) *jen.Statement {
 	return jen.Id(f.Name).Add(GenType(f.Type)).Tag(map[string]string{"json": f.Name})
 }
 
-func GenStructMethods(s *projection.Struct) *jen.Statement {
-	result := jen.Empty()
+func GenStructMethods(s *projection.Struct) []*jen.Statement {
+	result := []*jen.Statement{}
 
 	for _, method := range s.Methods {
 		params := FuncSigParams(method.FuncSig)
@@ -70,7 +72,7 @@ func GenStructMethods(s *projection.Struct) *jen.Statement {
 			}
 		})
 
-		result.Add(fn)
+		result = append(result, fn)
 	}
 
 	return result

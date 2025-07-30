@@ -8,9 +8,17 @@ struct@(A,B) Pair {
       y: x
     };
   }
+
+  func@(A,B) exchange() Pair@(A,B) {
+    return Pair@(A,B) {
+      x: await B->A y,
+      y: await A->B x
+    };
+  }
 }
 
 func@(X,Y) main() {
   let pair = Pair@(X,Y) { x: 10, y: 20 };
-  let pair2: Pair@(Y,X) = pair.swap();
+  let pair_swapped: Pair@(Y,X) = pair.swap();
+  let pair_exchanged: Pair@(X,Y) = pair.exchange();
 }

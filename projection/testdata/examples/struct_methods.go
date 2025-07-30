@@ -15,20 +15,32 @@ type Pair_B struct {
 func (self Pair_A) swap(env *runtime.Env) Pair_B {
 	return Pair_B{y: self.x}
 }
+func (self Pair_A) exchange(env *runtime.Env) Pair_A {
+	runtime.Send(env, self.x, "B")
+	return Pair_A{x: runtime.GetAsync(runtime.Recv[int](env, "B"))}
+}
 func (self Pair_B) swap(env *runtime.Env) Pair_A {
 	return Pair_A{x: self.y}
+}
+func (self Pair_B) exchange(env *runtime.Env) Pair_B {
+	runtime.Send(env, self.y, "A")
+	return Pair_B{y: runtime.GetAsync(runtime.Recv[int](env, "A"))}
 }
 
 // Projection of choreography `main`
 func main_X(env *runtime.Env) {
 	var pair Pair_A = Pair_A{x: 10}
 	_ = pair
-	var pair2 Pair_B = pair.swap(env.Subst("X", "A", "Y", "B"))
-	_ = pair2
+	var pair_swapped Pair_B = pair.swap(env.Subst("X", "A", "Y", "B"))
+	_ = pair_swapped
+	var pair_exchanged Pair_A = pair.exchange(env.Subst("X", "A", "Y", "B"))
+	_ = pair_exchanged
 }
 func main_Y(env *runtime.Env) {
 	var pair Pair_B = Pair_B{y: 20}
 	_ = pair
-	var pair2 Pair_A = pair.swap(env.Subst("X", "A", "Y", "B"))
-	_ = pair2
+	var pair_swapped Pair_A = pair.swap(env.Subst("X", "A", "Y", "B"))
+	_ = pair_swapped
+	var pair_exchanged Pair_B = pair.exchange(env.Subst("X", "A", "Y", "B"))
+	_ = pair_exchanged
 }

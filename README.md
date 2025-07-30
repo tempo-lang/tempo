@@ -19,8 +19,8 @@ Here is a brief list of implemented things.
 - [x] Interfaces
 - [x] Closures
 - [x] Lists
+- [x] Methods
 - [ ] Enums
-- [ ] Methods
 - [ ] Maps
 - [ ] Co-routines
 - [ ] Unit tests
