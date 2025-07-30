@@ -94,21 +94,18 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			receiverRoles = append(receiverRoles, receiver.GetText())
 		}
 
+		isReceiver := slices.Contains(receiverRoles, roleName)
+
 		exprValue := projection.NewExprAsync(inner)
 		if roleName == senderRole {
-			exprValue = projection.NewExprSend(inner, receiverRoles)
-			// if inner.HasSideEffects() {
-			// 	tmpName := epp.nextTmpName("")
-			// 	aux = append(aux, projection.NewStmtVarDecl(tmpName, exprValue, false))
-			// 	exprValue = projection.NewExprIdent(tmpName, exprValue.Type())
-			// 	aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(projection.NewExprAwait(exprValue, inner.Type()), receiverRoles)))
-			// } else {
-			// 	aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(inner, receiverRoles)))
-			// }
+			if !isReceiver {
+				exprValue = projection.NewExprSend(inner, receiverRoles)
+			} else {
+				aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(inner, receiverRoles)))
+			}
 		}
 
-		// receiver
-		if slices.Contains(receiverRoles, roleName) {
+		if isReceiver {
 			innerType := epp.eppType(senderRole, epp.info.Types[expr.Expr()])
 			return projection.NewExprRecv(innerType, senderRole), aux
 		}
@@ -118,6 +115,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			return exprValue, aux
 		}
 
+		// roles that are not a part of the com
 		return nil, aux
 	case *parser.ExprCallContext:
 		callExpr, aux := epp.eppExpression(roleName, expr.Expr())

@@ -37,5 +37,4 @@ func main_Y(env *runtime.Env) {
 func main_Z(env *runtime.Env) {
 	var foo Foo_C = Foo_C{z: 1}
 	_ = foo
-	runtime.Send(env, foo.z, "X")
 }

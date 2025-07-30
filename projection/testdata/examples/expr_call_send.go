@@ -5,7 +5,7 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of choreography `send`
 func send_X(env *runtime.Env, value int) {
-	runtime.Send(env, value, "Y")
+	_ = runtime.GetAsync(runtime.Send(env, value, "Y"))
 }
 func send_Y(env *runtime.Env) int {
 	return runtime.GetAsync(runtime.Recv[int](env, "X"))

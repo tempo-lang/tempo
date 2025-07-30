@@ -17,7 +17,7 @@ function Pair_A_methods(self: Pair_A) {
       return { y: self.x };
     },
     async exchange(env: Env): Promise<Pair_A> {
-      env.send(self.x, "B");
+      await env.send(self.x, "B");
       return { x: await env.recv<number>("B") };
     },
   };
@@ -28,7 +28,7 @@ function Pair_B_methods(self: Pair_B) {
       return { x: self.y };
     },
     async exchange(env: Env): Promise<Pair_B> {
-      env.send(self.y, "A");
+      await env.send(self.y, "A");
       return { y: await env.recv<number>("A") };
     },
   };

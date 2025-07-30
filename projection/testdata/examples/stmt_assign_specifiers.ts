@@ -33,6 +33,5 @@ export async function main_Y(env: Env) {
 }
 export async function main_Z(env: Env) {
   let foo: Foo_C = { z: 1 };
-  env.send(foo.z, "X");
 }
 

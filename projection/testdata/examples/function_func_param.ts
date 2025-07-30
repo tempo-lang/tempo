@@ -12,7 +12,7 @@ export async function foo_B(env: Env, fn: (env: Env) => Promise<number>): Promis
 
 // Projection of choreography `send`
 export async function send_F(env: Env, value: number) {
-  env.send(value, "G");
+  await env.send(value, "G");
 }
 export async function send_G(env: Env): Promise<number> {
   return await env.recv<number>("F");

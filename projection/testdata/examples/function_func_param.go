@@ -13,7 +13,7 @@ func foo_B(env *runtime.Env, fn func() int) int {
 
 // Projection of choreography `send`
 func send_F(env *runtime.Env, value int) {
-	runtime.Send(env, value, "G")
+	_ = runtime.GetAsync(runtime.Send(env, value, "G"))
 }
 func send_G(env *runtime.Env) int {
 	return runtime.GetAsync(runtime.Recv[int](env, "F"))

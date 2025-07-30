@@ -4,7 +4,7 @@ import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of choreography `send`
 export async function send_X(env: Env, value: number) {
-  env.send(value, "Y");
+  await env.send(value, "Y");
 }
 export async function send_Y(env: Env): Promise<number> {
   return await env.recv<number>("X");

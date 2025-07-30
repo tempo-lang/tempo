@@ -7,8 +7,7 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func foo_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
-	runtime.Send(env, x, "B", "C")
-	var y int = x
+	var y int = runtime.GetAsync(runtime.Send(env, x, "B", "C"))
 	_ = y
 }
 func foo_B(env *runtime.Env) {

@@ -16,14 +16,14 @@ func (self Pair_A) swap(env *runtime.Env) Pair_B {
 	return Pair_B{y: self.x}
 }
 func (self Pair_A) exchange(env *runtime.Env) Pair_A {
-	runtime.Send(env, self.x, "B")
+	_ = runtime.GetAsync(runtime.Send(env, self.x, "B"))
 	return Pair_A{x: runtime.GetAsync(runtime.Recv[int](env, "B"))}
 }
 func (self Pair_B) swap(env *runtime.Env) Pair_A {
 	return Pair_A{x: self.y}
 }
 func (self Pair_B) exchange(env *runtime.Env) Pair_B {
-	runtime.Send(env, self.y, "A")
+	_ = runtime.GetAsync(runtime.Send(env, self.y, "A"))
 	return Pair_B{y: runtime.GetAsync(runtime.Recv[int](env, "A"))}
 }
 
