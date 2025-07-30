@@ -1,6 +1,6 @@
 struct@A Credentials {
   Username: String@A;
-  Password: String@B;
+  Password: String@A;
 }
 
 struct@(C,S) AuthResult {

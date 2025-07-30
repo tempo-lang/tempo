@@ -3,29 +3,29 @@ package dist_auth
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of interface ClientRegistry
+// Projection of interface `ClientRegistry`
 type ClientRegistry_A interface {
 	GetSalt(env *runtime.Env, username string) string
 	Check(env *runtime.Env, hash string) bool
 }
 
-// Projection of interface TokenGenerator
+// Projection of interface `TokenGenerator`
 type TokenGenerator_A interface {
 	GenerateToken(env *runtime.Env) string
 }
 
-// Projection of interface Hasher
+// Projection of interface `Hasher`
 type Hasher_A interface {
 	CalcHash(env *runtime.Env, salt string, password string) string
 }
 
-// Projection of struct Credentials
+// Projection of struct `Credentials`
 type Credentials_A struct {
 	Username string `json:"Username"`
 	Password string `json:"Password"`
 }
 
-// Projection of struct AuthResult
+// Projection of struct `AuthResult`
 type AuthResult_C struct {
 	Success bool   `json:"Success"`
 	Token   string `json:"Token"`
@@ -35,7 +35,7 @@ type AuthResult_S struct {
 	Token   string `json:"Token"`
 }
 
-// Projection of choreography Authenticate
+// Projection of choreography `Authenticate`
 func Authenticate_Client(env *runtime.Env, credentials Credentials_A, hasher Hasher_A) AuthResult_C {
 	runtime.Send(env, credentials.Username, "IP")
 	var salt *runtime.Async[string] = runtime.Recv[string](env, "IP")

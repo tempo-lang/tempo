@@ -3,7 +3,7 @@ package send_trans
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography Trans
+// Projection of choreography `Trans`
 func Trans_A(env *runtime.Env) {
 	var x int = 10
 	_ = x

@@ -3,7 +3,7 @@ package ping_pong
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography pingPong
+// Projection of choreography `pingPong`
 func pingPong_A(env *runtime.Env, count int) {
 	if count > 0 {
 		runtime.Send(env, count, "B")
@@ -17,7 +17,7 @@ func pingPong_B(env *runtime.Env, count int) {
 	}
 }
 
-// Projection of choreography Start
+// Projection of choreography `Start`
 func Start_A(env *runtime.Env) {
 	pingPong_A(env.Subst("A", "A", "B", "B"), 4)
 }

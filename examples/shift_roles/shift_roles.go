@@ -3,7 +3,7 @@ package shift_roles
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography ShiftRoles
+// Projection of choreography `ShiftRoles`
 func ShiftRoles_A(env *runtime.Env, count int) {
 	if count > 0 {
 		runtime.Send(env, count, "B")

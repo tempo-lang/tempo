@@ -2,12 +2,12 @@
 
 import { Env } from '../../typescript/runtime.ts';
 
-// Projection of interface Math
+// Projection of interface `Math`
 export interface Math_A {
   Exp(env: Env, base: number, exp: number): Promise<number>;
 }
 
-// Projection of struct Secret
+// Projection of struct `Secret`
 export type Secret_A = {
   A: number;
 }
@@ -15,14 +15,14 @@ export type Secret_B = {
   B: number;
 }
 
-// Projection of choreography DiffieHellman
+// Projection of choreography `DiffieHellman`
 export async function DiffieHellman_A(env: Env, mathA: Math_A): Promise<Secret_A> {
   let p: number = 23;
   let g: number = 5;
   let a: number = 4;
   let tmp0: Promise<number> = Promise.resolve(Math.floor(await mathA.Exp(env.subst("A", "A"), g, a) % p));
   env.send(await tmp0, "B");
-  let B: Promise<number> = env.recv("B");
+  let B: Promise<number> = env.recv<number>("B");
   let sA: number = Math.floor(await mathA.Exp(env.subst("A", "A"), await B, a) % p);
   return { A: sA };
 }
@@ -30,7 +30,7 @@ export async function DiffieHellman_B(env: Env, mathB: Math_A): Promise<Secret_B
   let p: number = 23;
   let g: number = 5;
   let b: number = 3;
-  let A: Promise<number> = env.recv("A");
+  let A: Promise<number> = env.recv<number>("A");
   let tmp1: Promise<number> = Promise.resolve(Math.floor(await mathB.Exp(env.subst("B", "A"), g, b) % p));
   env.send(await tmp1, "A");
   let sB: number = Math.floor(await mathB.Exp(env.subst("B", "A"), await A, b) % p);

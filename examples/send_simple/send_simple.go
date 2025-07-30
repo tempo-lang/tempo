@@ -3,7 +3,7 @@ package send_simple
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography SimpleSend
+// Projection of choreography `SimpleSend`
 func SimpleSend_A(env *runtime.Env) {
 	var x int = 10
 	_ = x

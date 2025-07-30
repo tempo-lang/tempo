@@ -3,12 +3,12 @@ package diffie_hellman
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of interface Math
+// Projection of interface `Math`
 type Math_A interface {
 	Exp(env *runtime.Env, base int, exp int) int
 }
 
-// Projection of struct Secret
+// Projection of struct `Secret`
 type Secret_A struct {
 	A int `json:"A"`
 }
@@ -16,7 +16,7 @@ type Secret_B struct {
 	B int `json:"B"`
 }
 
-// Projection of choreography DiffieHellman
+// Projection of choreography `DiffieHellman`
 func DiffieHellman_A(env *runtime.Env, mathA Math_A) Secret_A {
 	var p int = 23
 	_ = p

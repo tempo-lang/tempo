@@ -3,7 +3,7 @@ package compose_closures
 
 import runtime "github.com/tempo-lang/tempo/runtime"
 
-// Projection of choreography compose
+// Projection of choreography `compose`
 func compose_A(env *runtime.Env, f func(int)) func(int) {
 	return func(input int) {
 		f(input)
@@ -20,7 +20,7 @@ func compose_C(env *runtime.Env, g func() int) func() int {
 	}
 }
 
-// Projection of choreography incAndSend
+// Projection of choreography `incAndSend`
 func incAndSend_X(env *runtime.Env, value int) {
 	runtime.Send(env, value+1, "Y")
 }
@@ -28,7 +28,7 @@ func incAndSend_Y(env *runtime.Env) int {
 	return runtime.GetAsync(runtime.Recv[int](env, "X"))
 }
 
-// Projection of choreography Start
+// Projection of choreography `Start`
 func Start_A(env *runtime.Env, input int) {
 	var f func(int) = func(value int) {
 		incAndSend_X(env.Subst("A", "X", "B", "Y"), value)

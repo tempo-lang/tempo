@@ -2,29 +2,29 @@
 
 import { Env } from '../../typescript/runtime.ts';
 
-// Projection of interface ClientRegistry
+// Projection of interface `ClientRegistry`
 export interface ClientRegistry_A {
   GetSalt(env: Env, username: string): Promise<string>;
   Check(env: Env, hash: string): Promise<boolean>;
 }
 
-// Projection of interface TokenGenerator
+// Projection of interface `TokenGenerator`
 export interface TokenGenerator_A {
   GenerateToken(env: Env): Promise<string>;
 }
 
-// Projection of interface Hasher
+// Projection of interface `Hasher`
 export interface Hasher_A {
   CalcHash(env: Env, salt: string, password: string): Promise<string>;
 }
 
-// Projection of struct Credentials
+// Projection of struct `Credentials`
 export type Credentials_A = {
   Username: string;
   Password: string;
 }
 
-// Projection of struct AuthResult
+// Projection of struct `AuthResult`
 export type AuthResult_C = {
   Success: boolean;
   Token: string;
@@ -34,34 +34,34 @@ export type AuthResult_S = {
   Token: string;
 }
 
-// Projection of choreography Authenticate
+// Projection of choreography `Authenticate`
 export async function Authenticate_Client(env: Env, credentials: Credentials_A, hasher: Hasher_A): Promise<AuthResult_C> {
   env.send(credentials.Username, "IP");
-  let salt: Promise<string> = env.recv("IP");
+  let salt: Promise<string> = env.recv<string>("IP");
   let tmp0: Promise<string> = Promise.resolve(await hasher.CalcHash(env.subst("Client", "A"), await salt, credentials.Password));
   env.send(await tmp0, "IP");
-  let valid: Promise<boolean> = env.recv("IP");
+  let valid: Promise<boolean> = env.recv<boolean>("IP");
   if (await valid) {
-    let token: Promise<string> = env.recv("IP");
+    let token: Promise<string> = env.recv<string>("IP");
     return { Success: true, Token: await token };
   } else {
     return { Success: false, Token: "" };
   }
 }
 export async function Authenticate_Service(env: Env): Promise<AuthResult_S> {
-  let valid: Promise<boolean> = env.recv("IP");
+  let valid: Promise<boolean> = env.recv<boolean>("IP");
   if (await valid) {
-    let token: Promise<string> = env.recv("IP");
+    let token: Promise<string> = env.recv<string>("IP");
     return { Success: true, Token: await token };
   } else {
     return { Success: false, Token: "" };
   }
 }
 export async function Authenticate_IP(env: Env, registry: ClientRegistry_A, tokenGen: TokenGenerator_A) {
-  let username: Promise<string> = env.recv("Client");
+  let username: Promise<string> = env.recv<string>("Client");
   let tmp1: Promise<string> = Promise.resolve(await registry.GetSalt(env.subst("IP", "A"), await username));
   env.send(await tmp1, "Client");
-  let hash: Promise<string> = env.recv("Client");
+  let hash: Promise<string> = env.recv<string>("Client");
   let tmp2: Promise<boolean> = Promise.resolve(await registry.Check(env.subst("IP", "A"), await hash));
   env.send(await tmp2, "Client", "Service");
   let valid: Promise<boolean> = tmp2;

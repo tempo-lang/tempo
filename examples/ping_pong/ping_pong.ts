@@ -2,7 +2,7 @@
 
 import { Env } from '../../typescript/runtime.ts';
 
-// Projection of choreography pingPong
+// Projection of choreography `pingPong`
 export async function pingPong_A(env: Env, count: number) {
   if (count > 0) {
     env.send(count, "B");
@@ -11,12 +11,12 @@ export async function pingPong_A(env: Env, count: number) {
 }
 export async function pingPong_B(env: Env, count: number) {
   if (count > 0) {
-    await env.recv("A");
+    await env.recv<number>("A");
     await pingPong_A(env.subst("B", "A", "A", "B"), count - 1);
   }
 }
 
-// Projection of choreography Start
+// Projection of choreography `Start`
 export async function Start_A(env: Env) {
   await pingPong_A(env.subst("A", "A", "B", "B"), 4);
 }
