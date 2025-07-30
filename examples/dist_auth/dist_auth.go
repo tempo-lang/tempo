@@ -37,11 +37,10 @@ type AuthResult_S struct {
 
 // Projection of choreography `Authenticate`
 func Authenticate_Client(env *runtime.Env, credentials Credentials_A, hasher Hasher_A) AuthResult_C {
-	runtime.Send(env, credentials.Username, "IP")
+	_ = runtime.Send(env, credentials.Username, "IP")
 	var salt *runtime.Async[string] = runtime.Recv[string](env, "IP")
 	_ = salt
-	var tmp0 *runtime.Async[string] = runtime.FixedAsync(hasher.CalcHash(env.Subst("Client", "A"), runtime.GetAsync(salt), credentials.Password))
-	runtime.Send(env, runtime.GetAsync(tmp0), "IP")
+	_ = runtime.Send(env, hasher.CalcHash(env.Subst("Client", "A"), runtime.GetAsync(salt), credentials.Password), "IP")
 	var valid *runtime.Async[bool] = runtime.Recv[bool](env, "IP")
 	_ = valid
 	if runtime.GetAsync(valid) {
@@ -78,16 +77,12 @@ func Authenticate_Service(env *runtime.Env) AuthResult_S {
 func Authenticate_IP(env *runtime.Env, registry ClientRegistry_A, tokenGen TokenGenerator_A) {
 	var username *runtime.Async[string] = runtime.Recv[string](env, "Client")
 	_ = username
-	var tmp1 *runtime.Async[string] = runtime.FixedAsync(registry.GetSalt(env.Subst("IP", "A"), runtime.GetAsync(username)))
-	runtime.Send(env, runtime.GetAsync(tmp1), "Client")
+	_ = runtime.Send(env, registry.GetSalt(env.Subst("IP", "A"), runtime.GetAsync(username)), "Client")
 	var hash *runtime.Async[string] = runtime.Recv[string](env, "Client")
 	_ = hash
-	var tmp2 *runtime.Async[bool] = runtime.FixedAsync(registry.Check(env.Subst("IP", "A"), runtime.GetAsync(hash)))
-	runtime.Send(env, runtime.GetAsync(tmp2), "Client", "Service")
-	var valid *runtime.Async[bool] = tmp2
+	var valid *runtime.Async[bool] = runtime.Send(env, registry.Check(env.Subst("IP", "A"), runtime.GetAsync(hash)), "Client", "Service")
 	_ = valid
 	if runtime.GetAsync(valid) {
-		var tmp3 *runtime.Async[string] = runtime.FixedAsync(tokenGen.GenerateToken(env.Subst("IP", "A")))
-		runtime.Send(env, runtime.GetAsync(tmp3), "Client", "Service")
+		_ = runtime.Send(env, tokenGen.GenerateToken(env.Subst("IP", "A")), "Client", "Service")
 	}
 }

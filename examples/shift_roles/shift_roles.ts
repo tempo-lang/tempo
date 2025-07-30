@@ -5,7 +5,7 @@ import { Env } from '../../typescript/runtime.ts';
 // Projection of choreography `ShiftRoles`
 export async function ShiftRoles_A(env: Env, count: number) {
   if (count > 0) {
-    env.send(count, "B");
+    await env.send(count, "B");
     await ShiftRoles_D(env.subst("B", "A", "C", "B", "D", "C", "A", "D"), count - 1);
   }
 }

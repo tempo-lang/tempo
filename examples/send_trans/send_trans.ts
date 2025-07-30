@@ -5,14 +5,12 @@ import { Env } from '../../typescript/runtime.ts';
 // Projection of choreography `Trans`
 export async function Trans_A(env: Env) {
   let x: number = 10;
-  env.send(x, "B");
-  let y: number = x;
+  let y: number = await env.send(x, "B");
   let z: number = y;
 }
 export async function Trans_B(env: Env) {
   let y: number = await env.recv<number>("A");
-  env.send(y, "C");
-  let z: number = y;
+  let z: number = await env.send(y, "C");
 }
 export async function Trans_C(env: Env) {
   let z: number = await env.recv<number>("B");

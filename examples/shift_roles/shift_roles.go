@@ -6,7 +6,7 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 // Projection of choreography `ShiftRoles`
 func ShiftRoles_A(env *runtime.Env, count int) {
 	if count > 0 {
-		runtime.Send(env, count, "B")
+		_ = runtime.GetAsync(runtime.Send(env, count, "B"))
 		ShiftRoles_D(env.Subst("B", "A", "C", "B", "D", "C", "A", "D"), count-1)
 	}
 }

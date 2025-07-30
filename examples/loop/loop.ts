@@ -5,15 +5,14 @@ import { Env } from '../../typescript/runtime.ts';
 // Projection of choreography `Main`
 export async function Main_A(env: Env) {
   let i: number = 5;
-  env.send(i > 0, "B");
-  while (i > 0) {
+  while (await env.send(i > 0, "B")) {
     await env.recv<string>("B");
     i = i - 1;
   }
 }
 export async function Main_B(env: Env) {
   while (await env.recv<boolean>("A")) {
-    env.send("ping", "A");
+    await env.send("ping", "A");
   }
 }
 

@@ -22,7 +22,7 @@ func compose_C(env *runtime.Env, g func() int) func() int {
 
 // Projection of choreography `incAndSend`
 func incAndSend_X(env *runtime.Env, value int) {
-	runtime.Send(env, value+1, "Y")
+	_ = runtime.GetAsync(runtime.Send(env, value+1, "Y"))
 }
 func incAndSend_Y(env *runtime.Env) int {
 	return runtime.GetAsync(runtime.Recv[int](env, "X"))

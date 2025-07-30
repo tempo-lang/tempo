@@ -21,7 +21,7 @@ export async function compose_C(env: Env, g: (env: Env) => Promise<number>): Pro
 
 // Projection of choreography `incAndSend`
 export async function incAndSend_X(env: Env, value: number) {
-  env.send(value + 1, "Y");
+  await env.send(value + 1, "Y");
 }
 export async function incAndSend_Y(env: Env): Promise<number> {
   return await env.recv<number>("X");

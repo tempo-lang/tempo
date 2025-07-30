@@ -38,8 +38,7 @@ export type AuthResult_S = {
 export async function Authenticate_Client(env: Env, credentials: Credentials_A, hasher: Hasher_A): Promise<AuthResult_C> {
   env.send(credentials.Username, "IP");
   let salt: Promise<string> = env.recv<string>("IP");
-  let tmp0: Promise<string> = Promise.resolve(await hasher.CalcHash(env.subst("Client", "A"), await salt, credentials.Password));
-  env.send(await tmp0, "IP");
+  env.send(await hasher.CalcHash(env.subst("Client", "A"), await salt, credentials.Password), "IP");
   let valid: Promise<boolean> = env.recv<boolean>("IP");
   if (await valid) {
     let token: Promise<string> = env.recv<string>("IP");
@@ -59,15 +58,11 @@ export async function Authenticate_Service(env: Env): Promise<AuthResult_S> {
 }
 export async function Authenticate_IP(env: Env, registry: ClientRegistry_A, tokenGen: TokenGenerator_A) {
   let username: Promise<string> = env.recv<string>("Client");
-  let tmp1: Promise<string> = Promise.resolve(await registry.GetSalt(env.subst("IP", "A"), await username));
-  env.send(await tmp1, "Client");
+  env.send(await registry.GetSalt(env.subst("IP", "A"), await username), "Client");
   let hash: Promise<string> = env.recv<string>("Client");
-  let tmp2: Promise<boolean> = Promise.resolve(await registry.Check(env.subst("IP", "A"), await hash));
-  env.send(await tmp2, "Client", "Service");
-  let valid: Promise<boolean> = tmp2;
+  let valid: Promise<boolean> = env.send(await registry.Check(env.subst("IP", "A"), await hash), "Client", "Service");
   if (await valid) {
-    let tmp3: Promise<string> = Promise.resolve(await tokenGen.GenerateToken(env.subst("IP", "A")));
-    env.send(await tmp3, "Client", "Service");
+    env.send(await tokenGen.GenerateToken(env.subst("IP", "A")), "Client", "Service");
   }
 }
 

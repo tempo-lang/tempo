@@ -7,8 +7,7 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func Trans_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
-	runtime.Send(env, x, "B")
-	var y int = x
+	var y int = runtime.GetAsync(runtime.Send(env, x, "B"))
 	_ = y
 	var z int = y
 	_ = z
@@ -16,8 +15,7 @@ func Trans_A(env *runtime.Env) {
 func Trans_B(env *runtime.Env) {
 	var y int = runtime.GetAsync(runtime.Recv[int](env, "A"))
 	_ = y
-	runtime.Send(env, y, "C")
-	var z int = y
+	var z int = runtime.GetAsync(runtime.Send(env, y, "C"))
 	_ = z
 }
 func Trans_C(env *runtime.Env) {

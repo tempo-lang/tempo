@@ -7,7 +7,7 @@ import runtime "github.com/tempo-lang/tempo/runtime"
 func SimpleSend_A(env *runtime.Env) {
 	var x int = 10
 	_ = x
-	runtime.Send(env, x, "B")
+	_ = runtime.GetAsync(runtime.Send(env, x, "B"))
 }
 func SimpleSend_B(env *runtime.Env) {
 	var y int = runtime.GetAsync(runtime.Recv[int](env, "A"))
