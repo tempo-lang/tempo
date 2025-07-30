@@ -1,6 +1,6 @@
 {
   "name": "@tempo-lang/tempo",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "license": "Apache-2.0",
   "exports": {
     "./runtime": "./runtime.ts",
