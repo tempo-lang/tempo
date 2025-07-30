@@ -12,11 +12,11 @@ import (
 
 func (tc *typeChecker) visitExpr(ctx parser.IExprContext) types.Type {
 	if ctx == nil {
-		return types.Invalid()
+		return tc.registerType(ctx, types.Invalid())
 	}
 	exprType := ctx.Accept(tc)
 	if exprType == nil {
-		return types.Invalid()
+		return tc.registerType(ctx, types.Invalid())
 	}
 	return exprType.(types.Type)
 }
@@ -31,7 +31,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	rhs := tc.visitExpr(ctx.GetRhs())
 
 	if lhs.IsInvalid() || rhs.IsInvalid() {
-		return types.Invalid()
+		return tc.registerType(ctx, types.Invalid())
 	}
 
 	arithmeticOps := []projection.Operator{
@@ -363,7 +363,11 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		tc.reportError(err)
 	}
 
-	stSym := sym.(*sym_table.StructSymbol)
+	stSym, ok := sym.(*sym_table.StructSymbol)
+	if !ok {
+		// parser error
+		return tc.registerType(ctx, types.Invalid())
+	}
 
 	// check that all struct fields are present
 	for _, defField := range stSym.Fields() {

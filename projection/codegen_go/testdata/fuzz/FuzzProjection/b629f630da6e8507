@@ -1,0 +1,2 @@
+go test fuzz v1
+string("struct@(A,B) Pair {\n  x: Int@A;\n  y: Int@Z;\n}\n\nstruct@(A,B,C) Foo {\n  pairs: [Pair@(A,B)];\n  z: Int@C;\n}\n\nfunc@(X,Y,Z) main() {\n  let foo = Foo@(X,Y,Z) {\n    pairs: [],\n    z: 1\n  };\n\n  foo.pairs = [\n    Pair@(X,Y) { x: 1, y: 2 },\n    Pair@(X,Y) { x: 3, y: 4 }\n  ];\n  \n  foo.pairs[awai%A0->A A0000]!0 =0000000")

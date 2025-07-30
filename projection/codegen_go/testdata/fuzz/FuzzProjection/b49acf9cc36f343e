@@ -1,0 +1,2 @@
+go test fuzz v1
+string("struct(0,0,A Foo 000000func(A{let foo=Foo@(A,A,A){})foo@(A){A:")

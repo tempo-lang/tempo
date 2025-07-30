@@ -21,12 +21,15 @@ func (epp *epp) eppStruct(st parser.IStructContext) *projection.ChoreographyStru
 		}
 
 		for _, method := range st.GetBody().AllFunc_() {
-			funcSig := epp.eppFuncSig(role, method.FuncSig())
-			m := str.AddMethod(funcSig, method)
+			methodSym := epp.info.Symbols[method.FuncSig().Ident()]
+			if methodSym.Type().Roles().Contains(role) {
+				funcSig := epp.eppFuncSig(role, method.FuncSig())
+				m := str.AddMethod(funcSig, method)
 
-			for _, stmt := range method.Scope().AllStmt() {
-				eppStmts := epp.EppStmt(role, stmt)
-				m.AddStmt(eppStmts...)
+				for _, stmt := range method.Scope().AllStmt() {
+					eppStmts := epp.EppStmt(role, stmt)
+					m.AddStmt(eppStmts...)
+				}
 			}
 		}
 	}
