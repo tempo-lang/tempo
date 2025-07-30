@@ -1,0 +1,7 @@
+func@(A,B) Main() {
+  let i: Int@A = 5;
+  while await A->B (i > 0) {
+    await B->A "ping";
+    i = i - 1;
+  }
+}

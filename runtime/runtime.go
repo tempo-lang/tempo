@@ -34,12 +34,14 @@ func New(trans Transport) *Env {
 }
 
 // Send will use the underlying [Transport] implementation to send the value.
-func Send[T any](env *Env, value T, roles ...string) {
+// The original value is returned to make it easier to use in expressions.
+func Send[T any](env *Env, value T, roles ...string) *Async[T] {
 	subRoles := make([]string, len(roles))
 	for i, role := range roles {
 		subRoles[i] = env.Role(role)
 	}
 	env.trans.Send(value, subRoles...)
+	return FixedAsync(value)
 }
 
 // Recv will use the underlying [Transport] implementation to receive a value.

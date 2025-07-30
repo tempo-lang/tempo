@@ -2,13 +2,11 @@ package types
 
 import (
 	"fmt"
-	"iter"
 )
 
 type ListType struct {
 	baseType
-	inner  Type
-	fields TypeFieldMap
+	inner Type
 }
 
 func (l *ListType) CoerceTo(other Type) (Type, bool) {
@@ -49,32 +47,6 @@ func (l *ListType) Inner() Type {
 
 func List(inner Type) Type {
 	return &ListType{
-		inner:  inner,
-		fields: listFields(inner),
+		inner: inner,
 	}
-}
-
-func listFields(innerType Type) TypeFieldMap {
-	result := TypeFieldMap{}
-
-	participants := innerType.Roles().participants
-
-	result["length"] = Int(participants)
-
-	return result
-}
-
-func (l *ListType) Fields() iter.Seq2[string, Type] {
-	return func(yield func(string, Type) bool) {
-		for k, v := range l.fields {
-			if !yield(k, v) {
-				return
-			}
-		}
-	}
-}
-
-func (l *ListType) Field(name string) (Type, bool) {
-	fieldType, found := l.fields[name]
-	return fieldType, found
 }

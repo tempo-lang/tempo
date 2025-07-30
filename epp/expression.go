@@ -96,14 +96,15 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		exprValue := projection.NewExprAsync(inner)
 		if roleName == senderRole {
-			if inner.HasSideEffects() {
-				tmpName := epp.nextTmpName("")
-				aux = append(aux, projection.NewStmtVarDecl(tmpName, exprValue, false))
-				exprValue = projection.NewExprIdent(tmpName, exprValue.Type())
-				aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(projection.NewExprAwait(exprValue, inner.Type()), receiverRoles)))
-			} else {
-				aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(inner, receiverRoles)))
-			}
+			exprValue = projection.NewExprSend(inner, receiverRoles)
+			// if inner.HasSideEffects() {
+			// 	tmpName := epp.nextTmpName("")
+			// 	aux = append(aux, projection.NewStmtVarDecl(tmpName, exprValue, false))
+			// 	exprValue = projection.NewExprIdent(tmpName, exprValue.Type())
+			// 	aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(projection.NewExprAwait(exprValue, inner.Type()), receiverRoles)))
+			// } else {
+			// 	aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(inner, receiverRoles)))
+			// }
 		}
 
 		// receiver

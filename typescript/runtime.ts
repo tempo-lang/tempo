@@ -38,10 +38,12 @@ export class Env {
    * Send will use the underlying {@link Transport} implementation to send the value.
    * @param value The value to send.
    * @param roles The roles to receive the value.
+   * @returns A promise resolving the original value, to make it easier to use in expressions.
    */
-  async send<T>(value: T, ...roles: string[]) {
+  async send<T>(value: T, ...roles: string[]): Promise<T> {
     const subRoles = roles.map((r) => this.role(r));
-    await this.trans.send(value, ...subRoles);
+    this.trans.send(value, ...subRoles);
+    return value;
   }
 
   /**

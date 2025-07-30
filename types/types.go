@@ -30,8 +30,6 @@ func baseCoerceValue(thisValue, otherValue Type) (Type, *bool) {
 	return nil, nil
 }
 
-type TypeFieldMap map[string]Type
-
 // A common interface for all types on the choreographic level
 type Type interface {
 	// IsSendable describes whether the type can be communicated using the `->` operator.

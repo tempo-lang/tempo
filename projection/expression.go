@@ -332,13 +332,14 @@ func NewExprAwait(inner Expression, typeVal Type) Expression {
 
 // Send the value of the inner expression to a set of recipients.
 // The recipient set cannot be empty but can contain the sender.
+// The expression returns the value of the inner expression wrapped in an async type.
 type ExprSend struct {
 	Expr      Expression
 	Receivers []string
 }
 
 func (e *ExprSend) ReturnsValue() bool {
-	return false
+	return true
 }
 
 func (e *ExprSend) HasSideEffects() bool {
@@ -348,7 +349,7 @@ func (e *ExprSend) HasSideEffects() bool {
 func (e *ExprSend) IsExpression() {}
 
 func (e *ExprSend) Type() Type {
-	return UnitType()
+	return NewAsyncType(e.Expr.Type())
 }
 
 func NewExprSend(expr Expression, receivers []string) Expression {
