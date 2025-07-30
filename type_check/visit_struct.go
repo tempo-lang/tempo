@@ -29,13 +29,16 @@ func (tc *typeChecker) VisitStructBody(ctx *parser.StructBodyContext) any {
 	structSym := tc.currentScope.GetStruct()
 
 	for _, method := range ctx.AllFunc_() {
-		funcSym, ok := tc.addFuncSymbol(method.FuncSig(), method.Scope())
+		funcSym, ok := tc.addFuncSymbol(method.FuncSig(), method)
 		if ok {
 			structSym.AddMethod(funcSym.(*sym_table.FuncSymbol))
 		}
 	}
 
 	for _, method := range ctx.AllFunc_() {
+
+		tc.checkRolesInScope(method.FuncSig().RoleType())
+
 		method.Accept(tc)
 	}
 

@@ -1,0 +1,5 @@
+struct@(A,B) Foo {
+  func@(A,B,C) test() {}
+}
+---
+E12 2:8: role `C` is not in scope
