@@ -114,16 +114,16 @@ func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (ty
 
 func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.Type, type_error.Error) {
 	// parser error
-	if ctx == nil || ctx.RoleType() == nil || ctx.Ident() == nil {
+	if ctx == nil || ctx.RoleIdent().RoleType() == nil || ctx.RoleIdent().Ident() == nil {
 		return types.Invalid(), nil
 	}
 
-	role, ok := tc.parseRoleType(ctx.RoleType())
+	role, ok := tc.parseRoleType(ctx.RoleIdent().RoleType())
 	if !ok {
 		return types.Invalid(), nil
 	}
 
-	typeName := ctx.Ident()
+	typeName := ctx.RoleIdent().Ident()
 	if builtinType, isBuiltinType := ToBuiltinValue(typeName.GetText(), role.Participants()); isBuiltinType {
 		if !role.IsSharedRole() && len(role.Participants()) > 1 {
 			return types.Invalid(), type_error.NewNotDistributedType(ctx)
@@ -137,16 +137,16 @@ func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.
 		return types.Invalid(), err
 	}
 
-	sym.AddRead(ctx.Ident())
+	sym.AddRead(ctx.RoleIdent().Ident())
 
 	expectedRoleCount := len(sym.Type().Roles().Participants())
 	if len(role.Participants()) != expectedRoleCount {
-		typeError = type_error.NewWrongRoleCount(sym, ctx.RoleType(), role)
+		typeError = type_error.NewWrongRoleCount(sym, ctx.RoleIdent().RoleType(), role)
 	}
 
 	substMap, rolesMatch := sym.Type().Roles().SubstituteMap(role)
 	if !rolesMatch {
-		return types.Invalid(), type_error.NewWrongRoleCount(sym, ctx.RoleType(), role)
+		return types.Invalid(), type_error.NewWrongRoleCount(sym, ctx.RoleIdent().RoleType(), role)
 	}
 	typeValue := sym.Type().SubstituteRoles(substMap)
 
@@ -289,7 +289,7 @@ func findRoleType(ctx parser.IValueTypeContext) parser.IRoleTypeContext {
 	case *parser.ListTypeContext:
 		return findRoleType(ctx.GetInner())
 	case *parser.NamedTypeContext:
-		return ctx.RoleType()
+		return ctx.RoleIdent().RoleType()
 	case *parser.ValueTypeContext:
 		// parser error
 		return nil

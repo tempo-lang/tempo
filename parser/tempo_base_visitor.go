@@ -15,6 +15,10 @@ func (v *BaseTempoVisitor) VisitIdent(ctx *IdentContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitRoleIdent(ctx *RoleIdentContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitAsyncType(ctx *AsyncTypeContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -48,6 +52,10 @@ func (v *BaseTempoVisitor) VisitClosureSig(ctx *ClosureSigContext) interface{} {
 }
 
 func (v *BaseTempoVisitor) VisitStruct(ctx *StructContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseTempoVisitor) VisitStructImplements(ctx *StructImplementsContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

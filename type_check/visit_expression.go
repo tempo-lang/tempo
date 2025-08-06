@@ -339,7 +339,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	sym, err := tc.lookupSymbol(ctx.Ident())
+	sym, err := tc.lookupSymbol(ctx.RoleIdent().Ident())
 	if err != nil {
 		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
@@ -351,15 +351,15 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	tc.info.Symbols[ctx.Ident()] = sym
-	sym.AddRead(ctx.Ident())
+	tc.info.Symbols[ctx.RoleIdent().Ident()] = sym
+	sym.AddRead(ctx.RoleIdent().Ident())
 
-	roles, ok := tc.parseRoleType(ctx.RoleType())
+	roles, ok := tc.parseRoleType(ctx.RoleIdent().RoleType())
 	if !ok {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	if err := tc.checkDuplicateRoles(ctx.RoleType(), roles); err != nil {
+	if err := tc.checkDuplicateRoles(ctx.RoleIdent().RoleType(), roles); err != nil {
 		tc.reportError(err)
 	}
 
@@ -388,7 +388,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	structRoles := defStructType.Roles()
 	defRoleSubst, ok := structRoles.SubstituteMap(roles)
 	if !ok {
-		tc.reportError(type_error.NewWrongRoleCount(sym, ctx.RoleType(), roles))
+		tc.reportError(type_error.NewWrongRoleCount(sym, ctx.RoleIdent().RoleType(), roles))
 		return tc.registerType(ctx, types.Invalid())
 	}
 

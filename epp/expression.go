@@ -181,7 +181,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		}
 
 	case *parser.ExprStructContext:
-		stSym := epp.info.Symbols[expr.Ident()].(*sym_table.StructSymbol)
+		stSym := epp.info.Symbols[expr.RoleIdent().Ident()].(*sym_table.StructSymbol)
 
 		defRoleSubst, _ := stSym.Type().Roles().SubstituteMap(exprType.Roles())
 		exprRoleSubst, _ := exprType.Roles().SubstituteMap(stSym.Type().Roles())

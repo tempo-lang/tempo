@@ -80,3 +80,7 @@ func (tc *typeChecker) VisitScope(ctx *parser.ScopeContext) any {
 func (tc *typeChecker) VisitIdent(ctx *parser.IdentContext) any {
 	return nil
 }
+
+func (tc *typeChecker) VisitRoleIdent(ctx *parser.RoleIdentContext) any {
+	return nil
+}

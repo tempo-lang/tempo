@@ -13,6 +13,9 @@ type TempoListener interface {
 	// EnterIdent is called when entering the ident production.
 	EnterIdent(c *IdentContext)
 
+	// EnterRoleIdent is called when entering the roleIdent production.
+	EnterRoleIdent(c *RoleIdentContext)
+
 	// EnterAsyncType is called when entering the asyncType production.
 	EnterAsyncType(c *AsyncTypeContext)
 
@@ -39,6 +42,9 @@ type TempoListener interface {
 
 	// EnterStruct is called when entering the struct production.
 	EnterStruct(c *StructContext)
+
+	// EnterStructImplements is called when entering the structImplements production.
+	EnterStructImplements(c *StructImplementsContext)
 
 	// EnterStructBody is called when entering the structBody production.
 	EnterStructBody(c *StructBodyContext)
@@ -157,6 +163,9 @@ type TempoListener interface {
 	// ExitIdent is called when exiting the ident production.
 	ExitIdent(c *IdentContext)
 
+	// ExitRoleIdent is called when exiting the roleIdent production.
+	ExitRoleIdent(c *RoleIdentContext)
+
 	// ExitAsyncType is called when exiting the asyncType production.
 	ExitAsyncType(c *AsyncTypeContext)
 
@@ -183,6 +192,9 @@ type TempoListener interface {
 
 	// ExitStruct is called when exiting the struct production.
 	ExitStruct(c *StructContext)
+
+	// ExitStructImplements is called when exiting the structImplements production.
+	ExitStructImplements(c *StructImplementsContext)
 
 	// ExitStructBody is called when exiting the structBody production.
 	ExitStructBody(c *StructBodyContext)

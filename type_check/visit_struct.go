@@ -13,6 +13,11 @@ func (tc *typeChecker) VisitStruct(ctx *parser.StructContext) any {
 		return nil
 	}
 
+	if ctx.GetBody() == nil {
+		// parser error
+		return nil
+	}
+
 	tc.currentScope = structSym.Scope()
 
 	ctx.GetBody().Accept(tc)
@@ -57,5 +62,9 @@ func (tc *typeChecker) VisitStructField(ctx *parser.StructFieldContext) any {
 		tc.checkRolesInScope(findRoleType(ctx.ValueType()))
 	}
 
+	return nil
+}
+
+func (tc *typeChecker) VisitStructImplements(ctx *parser.StructImplementsContext) any {
 	return nil
 }

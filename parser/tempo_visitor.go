@@ -13,6 +13,9 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#ident.
 	VisitIdent(ctx *IdentContext) interface{}
 
+	// Visit a parse tree produced by TempoParser#roleIdent.
+	VisitRoleIdent(ctx *RoleIdentContext) interface{}
+
 	// Visit a parse tree produced by TempoParser#asyncType.
 	VisitAsyncType(ctx *AsyncTypeContext) interface{}
 
@@ -39,6 +42,9 @@ type TempoVisitor interface {
 
 	// Visit a parse tree produced by TempoParser#struct.
 	VisitStruct(ctx *StructContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#structImplements.
+	VisitStructImplements(ctx *StructImplementsContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#structBody.
 	VisitStructBody(ctx *StructBodyContext) interface{}

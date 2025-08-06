@@ -32,6 +32,12 @@ func (s *BaseTempoListener) EnterIdent(ctx *IdentContext) {}
 // ExitIdent is called when production ident is exited.
 func (s *BaseTempoListener) ExitIdent(ctx *IdentContext) {}
 
+// EnterRoleIdent is called when production roleIdent is entered.
+func (s *BaseTempoListener) EnterRoleIdent(ctx *RoleIdentContext) {}
+
+// ExitRoleIdent is called when production roleIdent is exited.
+func (s *BaseTempoListener) ExitRoleIdent(ctx *RoleIdentContext) {}
+
 // EnterAsyncType is called when production asyncType is entered.
 func (s *BaseTempoListener) EnterAsyncType(ctx *AsyncTypeContext) {}
 
@@ -85,6 +91,12 @@ func (s *BaseTempoListener) EnterStruct(ctx *StructContext) {}
 
 // ExitStruct is called when production struct is exited.
 func (s *BaseTempoListener) ExitStruct(ctx *StructContext) {}
+
+// EnterStructImplements is called when production structImplements is entered.
+func (s *BaseTempoListener) EnterStructImplements(ctx *StructImplementsContext) {}
+
+// ExitStructImplements is called when production structImplements is exited.
+func (s *BaseTempoListener) ExitStructImplements(ctx *StructImplementsContext) {}
 
 // EnterStructBody is called when production structBody is entered.
 func (s *BaseTempoListener) EnterStructBody(ctx *StructBodyContext) {}

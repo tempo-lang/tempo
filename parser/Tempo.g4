@@ -10,12 +10,14 @@ sourceFile: (func | struct | interface)* EOF;
 // identifier
 ident: ID;
 
+roleIdent: ident ROLE_AT roleType;
+
 // type declaration
 valueType:
 	ASYNC inner = valueType														# asyncType
 	| LSQUARE inner = valueType RSQUARE											# listType
 	| FUNC ROLE_AT roleType params = closureParamList returnType = valueType?	# closureType
-	| (ident ROLE_AT roleType)													# namedType;
+	| roleIdent																	# namedType;
 
 roleType:
 	(LSQUARE ident (COMMA ident)* RSQUARE)				# roleTypeShared
@@ -28,7 +30,10 @@ closureSig:
 	FUNC ROLE_AT roleType params = funcParamList returnType = valueType?;
 
 // struct
-struct: STRUCT ROLE_AT roleType ident body = structBody;
+struct:
+	STRUCT ROLE_AT roleType ident structImplements? body = structBody;
+
+structImplements: IMPLEMENTS roleIdent (COMMA roleIdent)*;
 
 structBody: LCURLY (structField | func)* RCURLY;
 
@@ -90,7 +95,7 @@ expr:
 	| literal (ROLE_AT roleType)?						# exprPrimitive
 	| AWAIT expr										# exprAwait
 	| closureSig scope									# exprClosure
-	| ident ROLE_AT roleType exprStructField			# exprStruct
+	| roleIdent exprStructField							# exprStruct
 	| expr funcArgList									# exprCall
 	| expr DOT ident									# exprFieldAccess
 	| baseExpr = expr LSQUARE indexExpr = expr RSQUARE	# exprIndex
@@ -117,6 +122,7 @@ literal:
 // Keywords
 STRUCT: 'struct';
 INTERFACE: 'interface';
+IMPLEMENTS: 'implements';
 FUNC: 'func';
 RETURN: 'return';
 LET: 'let';
