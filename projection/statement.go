@@ -11,15 +11,18 @@ type StmtVarDecl struct {
 	Name string
 	// The expression that the variable is initially assigned with.
 	Expr Expression
+	// The type of the variable. Can be different from the Expr type in case of subtyping.
+	Type Type
 	// IsUnused if true if the variable is never read.
 	// False does not necessarily imply that it is used.
 	IsUnused bool
 }
 
-func NewStmtVarDecl(name string, expr Expression, isUnused bool) Statement {
+func NewStmtVarDecl(name string, expr Expression, varType Type, isUnused bool) Statement {
 	return &StmtVarDecl{
 		Name:     name,
 		Expr:     expr,
+		Type:     varType,
 		IsUnused: isUnused,
 	}
 }

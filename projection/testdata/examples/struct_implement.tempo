@@ -1,0 +1,17 @@
+interface@(A,B) Combine {
+  func@(A,B) combine() Int@[A,B];
+}
+
+struct@(X,Y) Sum implements Combine@(X,Y) {
+  x: Int@X;
+  y: Int@Y;
+
+  func@(X,Y) combine() Int@[X,Y] {
+    return (await X->Y x) + (await Y->X y);
+  }
+}
+
+func@(L,M) main() {
+  let sum: Combine@(L,M) = Sum@(L,M) { x: 10, y: 20 };
+  let result: Int@[L,M] = sum.combine();
+}

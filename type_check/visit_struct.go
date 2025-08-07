@@ -18,6 +18,8 @@ func (tc *typeChecker) VisitStruct(ctx *parser.StructContext) any {
 		return nil
 	}
 
+	tc.checkStructImplements(ctx)
+
 	tc.currentScope = structSym.Scope()
 
 	ctx.GetBody().Accept(tc)
@@ -67,4 +69,8 @@ func (tc *typeChecker) VisitStructField(ctx *parser.StructFieldContext) any {
 
 func (tc *typeChecker) VisitStructImplements(ctx *parser.StructImplementsContext) any {
 	return nil
+}
+
+func (tc *typeChecker) checkStructImplements(ctx *parser.StructContext) {
+	// TODO: check for conformance
 }

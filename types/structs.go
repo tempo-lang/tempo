@@ -11,6 +11,7 @@ type StructType struct {
 	structIdent  parser.IIdentContext
 	participants []string
 	substMap     *RoleSubst
+	implements   []Type
 }
 
 func (t *StructType) SubstituteRoles(substMap *RoleSubst) Type {
@@ -19,7 +20,12 @@ func (t *StructType) SubstituteRoles(substMap *RoleSubst) Type {
 		newParticipants = append(newParticipants, substMap.Subst(from))
 	}
 
-	newStruct := NewStructType(t.structIdent, newParticipants).(*StructType)
+	newImplements := []Type{}
+	for _, impl := range t.implements {
+		newImplements = append(newImplements, impl.SubstituteRoles(substMap))
+	}
+
+	newStruct := NewStructType(t.structIdent, newParticipants, newImplements).(*StructType)
 	newStruct.substMap = t.substMap.ApplySubst(substMap)
 
 	return newStruct
@@ -39,6 +45,13 @@ func (t *StructType) CoerceTo(other Type) (Type, bool) {
 			return t, true
 		}
 	}
+
+	for _, impl := range t.implements {
+		if implType, ok := impl.CoerceTo(other); ok {
+			return implType, true
+		}
+	}
+
 	return Invalid(), false
 }
 
@@ -62,13 +75,13 @@ func (t *StructType) ToString() string {
 	return fmt.Sprintf("struct@%s %s", t.Roles().ToString(), t.structIdent.GetText())
 }
 
-func NewStructType(structIdent parser.IIdentContext, participants []string) Type {
+func NewStructType(structIdent parser.IIdentContext, participants []string, implements []Type) Type {
 	substMap := NewRoleSubst()
 	for _, role := range participants {
 		substMap.AddRole(role, role)
 	}
 
-	return &StructType{structIdent: structIdent, participants: participants, substMap: substMap}
+	return &StructType{structIdent: structIdent, participants: participants, substMap: substMap, implements: implements}
 }
 
 func (t *StructType) Name() string {

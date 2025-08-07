@@ -27,7 +27,7 @@ func GenStatement(stmt projection.Statement) jen.Statement {
 
 func GenStmtVarDecl(decl *projection.StmtVarDecl) jen.Statement {
 	result := []jen.Code{
-		jen.Var().Id(decl.Name).Add(GenType(decl.Expr.Type())).Op("=").Add(GenExpression(decl.Expr)),
+		jen.Var().Id(decl.Name).Add(GenType(decl.Type)).Op("=").Add(GenExpression(decl.Expr)),
 	}
 
 	if decl.IsUnused {

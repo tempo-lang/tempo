@@ -253,7 +253,52 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, t
 		tc.reportError(err)
 	}
 
-	return types.NewStructType(ctx.Ident(), roles.Participants()), nil
+	implements := []types.Type{}
+	if ctx.StructImplements() != nil {
+		for _, impl := range ctx.StructImplements().AllRoleIdent() {
+			if impl == nil || impl.Ident() == nil || impl.RoleType() == nil {
+				continue // parser error
+			}
+
+			implRoles, ok := tc.parseRoleType(impl.RoleType())
+			if !ok {
+				continue
+			}
+
+			if err := tc.checkDuplicateRoles(ctx.RoleType(), implRoles); err != nil {
+				tc.reportError(err)
+			}
+
+			if implRoles.IsSharedRole() {
+				tc.reportError(type_error.NewUnexpectedSharedType(impl.RoleType()))
+			} else if unknownRoles := implRoles.SubtractParticipants(roles.Participants()); len(unknownRoles) > 0 {
+				tc.reportError(type_error.NewRolesNotInScope(impl.RoleType(), unknownRoles))
+				continue
+			}
+
+			sym, err := tc.lookupSymbol(impl.Ident())
+			if err != nil {
+				tc.reportError(err)
+				continue
+			}
+
+			infType, ok := sym.Type().(*types.InterfaceType)
+			if !ok {
+				tc.reportError(type_error.NewExpectedInterfaceType(sym, impl.Ident()))
+				continue
+			}
+
+			infRoleSubst, ok := infType.Roles().SubstituteMap(implRoles)
+			if !ok {
+				tc.reportError(type_error.NewWrongRoleCount(sym, impl.RoleType(), infType.Roles()))
+				continue
+			}
+
+			implements = append(implements, infType.SubstituteRoles(infRoleSubst))
+		}
+	}
+
+	return types.NewStructType(ctx.Ident(), roles.Participants(), implements), nil
 }
 
 func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.Type, type_error.Error) {

@@ -55,6 +55,7 @@ const (
 	CodeIndexWrongBaseType
 	CodeIndexRoleNotEncompassBase
 	CodeAssignUnitValue
+	CodeExpectedInterfaceType
 )
 
 type AnnotationType string

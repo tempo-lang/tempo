@@ -239,3 +239,28 @@ func NewFieldAccessUnknownField(fieldIdent parser.IIdentContext, baseType types.
 		BaseType:   baseType,
 	}
 }
+
+type ExpectedInterfaceType struct {
+	baseError
+	sym   sym_table.Symbol
+	ident parser.IIdentContext
+}
+
+func (e *ExpectedInterfaceType) Error() string {
+	return fmt.Sprintf("type `%s` is not an interface", e.sym.Type().ToString())
+}
+
+func (e *ExpectedInterfaceType) ParserRule() antlr.ParserRuleContext {
+	return e.ident
+}
+
+func (e *ExpectedInterfaceType) Code() ErrorCode {
+	return CodeExpectedInterfaceType
+}
+
+func NewExpectedInterfaceType(sym sym_table.Symbol, ident parser.IIdentContext) Error {
+	return &ExpectedInterfaceType{
+		sym:   sym,
+		ident: ident,
+	}
+}

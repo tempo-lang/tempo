@@ -82,7 +82,7 @@ func (gen *codegen) GenStmtVarDecl(s *projection.StmtVarDecl) string {
 	if gen.opts.DisableTypes {
 		return gen.Writeln("let %s = %s;", s.Name, gen.GenExpr(s.Expr))
 	} else {
-		return gen.Writeln("let %s: %s = %s;", s.Name, gen.GenType(s.Expr.Type()), gen.GenExpr(s.Expr))
+		return gen.Writeln("let %s: %s = %s;", s.Name, gen.GenType(s.Type), gen.GenExpr(s.Expr))
 	}
 }
 

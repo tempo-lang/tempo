@@ -6,28 +6,6 @@ import (
 )
 
 func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
-	for _, st := range sourceFile.AllStruct_() {
-		stType, err := tc.parseStructType(st)
-		if err != nil {
-			tc.reportError(err)
-			continue
-		}
-
-		if stType.IsInvalid() {
-			continue
-		}
-
-		structScope := tc.currentScope.MakeChild(st.GetStart(), st.GetStop(), stType.Roles().Participants())
-		tc.currentScope = structScope
-
-		structSym := sym_table.NewStructSymbol(st, structScope, stType)
-		tc.currentScope.SetStruct(structSym.(*sym_table.StructSymbol))
-
-		tc.currentScope = tc.currentScope.Parent()
-
-		tc.insertSymbol(structSym)
-	}
-
 	for _, inf := range sourceFile.AllInterface_() {
 		infType, err := tc.parseInterfaceType(inf)
 		if err != nil {
@@ -48,6 +26,28 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		tc.currentScope = tc.currentScope.Parent()
 
 		tc.insertSymbol(infSym)
+	}
+
+	for _, st := range sourceFile.AllStruct_() {
+		stType, err := tc.parseStructType(st)
+		if err != nil {
+			tc.reportError(err)
+			continue
+		}
+
+		if stType.IsInvalid() {
+			continue
+		}
+
+		structScope := tc.currentScope.MakeChild(st.GetStart(), st.GetStop(), stType.Roles().Participants())
+		tc.currentScope = structScope
+
+		structSym := sym_table.NewStructSymbol(st, structScope, stType)
+		tc.currentScope.SetStruct(structSym.(*sym_table.StructSymbol))
+
+		tc.currentScope = tc.currentScope.Parent()
+
+		tc.insertSymbol(structSym)
 	}
 
 	for _, fn := range sourceFile.AllFunc_() {
