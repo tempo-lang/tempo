@@ -11,36 +11,44 @@ export interface Combine_B {
 }
 
 // Projection of struct `Sum`
-export type Sum_X = {
+export interface Sum_X_attrs {
   x: number;
 }
-export type Sum_Y = {
-  y: number;
+export class Sum_X implements Sum_X_attrs {
+  x: number;
+  
+  constructor({ x }: Sum_X_attrs) {
+    this.x = x;
+  }
+  
+  async combine(env: Env): Promise<number> {
+    return await env.send(this.x, "Y") + await env.recv<number>("Y");
+  }
 }
 
-// Implementation of struct `Sum`
-function Sum_X_methods(self: Sum_X) {
-  return {
-    async combine(env: Env): Promise<number> {
-      return await env.send(self.x, "Y") + await env.recv<number>("Y");
-    },
-  };
+export interface Sum_Y_attrs {
+  y: number;
 }
-function Sum_Y_methods(self: Sum_Y) {
-  return {
-    async combine(env: Env): Promise<number> {
-      return await env.recv<number>("X") + await env.send(self.y, "X");
-    },
-  };
+export class Sum_Y implements Sum_Y_attrs {
+  y: number;
+  
+  constructor({ y }: Sum_Y_attrs) {
+    this.y = y;
+  }
+  
+  async combine(env: Env): Promise<number> {
+    return await env.recv<number>("X") + await env.send(this.y, "X");
+  }
 }
+
 
 // Projection of choreography `main`
 export async function main_L(env: Env) {
-  let sum: Combine_A = { x: 10 };
+  let sum: Combine_A = new Sum_X({ x: 10 });
   let result: number = await sum.combine(env.subst("L", "A", "M", "B"));
 }
 export async function main_M(env: Env) {
-  let sum: Combine_B = { y: 20 };
+  let sum: Combine_B = new Sum_Y({ y: 20 });
   let result: number = await sum.combine(env.subst("L", "A", "M", "B"));
 }
 

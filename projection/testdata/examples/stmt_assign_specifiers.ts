@@ -3,35 +3,75 @@
 import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of struct `Pair`
-export type Pair_A = {
+export interface Pair_A_attrs {
   x: number;
 }
-export type Pair_B = {
-  y: number;
+export class Pair_A implements Pair_A_attrs {
+  x: number;
+  
+  constructor({ x }: Pair_A_attrs) {
+    this.x = x;
+  }
 }
 
+export interface Pair_B_attrs {
+  y: number;
+}
+export class Pair_B implements Pair_B_attrs {
+  y: number;
+  
+  constructor({ y }: Pair_B_attrs) {
+    this.y = y;
+  }
+}
+
+
 // Projection of struct `Foo`
-export type Foo_A = {
+export interface Foo_A_attrs {
   pairs: Pair_A[];
 }
-export type Foo_B = {
+export class Foo_A implements Foo_A_attrs {
+  pairs: Pair_A[];
+  
+  constructor({ pairs }: Foo_A_attrs) {
+    this.pairs = pairs;
+  }
+}
+
+export interface Foo_B_attrs {
   pairs: Pair_B[];
 }
-export type Foo_C = {
+export class Foo_B implements Foo_B_attrs {
+  pairs: Pair_B[];
+  
+  constructor({ pairs }: Foo_B_attrs) {
+    this.pairs = pairs;
+  }
+}
+
+export interface Foo_C_attrs {
   z: number;
 }
+export class Foo_C implements Foo_C_attrs {
+  z: number;
+  
+  constructor({ z }: Foo_C_attrs) {
+    this.z = z;
+  }
+}
+
 
 // Projection of choreography `main`
 export async function main_X(env: Env) {
-  let foo: Foo_A = { pairs: [] };
-  foo.pairs = [{ x: 1 }, { x: 3 }];
+  let foo: Foo_A = new Foo_A({ pairs: [] });
+  foo.pairs = [new Pair_A({ x: 1 }), new Pair_A({ x: 3 })];
   foo.pairs[await env.recv<number>("Z")].x = 10;
 }
 export async function main_Y(env: Env) {
-  let foo: Foo_B = { pairs: [] };
-  foo.pairs = [{ y: 2 }, { y: 4 }];
+  let foo: Foo_B = new Foo_B({ pairs: [] });
+  foo.pairs = [new Pair_B({ y: 2 }), new Pair_B({ y: 4 })];
 }
 export async function main_Z(env: Env) {
-  let foo: Foo_C = { z: 1 };
+  let foo: Foo_C = new Foo_C({ z: 1 });
 }
 

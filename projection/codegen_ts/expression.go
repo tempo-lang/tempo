@@ -6,7 +6,6 @@ import (
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
-	"github.com/tempo-lang/tempo/sym_table"
 )
 
 func (gen *codegen) GenExpr(expr projection.Expression) string {
@@ -170,22 +169,6 @@ func (gen *codegen) GenExprClosure(e *projection.ExprClosure) string {
 }
 
 func (gen *codegen) GenExprFieldAccess(e *projection.ExprFieldAccess) string {
-	if stType, ok := e.BaseExpr.Type().(*projection.StructType); ok {
-		stSym := gen.info.Symbols[stType.Ident()].(*sym_table.StructSymbol)
-
-		isMethod := false
-		for _, method := range stSym.Methods() {
-			if method.SymbolName() == e.FieldName {
-				isMethod = true
-				break
-			}
-		}
-
-		if isMethod {
-			return fmt.Sprintf("%s_methods(%s).%s", gen.GenType(stType), gen.GenExpr(e.BaseExpr), e.FieldName)
-		}
-	}
-
 	return fmt.Sprintf("%s.%s", gen.GenExpr(e.BaseExpr), e.FieldName)
 }
 
@@ -245,11 +228,11 @@ func (gen *codegen) GenExprStruct(e *projection.ExprStruct) string {
 		fields = append(fields, fmt.Sprintf("%s: %s", field, gen.GenExpr(e.Fields[field])))
 	}
 
-	return fmt.Sprintf("{ %s }", misc.JoinStrings(fields, ", "))
+	return fmt.Sprintf("new %s_%s({ %s })", e.StructName, e.StructRole, misc.JoinStrings(fields, ", "))
 }
 
 func (gen *codegen) GenExprSelf(e *projection.ExprSelf) string {
-	return "self"
+	return "this"
 }
 
 func (gen *codegen) GenExprCopy(e *projection.ExprPassValue) string {

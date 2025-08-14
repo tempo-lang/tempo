@@ -3,6 +3,7 @@ package codegen_ts
 import (
 	"fmt"
 
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
 )
 
@@ -12,25 +13,9 @@ func (gen *codegen) GenChoreographyStruct(c *projection.ChoreographyStruct) stri
 		out += gen.Writeln("// Projection of struct `%s`", c.Name)
 
 		for _, role := range c.Roles {
+			out += gen.GenStructAttrs(c.Structs[role])
 			out += gen.GenStructDecl(c.Structs[role])
-
-		}
-
-		out += gen.Writeln("")
-	}
-
-	hasMethods := false
-	for _, role := range c.Roles {
-		if len(c.Structs[role].Methods) > 0 {
-			hasMethods = true
-		}
-	}
-
-	if hasMethods {
-		out += gen.Writeln("// Implementation of struct `%s`", c.Name)
-
-		for _, role := range c.Roles {
-			out += gen.GenStructMethods(c.Structs[role])
+			out += gen.Writeln("")
 		}
 
 		out += gen.Writeln("")
@@ -39,13 +24,46 @@ func (gen *codegen) GenChoreographyStruct(c *projection.ChoreographyStruct) stri
 	return out
 }
 
-func (gen *codegen) GenStructDecl(s *projection.Struct) string {
-	out := gen.Writeln("export type %s_%s = {", s.Name, s.Role)
+func (gen *codegen) GenStructAttrs(s *projection.Struct) string {
+	out := ""
+
+	out += gen.Writeln("export interface %s_%s_attrs {", s.Name, s.Role)
 	gen.IncIndent()
 
 	for _, field := range s.Fields {
 		out += gen.Writeln("%s: %s;", field.Name, gen.GenType(field.Type))
 	}
+
+	gen.DecIndent()
+	out += gen.Writeln("}")
+
+	return out
+}
+
+func (gen *codegen) GenStructDecl(s *projection.Struct) string {
+	out := ""
+
+	out += gen.Writeln("export class %s_%s implements %s_%s_attrs {", s.Name, s.Role, s.Name, s.Role)
+	gen.IncIndent()
+
+	for _, field := range s.Fields {
+		out += gen.Writeln("%s: %s;", field.Name, gen.GenType(field.Type))
+	}
+
+	out += gen.Writeln("")
+
+	fields := misc.JoinStringsFunc(s.Fields, ", ", func(field projection.StructField) string {
+		return field.Name
+	})
+	out += gen.Writeln("constructor({ %s }: %s_%s_attrs) {", fields, s.Name, s.Role)
+	gen.IncIndent()
+	for _, field := range s.Fields {
+		out += gen.Writeln("this.%s = %s;", field.Name, field.Name)
+	}
+	gen.DecIndent()
+	out += gen.Writeln("}")
+
+	out += gen.GenStructMethods(s)
 
 	gen.DecIndent()
 	out += gen.Writeln("}")
@@ -55,16 +73,8 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 func (gen *codegen) GenStructMethods(s *projection.Struct) string {
 	out := ""
 
-	if gen.opts.DisableTypes {
-		out += gen.Writeln("function %s_%s_methods(self) {", s.Name, s.Role)
-	} else {
-		out += gen.Writeln("function %s_%s_methods(self: %s_%s) {", s.Name, s.Role, s.Name, s.Role)
-	}
-
-	gen.IncIndent()
-	out += gen.Writeln("return {")
-	gen.IncIndent()
 	for _, method := range s.Methods {
+		out += gen.Writeln("")
 		params := gen.GenFuncParams(method.FuncSig)
 		fnSig := fmt.Sprintf("async %s(%s)", method.FuncSig.Name, params)
 		if method.FuncSig.ReturnValue != projection.UnitType() && !gen.opts.DisableTypes {
@@ -76,12 +86,8 @@ func (gen *codegen) GenStructMethods(s *projection.Struct) string {
 			out += gen.GenStmt(stmt)
 		}
 		gen.DecIndent()
-		out += gen.Writeln("},")
+		out += gen.Writeln("}")
 	}
-	gen.DecIndent()
-	out += gen.Writeln("};")
-	gen.DecIndent()
-	out += gen.Writeln("}")
 
 	return out
 }

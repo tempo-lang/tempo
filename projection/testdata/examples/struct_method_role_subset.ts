@@ -3,20 +3,23 @@
 import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of struct `Foo`
-export type Foo_A = {
+export interface Foo_A_attrs {
 }
-export type Foo_B = {
+export class Foo_A implements Foo_A_attrs {
+  
+  constructor({  }: Foo_A_attrs) {
+  }
+  
+  async onlyAtA(env: Env) {
+  }
 }
 
-// Implementation of struct `Foo`
-function Foo_A_methods(self: Foo_A) {
-  return {
-    async onlyAtA(env: Env) {
-    },
-  };
+export interface Foo_B_attrs {
 }
-function Foo_B_methods(self: Foo_B) {
-  return {
-  };
+export class Foo_B implements Foo_B_attrs {
+  
+  constructor({  }: Foo_B_attrs) {
+  }
 }
+
 

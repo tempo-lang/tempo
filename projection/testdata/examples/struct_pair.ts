@@ -3,19 +3,35 @@
 import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of struct `Pair`
-export type Pair_A = {
+export interface Pair_A_attrs {
   num: number;
 }
-export type Pair_B = {
+export class Pair_A implements Pair_A_attrs {
+  num: number;
+  
+  constructor({ num }: Pair_A_attrs) {
+    this.num = num;
+  }
+}
+
+export interface Pair_B_attrs {
   logic: boolean;
 }
+export class Pair_B implements Pair_B_attrs {
+  logic: boolean;
+  
+  constructor({ logic }: Pair_B_attrs) {
+    this.logic = logic;
+  }
+}
+
 
 // Projection of choreography `foo`
 export async function foo_X(env: Env) {
-  let p: Pair_A = { num: 1 };
+  let p: Pair_A = new Pair_A({ num: 1 });
   let x: number = p.num;
 }
 export async function foo_Y(env: Env) {
-  let p: Pair_B = { logic: true };
+  let p: Pair_B = new Pair_B({ logic: true });
 }
 

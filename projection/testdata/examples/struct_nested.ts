@@ -3,30 +3,66 @@
 import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of struct `Foo`
-export type Foo_A = {
+export interface Foo_A_attrs {
   first: Bar_X;
   second: Bar_Y;
 }
-export type Foo_B = {
+export class Foo_A implements Foo_A_attrs {
+  first: Bar_X;
+  second: Bar_Y;
+  
+  constructor({ first, second }: Foo_A_attrs) {
+    this.first = first;
+    this.second = second;
+  }
+}
+
+export interface Foo_B_attrs {
   first: Bar_Y;
   second: Bar_X;
 }
+export class Foo_B implements Foo_B_attrs {
+  first: Bar_Y;
+  second: Bar_X;
+  
+  constructor({ first, second }: Foo_B_attrs) {
+    this.first = first;
+    this.second = second;
+  }
+}
+
 
 // Projection of struct `Bar`
-export type Bar_X = {
+export interface Bar_X_attrs {
   num: number;
 }
-export type Bar_Y = {
+export class Bar_X implements Bar_X_attrs {
+  num: number;
+  
+  constructor({ num }: Bar_X_attrs) {
+    this.num = num;
+  }
+}
+
+export interface Bar_Y_attrs {
   logic: boolean;
 }
+export class Bar_Y implements Bar_Y_attrs {
+  logic: boolean;
+  
+  constructor({ logic }: Bar_Y_attrs) {
+    this.logic = logic;
+  }
+}
+
 
 // Projection of choreography `foo`
 export async function foo_P(env: Env) {
   let x: number = 10;
-  let nested: Foo_A = env.copy({ first: { num: x }, second: { logic: false } });
+  let nested: Foo_A = env.copy(new Foo_A({ first: new Bar_X({ num: x }), second: new Bar_Y({ logic: false }) }));
 }
 export async function foo_Q(env: Env) {
   let y: number = 20;
-  let nested: Foo_B = env.copy({ first: { logic: true }, second: { num: y } });
+  let nested: Foo_B = env.copy(new Foo_B({ first: new Bar_Y({ logic: true }), second: new Bar_X({ num: y }) }));
 }
 

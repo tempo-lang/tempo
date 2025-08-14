@@ -3,46 +3,56 @@
 import { Env } from '../../../typescript/runtime.ts';
 
 // Projection of struct `Pair`
-export type Pair_A = {
+export interface Pair_A_attrs {
   x: number;
 }
-export type Pair_B = {
-  y: number;
+export class Pair_A implements Pair_A_attrs {
+  x: number;
+  
+  constructor({ x }: Pair_A_attrs) {
+    this.x = x;
+  }
+  
+  async swap(env: Env): Promise<Pair_B> {
+    return new Pair_B({ y: this.x });
+  }
+  
+  async exchange(env: Env): Promise<Pair_A> {
+    await env.send(this.x, "B");
+    return new Pair_A({ x: await env.recv<number>("B") });
+  }
 }
 
-// Implementation of struct `Pair`
-function Pair_A_methods(self: Pair_A) {
-  return {
-    async swap(env: Env): Promise<Pair_B> {
-      return { y: self.x };
-    },
-    async exchange(env: Env): Promise<Pair_A> {
-      await env.send(self.x, "B");
-      return { x: await env.recv<number>("B") };
-    },
-  };
+export interface Pair_B_attrs {
+  y: number;
 }
-function Pair_B_methods(self: Pair_B) {
-  return {
-    async swap(env: Env): Promise<Pair_A> {
-      return { x: self.y };
-    },
-    async exchange(env: Env): Promise<Pair_B> {
-      await env.send(self.y, "A");
-      return { y: await env.recv<number>("A") };
-    },
-  };
+export class Pair_B implements Pair_B_attrs {
+  y: number;
+  
+  constructor({ y }: Pair_B_attrs) {
+    this.y = y;
+  }
+  
+  async swap(env: Env): Promise<Pair_A> {
+    return new Pair_A({ x: this.y });
+  }
+  
+  async exchange(env: Env): Promise<Pair_B> {
+    await env.send(this.y, "A");
+    return new Pair_B({ y: await env.recv<number>("A") });
+  }
 }
+
 
 // Projection of choreography `main`
 export async function main_X(env: Env) {
-  let pair: Pair_A = { x: 10 };
-  let pair_swapped: Pair_B = await Pair_A_methods(pair).swap(env.subst("X", "A", "Y", "B"));
-  let pair_exchanged: Pair_A = await Pair_A_methods(pair).exchange(env.subst("X", "A", "Y", "B"));
+  let pair: Pair_A = new Pair_A({ x: 10 });
+  let pair_swapped: Pair_B = await pair.swap(env.subst("X", "A", "Y", "B"));
+  let pair_exchanged: Pair_A = await pair.exchange(env.subst("X", "A", "Y", "B"));
 }
 export async function main_Y(env: Env) {
-  let pair: Pair_B = { y: 20 };
-  let pair_swapped: Pair_A = await Pair_B_methods(pair).swap(env.subst("X", "A", "Y", "B"));
-  let pair_exchanged: Pair_B = await Pair_B_methods(pair).exchange(env.subst("X", "A", "Y", "B"));
+  let pair: Pair_B = new Pair_B({ y: 20 });
+  let pair_swapped: Pair_A = await pair.swap(env.subst("X", "A", "Y", "B"));
+  let pair_exchanged: Pair_B = await pair.exchange(env.subst("X", "A", "Y", "B"));
 }
 
