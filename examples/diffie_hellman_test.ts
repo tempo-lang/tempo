@@ -4,6 +4,8 @@ import {
   DiffieHellman_A,
   DiffieHellman_B,
   Math_A,
+  Secret_A,
+  Secret_B,
 } from "./diffie_hellman/diffie_hellman.ts";
 import { Env } from "../typescript/runtime.ts";
 
@@ -26,12 +28,12 @@ Deno.test("simulate diffie hellman", async () => {
   assertEquals(result, {
     A: {
       receives: [{ sender: "B", value: 10 }],
-      return: { A: 18 },
+      return: new Secret_A({ A: 18 }),
       sends: [{ receivers: ["B"], value: 4 }],
     },
     B: {
       receives: [{ sender: "A", value: 4 }],
-      return: { B: 18 },
+      return: new Secret_B({ B: 18 }),
       sends: [{ receivers: ["A"], value: 10 }],
     },
   });

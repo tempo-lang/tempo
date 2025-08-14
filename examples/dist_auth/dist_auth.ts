@@ -19,20 +19,50 @@ export interface Hasher_A {
 }
 
 // Projection of struct `Credentials`
-export type Credentials_A = {
+export interface Credentials_A_attrs {
   Username: string;
   Password: string;
 }
+export class Credentials_A implements Credentials_A_attrs {
+  Username: string;
+  Password: string;
+  
+  constructor({ Username, Password }: Credentials_A_attrs) {
+    this.Username = Username;
+    this.Password = Password;
+  }
+}
+
 
 // Projection of struct `AuthResult`
-export type AuthResult_C = {
+export interface AuthResult_C_attrs {
   Success: boolean;
   Token: string;
 }
-export type AuthResult_S = {
+export class AuthResult_C implements AuthResult_C_attrs {
+  Success: boolean;
+  Token: string;
+  
+  constructor({ Success, Token }: AuthResult_C_attrs) {
+    this.Success = Success;
+    this.Token = Token;
+  }
+}
+
+export interface AuthResult_S_attrs {
   Success: boolean;
   Token: string;
 }
+export class AuthResult_S implements AuthResult_S_attrs {
+  Success: boolean;
+  Token: string;
+  
+  constructor({ Success, Token }: AuthResult_S_attrs) {
+    this.Success = Success;
+    this.Token = Token;
+  }
+}
+
 
 // Projection of choreography `Authenticate`
 export async function Authenticate_Client(env: Env, credentials: Credentials_A, hasher: Hasher_A): Promise<AuthResult_C> {
@@ -42,18 +72,18 @@ export async function Authenticate_Client(env: Env, credentials: Credentials_A, 
   let valid: Promise<boolean> = env.recv<boolean>("IP");
   if (await valid) {
     let token: Promise<string> = env.recv<string>("IP");
-    return { Success: true, Token: await token };
+    return new AuthResult_C({ Success: true, Token: await token });
   } else {
-    return { Success: false, Token: "" };
+    return new AuthResult_C({ Success: false, Token: "" });
   }
 }
 export async function Authenticate_Service(env: Env): Promise<AuthResult_S> {
   let valid: Promise<boolean> = env.recv<boolean>("IP");
   if (await valid) {
     let token: Promise<string> = env.recv<string>("IP");
-    return { Success: true, Token: await token };
+    return new AuthResult_S({ Success: true, Token: await token });
   } else {
-    return { Success: false, Token: "" };
+    return new AuthResult_S({ Success: false, Token: "" });
   }
 }
 export async function Authenticate_IP(env: Env, registry: ClientRegistry_A, tokenGen: TokenGenerator_A) {

@@ -8,6 +8,8 @@ import {
   Credentials_A,
   Hasher_A,
   TokenGenerator_A,
+  AuthResult_S,
+  AuthResult_C,
 } from "./dist_auth/dist_auth.ts";
 import { Env } from "../typescript/runtime.ts";
 import { crypto } from "@std/crypto";
@@ -97,10 +99,10 @@ Deno.test("simulate distributed authentication", async () => {
         { sender: "IP", value: true },
         { sender: "IP", value: expectedToken },
       ],
-      return: {
+      return: new AuthResult_C({
         Success: true,
         Token: expectedToken,
-      },
+      }),
       sends: [
         { receivers: ["IP"], value: "username" },
         {
@@ -129,7 +131,7 @@ Deno.test("simulate distributed authentication", async () => {
         { sender: "IP", value: true },
         { sender: "IP", value: expectedToken },
       ],
-      return: { Success: true, Token: expectedToken },
+      return: new AuthResult_S({ Success: true, Token: expectedToken }),
       sends: [],
     },
   });

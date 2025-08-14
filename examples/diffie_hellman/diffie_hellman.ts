@@ -8,12 +8,28 @@ export interface Math_A {
 }
 
 // Projection of struct `Secret`
-export type Secret_A = {
+export interface Secret_A_attrs {
   A: number;
 }
-export type Secret_B = {
+export class Secret_A implements Secret_A_attrs {
+  A: number;
+  
+  constructor({ A }: Secret_A_attrs) {
+    this.A = A;
+  }
+}
+
+export interface Secret_B_attrs {
   B: number;
 }
+export class Secret_B implements Secret_B_attrs {
+  B: number;
+  
+  constructor({ B }: Secret_B_attrs) {
+    this.B = B;
+  }
+}
+
 
 // Projection of choreography `DiffieHellman`
 export async function DiffieHellman_A(env: Env, mathA: Math_A): Promise<Secret_A> {
@@ -23,7 +39,7 @@ export async function DiffieHellman_A(env: Env, mathA: Math_A): Promise<Secret_A
   env.send(Math.floor(await mathA.Exp(env.subst("A", "A"), g, a) % p), "B");
   let B: Promise<number> = env.recv<number>("B");
   let sA: number = Math.floor(await mathA.Exp(env.subst("A", "A"), await B, a) % p);
-  return { A: sA };
+  return new Secret_A({ A: sA });
 }
 export async function DiffieHellman_B(env: Env, mathB: Math_A): Promise<Secret_B> {
   let p: number = 23;
@@ -32,6 +48,6 @@ export async function DiffieHellman_B(env: Env, mathB: Math_A): Promise<Secret_B
   let A: Promise<number> = env.recv<number>("A");
   env.send(Math.floor(await mathB.Exp(env.subst("B", "A"), g, b) % p), "A");
   let sB: number = Math.floor(await mathB.Exp(env.subst("B", "A"), await A, b) % p);
-  return { B: sB };
+  return new Secret_B({ B: sB });
 }
 
