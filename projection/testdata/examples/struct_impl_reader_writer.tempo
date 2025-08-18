@@ -1,0 +1,29 @@
+interface@A Reader {
+  func@A read() Int@A;
+}
+
+interface@A Writer {
+  func@A write(out: Int@A);
+}
+
+struct@X Buffer implements Reader@X, Writer@X {
+  buf: Int@X;
+
+  func@X read() Int@X {
+    return buf;
+  }
+
+  func@X write(out: Int@X) {
+    buf = out;
+  }
+}
+
+func@(A,B) main() {
+  let buffer: Buffer@A = Buffer@A { buf: 10 };
+  
+  let reader: Reader@A = buffer;
+  let writer: Writer@A = buffer;
+
+  writer.write(10);
+  reader.read();
+}

@@ -56,6 +56,8 @@ const (
 	CodeIndexRoleNotEncompassBase
 	CodeAssignUnitValue
 	CodeExpectedInterfaceType
+	CodeMissingImplementationMethod
+	CodeIncompatibleImplementationMethod
 )
 
 type AnnotationType string

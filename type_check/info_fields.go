@@ -86,7 +86,7 @@ func (info *Info) Field(typ types.Type, name string) (types.Type, bool) {
 		return types.Invalid(), false
 	case *types.InterfaceType:
 		infSym := info.Symbols[typ.Ident()].(*sym_table.InterfaceSymbol)
-		if method := infSym.Method(name); method != nil {
+		if method, found := infSym.Method(name); found {
 			return method.FuncType().SubstituteRoles(typ.SubstMap()), true
 		}
 		return types.Invalid(), false

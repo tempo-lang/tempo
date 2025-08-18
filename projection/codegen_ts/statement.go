@@ -27,6 +27,10 @@ func (gen *codegen) GenStmt(s projection.Statement) string {
 
 func (gen *codegen) GenStmtAssign(s *projection.StmtAssign) string {
 	base := s.Name
+	if s.IsMethodAttribute {
+		base = fmt.Sprintf("this.%s", s.Name)
+	}
+
 	for _, specifier := range s.Specifiers {
 		switch specifier.Kind {
 		case projection.AssignField:

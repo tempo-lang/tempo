@@ -298,7 +298,7 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, t
 		}
 	}
 
-	return types.NewStructType(ctx.Ident(), roles.Participants(), implements), nil
+	return types.NewStructType(ctx.Ident(), roles, implements), nil
 }
 
 func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.Type, type_error.Error) {

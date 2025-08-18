@@ -52,12 +52,12 @@ func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result an
 
 	tc.addGlobalSymbols(ctx)
 
-	for _, st := range ctx.AllStruct_() {
-		st.Accept(tc)
-	}
-
 	for _, inf := range ctx.AllInterface_() {
 		inf.Accept(tc)
+	}
+
+	for _, st := range ctx.AllStruct_() {
+		st.Accept(tc)
 	}
 
 	for _, fn := range ctx.AllFunc_() {

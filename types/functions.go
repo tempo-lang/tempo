@@ -54,7 +54,7 @@ func (f *FunctionType) CoerceTo(other Type) (Type, bool) {
 		return Invalid(), false
 	}
 
-	if f.ident != g.ident {
+	if f.ident.GetText() != g.ident.GetText() {
 		return Invalid(), false
 	}
 

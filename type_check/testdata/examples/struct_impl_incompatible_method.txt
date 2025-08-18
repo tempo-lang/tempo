@@ -1,0 +1,19 @@
+interface@A Combine {
+  func@A combine() Int@A;
+}
+
+struct@A Sum implements Combine@A {
+  x: Int@A;
+  y: Int@A;
+
+  func@A combine() String@A {
+    return "Hello";
+  }
+}
+
+func@(A,B) main() {
+  let foo_A: Combine@A = Sum@A { x: 10, y: 20 };
+  let x = foo_A.combine();
+}
+---
+E44 9:3: method `combine` does not match the signature required by interface `Combine`

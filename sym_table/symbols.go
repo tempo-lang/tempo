@@ -222,6 +222,10 @@ func (s *StructSymbol) AddMethod(method *FuncSymbol) {
 	s.methods = append(s.methods, method)
 }
 
+func (s *StructSymbol) StructCtx() parser.IStructContext {
+	return s.structCtx
+}
+
 func NewStructFieldSymbol(field parser.IStructFieldContext, parentStruct *StructSymbol, fieldType types.Type) Symbol {
 	return &StructFieldSymbol{
 		baseSymbol:   newBaseSymbol(field.Ident(), fieldType, parentStruct.Scope()),
@@ -277,8 +281,9 @@ func (i *InterfaceSymbol) Methods() iter.Seq2[string, *FuncSymbol] {
 	}
 }
 
-func (i *InterfaceSymbol) Method(name string) *FuncSymbol {
-	return i.methods[name]
+func (i *InterfaceSymbol) Method(name string) (*FuncSymbol, bool) {
+	fn, found := i.methods[name]
+	return fn, found
 }
 
 func (i *InterfaceSymbol) AddMethod(fnSym *FuncSymbol) {

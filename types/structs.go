@@ -8,31 +8,50 @@ import (
 
 type StructType struct {
 	baseType
-	structIdent  parser.IIdentContext
-	participants []string
-	substMap     *RoleSubst
-	implements   []Type
+	structIdent parser.IIdentContext
+	roles       *Roles
+	substMap    *RoleSubst
+	implements  []Type
 }
 
 func (t *StructType) SubstituteRoles(substMap *RoleSubst) Type {
-	newParticipants := []string{}
-	for _, from := range t.participants {
-		newParticipants = append(newParticipants, substMap.Subst(from))
-	}
+
+	newRoles := t.roles.SubstituteRoles(substMap)
 
 	newImplements := []Type{}
 	for _, impl := range t.implements {
 		newImplements = append(newImplements, impl.SubstituteRoles(substMap))
 	}
 
-	newStruct := NewStructType(t.structIdent, newParticipants, newImplements).(*StructType)
+	newStruct := NewStructType(t.structIdent, newRoles, newImplements).(*StructType)
 	newStruct.substMap = t.substMap.ApplySubst(substMap)
 
 	return newStruct
 }
 
 func (t *StructType) ReplaceSharedRoles(participants []string) Type {
-	return t
+	if t.roles.IsDistributedRole() {
+		return t
+	}
+
+	newRoles := NewRole(participants, true)
+
+	newImplements := []Type{}
+	for _, impl := range t.implements {
+		newImplements = append(newImplements, impl.ReplaceSharedRoles(participants))
+	}
+
+	newStruct := NewStructType(t.structIdent, newRoles, newImplements).(*StructType)
+
+	newSubst := NewRoleSubst()
+	from := t.substMap.Roles[0]
+	for _, to := range participants {
+		newSubst.AddRole(from, to)
+	}
+
+	newStruct.substMap = newSubst
+
+	return newStruct
 }
 
 func (t *StructType) CoerceTo(other Type) (Type, bool) {
@@ -56,7 +75,7 @@ func (t *StructType) CoerceTo(other Type) (Type, bool) {
 }
 
 func (t *StructType) Roles() *Roles {
-	return NewRole(t.participants, false)
+	return t.roles
 }
 
 func (t *StructType) SubstMap() *RoleSubst {
@@ -75,13 +94,13 @@ func (t *StructType) ToString() string {
 	return fmt.Sprintf("struct@%s %s", t.Roles().ToString(), t.structIdent.GetText())
 }
 
-func NewStructType(structIdent parser.IIdentContext, participants []string, implements []Type) Type {
-	substMap := NewRoleSubst()
-	for _, role := range participants {
-		substMap.AddRole(role, role)
+func NewStructType(structIdent parser.IIdentContext, roles *Roles, implements []Type) Type {
+	substMap, ok := roles.SubstituteMap(roles)
+	if !ok {
+		panic("should always be ok to substitute with itself")
 	}
 
-	return &StructType{structIdent: structIdent, participants: participants, substMap: substMap, implements: implements}
+	return &StructType{structIdent: structIdent, roles: roles, substMap: substMap, implements: implements}
 }
 
 func (t *StructType) Name() string {
@@ -90,4 +109,8 @@ func (t *StructType) Name() string {
 
 func (t *StructType) Ident() parser.IIdentContext {
 	return t.structIdent
+}
+
+func (t *StructType) Implements() []Type {
+	return t.implements
 }

@@ -31,9 +31,10 @@ func (decl *StmtVarDecl) IsStatement() {}
 
 // Evaluates the expression and assigns the result to the variable identified by `Name`.
 type StmtAssign struct {
-	Name       string
-	Specifiers []AssignSpecifier
-	Expr       Expression
+	Name              string
+	Specifiers        []AssignSpecifier
+	IsMethodAttribute bool
+	Expr              Expression
 }
 
 type AssignSpecifierKind int
@@ -41,6 +42,7 @@ type AssignSpecifierKind int
 const (
 	AssignField AssignSpecifierKind = iota
 	AssignIndex
+	AssignSelf
 )
 
 type AssignSpecifier struct {
@@ -51,11 +53,12 @@ type AssignSpecifier struct {
 
 func (s *StmtAssign) IsStatement() {}
 
-func NewStmtAssign(name string, specifiers []AssignSpecifier, expr Expression) Statement {
+func NewStmtAssign(name string, specifiers []AssignSpecifier, IsMethodAttribute bool, expr Expression) Statement {
 	return &StmtAssign{
-		Name:       name,
-		Specifiers: specifiers,
-		Expr:       expr,
+		Name:              name,
+		Specifiers:        specifiers,
+		IsMethodAttribute: IsMethodAttribute,
+		Expr:              expr,
 	}
 }
 

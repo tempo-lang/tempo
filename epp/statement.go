@@ -48,7 +48,11 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 
 			varName := stmt.Ident().GetText()
 
-			result = append(result, projection.NewStmtAssign(varName, specifiers, expr))
+			// check if identifier is struct attribute
+			structScope := epp.info.GlobalScope.Innermost(stmt.GetStart()).GetStruct()
+			isMethodAttribute := structScope != nil && sym.Parent() == structScope.Scope()
+
+			result = append(result, projection.NewStmtAssign(varName, specifiers, isMethodAttribute, expr))
 			return
 		} else if expr != nil && expr.HasSideEffects() {
 			result = append(result, projection.NewStmtExpr(expr))

@@ -1,0 +1,15 @@
+interface@A Combine {
+  func@A combine() Int@A;
+}
+
+struct@A Sum implements Combine@A {
+  x: Int@A;
+  y: Int@A;
+}
+
+func@(A,B) main() {
+  let foo_A: Combine@A = Sum@A { x: 10, y: 20 };
+  let x = foo_A.combine();
+}
+---
+E43 5:25: struct `Sum` does not implement method `combine` of interface `Combine`

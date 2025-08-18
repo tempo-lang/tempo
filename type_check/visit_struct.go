@@ -1,8 +1,12 @@
 package type_check
 
 import (
+	"fmt"
+
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/sym_table"
+	"github.com/tempo-lang/tempo/type_check/type_error"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (tc *typeChecker) VisitStruct(ctx *parser.StructContext) any {
@@ -18,13 +22,14 @@ func (tc *typeChecker) VisitStruct(ctx *parser.StructContext) any {
 		return nil
 	}
 
-	tc.checkStructImplements(ctx)
-
 	tc.currentScope = structSym.Scope()
 
 	ctx.GetBody().Accept(tc)
 
 	tc.currentScope = tc.currentScope.Parent()
+
+	tc.checkStructImplements(structSym)
+
 	return nil
 }
 
@@ -71,6 +76,35 @@ func (tc *typeChecker) VisitStructImplements(ctx *parser.StructImplementsContext
 	return nil
 }
 
-func (tc *typeChecker) checkStructImplements(ctx *parser.StructContext) {
-	// TODO: check for conformance
+func (tc *typeChecker) checkStructImplements(sym *sym_table.StructSymbol) {
+	structType := sym.Type().(*types.StructType)
+
+	for _, impl := range structType.Implements() {
+		infType, ok := impl.(*types.InterfaceType)
+		if !ok {
+			panic(fmt.Sprintf("Struct can only implement interfaces, type was %T", impl))
+		}
+
+		infSym := tc.info.Symbols[infType.Ident()].(*sym_table.InterfaceSymbol)
+
+		for _, field := range tc.info.Fields(infType) {
+			fn, ok := field.(*types.FunctionType)
+			if !ok {
+				panic(fmt.Sprintf("Interface can only have function fields, was %T", field))
+			}
+
+			method, found := tc.info.Field(structType, fn.NameIdent().GetText())
+			if !found {
+				tc.reportError(type_error.NewMissingImplementationMethod(sym, infSym, fn.NameIdent().GetText()))
+				continue
+			}
+
+			_, canCoerce := fn.CoerceTo(method)
+			if !canCoerce {
+				tc.reportError(type_error.NewIncompatibleImplementationMethod(sym, infSym, fn.NameIdent().GetText()))
+				continue
+			}
+		}
+	}
+
 }
