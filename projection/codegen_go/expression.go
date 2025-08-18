@@ -118,7 +118,7 @@ func GenExprCallFunc(e *projection.ExprCallFunc) jen.Code {
 
 	roleSub := []jen.Code{}
 	for _, to := range e.RoleSubs.Roles {
-		from := e.RoleSubs.Subst(to)
+		from := e.RoleSubs.Subst(to)[0]
 		roleSub = append(roleSub, jen.Lit(from), jen.Lit(to))
 	}
 

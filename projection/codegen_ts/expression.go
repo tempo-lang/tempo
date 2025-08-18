@@ -113,7 +113,7 @@ func (gen *codegen) GenExprCallClosure(e *projection.ExprCallClosure) string {
 func (gen *codegen) GenExprCallFunc(e *projection.ExprCallFunc) string {
 	roleSub := []string{}
 	for _, to := range e.RoleSubs.Roles {
-		from := e.RoleSubs.Subst(to)
+		from := e.RoleSubs.Subst(to)[0]
 		roleSub = append(roleSub, fmt.Sprintf("\"%s\"", from), fmt.Sprintf("\"%s\"", to))
 	}
 

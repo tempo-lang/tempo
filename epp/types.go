@@ -21,7 +21,7 @@ func (epp *epp) eppType(roleName string, typ types.Type) projection.Type {
 				panic("role substitution should succeed")
 			}
 
-			return projection.NewStructType(typeValue, roleSubstMap.Subst(roleName))
+			return projection.NewStructType(typeValue, roleSubstMap.Subst(roleName)[0])
 		case *types.InterfaceType:
 			interfaceSym := epp.info.GlobalScope.LookupParent(typeValue.Name()).(*sym_table.InterfaceSymbol)
 			interfaceSym.Type().Roles().Participants()
@@ -31,7 +31,7 @@ func (epp *epp) eppType(roleName string, typ types.Type) projection.Type {
 				panic("role substitution should succeed")
 			}
 
-			return projection.NewInterfaceType(typeValue, roleSubstMap.Subst(roleName))
+			return projection.NewInterfaceType(typeValue, roleSubstMap.Subst(roleName)[0])
 		case *types.FunctionType:
 			params := []projection.Type{}
 			for _, param := range typeValue.Params() {

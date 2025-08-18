@@ -164,7 +164,7 @@ func (epp *epp) convertFuncToClosure(roleName string, funcExpr projection.Expres
 	paramRoleSubst, _ := funcType.Roles().SubstituteMap(funcSym.Roles())
 	argRoleSubst := paramRoleSubst.Inverse()
 
-	paramRole := paramRoleSubst.Subst(roleName)
+	paramRole := paramRoleSubst.Subst(roleName)[0]
 
 	for _, param := range funcSym.Params() {
 		if param.Type().Roles().Contains(paramRole) {

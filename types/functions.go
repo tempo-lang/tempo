@@ -24,7 +24,7 @@ func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Type {
 
 	newRoles := []string{}
 	for _, r := range f.roles {
-		newRoles = append(newRoles, substMap.Subst(r))
+		newRoles = append(newRoles, substMap.Subst(r)[0])
 	}
 
 	return Function(

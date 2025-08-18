@@ -28,40 +28,48 @@ type Roles struct {
 // RoleSubst is a substitution map which is used to substitute the roles in a type with a new set of roles.
 type RoleSubst struct {
 	Roles []string
-	Map   map[string]string
+	Map   map[string][]string
 }
 
 // NewRoleSubst constructs a new role substitution.
 func NewRoleSubst() *RoleSubst {
 	return &RoleSubst{
 		Roles: []string{},
-		Map:   map[string]string{},
+		Map:   map[string][]string{},
 	}
 }
 
 // AddRole adds a new substitution to a role substitution map.
-func (r *RoleSubst) AddRole(from, to string) {
-	if _, found := r.Map[from]; found {
-		return
+func (r *RoleSubst) AddRole(from string, to ...string) *RoleSubst {
+	if !slices.Contains(r.Roles, from) {
+		r.Roles = append(r.Roles, from)
+		r.Map[from] = to
+	} else {
+		for _, t := range to {
+			if !slices.Contains(r.Map[from], t) {
+				r.Map[from] = append(r.Map[from], t)
+			}
+		}
 	}
 
-	r.Roles = append(r.Roles, from)
-	r.Map[from] = to
+	return r
 }
 
 // Subst returns the substitution of the given `from` role participant.
-func (r *RoleSubst) Subst(from string) string {
+func (r *RoleSubst) Subst(from string) []string {
 	if to, ok := r.Map[from]; ok {
 		return to
 	}
-	return from
+	return []string{from}
 }
 
 // Inverse returns a new role substitution map where all substitutions are reversed.
 func (r *RoleSubst) Inverse() *RoleSubst {
 	inv := NewRoleSubst()
 	for _, role := range r.Roles {
-		inv.AddRole(r.Subst(role), role)
+		for _, from := range r.Subst(role) {
+			inv.AddRole(from, role)
+		}
 	}
 	return inv
 }
@@ -70,7 +78,9 @@ func (r *RoleSubst) Inverse() *RoleSubst {
 func (r *RoleSubst) ApplySubst(other *RoleSubst) *RoleSubst {
 	result := NewRoleSubst()
 	for _, role := range r.Roles {
-		result.AddRole(role, other.Subst(r.Map[role]))
+		for _, from := range r.Map[role] {
+			result.AddRole(role, other.Subst(from)...)
+		}
 	}
 	return result
 }
@@ -272,26 +282,54 @@ func (r *Roles) Contains(role string) bool {
 // The substitution fails if the set of participants for each roles object has different lengths.
 // The returned boolean indicates whether the substitution was successfull.
 func (r *Roles) SubstituteMap(other *Roles) (*RoleSubst, bool) {
-	if len(r.participants) != len(other.participants) {
+	if r.IsDistributedRole() != other.IsDistributedRole() {
 		return nil, false
 	}
 
+	if r.IsDistributedRole() {
+		if len(r.participants) != len(other.participants) {
+			return nil, false
+		}
+
+		roleSubst := NewRoleSubst()
+		for i, role := range r.Participants() {
+			roleSubst.AddRole(role, other.participants[i])
+		}
+		return roleSubst, true
+	}
+
+	// local or shared roles
 	roleSubst := NewRoleSubst()
-	for i, role := range r.Participants() {
-		roleSubst.AddRole(role, other.participants[i])
+	for _, role := range r.Participants() {
+		roleSubst.AddRole(role, other.participants...)
 	}
 	return roleSubst, true
 }
 
 // SubstituteRoles returns a new roles object with substitutions for the roles mention in the given role substitution map.
 func (r *Roles) SubstituteRoles(subst *RoleSubst) *Roles {
-	roleSubst := r.Participants()
-	for i := range roleSubst {
-		newRole, found := subst.Map[roleSubst[i]]
-		if found {
-			roleSubst[i] = newRole
+	if r.IsDistributedRole() {
+		roleSubst := r.Participants()
+		for i := range roleSubst {
+			newRole := subst.Subst(roleSubst[i])
+			if len(newRole) != 1 {
+				panic("distributed role can only map 1-to-1")
+			}
+			roleSubst[i] = newRole[0]
+		}
+
+		return NewRole(roleSubst, false)
+	}
+
+	// local or shared role
+	newParticipants := []string{}
+	for _, from := range r.Participants() {
+		for _, to := range subst.Subst(from) {
+			if !slices.Contains(newParticipants, to) {
+				newParticipants = append(newParticipants, to)
+			}
 		}
 	}
 
-	return NewRole(roleSubst, r.IsSharedRole())
+	return NewRole(newParticipants, true)
 }

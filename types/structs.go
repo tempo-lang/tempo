@@ -15,7 +15,6 @@ type StructType struct {
 }
 
 func (t *StructType) SubstituteRoles(substMap *RoleSubst) Type {
-
 	newRoles := t.roles.SubstituteRoles(substMap)
 
 	newImplements := []Type{}

@@ -16,7 +16,7 @@ type InterfaceType struct {
 func (t *InterfaceType) SubstituteRoles(substMap *RoleSubst) Type {
 	newParticipants := []string{}
 	for _, from := range t.participants {
-		newParticipants = append(newParticipants, substMap.Subst(from))
+		newParticipants = append(newParticipants, substMap.Subst(from)[0])
 	}
 
 	newInf := Interface(t.ident, newParticipants).(*InterfaceType)

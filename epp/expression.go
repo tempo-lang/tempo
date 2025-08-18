@@ -62,7 +62,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 				substMap, _ := funcType.Roles().SubstituteMap(sym.Roles())
 
-				roleSubst := substMap.Subst(roleName)
+				roleSubst := substMap.Subst(roleName)[0]
 				name += "_" + roleSubst
 			}
 
@@ -211,7 +211,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		if exprType.Roles().Contains(roleName) {
 			structType := exprValue.(*projection.StructType)
-			return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst.Subst(roleName), fieldNames, fields, structType), aux
+			return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst.Subst(roleName)[0], fieldNames, fields, structType), aux
 		} else {
 			return nil, aux
 		}
