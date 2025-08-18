@@ -1,0 +1,2 @@
+go test fuzz v1
+string("struct A Buffer func B0{let A:Buffer A")
