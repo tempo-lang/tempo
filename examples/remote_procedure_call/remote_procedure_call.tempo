@@ -1,0 +1,22 @@
+interface@(A, B) RPC {
+  func@(A, B) Call(input: Int@A) async Int@A;
+}
+
+struct@(A,B) RemoteCall implements RPC@(A,B) {
+  Fn: func@(B)(Int@B)Int@B;
+
+  func@(A, B) Call(input: Int@A) async Int@A {
+    let output = Fn(await A->B input);
+    return B->A output;
+  }
+}
+
+func@(A,B) Start() {
+  let double = func@B (input: Int@B) Int@B {
+    return input * 2;
+  };
+
+  let rpc: RPC@(A,B) = RemoteCall@(A,B) { Fn: double };
+
+  let result: Int@A = await rpc.Call(10@A);
+}

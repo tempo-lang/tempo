@@ -130,11 +130,11 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#exprIndex.
 	VisitExprIndex(ctx *ExprIndexContext) interface{}
 
-	// Visit a parse tree produced by TempoParser#exprAwait.
-	VisitExprAwait(ctx *ExprAwaitContext) interface{}
-
 	// Visit a parse tree produced by TempoParser#exprClosure.
 	VisitExprClosure(ctx *ExprClosureContext) interface{}
+
+	// Visit a parse tree produced by TempoParser#exprAwait.
+	VisitExprAwait(ctx *ExprAwaitContext) interface{}
 
 	// Visit a parse tree produced by TempoParser#exprPrimitive.
 	VisitExprPrimitive(ctx *ExprPrimitiveContext) interface{}

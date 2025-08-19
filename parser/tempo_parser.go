@@ -86,10 +86,10 @@ func tempoParserInit() {
 		1, 20, 1, 20, 1, 20, 1, 20, 3, 20, 273, 8, 20, 1, 21, 1, 21, 1, 21, 1,
 		21, 1, 21, 1, 21, 3, 21, 281, 8, 21, 1, 22, 1, 22, 1, 22, 1, 22, 3, 22,
 		287, 8, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1,
-		22, 1, 22, 1, 22, 1, 22, 5, 22, 301, 8, 22, 10, 22, 12, 22, 304, 9, 22,
-		3, 22, 306, 8, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1,
-		22, 1, 22, 1, 22, 1, 22, 3, 22, 319, 8, 22, 1, 22, 1, 22, 1, 22, 1, 22,
-		1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 5, 22, 334,
+		22, 1, 22, 5, 22, 299, 8, 22, 10, 22, 12, 22, 302, 9, 22, 3, 22, 304, 8,
+		22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22,
+		1, 22, 1, 22, 1, 22, 3, 22, 319, 8, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1,
+		22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 1, 22, 5, 22, 334,
 		8, 22, 10, 22, 12, 22, 337, 9, 22, 1, 23, 1, 23, 1, 23, 1, 23, 1, 23, 1,
 		23, 1, 23, 1, 23, 1, 23, 5, 23, 348, 8, 23, 10, 23, 12, 23, 351, 9, 23,
 		3, 23, 353, 8, 23, 1, 23, 1, 23, 1, 24, 1, 24, 1, 24, 3, 24, 360, 8, 24,
@@ -186,23 +186,23 @@ func tempoParserInit() {
 		18, 0, 0, 279, 281, 1, 0, 0, 0, 280, 274, 1, 0, 0, 0, 280, 276, 1, 0, 0,
 		0, 281, 43, 1, 0, 0, 0, 282, 283, 6, 22, -1, 0, 283, 286, 3, 50, 25, 0,
 		284, 285, 5, 34, 0, 0, 285, 287, 3, 8, 4, 0, 286, 284, 1, 0, 0, 0, 286,
-		287, 1, 0, 0, 0, 287, 319, 1, 0, 0, 0, 288, 289, 5, 8, 0, 0, 289, 319,
-		3, 44, 22, 10, 290, 291, 3, 12, 6, 0, 291, 292, 3, 38, 19, 0, 292, 319,
-		1, 0, 0, 0, 293, 294, 3, 4, 2, 0, 294, 295, 3, 46, 23, 0, 295, 319, 1,
-		0, 0, 0, 296, 305, 5, 15, 0, 0, 297, 302, 3, 44, 22, 0, 298, 299, 5, 35,
-		0, 0, 299, 301, 3, 44, 22, 0, 300, 298, 1, 0, 0, 0, 301, 304, 1, 0, 0,
-		0, 302, 300, 1, 0, 0, 0, 302, 303, 1, 0, 0, 0, 303, 306, 1, 0, 0, 0, 304,
-		302, 1, 0, 0, 0, 305, 297, 1, 0, 0, 0, 305, 306, 1, 0, 0, 0, 306, 307,
-		1, 0, 0, 0, 307, 319, 5, 18, 0, 0, 308, 319, 3, 48, 24, 0, 309, 310, 3,
-		8, 4, 0, 310, 311, 5, 38, 0, 0, 311, 312, 3, 8, 4, 0, 312, 313, 3, 44,
-		22, 2, 313, 319, 1, 0, 0, 0, 314, 315, 5, 14, 0, 0, 315, 316, 3, 44, 22,
-		0, 316, 317, 5, 17, 0, 0, 317, 319, 1, 0, 0, 0, 318, 282, 1, 0, 0, 0, 318,
-		288, 1, 0, 0, 0, 318, 290, 1, 0, 0, 0, 318, 293, 1, 0, 0, 0, 318, 296,
-		1, 0, 0, 0, 318, 308, 1, 0, 0, 0, 318, 309, 1, 0, 0, 0, 318, 314, 1, 0,
+		287, 1, 0, 0, 0, 287, 319, 1, 0, 0, 0, 288, 289, 3, 12, 6, 0, 289, 290,
+		3, 38, 19, 0, 290, 319, 1, 0, 0, 0, 291, 292, 3, 4, 2, 0, 292, 293, 3,
+		46, 23, 0, 293, 319, 1, 0, 0, 0, 294, 303, 5, 15, 0, 0, 295, 300, 3, 44,
+		22, 0, 296, 297, 5, 35, 0, 0, 297, 299, 3, 44, 22, 0, 298, 296, 1, 0, 0,
+		0, 299, 302, 1, 0, 0, 0, 300, 298, 1, 0, 0, 0, 300, 301, 1, 0, 0, 0, 301,
+		304, 1, 0, 0, 0, 302, 300, 1, 0, 0, 0, 303, 295, 1, 0, 0, 0, 303, 304,
+		1, 0, 0, 0, 304, 305, 1, 0, 0, 0, 305, 319, 5, 18, 0, 0, 306, 319, 3, 48,
+		24, 0, 307, 308, 3, 8, 4, 0, 308, 309, 5, 38, 0, 0, 309, 310, 3, 8, 4,
+		0, 310, 311, 3, 44, 22, 3, 311, 319, 1, 0, 0, 0, 312, 313, 5, 8, 0, 0,
+		313, 319, 3, 44, 22, 2, 314, 315, 5, 14, 0, 0, 315, 316, 3, 44, 22, 0,
+		316, 317, 5, 17, 0, 0, 317, 319, 1, 0, 0, 0, 318, 282, 1, 0, 0, 0, 318,
+		288, 1, 0, 0, 0, 318, 291, 1, 0, 0, 0, 318, 294, 1, 0, 0, 0, 318, 306,
+		1, 0, 0, 0, 318, 307, 1, 0, 0, 0, 318, 312, 1, 0, 0, 0, 318, 314, 1, 0,
 		0, 0, 319, 335, 1, 0, 0, 0, 320, 321, 10, 12, 0, 0, 321, 322, 7, 0, 0,
-		0, 322, 334, 3, 44, 22, 13, 323, 324, 10, 7, 0, 0, 324, 334, 3, 36, 18,
-		0, 325, 326, 10, 6, 0, 0, 326, 327, 5, 36, 0, 0, 327, 334, 3, 2, 1, 0,
-		328, 329, 10, 5, 0, 0, 329, 330, 5, 15, 0, 0, 330, 331, 3, 44, 22, 0, 331,
+		0, 322, 334, 3, 44, 22, 13, 323, 324, 10, 8, 0, 0, 324, 334, 3, 36, 18,
+		0, 325, 326, 10, 7, 0, 0, 326, 327, 5, 36, 0, 0, 327, 334, 3, 2, 1, 0,
+		328, 329, 10, 6, 0, 0, 329, 330, 5, 15, 0, 0, 330, 331, 3, 44, 22, 0, 331,
 		332, 5, 18, 0, 0, 332, 334, 1, 0, 0, 0, 333, 320, 1, 0, 0, 0, 333, 323,
 		1, 0, 0, 0, 333, 325, 1, 0, 0, 0, 333, 328, 1, 0, 0, 0, 334, 337, 1, 0,
 		0, 0, 335, 333, 1, 0, 0, 0, 335, 336, 1, 0, 0, 0, 336, 45, 1, 0, 0, 0,
@@ -222,7 +222,7 @@ func tempoParserInit() {
 		370, 1, 0, 0, 0, 373, 371, 1, 0, 0, 0, 373, 372, 1, 0, 0, 0, 374, 51, 1,
 		0, 0, 0, 39, 55, 57, 79, 82, 90, 102, 107, 109, 117, 120, 129, 136, 146,
 		152, 154, 174, 191, 199, 202, 216, 219, 227, 236, 247, 255, 262, 272, 280,
-		286, 302, 305, 318, 333, 335, 349, 352, 359, 368, 373,
+		286, 300, 303, 318, 333, 335, 349, 352, 359, 368, 373,
 	}
 	deserializer := antlr.NewATNDeserializer(nil)
 	staticData.atn = deserializer.Deserialize(staticData.serializedATN)
@@ -6610,66 +6610,6 @@ func (s *ExprIndexContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
 	}
 }
 
-type ExprAwaitContext struct {
-	ExprContext
-}
-
-func NewExprAwaitContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ExprAwaitContext {
-	var p = new(ExprAwaitContext)
-
-	InitEmptyExprContext(&p.ExprContext)
-	p.parser = parser
-	p.CopyAll(ctx.(*ExprContext))
-
-	return p
-}
-
-func (s *ExprAwaitContext) GetRuleContext() antlr.RuleContext {
-	return s
-}
-
-func (s *ExprAwaitContext) AWAIT() antlr.TerminalNode {
-	return s.GetToken(TempoParserAWAIT, 0)
-}
-
-func (s *ExprAwaitContext) Expr() IExprContext {
-	var t antlr.RuleContext
-	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IExprContext); ok {
-			t = ctx.(antlr.RuleContext)
-			break
-		}
-	}
-
-	if t == nil {
-		return nil
-	}
-
-	return t.(IExprContext)
-}
-
-func (s *ExprAwaitContext) EnterRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(TempoListener); ok {
-		listenerT.EnterExprAwait(s)
-	}
-}
-
-func (s *ExprAwaitContext) ExitRule(listener antlr.ParseTreeListener) {
-	if listenerT, ok := listener.(TempoListener); ok {
-		listenerT.ExitExprAwait(s)
-	}
-}
-
-func (s *ExprAwaitContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
-	switch t := visitor.(type) {
-	case TempoVisitor:
-		return t.VisitExprAwait(s)
-
-	default:
-		return t.VisitChildren(s)
-	}
-}
-
 type ExprClosureContext struct {
 	ExprContext
 }
@@ -6736,6 +6676,66 @@ func (s *ExprClosureContext) Accept(visitor antlr.ParseTreeVisitor) interface{} 
 	switch t := visitor.(type) {
 	case TempoVisitor:
 		return t.VisitExprClosure(s)
+
+	default:
+		return t.VisitChildren(s)
+	}
+}
+
+type ExprAwaitContext struct {
+	ExprContext
+}
+
+func NewExprAwaitContext(parser antlr.Parser, ctx antlr.ParserRuleContext) *ExprAwaitContext {
+	var p = new(ExprAwaitContext)
+
+	InitEmptyExprContext(&p.ExprContext)
+	p.parser = parser
+	p.CopyAll(ctx.(*ExprContext))
+
+	return p
+}
+
+func (s *ExprAwaitContext) GetRuleContext() antlr.RuleContext {
+	return s
+}
+
+func (s *ExprAwaitContext) AWAIT() antlr.TerminalNode {
+	return s.GetToken(TempoParserAWAIT, 0)
+}
+
+func (s *ExprAwaitContext) Expr() IExprContext {
+	var t antlr.RuleContext
+	for _, ctx := range s.GetChildren() {
+		if _, ok := ctx.(IExprContext); ok {
+			t = ctx.(antlr.RuleContext)
+			break
+		}
+	}
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExprContext)
+}
+
+func (s *ExprAwaitContext) EnterRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(TempoListener); ok {
+		listenerT.EnterExprAwait(s)
+	}
+}
+
+func (s *ExprAwaitContext) ExitRule(listener antlr.ParseTreeListener) {
+	if listenerT, ok := listener.(TempoListener); ok {
+		listenerT.ExitExprAwait(s)
+	}
+}
+
+func (s *ExprAwaitContext) Accept(visitor antlr.ParseTreeVisitor) interface{} {
+	switch t := visitor.(type) {
+	case TempoVisitor:
+		return t.VisitExprAwait(s)
 
 	default:
 		return t.VisitChildren(s)
@@ -6874,61 +6874,44 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		}
 
 	case 2:
-		localctx = NewExprAwaitContext(p, localctx)
-		p.SetParserRuleContext(localctx)
-		_prevctx = localctx
-		{
-			p.SetState(288)
-			p.Match(TempoParserAWAIT)
-			if p.HasError() {
-				// Recognition error - abort rule
-				goto errorExit
-			}
-		}
-		{
-			p.SetState(289)
-			p.expr(10)
-		}
-
-	case 3:
 		localctx = NewExprClosureContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(290)
+			p.SetState(288)
 			p.ClosureSig()
 		}
 		{
-			p.SetState(291)
+			p.SetState(289)
 			p.Scope()
 		}
 
-	case 4:
+	case 3:
 		localctx = NewExprStructContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(293)
+			p.SetState(291)
 			p.RoleIdent()
 		}
 		{
-			p.SetState(294)
+			p.SetState(292)
 			p.ExprStructField()
 		}
 
-	case 5:
+	case 4:
 		localctx = NewExprListContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(296)
+			p.SetState(294)
 			p.Match(TempoParserLSQUARE)
 			if p.HasError() {
 				// Recognition error - abort rule
 				goto errorExit
 			}
 		}
-		p.SetState(305)
+		p.SetState(303)
 		p.GetErrorHandler().Sync(p)
 		if p.HasError() {
 			goto errorExit
@@ -6937,10 +6920,10 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 
 		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&3917010235664) != 0 {
 			{
-				p.SetState(297)
+				p.SetState(295)
 				p.expr(0)
 			}
-			p.SetState(302)
+			p.SetState(300)
 			p.GetErrorHandler().Sync(p)
 			if p.HasError() {
 				goto errorExit
@@ -6949,7 +6932,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 
 			for _la == TempoParserCOMMA {
 				{
-					p.SetState(298)
+					p.SetState(296)
 					p.Match(TempoParserCOMMA)
 					if p.HasError() {
 						// Recognition error - abort rule
@@ -6957,11 +6940,11 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 					}
 				}
 				{
-					p.SetState(299)
+					p.SetState(297)
 					p.expr(0)
 				}
 
-				p.SetState(304)
+				p.SetState(302)
 				p.GetErrorHandler().Sync(p)
 				if p.HasError() {
 					goto errorExit
@@ -6971,7 +6954,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 
 		}
 		{
-			p.SetState(307)
+			p.SetState(305)
 			p.Match(TempoParserRSQUARE)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -6979,28 +6962,28 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 			}
 		}
 
-	case 6:
+	case 5:
 		localctx = NewExprIdentContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(308)
+			p.SetState(306)
 			p.IdentAccess()
 		}
 
-	case 7:
+	case 6:
 		localctx = NewExprComContext(p, localctx)
 		p.SetParserRuleContext(localctx)
 		_prevctx = localctx
 		{
-			p.SetState(309)
+			p.SetState(307)
 
 			var _x = p.RoleType()
 
 			localctx.(*ExprComContext).sender = _x
 		}
 		{
-			p.SetState(310)
+			p.SetState(308)
 			p.Match(TempoParserCOM)
 			if p.HasError() {
 				// Recognition error - abort rule
@@ -7008,14 +6991,31 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 			}
 		}
 		{
-			p.SetState(311)
+			p.SetState(309)
 
 			var _x = p.RoleType()
 
 			localctx.(*ExprComContext).receiver = _x
 		}
 		{
+			p.SetState(310)
+			p.expr(3)
+		}
+
+	case 7:
+		localctx = NewExprAwaitContext(p, localctx)
+		p.SetParserRuleContext(localctx)
+		_prevctx = localctx
+		{
 			p.SetState(312)
+			p.Match(TempoParserAWAIT)
+			if p.HasError() {
+				// Recognition error - abort rule
+				goto errorExit
+			}
+		}
+		{
+			p.SetState(313)
 			p.expr(2)
 		}
 
@@ -7105,8 +7105,8 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 				p.PushNewRecursionContext(localctx, _startState, TempoParserRULE_expr)
 				p.SetState(323)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 7)) {
-					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 7)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 8)) {
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 8)", ""))
 					goto errorExit
 				}
 				{
@@ -7119,8 +7119,8 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 				p.PushNewRecursionContext(localctx, _startState, TempoParserRULE_expr)
 				p.SetState(325)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 6)) {
-					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 6)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 7)) {
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 7)", ""))
 					goto errorExit
 				}
 				{
@@ -7143,8 +7143,8 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 				p.PushNewRecursionContext(localctx, _startState, TempoParserRULE_expr)
 				p.SetState(328)
 
-				if !(p.Precpred(p.GetParserRuleContext(), 5)) {
-					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 5)", ""))
+				if !(p.Precpred(p.GetParserRuleContext(), 6)) {
+					p.SetError(antlr.NewFailedPredicateException(p, "p.Precpred(p.GetParserRuleContext(), 6)", ""))
 					goto errorExit
 				}
 				{
@@ -8055,13 +8055,13 @@ func (p *TempoParser) Expr_Sempred(localctx antlr.RuleContext, predIndex int) bo
 		return p.Precpred(p.GetParserRuleContext(), 12)
 
 	case 1:
-		return p.Precpred(p.GetParserRuleContext(), 7)
+		return p.Precpred(p.GetParserRuleContext(), 8)
 
 	case 2:
-		return p.Precpred(p.GetParserRuleContext(), 6)
+		return p.Precpred(p.GetParserRuleContext(), 7)
 
 	case 3:
-		return p.Precpred(p.GetParserRuleContext(), 5)
+		return p.Precpred(p.GetParserRuleContext(), 6)
 
 	default:
 		panic("No predicate with index: " + fmt.Sprint(predIndex))

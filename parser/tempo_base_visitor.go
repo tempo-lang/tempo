@@ -171,11 +171,11 @@ func (v *BaseTempoVisitor) VisitExprIndex(ctx *ExprIndexContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseTempoVisitor) VisitExprAwait(ctx *ExprAwaitContext) interface{} {
+func (v *BaseTempoVisitor) VisitExprClosure(ctx *ExprClosureContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseTempoVisitor) VisitExprClosure(ctx *ExprClosureContext) interface{} {
+func (v *BaseTempoVisitor) VisitExprAwait(ctx *ExprAwaitContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

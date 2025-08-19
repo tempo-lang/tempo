@@ -147,7 +147,14 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 				funcSym := epp.info.Symbols[callFuncValue.NameIdent()].(*sym_table.FuncSymbol)
 				returnValue := callFuncValue.ReturnType
 				roleSubst, _ := funcSym.Roles().SubstituteMap(callFuncValue.Roles())
-				return projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, roleSubst), aux
+
+				callExpr := projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, roleSubst)
+				if returnValue == projection.UnitType() {
+					aux = append(aux, projection.NewStmtExpr(callExpr))
+					return nil, aux
+				} else {
+					return callExpr, aux
+				}
 			} else {
 				return nil, aux
 			}

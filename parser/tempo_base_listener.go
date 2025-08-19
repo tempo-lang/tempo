@@ -266,17 +266,17 @@ func (s *BaseTempoListener) EnterExprIndex(ctx *ExprIndexContext) {}
 // ExitExprIndex is called when production exprIndex is exited.
 func (s *BaseTempoListener) ExitExprIndex(ctx *ExprIndexContext) {}
 
-// EnterExprAwait is called when production exprAwait is entered.
-func (s *BaseTempoListener) EnterExprAwait(ctx *ExprAwaitContext) {}
-
-// ExitExprAwait is called when production exprAwait is exited.
-func (s *BaseTempoListener) ExitExprAwait(ctx *ExprAwaitContext) {}
-
 // EnterExprClosure is called when production exprClosure is entered.
 func (s *BaseTempoListener) EnterExprClosure(ctx *ExprClosureContext) {}
 
 // ExitExprClosure is called when production exprClosure is exited.
 func (s *BaseTempoListener) ExitExprClosure(ctx *ExprClosureContext) {}
+
+// EnterExprAwait is called when production exprAwait is entered.
+func (s *BaseTempoListener) EnterExprAwait(ctx *ExprAwaitContext) {}
+
+// ExitExprAwait is called when production exprAwait is exited.
+func (s *BaseTempoListener) ExitExprAwait(ctx *ExprAwaitContext) {}
 
 // EnterExprPrimitive is called when production exprPrimitive is entered.
 func (s *BaseTempoListener) EnterExprPrimitive(ctx *ExprPrimitiveContext) {}

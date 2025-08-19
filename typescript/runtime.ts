@@ -124,13 +124,15 @@ export class Env {
       return result as T;
     }
 
-    // Recursively copy objects
+    // Recursively copy classes
     if (typeof value === "object") {
-      const result: any = {};
+      const attrs: any = {};
       for (const [key, elem] of Object.entries(value)) {
-        result[key] = this.copy(elem);
+        attrs[key] = this.copy(elem);
       }
-      return result as T;
+
+      // call the original class constructor with the attributes copied
+      return new (value.constructor as any)(attrs) as T;
     }
 
     // All other types are returned as is

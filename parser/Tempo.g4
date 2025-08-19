@@ -93,7 +93,6 @@ expr:
 		| OR
 	) rhs = expr										# exprBinOp
 	| literal (ROLE_AT roleType)?						# exprPrimitive
-	| AWAIT expr										# exprAwait
 	| closureSig scope									# exprClosure
 	| roleIdent exprStructField							# exprStruct
 	| expr funcArgList									# exprCall
@@ -102,6 +101,7 @@ expr:
 	| LSQUARE (expr (COMMA expr)*)? RSQUARE				# exprList
 	| identAccess										# exprIdent
 	| sender = roleType COM receiver = roleType expr	# exprCom
+	| AWAIT expr										# exprAwait
 	| LPAREN expr RPAREN								# exprGroup;
 
 exprStructField:
