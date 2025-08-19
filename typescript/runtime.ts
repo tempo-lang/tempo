@@ -57,6 +57,24 @@ export class Env {
   }
 
   /**
+   * Receive Class will receive the class attributes with {@link recv},
+   * and then pass it to the given class constructor to instantiate it as the right class.
+   *
+   * @param role The role to receive the value from.
+   * @param constructor Class constructor for the received value
+   * @returns The received value wrapped in the class.
+   */
+  async recvClass<Class, Attrs>(
+    role: string,
+    constructor: {
+      new (attrs: Attrs): Class;
+    }
+  ): Promise<Class> {
+    const attrs = await this.recv<Attrs>(role);
+    return new constructor(attrs);
+  }
+
+  /**
    * Maps a static role name to the name substituted in the invocation of the current function.
    * @param name The static role.
    * @returns The substituted role.

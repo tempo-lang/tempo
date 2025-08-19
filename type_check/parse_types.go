@@ -139,11 +139,6 @@ func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.
 
 	sym.AddRead(ctx.RoleIdent().Ident())
 
-	expectedRoleCount := len(sym.Type().Roles().Participants())
-	if len(role.Participants()) != expectedRoleCount {
-		typeError = type_error.NewWrongRoleCount(sym, ctx.RoleIdent().RoleType(), role)
-	}
-
 	substMap, rolesMatch := sym.Type().Roles().SubstituteMap(role)
 	if !rolesMatch {
 		return types.Invalid(), type_error.NewWrongRoleCount(sym, ctx.RoleIdent().RoleType(), role)

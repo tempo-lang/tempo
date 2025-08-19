@@ -1,6 +1,8 @@
 package projection
 
 import (
+	"fmt"
+
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 )
@@ -96,4 +98,12 @@ func NewStructType(structType *types.StructType, role string) *StructType {
 
 func (s *StructType) Role() string {
 	return s.role
+}
+
+func (s *StructType) Class() string {
+	return fmt.Sprintf("%s_%s", s.Name(), s.Role())
+}
+
+func (s *StructType) ClassAttrs() string {
+	return fmt.Sprintf("%s_attrs", s.Class())
 }

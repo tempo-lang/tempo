@@ -76,5 +76,5 @@ func (gen *codegen) GenListType(t *projection.ListType) string {
 }
 
 func (gen *codegen) GenStructType(t *projection.StructType) string {
-	return fmt.Sprintf("%s_%s", t.Name(), t.Role())
+	return t.Class()
 }

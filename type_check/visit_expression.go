@@ -234,12 +234,12 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		invalidType = true
 	}
 
-	if fromRoles, ok := tc.parseRoleType(ctx.RoleType(0)); ok {
+	if fromRoles, ok := tc.parseRoleType(ctx.GetSender()); ok {
 		if !fromRoles.IsLocalRole() {
 			tc.reportError(type_error.NewComNonLocalSender(ctx))
 		}
 
-		if tc.checkRolesInScope(ctx.RoleType(0)) {
+		if tc.checkRolesInScope(ctx.GetSender()) {
 			tc.checkExprInScope(ctx, fromRoles)
 		}
 
@@ -251,9 +251,9 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		invalidRole = true
 	}
 
-	toRoles, ok := tc.parseRoleType(ctx.RoleType(1))
+	toRoles, ok := tc.parseRoleType(ctx.GetReceiver())
 	if ok {
-		if !tc.checkRolesInScope(ctx.RoleType(1)) {
+		if !tc.checkRolesInScope(ctx.GetReceiver()) {
 			invalidRole = true
 		} else {
 			if !tc.checkExprInScope(ctx, toRoles) {

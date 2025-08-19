@@ -1,0 +1,10 @@
+struct@A Foo {
+  x: Int@A;
+  y: Int@A;
+}
+
+func@(A,B) main() {
+  let foo = Foo@A { x: 10, y: 20 };
+  let fooShared: Foo@[A,B] = await A->B foo;
+  let x: Int@[A,B] = fooShared.x;
+}

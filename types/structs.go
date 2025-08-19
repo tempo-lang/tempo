@@ -29,7 +29,7 @@ func (t *StructType) SubstituteRoles(substMap *RoleSubst) Type {
 }
 
 func (t *StructType) ReplaceSharedRoles(participants []string) Type {
-	if t.roles.IsDistributedRole() || len(t.substMap.Roles) > 0 {
+	if t.roles.IsDistributedRole() || len(t.substMap.Roles) == 0 {
 		return t
 	}
 
