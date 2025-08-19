@@ -6,6 +6,12 @@ import (
 	"github.com/tempo-lang/tempo/misc"
 )
 
+type CallableType interface {
+	Type
+	Params() []Type
+	ReturnType() Type
+}
+
 type ClosureType struct {
 	baseType
 	params       []Type

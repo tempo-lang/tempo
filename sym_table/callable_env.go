@@ -12,14 +12,15 @@ type CallableEnv interface {
 	Scope() *Scope
 	Params() []*FuncParamSymbol
 	AddParam(param *FuncParamSymbol)
+	CallableType() types.CallableType
 	ReturnType() types.Type
 }
 
 type ClosureEnv struct {
-	scope      *Scope
-	params     []*FuncParamSymbol
-	returnType types.Type
-	returnCtx  parser.IValueTypeContext
+	scope        *Scope
+	params       []*FuncParamSymbol
+	callableType types.CallableType
+	returnCtx    parser.IValueTypeContext
 }
 
 // ReturnCtx implements CallableEnv.
@@ -37,9 +38,14 @@ func (f *ClosureEnv) AddParam(param *FuncParamSymbol) {
 	f.params = append(f.params, param)
 }
 
+// CallableType implements CallableEnv.
+func (c *ClosureEnv) CallableType() types.CallableType {
+	return c.callableType
+}
+
 // ReturnType implements CallableEnv.
-func (c *ClosureEnv) ReturnType() types.Type {
-	return c.returnType
+func (f *ClosureEnv) ReturnType() types.Type {
+	return f.callableType.ReturnType()
 }
 
 // Scope implements CallableEnv.
@@ -48,11 +54,11 @@ func (c *ClosureEnv) Scope() *Scope {
 }
 
 // NewClosureEnv constructs a new closure callable environment.
-func NewClosureEnv(scope *Scope, returnType types.Type, returnCtx parser.IValueTypeContext) CallableEnv {
+func NewClosureEnv(scope *Scope, callableType types.CallableType, returnCtx parser.IValueTypeContext) CallableEnv {
 	return &ClosureEnv{
-		scope:      scope,
-		params:     []*FuncParamSymbol{},
-		returnType: returnType,
-		returnCtx:  returnCtx,
+		scope:        scope,
+		params:       []*FuncParamSymbol{},
+		callableType: callableType,
+		returnCtx:    returnCtx,
 	}
 }

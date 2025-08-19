@@ -35,48 +35,36 @@ func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
 
 func (tc *typeChecker) VisitFuncSig(ctx *parser.FuncSigContext) any {
 
-	if sym, ok := tc.info.Symbols[ctx.GetName()].(*sym_table.FuncSymbol); ok {
-		if err := tc.checkDuplicateRoles(ctx.RoleType(), sym.Type().Roles()); err != nil {
-			tc.reportError(err)
-		}
-	}
-
 	ctx.FuncParamList().Accept(tc)
 
 	return nil
 }
 
 func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
-	paramType := tc.visitValueType(ctx.ValueType())
-	paramSym := sym_table.NewFuncParamSymbol(ctx, tc.currentScope, paramType)
-	tc.insertSymbol(paramSym)
-
-	funcSym := tc.currentScope.GetCallableEnv()
-	funcSym.AddParam(paramSym.(*sym_table.FuncParamSymbol))
-
 	return nil
 }
 
 func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any {
-	for _, param := range ctx.AllFuncParam() {
-		param.Accept(tc)
+	sym := tc.currentScope.GetCallableEnv()
+
+	for i, paramCtx := range ctx.AllFuncParam() {
+		paramType := sym.CallableType().Params()[i]
+		paramSym := sym_table.NewFuncParamSymbol(paramCtx, tc.currentScope, paramType)
+		tc.insertSymbol(paramSym)
+
+		funcSym := tc.currentScope.GetCallableEnv()
+		funcSym.AddParam(paramSym.(*sym_table.FuncParamSymbol))
 	}
+
 	return nil
 }
 
 // addFuncSymbol creates a new function symbol and stores it in the current scope.
 // It returns the new symbol along with a success boolean.
 func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr.ParserRuleContext) (funcSym sym_table.Symbol, success bool) {
-	fnType, errors := tc.parseFuncType(fn)
-	for _, err := range errors {
-		tc.reportError(err)
-	}
+	fnType, ok := tc.parseFuncType(fn)
 
-	if len(errors) > 0 {
-		return nil, false
-	}
-
-	if fnType.IsInvalid() {
+	if !ok {
 		return nil, false
 	}
 

@@ -78,6 +78,10 @@ func (f *FuncSymbol) FuncType() *types.FunctionType {
 	return f.Type().(*types.FunctionType)
 }
 
+func (f *FuncSymbol) CallableType() types.CallableType {
+	return f.FuncType()
+}
+
 func (f *FuncSymbol) Scope() *Scope {
 	return f.scope
 }

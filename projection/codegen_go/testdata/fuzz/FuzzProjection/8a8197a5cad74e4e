@@ -1,0 +1,2 @@
+go test fuzz v1
+string("struct(B,B,A Foo func!0A A%Foo(0,1,")

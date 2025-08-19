@@ -7,13 +7,8 @@ import (
 
 func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 	for _, inf := range sourceFile.AllInterface_() {
-		infType, err := tc.parseInterfaceType(inf)
-		if err != nil {
-			tc.reportError(err)
-			continue
-		}
-
-		if infType.IsInvalid() {
+		infType, ok := tc.parseInterfaceType(inf)
+		if !ok {
 			continue
 		}
 
@@ -29,13 +24,8 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 	}
 
 	for _, st := range sourceFile.AllStruct_() {
-		stType, err := tc.parseStructType(st)
-		if err != nil {
-			tc.reportError(err)
-			continue
-		}
-
-		if stType.IsInvalid() {
+		stType, ok := tc.parseStructType(st)
+		if !ok {
 			continue
 		}
 

@@ -180,10 +180,6 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 			return tc.registerType(ctx, types.Invalid())
 		}
 
-		if err := tc.checkDuplicateRoles(ctx.IdentAccess().RoleType(), roles); err != nil {
-			tc.reportError(err)
-		}
-
 		if isFunc {
 			roleSubst, ok := identType.Roles().SubstituteMap(roles)
 			if !ok {
@@ -359,10 +355,6 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	if err := tc.checkDuplicateRoles(ctx.RoleIdent().RoleType(), roles); err != nil {
-		tc.reportError(err)
-	}
-
 	stSym, ok := sym.(*sym_table.StructSymbol)
 	if !ok {
 		// parser error
@@ -524,27 +516,22 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	var returnType types.Type = types.Unit()
-	if sig.GetReturnType() != nil {
-		returnType = tc.visitValueType(sig.GetReturnType())
-		tc.checkRolesInScope(findRoleType(sig.GetReturnType()))
+	t, ok := tc.parseClosureType(sig)
+	if !ok {
+		return tc.registerType(ctx, types.Invalid())
 	}
-
-	closureRoles, _ := tc.parseRoleType(sig.RoleType())
-	if closureRoles.IsSharedRole() {
-		tc.reportError(type_error.NewUnexpectedSharedType(sig.RoleType()))
-	}
+	closureType := t.(*types.ClosureType)
 
 	// enter scope
-	tc.currentScope = tc.currentScope.MakeChild(ctx.Scope().GetStart(), ctx.Scope().GetStop(), closureRoles.Participants())
-	closureEnv := sym_table.NewClosureEnv(tc.currentScope, returnType, sig.GetReturnType())
+	tc.currentScope = tc.currentScope.MakeChild(ctx.Scope().GetStart(), ctx.Scope().GetStop(), closureType.Roles().Participants())
+	closureEnv := sym_table.NewClosureEnv(tc.currentScope, closureType, sig.GetReturnType())
 	tc.currentScope.SetCallableEnv(closureEnv)
 
 	// add params to scope
 	sig.FuncParamList().Accept(tc)
 
 	returnsValue := ctx.Scope().Accept(tc) == true
-	if !returnsValue && returnType != types.Unit() {
+	if !returnsValue && closureType.ReturnType() != types.Unit() {
 		tc.reportError(type_error.NewFunctionMissingReturn(closureEnv))
 	}
 
@@ -556,7 +543,6 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 		paramTypes = append(paramTypes, param.Type())
 	}
 
-	closureType := types.Closure(paramTypes, returnType, closureRoles.Participants())
 	return tc.registerType(ctx, closureType)
 }
 

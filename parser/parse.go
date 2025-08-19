@@ -121,3 +121,12 @@ func (t *errorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol
 		newSyntaxError(line, column, msg),
 	)
 }
+
+// A common interface for the intersection between [IFuncSigContext] and [IClosureSigContext]
+type CallableSigContext interface {
+	GetParams() IFuncParamListContext
+	GetReturnType() IValueTypeContext
+	RoleType() IRoleTypeContext
+	FuncParamList() IFuncParamListContext
+	ValueType() IValueTypeContext
+}

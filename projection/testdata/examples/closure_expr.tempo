@@ -1,0 +1,7 @@
+func@(A,B) foo() {
+  let closure = func@(A,B) (input: Int@A) Int@B {
+    return await A->B input;
+  };
+
+  let result: Int@B = closure(10@A);
+}
