@@ -9,22 +9,24 @@ import (
 
 func (gen *codegen) GenChoreographyStruct(c *projection.ChoreographyStruct) string {
 	out := ""
-	if !gen.opts.DisableTypes {
-		out += gen.Writeln("// Projection of struct `%s`", c.Name)
+	out += gen.Writeln("// Projection of struct `%s`", c.Name)
 
-		for _, role := range c.Roles {
-			out += gen.GenStructAttrs(c.Structs[role])
-			out += gen.GenStructDecl(c.Structs[role])
-			out += gen.Writeln("")
-		}
-
+	for _, role := range c.Roles {
+		out += gen.GenStructAttrs(c.Structs[role])
+		out += gen.GenStructDecl(c.Structs[role])
 		out += gen.Writeln("")
 	}
+
+	out += gen.Writeln("")
 
 	return out
 }
 
 func (gen *codegen) GenStructAttrs(s *projection.Struct) string {
+	if gen.opts.DisableTypes {
+		return ""
+	}
+
 	out := ""
 
 	out += gen.Writeln("export interface %s_%s_attrs {", s.Name, s.Role)
@@ -43,19 +45,30 @@ func (gen *codegen) GenStructAttrs(s *projection.Struct) string {
 func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 	out := ""
 
-	out += gen.Writeln("export class %s_%s implements %s_%s_attrs {", s.Name, s.Role, s.Name, s.Role)
+	if gen.opts.DisableTypes {
+		out += gen.Writeln("export class %s_%s {", s.Name, s.Role)
+	} else {
+		out += gen.Writeln("export class %s_%s implements %s_%s_attrs {", s.Name, s.Role, s.Name, s.Role)
+	}
 	gen.IncIndent()
 
-	for _, field := range s.Fields {
-		out += gen.Writeln("%s: %s;", field.Name, gen.GenType(field.Type))
+	if !gen.opts.DisableTypes {
+		for _, field := range s.Fields {
+			out += gen.Writeln("%s: %s;", field.Name, gen.GenType(field.Type))
+		}
+		out += gen.Writeln("")
 	}
-
-	out += gen.Writeln("")
 
 	fields := misc.JoinStringsFunc(s.Fields, ", ", func(field projection.StructField) string {
 		return field.Name
 	})
-	out += gen.Writeln("constructor({ %s }: %s_%s_attrs) {", fields, s.Name, s.Role)
+
+	if gen.opts.DisableTypes {
+		out += gen.Writeln("constructor({ %s }) {", fields)
+	} else {
+		out += gen.Writeln("constructor({ %s }: %s_%s_attrs) {", fields, s.Name, s.Role)
+	}
+
 	gen.IncIndent()
 	for _, field := range s.Fields {
 		out += gen.Writeln("this.%s = %s;", field.Name, field.Name)
