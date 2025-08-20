@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/parser"
@@ -13,7 +12,7 @@ type FunctionType struct {
 	ident      parser.IIdentContext
 	params     []Type
 	returnType Type
-	roles      []string
+	roles      *Roles
 }
 
 func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Type {
@@ -22,16 +21,11 @@ func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Type {
 		substParams = append(substParams, p.SubstituteRoles(substMap))
 	}
 
-	newRoles := []string{}
-	for _, r := range f.roles {
-		newRoles = append(newRoles, substMap.Subst(r)[0])
-	}
-
 	return Function(
 		f.ident,
 		substParams,
-		f.returnType.SubstituteRoles(substMap),
-		newRoles,
+		f.ReturnType().SubstituteRoles(substMap),
+		f.Roles().SubstituteRoles(substMap),
 	)
 }
 
@@ -45,7 +39,7 @@ func (f *FunctionType) CoerceTo(other Type) (Type, bool) {
 	}
 
 	if closure, ok := other.(*ClosureType); ok {
-		thisClosure := Closure(f.Params(), f.ReturnType(), f.roles)
+		thisClosure := Closure(f.Params(), f.ReturnType(), f.Roles().Participants())
 		return thisClosure.CoerceTo(closure)
 	}
 
@@ -62,7 +56,7 @@ func (f *FunctionType) CoerceTo(other Type) (Type, bool) {
 		return Invalid(), false
 	}
 
-	if !slices.Equal(f.roles, g.roles) {
+	if !f.Roles().Equals(g.Roles()) {
 		return Invalid(), false
 	}
 
@@ -88,7 +82,7 @@ func (f *FunctionType) CoerceTo(other Type) (Type, bool) {
 }
 
 func (f *FunctionType) Roles() *Roles {
-	return NewRole(f.roles, false)
+	return f.roles
 }
 
 func (f *FunctionType) IsSendable() bool {
@@ -120,7 +114,7 @@ func (f *FunctionType) NameIdent() parser.IIdentContext {
 	return f.ident
 }
 
-func Function(ident parser.IIdentContext, params []Type, returnType Type, roles []string) Type {
+func Function(ident parser.IIdentContext, params []Type, returnType Type, roles *Roles) Type {
 	return &FunctionType{
 		ident:      ident,
 		params:     params,

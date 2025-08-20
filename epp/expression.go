@@ -60,7 +60,10 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			case *sym_table.FuncSymbol:
 				funcType := exprValue.(*projection.FunctionType)
 
-				substMap, _ := funcType.Roles().SubstituteMap(sym.Roles())
+				substMap, ok := funcType.Roles().SubstituteMap(sym.Roles())
+				if !ok {
+					panic("type check ensures substitution is valid")
+				}
 
 				roleSubst := substMap.Subst(roleName)[0]
 				name += "_" + roleSubst
@@ -146,7 +149,23 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			if callType.Roles().Contains(roleName) {
 				funcSym := epp.info.Symbols[callFuncValue.NameIdent()].(*sym_table.FuncSymbol)
 				returnValue := callFuncValue.ReturnType
-				roleSubst, _ := funcSym.Roles().SubstituteMap(callFuncValue.Roles())
+
+				var roleSubst *types.RoleSubst
+				if callType.Roles().IsSharedRole() {
+
+					if !funcSym.Roles().IsLocalRole() {
+						panic("function can only be shared if declaration is local")
+					}
+
+					from := funcSym.Roles().Participants()[0]
+					roleSubst = types.NewRoleSubst().AddRole(from, roleName)
+				} else {
+					var ok bool
+					roleSubst, ok = funcSym.Roles().SubstituteMap(callFuncValue.Roles())
+					if !ok {
+						panic("type check ensures valid role substitution")
+					}
+				}
 
 				callExpr := projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, roleSubst)
 				if returnValue == projection.UnitType() {

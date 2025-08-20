@@ -1,0 +1,7 @@
+func@A double(val: Int@A) Int@A {
+  return val * 2;
+}
+
+func@(A,B) main() {
+  let x: Int@[A,B] = double@[A,B](10);
+}

@@ -217,7 +217,7 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (types.Type, bo
 		return types.Invalid(), false
 	}
 
-	fn := types.Function(ctx.Ident(), props.params, props.returnType, props.roles.Participants())
+	fn := types.Function(ctx.Ident(), props.params, props.returnType, props.roles)
 	return fn, true
 }
 

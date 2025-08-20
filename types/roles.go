@@ -278,6 +278,18 @@ func (r *Roles) Contains(role string) bool {
 	return slices.Contains(r.participants, role)
 }
 
+func (r *Roles) Equals(other *Roles) bool {
+	if r.roleType != other.roleType {
+		return false
+	}
+
+	if !slices.Equal(r.participants, other.participants) {
+		return false
+	}
+
+	return true
+}
+
 // SubstituteMap calculates a role substitution map from `this` roles object to `other`.
 // The substitution fails if the set of participants for each roles object has different lengths.
 // The returned boolean indicates whether the substitution was successfull.
