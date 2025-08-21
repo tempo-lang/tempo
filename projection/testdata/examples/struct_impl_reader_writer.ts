@@ -38,8 +38,8 @@ export async function main_A(env: Env) {
   let buffer: Buffer_X = new Buffer_X({ buf: 10 });
   let reader: Reader_A = env.copy(buffer);
   let writer: Writer_A = env.copy(buffer);
-  await writer.write(env.subst("A", "A"), 10);
-  await reader.read(env.subst("A", "A"));
+  await writer.write(env, 10);
+  await reader.read(env);
 }
 export async function main_B(env: Env) {
 }

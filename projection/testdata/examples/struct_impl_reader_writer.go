@@ -34,7 +34,7 @@ func main_A(env *runtime.Env) {
 	_ = reader
 	var writer Writer_A = runtime.Copy(buffer)
 	_ = writer
-	writer.write(env.Subst("A", "A"), 10)
-	_ = reader.read(env.Subst("A", "A"))
+	writer.write(env, 10)
+	_ = reader.read(env)
 }
 func main_B(env *runtime.Env) {}

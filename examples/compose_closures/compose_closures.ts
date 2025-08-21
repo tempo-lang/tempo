@@ -32,7 +32,7 @@ export async function Start_A(env: Env, input: number) {
   let f: (env: Env, arg0: number) => Promise<void> = async (env: Env, value: number) => {
     await incAndSend_X(env.subst("A", "X", "B", "Y"), value);
   };
-  let c: (env: Env, arg0: number) => Promise<void> = await compose_A(env.subst("A", "A", "B", "B", "C", "C"), env.copy(f));
+  let c: (env: Env, arg0: number) => Promise<void> = await compose_A(env, env.copy(f));
   await c(env, input);
 }
 export async function Start_B(env: Env) {
@@ -42,14 +42,14 @@ export async function Start_B(env: Env) {
   let g: (env: Env, arg0: number) => Promise<void> = async (env: Env, value: number) => {
     await incAndSend_X(env.subst("B", "X", "C", "Y"), value);
   };
-  let c: (env: Env) => Promise<void> = await compose_B(env.subst("A", "A", "B", "B", "C", "C"), env.copy(f), env.copy(g));
+  let c: (env: Env) => Promise<void> = await compose_B(env, env.copy(f), env.copy(g));
   await c(env);
 }
 export async function Start_C(env: Env): Promise<number> {
   let g: (env: Env) => Promise<number> = async (env: Env): Promise<number> => {
     return await incAndSend_Y(env.subst("B", "X", "C", "Y"));
   };
-  let c: (env: Env) => Promise<number> = await compose_C(env.subst("A", "A", "B", "B", "C", "C"), env.copy(g));
+  let c: (env: Env) => Promise<number> = await compose_C(env, env.copy(g));
   return await c(env);
 }
 

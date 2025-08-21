@@ -19,8 +19,8 @@ func pingPong_B(env *runtime.Env, count int) {
 
 // Projection of choreography `Start`
 func Start_A(env *runtime.Env) {
-	pingPong_A(env.Subst("A", "A", "B", "B"), 4)
+	pingPong_A(env, 4)
 }
 func Start_B(env *runtime.Env) {
-	pingPong_B(env.Subst("A", "A", "B", "B"), 4)
+	pingPong_B(env, 4)
 }

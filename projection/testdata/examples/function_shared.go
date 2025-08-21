@@ -10,7 +10,7 @@ func double_A(env *runtime.Env, val int) int {
 
 // Projection of choreography `main`
 func main_A(env *runtime.Env) {
-	var x int = double_A(env.Subst("A", "A"), 10)
+	var x int = double_A(env, 10)
 	_ = x
 }
 func main_B(env *runtime.Env) {

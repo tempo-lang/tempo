@@ -34,7 +34,7 @@ func Start_A(env *runtime.Env, input int) {
 		incAndSend_X(env.Subst("A", "X", "B", "Y"), value)
 	}
 	_ = f
-	var c func(int) = compose_A(env.Subst("A", "A", "B", "B", "C", "C"), runtime.Copy(f))
+	var c func(int) = compose_A(env, runtime.Copy(f))
 	_ = c
 	c(input)
 }
@@ -47,7 +47,7 @@ func Start_B(env *runtime.Env) {
 		incAndSend_X(env.Subst("B", "X", "C", "Y"), value)
 	}
 	_ = g
-	var c func() = compose_B(env.Subst("A", "A", "B", "B", "C", "C"), runtime.Copy(f), runtime.Copy(g))
+	var c func() = compose_B(env, runtime.Copy(f), runtime.Copy(g))
 	_ = c
 	c()
 }
@@ -56,7 +56,7 @@ func Start_C(env *runtime.Env) int {
 		return incAndSend_Y(env.Subst("B", "X", "C", "Y"))
 	}
 	_ = g
-	var c func() int = compose_C(env.Subst("A", "A", "B", "B", "C", "C"), runtime.Copy(g))
+	var c func() int = compose_C(env, runtime.Copy(g))
 	_ = c
 	return c()
 }

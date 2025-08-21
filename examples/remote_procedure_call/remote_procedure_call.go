@@ -32,7 +32,7 @@ func (self RemoteCall_B) Call(env *runtime.Env) {
 func Start_A(env *runtime.Env) {
 	var rpc RPC_A = RemoteCall_A{}
 	_ = rpc
-	var result int = runtime.GetAsync(rpc.Call(env.Subst("A", "A", "B", "B"), 10))
+	var result int = runtime.GetAsync(rpc.Call(env, 10))
 	_ = result
 }
 func Start_B(env *runtime.Env) {
@@ -42,5 +42,5 @@ func Start_B(env *runtime.Env) {
 	_ = double
 	var rpc RPC_B = runtime.Copy(RemoteCall_B{Fn: double})
 	_ = rpc
-	rpc.Call(env.Subst("A", "A", "B", "B"))
+	rpc.Call(env)
 }

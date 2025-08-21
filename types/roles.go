@@ -41,6 +41,10 @@ func NewRoleSubst() *RoleSubst {
 
 // AddRole adds a new substitution to a role substitution map.
 func (r *RoleSubst) AddRole(from string, to ...string) *RoleSubst {
+	if len(to) == 0 {
+		panic("can not substitute a role to nothing")
+	}
+
 	if !slices.Contains(r.Roles, from) {
 		r.Roles = append(r.Roles, from)
 		r.Map[from] = to

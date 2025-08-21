@@ -24,10 +24,10 @@ func DiffieHellman_A(env *runtime.Env, mathA Math_A) Secret_A {
 	_ = g
 	var a int = 4
 	_ = a
-	_ = runtime.Send(env, mathA.Exp(env.Subst("A", "A"), g, a)%p, "B")
+	_ = runtime.Send(env, mathA.Exp(env, g, a)%p, "B")
 	var B *runtime.Async[int] = runtime.Recv[int](env, "B")
 	_ = B
-	var sA int = mathA.Exp(env.Subst("A", "A"), runtime.GetAsync(B), a) % p
+	var sA int = mathA.Exp(env, runtime.GetAsync(B), a) % p
 	_ = sA
 	return Secret_A{A: sA}
 }

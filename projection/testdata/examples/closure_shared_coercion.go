@@ -11,7 +11,7 @@ func double_A(env *runtime.Env, val int) int {
 // Projection of choreography `main`
 func main_A(env *runtime.Env) {
 	var a func(int) int = func(val int) int {
-		return double_A(env.Subst("A", "A"), val)
+		return double_A(env, val)
 	}
 	_ = a
 	var b func(int) int = runtime.Copy(a)

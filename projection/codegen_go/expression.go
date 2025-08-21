@@ -124,10 +124,16 @@ func GenExprCallFunc(e *projection.ExprCallFunc) jen.Code {
 		}
 
 		from := e.RoleSubst.Subst(to)[0]
-		roleSub = append(roleSub, jen.Lit(from), jen.Lit(to))
+		if from != to {
+			roleSub = append(roleSub, jen.Lit(from), jen.Lit(to))
+		}
 	}
 
-	args = append(args, jen.Id("env").Dot("Subst").Call(roleSub...))
+	if len(roleSub) == 0 {
+		args = append(args, jen.Id("env"))
+	} else {
+		args = append(args, jen.Id("env").Dot("Subst").Call(roleSub...))
+	}
 
 	for _, arg := range e.Args {
 		args = append(args, GenExpression(arg))

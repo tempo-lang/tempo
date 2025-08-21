@@ -36,9 +36,9 @@ export async function DiffieHellman_A(env: Env, mathA: Math_A): Promise<Secret_A
   let p: number = 23;
   let g: number = 5;
   let a: number = 4;
-  env.send(Math.floor(await mathA.Exp(env.subst("A", "A"), g, a) % p), "B");
+  env.send(Math.floor(await mathA.Exp(env, g, a) % p), "B");
   let B: Promise<number> = env.recv<number>("B");
-  let sA: number = Math.floor(await mathA.Exp(env.subst("A", "A"), await B, a) % p);
+  let sA: number = Math.floor(await mathA.Exp(env, await B, a) % p);
   return new Secret_A({ A: sA });
 }
 export async function DiffieHellman_B(env: Env, mathB: Math_A): Promise<Secret_B> {

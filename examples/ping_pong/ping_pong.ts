@@ -18,9 +18,9 @@ export async function pingPong_B(env: Env, count: number) {
 
 // Projection of choreography `Start`
 export async function Start_A(env: Env) {
-  await pingPong_A(env.subst("A", "A", "B", "B"), 4);
+  await pingPong_A(env, 4);
 }
 export async function Start_B(env: Env) {
-  await pingPong_B(env.subst("A", "A", "B", "B"), 4);
+  await pingPong_B(env, 4);
 }
 

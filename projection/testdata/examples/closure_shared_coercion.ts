@@ -10,7 +10,7 @@ export async function double_A(env: Env, val: number): Promise<number> {
 // Projection of choreography `main`
 export async function main_A(env: Env) {
   let a: (env: Env, arg0: number) => Promise<number> = async (env: Env, val: number): Promise<number> => {
-    return await double_A(env.subst("A", "A"), val);
+    return await double_A(env, val);
   };
   let b: (env: Env, arg0: number) => Promise<number> = env.copy(a);
 }
