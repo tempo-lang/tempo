@@ -35,7 +35,7 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 
 	// convert function type to closure type when stored in a variable
 	if funcType, ok := exprType.(*types.FunctionType); ok {
-		exprType = types.Closure(funcType.Params(), funcType.ReturnType(), funcType.Roles().Participants())
+		exprType = funcType.ToClosure()
 	}
 
 	stmtType := exprType

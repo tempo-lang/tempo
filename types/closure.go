@@ -14,9 +14,9 @@ type CallableType interface {
 
 type ClosureType struct {
 	baseType
-	params       []Type
-	returnType   Type
-	participants []string
+	params     []Type
+	returnType Type
+	roles      *Roles
 }
 
 func (f *ClosureType) CoerceTo(other Type) (Type, bool) {
@@ -44,12 +44,12 @@ func (f *ClosureType) CoerceTo(other Type) (Type, bool) {
 		}
 	}
 
-	newReturn, ok := f.returnType.CoerceTo(g.returnType)
+	newReturn, ok := f.ReturnType().CoerceTo(g.ReturnType())
 	if !ok {
 		canCoerce = false
 	}
 
-	return Closure(newParams, newReturn, other.Roles().participants), canCoerce
+	return Closure(newParams, newReturn, other.Roles()), canCoerce
 }
 
 func (c *ClosureType) IsEquatable() bool {
@@ -68,8 +68,8 @@ func (c *ClosureType) SubstituteRoles(substMap *RoleSubst) Type {
 
 	return Closure(
 		substParams,
-		c.returnType.SubstituteRoles(substMap),
-		c.Roles().SubstituteRoles(substMap).participants,
+		c.ReturnType().SubstituteRoles(substMap),
+		c.Roles().SubstituteRoles(substMap),
 	)
 }
 
@@ -78,7 +78,7 @@ func (c *ClosureType) ReplaceSharedRoles(participants []string) Type {
 }
 
 func (c *ClosureType) Roles() *Roles {
-	return NewRole(c.participants, false)
+	return c.roles
 }
 
 func (c *ClosureType) ToString() string {
@@ -90,11 +90,11 @@ func (c *ClosureType) ToString() string {
 	return fmt.Sprintf("func@%s(%s)%s", c.Roles().ToString(), params, returnType)
 }
 
-func Closure(params []Type, returnType Type, participants []string) *ClosureType {
+func Closure(params []Type, returnType Type, roles *Roles) *ClosureType {
 	return &ClosureType{
-		params:       params,
-		returnType:   returnType,
-		participants: participants,
+		params:     params,
+		returnType: returnType,
+		roles:      roles,
 	}
 }
 

@@ -117,8 +117,13 @@ func GenExprCallFunc(e *projection.ExprCallFunc) jen.Code {
 	args := []jen.Code{}
 
 	roleSub := []jen.Code{}
-	for _, to := range e.RoleSubs.Roles {
-		from := e.RoleSubs.Subst(to)[0]
+	for _, to := range e.RoleSubst.Roles {
+		fromSubst := e.RoleSubst.Subst(to)
+		if len(fromSubst) != 1 {
+			panic(fmt.Sprintf("expected role substitution to be unique: %s -> %v", to, fromSubst))
+		}
+
+		from := e.RoleSubst.Subst(to)[0]
 		roleSub = append(roleSub, jen.Lit(from), jen.Lit(to))
 	}
 

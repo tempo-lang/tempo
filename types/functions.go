@@ -39,8 +39,7 @@ func (f *FunctionType) CoerceTo(other Type) (Type, bool) {
 	}
 
 	if closure, ok := other.(*ClosureType); ok {
-		thisClosure := Closure(f.Params(), f.ReturnType(), f.Roles().Participants())
-		return thisClosure.CoerceTo(closure)
+		return f.ToClosure().CoerceTo(closure)
 	}
 
 	g, ok := other.(*FunctionType)
@@ -112,6 +111,10 @@ func (f *FunctionType) ReturnType() Type {
 
 func (f *FunctionType) NameIdent() parser.IIdentContext {
 	return f.ident
+}
+
+func (f *FunctionType) ToClosure() Type {
+	return Closure(f.Params(), f.ReturnType(), f.Roles())
 }
 
 func Function(ident parser.IIdentContext, params []Type, returnType Type, roles *Roles) Type {

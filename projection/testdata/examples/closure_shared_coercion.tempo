@@ -1,0 +1,15 @@
+func@A double(val: Int@A) Int@A {
+  return val * 2;
+}
+
+func@(A,B) main() {
+  // shared functions can be coerced to a shared closure
+  let a: func@[A,B](Int@[A,B])Int@[A,B] = double@[A,B];
+
+  // shared functions can be coerced to normal functions
+  let b: func@(A,B)(Int@[A,B])Int@[A,B] = a;
+
+  // shared closures and functions can be coerced to a subset of the roles
+  let x: func@B(Int@B)Int@B = a;
+  let y: func@B(Int@B)Int@B = double@[A,B];
+}

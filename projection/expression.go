@@ -394,7 +394,7 @@ type ExprCallFunc struct {
 	FuncRole   string
 	Args       []Expression
 	ReturnType Type
-	RoleSubs   *types.RoleSubst
+	RoleSubst  *types.RoleSubst
 }
 
 func (e *ExprCallFunc) Type() Type {
@@ -411,13 +411,29 @@ func (e *ExprCallFunc) HasSideEffects() bool {
 
 func (e *ExprCallFunc) IsExpression() {}
 
-func NewExprCallFunc(funcExpr Expression, funcRole string, args []Expression, returnType Type, roleSubs *types.RoleSubst) Expression {
+func NewExprCallFunc(funcExpr Expression, funcRole string, args []Expression, returnType Type, defRoles *types.Roles, callRoles *types.Roles) Expression {
+	var roleSubst *types.RoleSubst
+	if callRoles.IsSharedRole() {
+		if !defRoles.IsLocalRole() {
+			panic("function can only be shared if declaration is local")
+		}
+
+		from := defRoles.Participants()[0]
+		roleSubst = types.NewRoleSubst().AddRole(from, funcRole)
+	} else {
+		var ok bool
+		roleSubst, ok = defRoles.SubstituteMap(callRoles)
+		if !ok {
+			panic("type check ensures valid role substitution")
+		}
+	}
+
 	return &ExprCallFunc{
 		FuncExpr:   funcExpr,
 		FuncRole:   funcRole,
 		Args:       args,
 		ReturnType: returnType,
-		RoleSubs:   roleSubs,
+		RoleSubst:  roleSubst,
 	}
 }
 

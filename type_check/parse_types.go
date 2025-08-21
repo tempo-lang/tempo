@@ -107,7 +107,7 @@ func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (ty
 		}
 	}
 
-	closureValue := types.Closure(params, returnType, roles.Participants())
+	closureValue := types.Closure(params, returnType, roles)
 
 	return closureValue, nil
 }
@@ -227,7 +227,7 @@ func (tc *typeChecker) parseClosureType(ctx parser.IClosureSigContext) (types.Ty
 		return types.Invalid(), false
 	}
 
-	closure := types.Closure(props.params, props.returnType, props.roles.Participants())
+	closure := types.Closure(props.params, props.returnType, props.roles)
 	return closure, true
 }
 

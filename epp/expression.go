@@ -150,24 +150,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 				funcSym := epp.info.Symbols[callFuncValue.NameIdent()].(*sym_table.FuncSymbol)
 				returnValue := callFuncValue.ReturnType
 
-				var roleSubst *types.RoleSubst
-				if callType.Roles().IsSharedRole() {
-
-					if !funcSym.Roles().IsLocalRole() {
-						panic("function can only be shared if declaration is local")
-					}
-
-					from := funcSym.Roles().Participants()[0]
-					roleSubst = types.NewRoleSubst().AddRole(from, roleName)
-				} else {
-					var ok bool
-					roleSubst, ok = funcSym.Roles().SubstituteMap(callFuncValue.Roles())
-					if !ok {
-						panic("type check ensures valid role substitution")
-					}
-				}
-
-				callExpr := projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, roleSubst)
+				callExpr := projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, funcSym.Roles(), callType.Roles())
 				if returnValue == projection.UnitType() {
 					aux = append(aux, projection.NewStmtExpr(callExpr))
 					return nil, aux

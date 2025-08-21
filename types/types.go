@@ -7,7 +7,15 @@ func baseCoerceValue(thisValue, otherValue Type) (Type, *bool) {
 	fail := false
 	success := true
 
-	if !thisValue.Roles().Encompass(otherValue.Roles()) {
+	// shared closures can be coerced to normal closures
+	thisRole := thisValue.Roles()
+	if _, isClosure := otherValue.(*ClosureType); isClosure {
+		if thisRole.IsSharedRole() && otherValue.Roles().IsDistributedRole() {
+			thisRole = NewRole(thisRole.participants, false)
+		}
+	}
+
+	if !thisRole.Encompass(otherValue.Roles()) {
 		return otherValue, &fail
 	}
 
