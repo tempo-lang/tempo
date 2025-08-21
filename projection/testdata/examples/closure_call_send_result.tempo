@@ -1,0 +1,7 @@
+func@(A,B) main() {
+  let send = func@(A,B) () Int@B {
+    return await A->B 10;
+  };
+  
+  await B->A send();
+}

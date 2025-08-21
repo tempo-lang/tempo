@@ -181,7 +181,13 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 			if callType.Roles().Contains(roleName) {
 				returnValue := callFuncValue.ReturnType
-				return projection.NewExprCallClosure(callExpr, roleName, argValues, returnValue), aux
+				callExpr := projection.NewExprCallClosure(callExpr, roleName, argValues, returnValue)
+				if returnValue == projection.UnitType() {
+					aux = append(aux, projection.NewStmtExpr(callExpr))
+					return nil, aux
+				} else {
+					return callExpr, aux
+				}
 			} else {
 				return nil, aux
 			}
