@@ -7,6 +7,7 @@ import (
 	"github.com/tempo-lang/tempo/epp"
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/projection/codegen_go"
+	"github.com/tempo-lang/tempo/projection/codegen_java"
 	"github.com/tempo-lang/tempo/projection/codegen_ts"
 	"github.com/tempo-lang/tempo/type_check"
 
@@ -17,24 +18,24 @@ import (
 type CompilerLanguage string
 
 const (
-	LangGo = "go"
-	LangTS = "ts"
+	LangGo   = "go"
+	LangTS   = "ts"
+	LangJS   = "js"
+	LangJava = "java"
 )
 
 // Options given to the compiler
 type Options struct {
-	PackageName  string
-	Language     CompilerLanguage
-	RuntimePath  string
-	DisableTypes bool
+	PackageName string
+	Language    CompilerLanguage
+	RuntimePath string
 }
 
 func DefaultOptions() Options {
 	return Options{
-		PackageName:  "choreography",
-		Language:     LangGo,
-		RuntimePath:  "@tempo-lang/tempo/runtime",
-		DisableTypes: false,
+		PackageName: "choreography",
+		Language:    LangGo,
+		RuntimePath: "@tempo-lang/tempo/runtime",
 	}
 }
 
@@ -84,12 +85,15 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 
 		output = file.GoString()
 		return
-	case LangTS:
+	case LangTS, LangJS:
 		tsOpts := codegen_ts.Options{
-			DisableTypes: options.DisableTypes,
+			DisableTypes: options.Language == LangJS,
 			RuntimePath:  options.RuntimePath,
 		}
 		output = codegen_ts.Codegen(info, eppFile, &tsOpts)
+		return
+	case LangJava:
+		output = codegen_java.Codegen(info, eppFile, nil)
 		return
 	default:
 		panic(fmt.Sprintf("unknown language: %v", options.Language))
