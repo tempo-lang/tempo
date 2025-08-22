@@ -93,7 +93,11 @@ func Compile(input antlr.CharStream, options *Options) (output string, errors []
 		output = codegen_ts.Codegen(info, eppFile, &tsOpts)
 		return
 	case LangJava:
-		output = codegen_java.Codegen(info, eppFile, nil)
+		javaOpts := codegen_java.Options{
+			Package:   &options.PackageName,
+			ClassName: "Choreography",
+		}
+		output = codegen_java.Codegen(info, eppFile, &javaOpts)
 		return
 	default:
 		panic(fmt.Sprintf("unknown language: %v", options.Language))

@@ -3,14 +3,22 @@ package epp
 import (
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/projection"
+	"github.com/tempo-lang/tempo/types"
 )
 
 func (epp *epp) eppStruct(st parser.IStructContext) *projection.ChoreographyStruct {
 	sym := epp.info.Symbols[st.Ident()]
 	result := projection.NewChoreographyStruct(sym.SymbolName())
 
+	stType := sym.Type().(*types.StructType)
+
 	for _, role := range sym.Type().Roles().Participants() {
 		str := result.AddStruct(role, st)
+
+		for _, impl := range stType.Implements() {
+			eppImpl := epp.eppType(role, impl)
+			str.AddImplements(eppImpl)
+		}
 
 		for _, field := range st.GetBody().AllStructField() {
 			fieldSym := epp.info.Symbols[field.Ident()]

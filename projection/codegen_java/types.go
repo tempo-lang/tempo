@@ -52,11 +52,11 @@ func (gen *codegen) GenBuiltinType(t projection.BuiltinType) string {
 }
 
 func (gen *codegen) GenClosureType(t *projection.ClosureType) string {
-	panic("type gen not implemented yet")
+	return "ClosureType"
 }
 
 func (gen *codegen) GenFunctionType(t *projection.FunctionType) string {
-	panic("type gen not implemented yet")
+	return "FunctionType"
 }
 
 func (gen *codegen) GenInterfaceType(t *projection.InterfaceType) string {
@@ -69,5 +69,5 @@ func (gen *codegen) GenListType(t *projection.ListType) string {
 }
 
 func (gen *codegen) GenStructType(t *projection.StructType) string {
-	return t.Class()
+	return t.GenName()
 }

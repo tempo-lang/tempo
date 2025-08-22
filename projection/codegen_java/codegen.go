@@ -2,8 +2,6 @@ package codegen_java
 
 import (
 	"fmt"
-	"maps"
-	"slices"
 	"strings"
 
 	"github.com/tempo-lang/tempo/projection"
@@ -75,15 +73,5 @@ func Codegen(info *type_check.Info, sourceFile *projection.SourceFile, opts *Opt
 		gen.opts = DefaultOptions()
 	}
 
-	code := gen.GenSourceFile(sourceFile)
-
-	out := ""
-	for _, pkg := range slices.Sorted(maps.Keys(gen.imports)) {
-		out += gen.Writeln("import %s;", pkg)
-	}
-	out += gen.Writeln("")
-
-	out += code
-
-	return out
+	return gen.GenSourceFile(sourceFile)
 }

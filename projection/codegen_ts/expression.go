@@ -214,9 +214,9 @@ func (gen *codegen) GenExprListLength(e *projection.ExprListLength) string {
 func (gen *codegen) GenExprRecv(e *projection.ExprRecv) string {
 	if structType, isStruct := e.RecvType.(*projection.StructType); isStruct {
 		if gen.opts.DisableTypes {
-			return fmt.Sprintf("env.recvClass(\"%s\", %s)", e.Sender, structType.Class())
+			return fmt.Sprintf("env.recvClass(\"%s\", %s)", e.Sender, structType.GenName())
 		} else {
-			return fmt.Sprintf("env.recvClass<%s, %s>(\"%s\", %s)", gen.GenType(e.RecvType), structType.ClassAttrs(), e.Sender, structType.Class())
+			return fmt.Sprintf("env.recvClass<%s, %s>(\"%s\", %s)", gen.GenType(e.RecvType), structType.ClassAttrs(), e.Sender, structType.GenName())
 		}
 	}
 

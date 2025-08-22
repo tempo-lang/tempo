@@ -176,7 +176,17 @@ func (gen *codegen) GenExprString(e *projection.ExprString) string {
 }
 
 func (gen *codegen) GenExprStruct(e *projection.ExprStruct) string {
-	return fmt.Sprintf("new %s_%s(%s)", e.StructName, e.StructRole, misc.JoinStrings(e.FieldNames, ", "))
+
+	args := misc.JoinStringsFunc(e.FieldNames, ", ", func(field string) string {
+		expr := e.Fields[field]
+		if CopyNecessary(expr) && !ValueBasedType(expr.Type()) {
+			return fmt.Sprintf("%s.clone()", gen.GenExpr(expr))
+		} else {
+			return gen.GenExpr(expr)
+		}
+	})
+
+	return fmt.Sprintf("new %s_%s(%s)", e.StructName, e.StructRole, args)
 }
 
 func (gen *codegen) GenExprSelf(e *projection.ExprSelf) string {
@@ -230,7 +240,7 @@ func CopyNecessary(e projection.Expression) bool {
 	case *projection.ExprString:
 		return false
 	case *projection.ExprStruct:
-		return true
+		return false
 	default:
 		panic(fmt.Sprintf("unexpected projection.Expression: %#v", e))
 	}

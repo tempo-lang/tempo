@@ -22,20 +22,22 @@ func NewChoreographyStruct(name string) *ChoreographyStruct {
 }
 
 type Struct struct {
-	StructCtx parser.IStructContext
-	Name      string
-	Role      string
-	Fields    []StructField
-	Methods   []*StructMethod
+	StructCtx  parser.IStructContext
+	Name       string
+	Role       string
+	Fields     []StructField
+	Methods    []*StructMethod
+	Implements []Type
 }
 
 func (c *ChoreographyStruct) AddStruct(role string, structCtx parser.IStructContext) *Struct {
 	c.Roles = append(c.Roles, role)
 	c.Structs[role] = &Struct{
-		StructCtx: structCtx,
-		Name:      structCtx.Ident().GetText(),
-		Role:      role,
-		Fields:    []StructField{},
+		StructCtx:  structCtx,
+		Name:       structCtx.Ident().GetText(),
+		Role:       role,
+		Fields:     []StructField{},
+		Implements: []Type{},
 	}
 	return c.Structs[role]
 }
@@ -60,6 +62,10 @@ func (s *Struct) AddMethod(sig *FuncSig, funcCtx parser.IFuncContext) *StructMet
 	s.Methods = append(s.Methods, method)
 
 	return method
+}
+
+func (s *Struct) AddImplements(infType Type) {
+	s.Implements = append(s.Implements, infType)
 }
 
 type StructField struct {
@@ -100,10 +106,10 @@ func (s *StructType) Role() string {
 	return s.role
 }
 
-func (s *StructType) Class() string {
+func (s *StructType) GenName() string {
 	return fmt.Sprintf("%s_%s", s.Name(), s.Role())
 }
 
 func (s *StructType) ClassAttrs() string {
-	return fmt.Sprintf("%s_attrs", s.Class())
+	return fmt.Sprintf("%s_attrs", s.GenName())
 }
