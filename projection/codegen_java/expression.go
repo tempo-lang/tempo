@@ -94,7 +94,12 @@ func (gen *codegen) GenExprBool(e *projection.ExprBool) string {
 }
 
 func (gen *codegen) GenExprCallClosure(e *projection.ExprCallClosure) string {
-	return "CALL_CLOSURE"
+	args := []string{}
+	for _, arg := range e.Args {
+		args = append(args, gen.GenExpr(arg))
+	}
+
+	return fmt.Sprintf("%s.call(%s)", gen.GenExpr(e.ClosureExpr), misc.JoinStrings(args, ", "))
 }
 
 func (gen *codegen) GenExprCallFunc(e *projection.ExprCallFunc) string {
@@ -122,7 +127,24 @@ func (gen *codegen) GenExprCallFunc(e *projection.ExprCallFunc) string {
 }
 
 func (gen *codegen) GenExprClosure(e *projection.ExprClosure) string {
-	return "MAKE_CLOSURE"
+	out := ""
+
+	params := []string{}
+	for _, p := range e.Params {
+		params = append(params, p.Name)
+	}
+
+	out += fmt.Sprintf("(%s) -> {\n", misc.JoinStrings(params, ", "))
+	gen.IncIndent()
+
+	for _, stmt := range e.Body {
+		out += gen.GenStmt(stmt)
+	}
+
+	gen.DecIndent()
+	out += gen.WriteIndent() + "}"
+
+	return out
 }
 
 func (gen *codegen) GenExprFieldAccess(e *projection.ExprFieldAccess) string {
@@ -253,7 +275,7 @@ func ValueBasedType(t projection.Type) bool {
 	case projection.BuiltinType:
 		return true
 	case *projection.ClosureType:
-		return false
+		return true
 	case *projection.FunctionType:
 		return true
 	case *projection.InterfaceType:

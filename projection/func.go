@@ -54,16 +54,24 @@ func (f *Func) AddStmt(stmt ...Statement) *Func {
 
 type FunctionType struct {
 	types.FunctionType
-	Params     []Type
-	ReturnType Type
+	params     []Type
+	returnType Type
 }
 
 func NewFunctionType(funcType *types.FunctionType, params []Type, returnType Type) *FunctionType {
 	return &FunctionType{
 		FunctionType: *funcType,
-		Params:       params,
-		ReturnType:   returnType,
+		params:       params,
+		returnType:   returnType,
 	}
 }
 
 func (c *FunctionType) IsType() {}
+
+func (c *FunctionType) Params() []Type {
+	return c.params
+}
+
+func (c *FunctionType) ReturnType() Type {
+	return c.returnType
+}

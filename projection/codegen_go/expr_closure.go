@@ -31,14 +31,14 @@ func GenExprClosure(e *projection.ExprClosure) jen.Code {
 func GenClosureType(c *projection.ClosureType) jen.Code {
 	params := []jen.Code{}
 
-	for _, param := range c.Params {
+	for _, param := range c.Params() {
 		params = append(params, GenType(param))
 	}
 
 	result := jen.Func().Params(params...)
 
-	if c.ReturnType != projection.UnitType() {
-		result = result.Add(GenType(c.ReturnType))
+	if c.ReturnType() != projection.UnitType() {
+		result = result.Add(GenType(c.ReturnType()))
 	}
 
 	return result

@@ -138,7 +138,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 				funcParam := funcType.Params()[i]
 				if funcParam.Roles().Contains(roleName) {
-					paramType := callFuncValue.Params[len(argValues)]
+					paramType := callFuncValue.Params()[len(argValues)]
 					argStored := epp.storeExpression(roleName, argVal, paramType)
 					argValues = append(argValues, argStored)
 				} else if argVal != nil && argVal.HasSideEffects() {
@@ -148,7 +148,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 			if callType.Roles().Contains(roleName) {
 				funcSym := epp.info.Symbols[callFuncValue.NameIdent()].(*sym_table.FuncSymbol)
-				returnValue := callFuncValue.ReturnType
+				returnValue := callFuncValue.ReturnType()
 
 				callExpr := projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, funcSym.Roles(), callType.Roles())
 				if returnValue == projection.UnitType() {
@@ -171,7 +171,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 				closureParam := closureType.Params()[i]
 				if closureParam.Roles().Contains(roleName) {
-					paramType := callFuncValue.Params[len(argValues)]
+					paramType := callFuncValue.Params()[len(argValues)]
 					argStored := epp.storeExpression(roleName, argVal, paramType)
 					argValues = append(argValues, argStored)
 				} else if argVal != nil && argVal.HasSideEffects() {
@@ -180,7 +180,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			}
 
 			if callType.Roles().Contains(roleName) {
-				returnValue := callFuncValue.ReturnType
+				returnValue := callFuncValue.ReturnType()
 				callExpr := projection.NewExprCallClosure(callExpr, roleName, argValues, returnValue)
 				if returnValue == projection.UnitType() {
 					aux = append(aux, projection.NewStmtExpr(callExpr))

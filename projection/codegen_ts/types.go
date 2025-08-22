@@ -51,20 +51,20 @@ func (gen *codegen) GenBuiltinType(t projection.BuiltinType) string {
 	panic(fmt.Sprintf("unexpected projection.BuiltinType: %#v", t))
 }
 
-func (gen *codegen) GenClosureType(t *projection.ClosureType) string {
+func (gen *codegen) GenCallableType(t projection.CallableType) string {
 	params := []string{"env: Env"}
-	for i, param := range t.Params {
+	for i, param := range t.Params() {
 		params = append(params, fmt.Sprintf("arg%d: %s", i, gen.GenType(param)))
 	}
-	return fmt.Sprintf("(%s) => Promise<%s>", misc.JoinStrings(params, ", "), gen.GenType(t.ReturnType))
+	return fmt.Sprintf("(%s) => Promise<%s>", misc.JoinStrings(params, ", "), gen.GenType(t.ReturnType()))
+}
+
+func (gen *codegen) GenClosureType(t *projection.ClosureType) string {
+	return gen.GenCallableType(t)
 }
 
 func (gen *codegen) GenFunctionType(t *projection.FunctionType) string {
-	params := []string{"env: Env"}
-	for i, param := range t.Params {
-		params = append(params, fmt.Sprintf("arg%d: %s", i, gen.GenType(param)))
-	}
-	return fmt.Sprintf("(%s) => Promise<%s>", misc.JoinStrings(params, ", "), gen.GenType(t.ReturnType))
+	return gen.GenCallableType(t)
 }
 
 func (gen *codegen) GenInterfaceType(t *projection.InterfaceType) string {

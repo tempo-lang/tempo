@@ -167,7 +167,7 @@ func (epp *epp) convertFuncToClosure(roleName string, funcExpr projection.Expres
 	for _, param := range funcSym.Params() {
 		argRoles := param.Type().Roles().SubstituteRoles(argRoleSubst)
 		if argRoles.Contains(roleName) {
-			paramType := funcType.Params[len(closureParams)]
+			paramType := funcType.Params()[len(closureParams)]
 			closureParams = append(closureParams, projection.NewClosureParam(param.SymbolName(), paramType))
 		}
 	}
@@ -177,9 +177,9 @@ func (epp *epp) convertFuncToClosure(roleName string, funcExpr projection.Expres
 		argValues = append(argValues, projection.NewExprIdent(param.Name, param.Type))
 	}
 
-	callExpr := projection.NewExprCallFunc(funcExpr, roleName, argValues, funcType.ReturnType, funcSym.Roles(), funcType.Roles())
+	callExpr := projection.NewExprCallFunc(funcExpr, roleName, argValues, funcType.ReturnType(), funcSym.Roles(), funcType.Roles())
 	var callStmt projection.Statement
-	if funcType.ReturnType != projection.UnitType() {
+	if funcType.ReturnType() != projection.UnitType() {
 		callStmt = projection.NewStmtReturn(callExpr)
 	} else {
 		callStmt = projection.NewStmtExpr(callExpr)
@@ -189,5 +189,5 @@ func (epp *epp) convertFuncToClosure(roleName string, funcExpr projection.Expres
 		callStmt,
 	}
 
-	return projection.NewExprClosure(closureParams, funcType.ReturnType, body)
+	return projection.NewExprClosure(closureParams, funcType.ReturnType(), body)
 }

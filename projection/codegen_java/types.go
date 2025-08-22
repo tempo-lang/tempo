@@ -3,6 +3,7 @@ package codegen_java
 import (
 	"fmt"
 
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
 )
 
@@ -51,12 +52,35 @@ func (gen *codegen) GenBuiltinType(t projection.BuiltinType) string {
 	panic(fmt.Sprintf("unexpected projection.BuiltinType: %#v", t))
 }
 
+func (gen *codegen) GenCallableType(t projection.CallableType) string {
+	returnsVoid := t.ReturnType() == projection.UnitType()
+	params := []string{}
+
+	if !returnsVoid {
+		params = append(params, gen.GenType(t.ReturnType()))
+	}
+
+	for _, param := range t.Params() {
+		params = append(params, gen.GenType(param))
+	}
+
+	var javaType string
+	if t.ReturnType() != projection.UnitType() {
+		javaType = fmt.Sprintf("FnRet%d", len(t.Params()))
+	} else {
+		javaType = fmt.Sprintf("Fn%d", len(t.Params()))
+	}
+
+	gen.AddImport(funcTypeToPkg(javaType))
+	return fmt.Sprintf("%s<%s>", javaType, misc.JoinStrings(params, ", "))
+}
+
 func (gen *codegen) GenClosureType(t *projection.ClosureType) string {
-	return "ClosureType"
+	return gen.GenCallableType(t)
 }
 
 func (gen *codegen) GenFunctionType(t *projection.FunctionType) string {
-	return "FunctionType"
+	return gen.GenCallableType(t)
 }
 
 func (gen *codegen) GenInterfaceType(t *projection.InterfaceType) string {

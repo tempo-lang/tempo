@@ -13,10 +13,7 @@ func (gen *codegen) GenChoreographyStruct(c *projection.ChoreographyStruct) stri
 
 	for _, role := range c.Roles {
 		out += gen.GenStructDecl(c.Structs[role])
-		out += gen.Writeln("")
 	}
-
-	out += gen.Writeln("")
 
 	return out
 }
@@ -37,10 +34,12 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 	out += gen.Writeln("public static final class %s_%s implements %s {", s.Name, s.Role, impls)
 	gen.IncIndent()
 
-	for _, field := range s.Fields {
-		out += gen.Writeln("public %s %s;", gen.GenType(field.Type), field.Name)
+	if len(s.Fields) > 0 {
+		for _, field := range s.Fields {
+			out += gen.Writeln("public %s %s;", gen.GenType(field.Type), field.Name)
+		}
+		out += gen.Writeln("")
 	}
-	out += gen.Writeln("")
 
 	fields := misc.JoinStringsFunc(s.Fields, ", ", func(field projection.StructField) string {
 		return fmt.Sprintf("%s %s", gen.GenType(field.Type), field.Name)

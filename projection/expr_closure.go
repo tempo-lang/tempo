@@ -1,5 +1,10 @@
 package projection
 
+type CallableType interface {
+	Params() []Type
+	ReturnType() Type
+}
+
 // Construct a new closure and returns it.
 // The closure can capture symbols from parent scopes by reference.
 type ExprClosure struct {
@@ -48,15 +53,23 @@ func (e *ExprClosure) Type() Type {
 }
 
 type ClosureType struct {
-	Params     []Type
-	ReturnType Type
+	params     []Type
+	returnType Type
 }
 
 func (c *ClosureType) IsType() {}
 
 func NewClosureType(params []Type, returnType Type) *ClosureType {
 	return &ClosureType{
-		Params:     params,
-		ReturnType: returnType,
+		params:     params,
+		returnType: returnType,
 	}
+}
+
+func (c *ClosureType) Params() []Type {
+	return c.params
+}
+
+func (c *ClosureType) ReturnType() Type {
+	return c.returnType
 }

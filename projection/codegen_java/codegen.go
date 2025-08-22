@@ -20,6 +20,10 @@ const (
 	javaPkgCollectors        javaPkg = "java.util.stream.Collectors"
 )
 
+func funcTypeToPkg(funcType string) javaPkg {
+	return javaPkg(fmt.Sprintf("tempo.runtime.function.%s", funcType))
+}
+
 type codegen struct {
 	indent  int
 	opts    Options

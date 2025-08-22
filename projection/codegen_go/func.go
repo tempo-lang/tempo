@@ -53,14 +53,14 @@ func GenFunctionType(f *projection.FunctionType) jen.Code {
 		jen.Op("*").Qual("github.com/tempo-lang/tempo/runtime", "Env"),
 	}
 
-	for _, param := range f.Params {
+	for _, param := range f.Params() {
 		params = append(params, GenType(param))
 	}
 
 	result := jen.Func().Params(params...)
 
-	if f.ReturnType != projection.UnitType() {
-		result = result.Add(GenType(f.ReturnType))
+	if f.ReturnType() != projection.UnitType() {
+		result = result.Add(GenType(f.ReturnType()))
 	}
 
 	return result
