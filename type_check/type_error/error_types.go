@@ -396,7 +396,7 @@ type UnsendableType struct {
 }
 
 func (u *UnsendableType) Error() string {
-	return fmt.Sprintf("can not send values of type `%s`", u.UnsendableType.ToString())
+	return fmt.Sprintf("can not send value of type `%s`", u.UnsendableType.ToString())
 }
 
 func (u *UnsendableType) ParserRule() antlr.ParserRuleContext {
@@ -405,6 +405,19 @@ func (u *UnsendableType) ParserRule() antlr.ParserRuleContext {
 
 func (e *UnsendableType) Code() ErrorCode {
 	return CodeUnsendableType
+}
+
+func (u *UnsendableType) Annotations() []Annotation {
+	result := []Annotation{}
+
+	if _, isStruct := u.UnsendableType.(*types.StructType); isStruct {
+		result = append(result, Annotation{
+			Type:    AnnotationTypeNote,
+			Message: "struct contains unsendable fields",
+		})
+	}
+
+	return result
 }
 
 func NewUnsendableType(com *parser.ExprComContext, unsendableType types.Type) Error {

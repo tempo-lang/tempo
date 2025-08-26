@@ -81,10 +81,6 @@ func (t *StructType) SubstMap() *RoleSubst {
 	return t.substMap
 }
 
-func (t *StructType) IsSendable() bool {
-	return true
-}
-
 func (t *StructType) IsEquatable() bool {
 	return true
 }

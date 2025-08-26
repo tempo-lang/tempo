@@ -1,0 +1,10 @@
+struct@A Foo {
+  fn: func@A();
+}
+
+func@(A,B) main() {
+  let foo = Foo@A { fn: func@A () {} };
+  let bar: Foo@B = await A->B foo;
+}
+---
+E9 7:31: can not send value of type `struct@A Foo`

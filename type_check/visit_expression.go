@@ -225,7 +225,7 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	invalidType := false
 	invalidRole := false
 
-	if !innerExprType.IsSendable() {
+	if !tc.IsTypeSendable(innerExprType) {
 		tc.reportError(type_error.NewUnsendableType(ctx, innerExprType))
 		invalidType = true
 	}

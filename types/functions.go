@@ -84,10 +84,6 @@ func (f *FunctionType) Roles() *Roles {
 	return f.roles
 }
 
-func (f *FunctionType) IsSendable() bool {
-	return false
-}
-
 func (t *FunctionType) IsEquatable() bool {
 	return false
 }

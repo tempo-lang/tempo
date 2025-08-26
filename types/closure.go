@@ -56,10 +56,6 @@ func (c *ClosureType) IsEquatable() bool {
 	return false
 }
 
-func (c *ClosureType) IsSendable() bool {
-	return false
-}
-
 func (c *ClosureType) SubstituteRoles(substMap *RoleSubst) Type {
 	substParams := []Type{}
 	for _, p := range c.params {

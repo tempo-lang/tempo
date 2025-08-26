@@ -48,10 +48,6 @@ func (t *InterfaceType) CoerceTo(other Type) (Type, bool) {
 	return Unit(), false
 }
 
-func (s *InterfaceType) IsSendable() bool {
-	return false
-}
-
 func (t *InterfaceType) IsEquatable() bool {
 	return true
 }

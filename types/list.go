@@ -21,10 +21,6 @@ func (l *ListType) IsEquatable() bool {
 	return l.inner.IsEquatable()
 }
 
-func (l *ListType) IsSendable() bool {
-	return l.inner.IsSendable()
-}
-
 func (l *ListType) SubstituteRoles(substMap *RoleSubst) Type {
 	return List(l.inner.SubstituteRoles(substMap))
 }

@@ -40,8 +40,6 @@ func baseCoerceValue(thisValue, otherValue Type) (Type, *bool) {
 
 // A common interface for all types on the choreographic level
 type Type interface {
-	// IsSendable describes whether the type can be communicated using the `->` operator.
-	IsSendable() bool
 	// IsEquatable describes whether values of this type can be compared with eachother using the `==` operator.
 	IsEquatable() bool
 	// ToString returns the textual representation of the type.
@@ -90,10 +88,6 @@ func (t *InvalidType) Roles() *Roles {
 
 var invalid_type InvalidType = InvalidType{}
 
-func (t *InvalidType) IsSendable() bool {
-	return true
-}
-
 func (t *InvalidType) IsEquatable() bool {
 	return true
 }
@@ -131,10 +125,6 @@ func (t *UnitType) Roles() *Roles {
 
 func (u *UnitType) ToString() string {
 	return "()"
-}
-
-func (u *UnitType) IsSendable() bool {
-	return true
 }
 
 func (t *UnitType) IsEquatable() bool {

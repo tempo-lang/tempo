@@ -34,10 +34,6 @@ func (t *AsyncType) Roles() *Roles {
 	return t.inner.Roles()
 }
 
-func (a *AsyncType) IsSendable() bool {
-	return false
-}
-
 func (t *AsyncType) IsEquatable() bool {
 	return false
 }

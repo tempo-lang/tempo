@@ -37,10 +37,6 @@ type baseBuiltin struct {
 
 func (*baseBuiltin) IsBuiltin() {}
 
-func (*baseBuiltin) IsSendable() bool {
-	return true
-}
-
 func (*baseBuiltin) IsEquatable() bool {
 	return true
 }
