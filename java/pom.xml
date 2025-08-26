@@ -3,11 +3,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>tempo.runtime</groupId>
-  <artifactId>tempo-runtime</artifactId>
+  <groupId>tempo</groupId>
+  <artifactId>tempo</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>tempo-runtime</name>
+  <name>tempo</name>
   <url>https://tempo-lang.github.io/</url>
 
   <properties>
