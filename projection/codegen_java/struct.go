@@ -83,12 +83,68 @@ func (gen *codegen) GenStructMethods(s *projection.Struct) string {
 }
 
 func (gen *codegen) GenStructDefaultMethods(s *projection.Struct) string {
+	out := ""
+
+	out += gen.GenStructDefaultMethodToString(s)
+	out += gen.GenStructDefaultMethodEquals(s)
+	out += gen.GenStructDefaultMethodClone(s)
+
+	return out
+}
+
+func (gen *codegen) GenStructDefaultMethodToString(s *projection.Struct) string {
+	out := gen.Writeln("")
+
+	attrs := misc.JoinStringsFunc(s.Fields, ", ", func(field projection.StructField) string {
+		return fmt.Sprintf("%s=\"+this.%s+\"", field.Name, field.Name)
+	})
+
+	out += gen.Writeln("@Override")
+	out += gen.Writeln("public String toString() {")
+	gen.IncIndent()
+	out += gen.Writeln("return \"%s_%s[%s]\";", s.Name, s.Role, attrs)
+	gen.DecIndent()
+	out += gen.Writeln("}")
+
+	return out
+}
+
+func (gen *codegen) GenStructDefaultMethodEquals(s *projection.Struct) string {
+	out := gen.Writeln("")
+
+	out += gen.Writeln("@Override")
+	out += gen.Writeln("public boolean equals(Object o) {")
+	gen.IncIndent()
+	out += gen.Writeln("if (this == o) return true;")
+	out += gen.Writeln("if (o == null) return false;")
+	out += gen.Writeln("if (getClass() != o.getClass()) return false;")
+
+	if len(s.Fields) > 0 {
+		gen.AddImport(javaPkgObjects)
+		attrs := misc.JoinStringsFunc(s.Fields, " && ", func(field projection.StructField) string {
+			return fmt.Sprintf("Objects.equals(this.%s, oo.%s)", field.Name, field.Name)
+		})
+
+		out += gen.Writeln("%s_%s oo = (%s_%s) o;", s.Name, s.Role, s.Name, s.Role)
+		out += gen.Writeln("return %s;", attrs)
+	} else {
+		out += gen.Writeln("return true;")
+	}
+
+	gen.DecIndent()
+	out += gen.Writeln("}")
+
+	return out
+}
+
+func (gen *codegen) GenStructDefaultMethodClone(s *projection.Struct) string {
 	out := gen.Writeln("")
 
 	attrs := misc.JoinStringsFunc(s.Fields, ", ", func(field projection.StructField) string {
 		return field.Name
 	})
 
+	out += gen.Writeln("@Override")
 	out += gen.Writeln("public %s_%s clone() {", s.Name, s.Role)
 	gen.IncIndent()
 	out += gen.Writeln("return new %s_%s(%s);", s.Name, s.Role, attrs)

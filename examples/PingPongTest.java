@@ -1,15 +1,9 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-
-import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import tempo.simulator.Result;
 import tempo.simulator.Simulator;
-import tempo.transports.RecvValue;
-import tempo.transports.SendValue;
 
 public class PingPongTest {
     @Test
@@ -26,15 +20,14 @@ public class PingPongTest {
 
         var result = sim.run();
 
-        var expected = Map.<String, Result>of(
-                "A", new Result(
-                        null,
-                        List.of(new SendValue(4, List.of("B")), new SendValue(2, List.of("B"))),
-                        List.of(new RecvValue(3, "B"), new RecvValue(1, "B"))),
-                "B", new Result(
-                        null,
-                        List.of(new SendValue(3, List.of("A")), new SendValue(1, List.of("A"))),
-                        List.of(new RecvValue(4, "A"), new RecvValue(2, "A"))));
+        var expected = Result.builder()
+                .addProcess("A", proc -> proc
+                        .sends(4, "B").sends(2, "B")
+                        .receives(3, "B").receives(1, "B"))
+                .addProcess("B", proc -> proc
+                        .sends(3, "A").sends(1, "A")
+                        .receives(4, "A").receives(2, "A"))
+                .build();
 
         assertEquals(result, expected);
     }

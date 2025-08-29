@@ -4,9 +4,8 @@ package ping_pong;
 import tempo.runtime.Env;
 
 public final class Choreography {
-  private Choreography() {
-  }
-
+  private Choreography() {}
+  
   // Projection of choreography `pingPong`
   public static void pingPong_A(Env env, Integer count) throws Exception {
     if (count > 0) {
@@ -14,19 +13,17 @@ public final class Choreography {
       pingPong_B(env.subst("B", "A", "A", "B"), count - 1);
     }
   }
-
   public static void pingPong_B(Env env, Integer count) throws Exception {
     if (count > 0) {
       env.<Integer>recv("A").get();
       pingPong_A(env.subst("B", "A", "A", "B"), count - 1);
     }
   }
-
+  
   // Projection of choreography `Start`
   public static void Start_A(Env env) throws Exception {
     pingPong_A(env, 4);
   }
-
   public static void Start_B(Env env) throws Exception {
     pingPong_B(env, 4);
   }

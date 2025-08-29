@@ -12,6 +12,7 @@ type javaPkg string
 
 const (
 	javaPkgTempoEnv          javaPkg = "tempo.runtime.Env"
+	javaPkgObjects           javaPkg = "java.util.Objects"
 	javaPkgArrayList         javaPkg = "java.util.ArrayList"
 	javaPkgList              javaPkg = "java.util.List"
 	javaPkgFuture            javaPkg = "java.util.concurrent.Future"
