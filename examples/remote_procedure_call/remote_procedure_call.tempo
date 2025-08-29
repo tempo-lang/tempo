@@ -12,11 +12,11 @@ struct@(A,B) RemoteCall implements RPC@(A,B) {
 }
 
 func@(A,B) Start() {
-  let double = func@B (input: Int@B) Int@B {
+  let timesTwo = func@B (input: Int@B) Int@B {
     return input * 2;
   };
 
-  let rpc: RPC@(A,B) = RemoteCall@(A,B) { Fn: double };
+  let rpc: RPC@(A,B) = RemoteCall@(A,B) { Fn: timesTwo };
 
   let result: Int@A = await rpc.Call(10@A);
 }

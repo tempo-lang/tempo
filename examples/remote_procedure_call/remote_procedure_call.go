@@ -36,11 +36,11 @@ func Start_A(env *runtime.Env) {
 	_ = result
 }
 func Start_B(env *runtime.Env) {
-	var double func(int) int = func(input int) int {
+	var timesTwo func(int) int = func(input int) int {
 		return input * 2
 	}
-	_ = double
-	var rpc RPC_B = runtime.Copy(RemoteCall_B{Fn: double})
+	_ = timesTwo
+	var rpc RPC_B = runtime.Copy(RemoteCall_B{Fn: timesTwo})
 	_ = rpc
 	rpc.Call(env)
 }

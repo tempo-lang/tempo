@@ -4,11 +4,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>tempo</groupId>
-  <artifactId>tempo</artifactId>
+  <artifactId>tempo-examples</artifactId>
   <version>1.0</version>
 
-  <name>Tempo</name>
-  <url>https://tempo-lang.github.io/</url>
+  <name>Tempo Examples</name>
 
   <parent>
     <groupId>tempo</groupId>
@@ -24,9 +23,29 @@
 
   <dependencies>
     <dependency>
+      <groupId>tempo</groupId>
+      <artifactId>tempo</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <testSourceDirectory>${project.basedir}</testSourceDirectory>
+    <!-- <sourceDirectory>${project.basedir}</sourceDirectory> -->
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <testIncludes>
+            <include>**/*.java</include>
+          </testIncludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

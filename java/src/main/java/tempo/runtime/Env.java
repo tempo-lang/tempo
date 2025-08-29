@@ -18,7 +18,16 @@ public class Env implements Cloneable {
     }
 
     public Env subst(String... roles) {
-        throw new RuntimeException("not implemented yet");
+        HashMap<String, String> newSub = new HashMap<>();
+        for (int i = 0; i < roles.length; i += 2) {
+            var before = roles[i];
+            var after = roles[i + 1];
+            newSub.put(after, this.role(before));
+        }
+
+        Env newEnv = new Env(trans);
+        newEnv.roleSubst = newSub;
+        return newEnv;
     }
 
     public <T> Future<T> send(T value, String... roles) {

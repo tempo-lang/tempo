@@ -47,10 +47,10 @@ export async function Start_A(env: Env) {
   let result: number = await rpc.Call(env, 10);
 }
 export async function Start_B(env: Env) {
-  let double: (env: Env, arg0: number) => Promise<number> = async (env: Env, input: number): Promise<number> => {
+  let timesTwo: (env: Env, arg0: number) => Promise<number> = async (env: Env, input: number): Promise<number> => {
     return input * 2;
   };
-  let rpc: RPC_B = env.copy(new RemoteCall_B({ Fn: double }));
+  let rpc: RPC_B = env.copy(new RemoteCall_B({ Fn: timesTwo }));
   await rpc.Call(env);
 }
 

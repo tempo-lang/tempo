@@ -72,7 +72,11 @@ func (gen *codegen) GenCallableType(t projection.CallableType) string {
 	}
 
 	gen.AddImport(funcTypeToPkg(javaType))
-	return fmt.Sprintf("%s<%s>", javaType, misc.JoinStrings(params, ", "))
+	if len(params) > 0 {
+		return fmt.Sprintf("%s<%s>", javaType, misc.JoinStrings(params, ", "))
+	} else {
+		return javaType
+	}
 }
 
 func (gen *codegen) GenClosureType(t *projection.ClosureType) string {

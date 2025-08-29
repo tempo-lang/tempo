@@ -12,7 +12,7 @@ public class LocalChannel<T> {
         this.recvBuf = new ArrayDeque<>();
     }
 
-    public void send(T value) {
+    public synchronized void send(T value) {
         CompletableFuture<T> fut = recvBuf.pollFirst();
         if (fut != null) {
             fut.complete(value);
@@ -21,7 +21,7 @@ public class LocalChannel<T> {
         }
     }
 
-    public CompletableFuture<T> recv() {
+    public synchronized CompletableFuture<T> recv() {
         CompletableFuture<T> fut = new CompletableFuture<>();
         T value = this.sendBuf.pollFirst();
         if (value != null) {

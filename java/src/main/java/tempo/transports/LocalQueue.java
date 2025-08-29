@@ -11,7 +11,7 @@ public class LocalQueue {
         this.channels = new HashMap<>();
     }
 
-    public LocalChannel<Object> get(String from, String to) {
+    public synchronized LocalChannel<Object> get(String from, String to) {
         String key = from + "." + to;
 
         var chan = this.channels.get(key);
