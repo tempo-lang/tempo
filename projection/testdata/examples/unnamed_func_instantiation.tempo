@@ -1,0 +1,7 @@
+func@A foo() {
+  bar@A();
+}
+
+func bar() {
+  foo();
+}
