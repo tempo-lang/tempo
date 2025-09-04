@@ -161,9 +161,7 @@ func GenExprStruct(e *projection.ExprStruct) jen.Code {
 		fields[jen.Id(fieldName)] = expr
 	}
 
-	name := fmt.Sprintf("%s_%s", e.StructName, e.StructRole)
-
-	return jen.Id(name).Values(fields)
+	return jen.Id(e.StructName()).Values(fields)
 }
 
 func GenExprFieldAccess(e *projection.ExprFieldAccess) jen.Code {

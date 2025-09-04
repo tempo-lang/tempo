@@ -1,8 +1,6 @@
 package codegen_go
 
 import (
-	"fmt"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/tempo-lang/tempo/projection"
 )
@@ -29,10 +27,6 @@ func GenChoreographyStruct(file *jen.File, c *projection.ChoreographyStruct) {
 	}
 }
 
-func structTypeName(s *projection.Struct) string {
-	return fmt.Sprintf("%s_%s", s.Name, s.Role)
-}
-
 func GenStructDecl(s *projection.Struct) *jen.Statement {
 
 	fields := []jen.Code{}
@@ -41,11 +35,11 @@ func GenStructDecl(s *projection.Struct) *jen.Statement {
 		fields = append(fields, GenStructField(&field))
 	}
 
-	return jen.Type().Id(structTypeName(s)).Struct(fields...)
+	return jen.Type().Id(s.StructName()).Struct(fields...)
 }
 
 func GenStructType(s *projection.StructType) jen.Code {
-	return jen.Id(fmt.Sprintf("%s_%s", s.Name(), s.Role()))
+	return jen.Id(s.StructName())
 }
 
 func GenStructField(f *projection.StructField) *jen.Statement {
@@ -58,7 +52,7 @@ func GenStructMethods(s *projection.Struct) []*jen.Statement {
 	for _, method := range s.Methods {
 		params := FuncSigParams(method.FuncSig)
 
-		fn := jen.Func().Params(jen.Id("self").Id(structTypeName(s))).Id(method.FuncSig.Name).Params(params...)
+		fn := jen.Func().Params(jen.Id("self").Id(s.StructName())).Id(method.FuncSig.Name).Params(params...)
 
 		if method.FuncSig.ReturnValue != projection.UnitType() {
 			fn = fn.Add(GenType(method.FuncSig.ReturnValue))

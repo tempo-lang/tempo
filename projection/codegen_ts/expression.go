@@ -214,9 +214,9 @@ func (gen *codegen) GenExprListLength(e *projection.ExprListLength) string {
 func (gen *codegen) GenExprRecv(e *projection.ExprRecv) string {
 	if structType, isStruct := e.RecvType.(*projection.StructType); isStruct {
 		if gen.opts.DisableTypes {
-			return fmt.Sprintf("env.recvClass(\"%s\", %s)", e.Sender, structType.GenName())
+			return fmt.Sprintf("env.recvClass(\"%s\", %s)", e.Sender, structType.StructName())
 		} else {
-			return fmt.Sprintf("env.recvClass<%s, %s>(\"%s\", %s)", gen.GenType(e.RecvType), structType.ClassAttrs(), e.Sender, structType.GenName())
+			return fmt.Sprintf("env.recvClass<%s, %s>(\"%s\", %s)", gen.GenType(e.RecvType), structTypeAttrs(structType), e.Sender, structType.StructName())
 		}
 	}
 
@@ -246,7 +246,7 @@ func (gen *codegen) GenExprStruct(e *projection.ExprStruct) string {
 		fields = append(fields, fmt.Sprintf("%s: %s", field, gen.GenExpr(e.Fields[field])))
 	}
 
-	return fmt.Sprintf("new %s_%s({ %s })", e.StructName, e.StructRole, misc.JoinStrings(fields, ", "))
+	return fmt.Sprintf("new %s({ %s })", e.StructName(), misc.JoinStrings(fields, ", "))
 }
 
 func (gen *codegen) GenExprSelf(e *projection.ExprSelf) string {

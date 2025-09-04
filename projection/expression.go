@@ -414,7 +414,7 @@ func (e *ExprCallFunc) IsExpression() {}
 func NewExprCallFunc(funcExpr Expression, funcRole string, args []Expression, returnType Type, defRoles *types.Roles, callRoles *types.Roles) Expression {
 	var roleSubst *types.RoleSubst
 	if callRoles.IsSharedRole() {
-		if !defRoles.IsLocalRole() {
+		if !defRoles.IsLocalRole() && !defRoles.IsUnnamedRole() {
 			panic("function can only be shared if declaration is local")
 		}
 
@@ -471,11 +471,21 @@ func NewExprCallClosure(closureExpr Expression, role string, args []Expression, 
 
 // Construct an instance of the struct with the given name.
 type ExprStruct struct {
-	StructName string
-	StructRole string
+	StructType *StructType
 	FieldNames []string
 	Fields     map[string]Expression
-	StructType *StructType
+}
+
+func (e *ExprStruct) Name() string {
+	return e.StructType.Ident().GetText()
+}
+
+func (e *ExprStruct) Role() string {
+	return e.StructType.Role()
+}
+
+func (e *ExprStruct) StructName() string {
+	return e.StructType.StructName()
 }
 
 func (e *ExprStruct) Type() Type {
@@ -497,13 +507,11 @@ func (e *ExprStruct) HasSideEffects() bool {
 
 func (e *ExprStruct) IsExpression() {}
 
-func NewExprStruct(structName, structRole string, fieldNames []string, fields map[string]Expression, typ *StructType) Expression {
+func NewExprStruct(typ *StructType, fieldNames []string, fields map[string]Expression) Expression {
 	return &ExprStruct{
-		StructName: structName,
-		StructRole: structRole,
+		StructType: typ,
 		FieldNames: fieldNames,
 		Fields:     fields,
-		StructType: typ,
 	}
 }
 

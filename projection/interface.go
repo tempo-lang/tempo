@@ -58,8 +58,12 @@ func (inf *Interface) AddMethod(sig *FuncSig, ctx parser.IInterfaceMethodContext
 	return method
 }
 
-func (inf *Interface) GenName() string {
-	return fmt.Sprintf("%s_%s", inf.Name, inf.Role)
+func (inf *Interface) InterfaceName() string {
+	if inf.Role == "" {
+		return inf.Name
+	} else {
+		return fmt.Sprintf("%s_%s", inf.Name, inf.Role)
+	}
 }
 
 type InterfaceType struct {

@@ -41,7 +41,7 @@ func (gen *codegen) GenFuncParams(f *projection.FuncSig) string {
 
 func (gen *codegen) GenFuncSig(f *projection.FuncSig) string {
 	params := gen.GenFuncParams(f)
-	result := fmt.Sprintf("export async function %s_%s(%s)", f.Name, f.Role, params)
+	result := fmt.Sprintf("export async function %s(%s)", f.FuncName(), params)
 
 	if f.ReturnValue != projection.UnitType() && !gen.opts.DisableTypes {
 		result += fmt.Sprintf(": Promise<%s>", gen.GenType(f.ReturnValue))

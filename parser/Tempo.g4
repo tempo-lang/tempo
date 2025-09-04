@@ -10,7 +10,7 @@ sourceFile: (func | struct | interface)* EOF;
 // identifier
 ident: ID;
 
-roleIdent: ident ROLE_AT roleType;
+roleIdent: ident (ROLE_AT roleType)?;
 
 // type declaration
 valueType:
@@ -31,7 +31,7 @@ closureSig:
 
 // struct
 struct:
-	STRUCT ROLE_AT roleType ident structImplements? body = structBody;
+	STRUCT (ROLE_AT roleType)? ident structImplements? body = structBody;
 
 structImplements: IMPLEMENTS roleIdent (COMMA roleIdent)*;
 
@@ -41,7 +41,7 @@ structField: ident COLON valueType END;
 
 // interface
 interface:
-	INTERFACE ROLE_AT roleType ident interfaceMethodsList;
+	INTERFACE (ROLE_AT roleType)? ident interfaceMethodsList;
 
 interfaceMethodsList: LCURLY interfaceMethod* RCURLY;
 
@@ -51,7 +51,7 @@ interfaceMethod: funcSig END;
 func: funcSig scope;
 
 funcSig:
-	FUNC ROLE_AT roleType name = ident params = funcParamList returnType = valueType?;
+	FUNC (ROLE_AT roleType)? name = ident params = funcParamList returnType = valueType?;
 
 funcParamList: LPAREN (funcParam (COMMA funcParam)*)? RPAREN;
 

@@ -60,13 +60,15 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 			case *sym_table.FuncSymbol:
 				funcType := exprValue.(*projection.FunctionType)
 
-				substMap, ok := funcType.Roles().SubstituteMap(sym.Roles())
-				if !ok {
-					panic("type check ensures substitution is valid")
-				}
+				if !sym.Roles().IsUnnamedRole() {
+					substMap, ok := funcType.Roles().SubstituteMap(sym.Roles())
+					if !ok {
+						panic("type check ensures substitution is valid")
+					}
 
-				roleSubst := substMap.Subst(roleName)[0]
-				name += "_" + roleSubst
+					roleSubst := substMap.Subst(roleName)[0]
+					name += "_" + roleSubst
+				}
 			}
 
 			return projection.NewExprIdent(name, exprValue), []projection.Statement{}
@@ -199,7 +201,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		stSym := epp.info.Symbols[expr.RoleIdent().Ident()].(*sym_table.StructSymbol)
 
 		defRoleSubst, _ := stSym.Type().Roles().SubstituteMap(exprType.Roles())
-		exprRoleSubst, _ := exprType.Roles().SubstituteMap(stSym.Type().Roles())
+		// exprRoleSubst, _ := exprType.Roles().SubstituteMap(stSym.Type().Roles())
 
 		aux := []projection.Statement{}
 
@@ -226,7 +228,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		if exprType.Roles().Contains(roleName) {
 			structType := exprValue.(*projection.StructType)
-			return projection.NewExprStruct(stSym.SymbolName(), exprRoleSubst.Subst(roleName)[0], fieldNames, fields, structType), aux
+			return projection.NewExprStruct(structType, fieldNames, fields), aux
 		} else {
 			return nil, aux
 		}

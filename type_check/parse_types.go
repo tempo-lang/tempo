@@ -18,6 +18,10 @@ import (
 // }
 
 func ToBuiltinValue(name string, participants []string) (types.Type, bool) {
+	if len(participants) == 1 && participants[0] == "" {
+		participants = []string{}
+	}
+
 	switch name {
 	case "Int":
 		return types.Int(participants), true
@@ -114,7 +118,7 @@ func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (ty
 
 func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.Type, type_error.Error) {
 	// parser error
-	if ctx == nil || ctx.RoleIdent().RoleType() == nil || ctx.RoleIdent().Ident() == nil {
+	if ctx == nil {
 		return types.Invalid(), nil
 	}
 
@@ -231,7 +235,13 @@ func (tc *typeChecker) parseClosureType(ctx parser.IClosureSigContext) (types.Ty
 	return closure, true
 }
 
+// parseRoleType converts the AST representation of a role type to a [*types.Roles],
+// the returned boolean indicates whether the AST role is valid.
 func (tc *typeChecker) parseRoleType(ctx parser.IRoleTypeContext) (*types.Roles, bool) {
+	if ctx == nil {
+		return types.UnnamedRole(), true
+	}
+
 	switch ctx := ctx.(type) {
 	case *parser.RoleTypeNormalContext:
 		return tc.parseRoleTypeNormal(ctx)
@@ -284,7 +294,7 @@ func (tc *typeChecker) parseRoleTypeShared(ctx *parser.RoleTypeSharedContext) (*
 
 func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, bool) {
 	// parser error
-	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
+	if ctx == nil || ctx.Ident() == nil {
 		return types.Invalid(), false
 	}
 
@@ -339,7 +349,7 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 
 func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.Type, bool) {
 	// parser error
-	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
+	if ctx == nil || ctx.Ident() == nil {
 		return types.Invalid(), false
 	}
 

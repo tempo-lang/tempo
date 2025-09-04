@@ -208,7 +208,7 @@ func (gen *codegen) GenExprStruct(e *projection.ExprStruct) string {
 		}
 	})
 
-	return fmt.Sprintf("new %s_%s(%s)", e.StructName, e.StructRole, args)
+	return fmt.Sprintf("new %s(%s)", e.StructName(), args)
 }
 
 func (gen *codegen) GenExprSelf(e *projection.ExprSelf) string {

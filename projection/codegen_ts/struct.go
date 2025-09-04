@@ -22,6 +22,10 @@ func (gen *codegen) GenChoreographyStruct(c *projection.ChoreographyStruct) stri
 	return out
 }
 
+func structAttrs(s *projection.Struct) string {
+	return fmt.Sprintf("%s_attrs", s.StructName())
+}
+
 func (gen *codegen) GenStructAttrs(s *projection.Struct) string {
 	if gen.opts.DisableTypes {
 		return ""
@@ -29,7 +33,7 @@ func (gen *codegen) GenStructAttrs(s *projection.Struct) string {
 
 	out := ""
 
-	out += gen.Writeln("export interface %s_%s_attrs {", s.Name, s.Role)
+	out += gen.Writeln("export interface %s {", structAttrs(s))
 	gen.IncIndent()
 
 	for _, field := range s.Fields {
@@ -46,9 +50,9 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 	out := ""
 
 	if gen.opts.DisableTypes {
-		out += gen.Writeln("export class %s_%s {", s.Name, s.Role)
+		out += gen.Writeln("export class %s {", s.StructName())
 	} else {
-		out += gen.Writeln("export class %s_%s implements %s_%s_attrs {", s.Name, s.Role, s.Name, s.Role)
+		out += gen.Writeln("export class %s implements %s {", s.StructName(), structAttrs(s))
 	}
 	gen.IncIndent()
 
@@ -66,7 +70,7 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 	if gen.opts.DisableTypes {
 		out += gen.Writeln("constructor({ %s }) {", fields)
 	} else {
-		out += gen.Writeln("constructor({ %s }: %s_%s_attrs) {", fields, s.Name, s.Role)
+		out += gen.Writeln("constructor({ %s }: %s) {", fields, structAttrs(s))
 	}
 
 	gen.IncIndent()

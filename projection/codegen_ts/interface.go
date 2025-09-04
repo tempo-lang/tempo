@@ -16,7 +16,7 @@ func (gen *codegen) GenChoreographyInterface(c *projection.ChoreographyInterface
 }
 
 func (gen *codegen) GenInterface(inf *projection.Interface) string {
-	out := gen.Writeln("export interface %s {", inf.GenName())
+	out := gen.Writeln("export interface %s {", inf.InterfaceName())
 	gen.IncIndent()
 
 	for _, method := range inf.Methods {
