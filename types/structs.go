@@ -86,7 +86,11 @@ func (t *StructType) IsEquatable() bool {
 }
 
 func (t *StructType) ToString() string {
-	return fmt.Sprintf("struct@%s %s", t.Roles().ToString(), t.structIdent.GetText())
+	if t.Roles().IsUnnamedRole() {
+		return fmt.Sprintf("struct %s", t.structIdent.GetText())
+	} else {
+		return fmt.Sprintf("struct@%s %s", t.Roles().ToString(), t.structIdent.GetText())
+	}
 }
 
 func NewStructType(structIdent parser.IIdentContext, roles *Roles, implements []Type) Type {

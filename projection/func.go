@@ -1,6 +1,8 @@
 package projection
 
 import (
+	"fmt"
+
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 )
@@ -45,6 +47,14 @@ func (f *FuncSig) AddParam(param parser.IFuncParamContext, paramType Type) *Func
 		TypeValue: paramType,
 	})
 	return f
+}
+
+func (f *FuncSig) FuncName() string {
+	if f.Role == "" {
+		return f.Name
+	} else {
+		return fmt.Sprintf("%s_%s", f.Name, f.Role)
+	}
 }
 
 func (f *Func) AddStmt(stmt ...Statement) *Func {

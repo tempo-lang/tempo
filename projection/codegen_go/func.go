@@ -1,8 +1,6 @@
 package codegen_go
 
 import (
-	"fmt"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/tempo-lang/tempo/projection"
 )
@@ -38,7 +36,7 @@ func GenFuncSig(f *projection.FuncSig, isInterfaceMethod bool) *jen.Statement {
 	if isInterfaceMethod {
 		result = jen.Id(f.Name).Params(params...)
 	} else {
-		result = jen.Func().Id(fmt.Sprintf("%s_%s", f.Name, f.Role)).Params(params...)
+		result = jen.Func().Id(f.FuncName()).Params(params...)
 	}
 
 	if f.ReturnValue != projection.UnitType() {

@@ -167,20 +167,21 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	sym.AddRead(ctx.IdentAccess().Ident())
 
 	identType := sym.Type()
-	_, isFunc := sym.Type().(*types.FunctionType)
 
 	if _, isStructDef := sym.(*sym_table.StructSymbol); isStructDef {
 		tc.reportError(type_error.NewStructNotInitialized(ctx))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	if ctx.IdentAccess().RoleType() != nil {
-		roles, ok := tc.parseRoleType(ctx.IdentAccess().RoleType())
-		if !ok {
-			return tc.registerType(ctx, types.Invalid())
-		}
+	if _, isFunc := identType.(*types.FunctionType); isFunc {
+		if ctx.IdentAccess().RoleType() != nil {
+			// function role substitution is defined explicitly
 
-		if isFunc {
+			roles, ok := tc.parseRoleType(ctx.IdentAccess().RoleType())
+			if !ok {
+				return tc.registerType(ctx, types.Invalid())
+			}
+
 			roleSubst, ok := identType.Roles().SubstituteMap(roles)
 			if !ok {
 				tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{identType.Roles(), roles}))
@@ -189,12 +190,25 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 
 			identType = identType.SubstituteRoles(roleSubst)
 		} else {
+			scopeRoles := tc.currentScope.Roles()
+
+			// if both definition and call scope is local role, do conversion automatically.
+			if identType.Roles().IsLocalRole() && scopeRoles.IsLocalRole() {
+				roleSubst, ok := identType.Roles().SubstituteMap(scopeRoles)
+				if !ok {
+					panic("two local roles should always be substitutable")
+				}
+				identType = identType.SubstituteRoles(roleSubst)
+			} else {
+				tc.reportError(type_error.NewFunctionNotInstantiated(ctx.IdentAccess(), sym))
+				return tc.registerType(ctx, types.Invalid())
+			}
+		}
+	} else {
+		if ctx.IdentAccess().RoleType() != nil {
 			tc.reportError(type_error.NewInstantiateNonFunction(ctx.IdentAccess(), sym))
 			return tc.registerType(ctx, types.Invalid())
 		}
-	} else if isFunc {
-		tc.reportError(type_error.NewFunctionNotInstantiated(ctx.IdentAccess(), sym))
-		return tc.registerType(ctx, types.Invalid())
 	}
 
 	tc.checkExprInScope(ctx, identType.Roles())

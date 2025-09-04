@@ -1,0 +1,26 @@
+struct Point implements Printer {
+  x: Int;
+  y: Int;
+
+  func print() String {
+    return "Point";
+  }
+}
+
+interface Printer {
+  func print() String;
+}
+
+func foo() Int {
+  let x: Int = 10;
+  let y: [Int] = [1,2,3];
+
+  let p: Point = Point { x: x, y: y[0] };
+  let str = p.print();
+
+  return x;
+}
+
+func@(A,B) main() {
+  let x = foo@[A,B]();
+}

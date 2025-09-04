@@ -35,6 +35,16 @@ type baseBuiltin struct {
 	participants []string
 }
 
+func newBaseBuiltin(participants []string) baseBuiltin {
+	if len(participants) == 1 && participants[0] == "" {
+		participants = []string{}
+	}
+
+	return baseBuiltin{
+		participants: participants,
+	}
+}
+
 func (*baseBuiltin) IsBuiltin() {}
 
 func (*baseBuiltin) IsEquatable() bool {
@@ -87,9 +97,7 @@ func (t *StringType) ToString() string {
 
 func String(participants []string) Type {
 	return &StringType{
-		baseBuiltin: baseBuiltin{
-			participants: participants,
-		},
+		baseBuiltin: newBaseBuiltin(participants),
 	}
 }
 
@@ -123,9 +131,7 @@ func (t *IntType) ToString() string {
 
 func Int(participants []string) Type {
 	return &IntType{
-		baseBuiltin: baseBuiltin{
-			participants: participants,
-		},
+		baseBuiltin: newBaseBuiltin(participants),
 	}
 }
 
@@ -159,9 +165,7 @@ func (t *FloatType) ToString() string {
 
 func Float(participants []string) Type {
 	return &FloatType{
-		baseBuiltin: baseBuiltin{
-			participants: participants,
-		},
+		baseBuiltin: newBaseBuiltin(participants),
 	}
 }
 
@@ -195,8 +199,6 @@ func (t *BoolType) ToString() string {
 
 func Bool(participants []string) Type {
 	return &BoolType{
-		baseBuiltin: baseBuiltin{
-			participants: participants,
-		},
+		baseBuiltin: newBaseBuiltin(participants),
 	}
 }

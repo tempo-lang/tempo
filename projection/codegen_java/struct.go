@@ -31,7 +31,7 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 		impls = "Cloneable"
 	}
 
-	out += gen.Writeln("public static final class %s_%s implements %s {", s.Name, s.Role, impls)
+	out += gen.Writeln("public static final class %s implements %s {", s.StructName(), impls)
 	gen.IncIndent()
 
 	if len(s.Fields) > 0 {
@@ -45,7 +45,7 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 		return fmt.Sprintf("%s %s", gen.GenType(field.Type), field.Name)
 	})
 
-	out += gen.Writeln("public %s_%s(%s) {", s.Name, s.Role, fields)
+	out += gen.Writeln("public %s(%s) {", s.StructName(), fields)
 
 	gen.IncIndent()
 	for _, field := range s.Fields {
@@ -102,7 +102,7 @@ func (gen *codegen) GenStructDefaultMethodToString(s *projection.Struct) string 
 	out += gen.Writeln("@Override")
 	out += gen.Writeln("public String toString() {")
 	gen.IncIndent()
-	out += gen.Writeln("return \"%s_%s[%s]\";", s.Name, s.Role, attrs)
+	out += gen.Writeln("return \"%s[%s]\";", s.StructName(), attrs)
 	gen.DecIndent()
 	out += gen.Writeln("}")
 
@@ -125,7 +125,7 @@ func (gen *codegen) GenStructDefaultMethodEquals(s *projection.Struct) string {
 			return fmt.Sprintf("Objects.equals(this.%s, oo.%s)", field.Name, field.Name)
 		})
 
-		out += gen.Writeln("%s_%s oo = (%s_%s) o;", s.Name, s.Role, s.Name, s.Role)
+		out += gen.Writeln("%s oo = (%s) o;", s.StructName(), s.StructName())
 		out += gen.Writeln("return %s;", attrs)
 	} else {
 		out += gen.Writeln("return true;")
@@ -145,9 +145,9 @@ func (gen *codegen) GenStructDefaultMethodClone(s *projection.Struct) string {
 	})
 
 	out += gen.Writeln("@Override")
-	out += gen.Writeln("public %s_%s clone() {", s.Name, s.Role)
+	out += gen.Writeln("public %s clone() {", s.StructName())
 	gen.IncIndent()
-	out += gen.Writeln("return new %s_%s(%s);", s.Name, s.Role, attrs)
+	out += gen.Writeln("return new %s(%s);", s.StructName(), attrs)
 	gen.DecIndent()
 	out += gen.Writeln("}")
 

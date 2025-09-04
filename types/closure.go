@@ -36,7 +36,9 @@ func (f *ClosureType) CoerceTo(other Type) (Type, bool) {
 	canCoerce := true
 	newParams := []Type{}
 	for i := range f.params {
-		if newParam, ok := f.params[i].CoerceTo(g.params[i]); ok {
+		newParam, okFtoG := f.params[i].CoerceTo(g.params[i])
+		_, okGtoF := g.params[i].CoerceTo(f.params[i])
+		if okFtoG && (f.Roles().IsSharedRole() || okGtoF) {
 			newParams = append(newParams, newParam)
 		} else {
 			newParams = append(newParams, Invalid())
@@ -83,7 +85,12 @@ func (c *ClosureType) ToString() string {
 	if c.returnType != Unit() {
 		returnType = c.returnType.ToString()
 	}
-	return fmt.Sprintf("func@%s(%s)%s", c.Roles().ToString(), params, returnType)
+
+	if c.Roles().IsUnnamedRole() {
+		return fmt.Sprintf("func(%s)%s", params, returnType)
+	} else {
+		return fmt.Sprintf("func@%s(%s)%s", c.Roles().ToString(), params, returnType)
+	}
 }
 
 func Closure(params []Type, returnType Type, roles *Roles) *ClosureType {

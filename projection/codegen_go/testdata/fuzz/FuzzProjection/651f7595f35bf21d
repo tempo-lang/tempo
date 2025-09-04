@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func@(A,B) foo(value: Int@A, fn: func@(A,B)(Int@A)Int@B)Int@B {  return fn(value);} func@(A,G) send(value: Int) Int@G {return value; }func@(X,Y)A() {foo@(X,Y)(0,send@(X,Y));} ")

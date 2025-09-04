@@ -18,6 +18,10 @@ import (
 // }
 
 func ToBuiltinValue(name string, participants []string) (types.Type, bool) {
+	if len(participants) == 1 && participants[0] == "" {
+		participants = []string{}
+	}
+
 	switch name {
 	case "Int":
 		return types.Int(participants), true
@@ -114,7 +118,7 @@ func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (ty
 
 func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.Type, type_error.Error) {
 	// parser error
-	if ctx == nil || ctx.RoleIdent().RoleType() == nil || ctx.RoleIdent().Ident() == nil {
+	if ctx == nil {
 		return types.Invalid(), nil
 	}
 
@@ -164,6 +168,10 @@ type callableTypeProps struct {
 }
 
 func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callableTypeProps, bool) {
+	if ctx == nil || ctx.FuncParamList() == nil {
+		return nil, false
+	}
+
 	funcRoles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
 		return nil, false
@@ -172,6 +180,15 @@ func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callab
 	if funcRoles.IsSharedRole() {
 		tc.reportError(type_error.NewUnexpectedSharedType(ctx.RoleType()))
 		funcRoles = types.NewRole(funcRoles.Participants(), false) // recover gracefully
+	}
+
+	// If function is defined within a scope, and roles are not explicitly stated,
+	// then inherit the roles from the scope
+	if funcRoles.IsUnnamedRole() {
+		scopeRoles := tc.currentScope.Roles().Participants()
+		if len(scopeRoles) > 0 {
+			funcRoles = types.NewRole(scopeRoles, false)
+		}
 	}
 
 	valid := true
@@ -190,6 +207,10 @@ func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callab
 			valid = false
 		}
 
+		if len(paramType.Roles().Participants()) == 0 {
+			paramType = paramType.ReplaceSharedRoles(funcRoles.Participants())
+		}
+
 		params = append(params, paramType)
 	}
 
@@ -201,6 +222,10 @@ func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callab
 			tc.reportError(err)
 			returnType = types.Invalid()
 			valid = false
+		}
+
+		if len(returnType.Roles().Participants()) == 0 {
+			returnType = returnType.ReplaceSharedRoles(funcRoles.Participants())
 		}
 	}
 
@@ -231,7 +256,13 @@ func (tc *typeChecker) parseClosureType(ctx parser.IClosureSigContext) (types.Ty
 	return closure, true
 }
 
+// parseRoleType converts the AST representation of a role type to a [*types.Roles],
+// the returned boolean indicates whether the AST role is valid.
 func (tc *typeChecker) parseRoleType(ctx parser.IRoleTypeContext) (*types.Roles, bool) {
+	if ctx == nil {
+		return types.UnnamedRole(), true
+	}
+
 	switch ctx := ctx.(type) {
 	case *parser.RoleTypeNormalContext:
 		return tc.parseRoleTypeNormal(ctx)
@@ -284,7 +315,7 @@ func (tc *typeChecker) parseRoleTypeShared(ctx *parser.RoleTypeSharedContext) (*
 
 func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, bool) {
 	// parser error
-	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
+	if ctx == nil || ctx.Ident() == nil {
 		return types.Invalid(), false
 	}
 
@@ -339,7 +370,7 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 
 func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.Type, bool) {
 	// parser error
-	if ctx == nil || ctx.Ident() == nil || ctx.RoleType() == nil {
+	if ctx == nil || ctx.Ident() == nil {
 		return types.Invalid(), false
 	}
 

@@ -53,7 +53,11 @@ func (t *InterfaceType) IsEquatable() bool {
 }
 
 func (t *InterfaceType) ToString() string {
-	return fmt.Sprintf("interface@%s %s", t.Roles().ToString(), t.ident.GetText())
+	if t.Roles().IsUnnamedRole() {
+		return fmt.Sprintf("interface %s", t.ident.GetText())
+	} else {
+		return fmt.Sprintf("interface@%s %s", t.Roles().ToString(), t.ident.GetText())
+	}
 }
 
 func Interface(ident parser.IIdentContext, participants []string) Type {

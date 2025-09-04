@@ -33,7 +33,7 @@ func (gen *codegen) GenFuncParams(f *projection.FuncSig) string {
 
 func (gen *codegen) GenFuncSig(f *projection.FuncSig) string {
 	params := gen.GenFuncParams(f)
-	result := fmt.Sprintf("public static %s %s_%s(%s)", gen.GenType(f.ReturnValue), f.Name, f.Role, params)
+	result := fmt.Sprintf("public static %s %s(%s)", gen.GenType(f.ReturnValue), f.FuncName(), params)
 
 	return result
 }

@@ -68,6 +68,14 @@ func (s *Struct) AddImplements(infType Type) {
 	s.Implements = append(s.Implements, infType)
 }
 
+func (s *Struct) StructName() string {
+	if s.Role == "" {
+		return s.Name
+	} else {
+		return fmt.Sprintf("%s_%s", s.Name, s.Role)
+	}
+}
+
 type StructField struct {
 	Struct   *Struct
 	FieldCtx parser.IStructFieldContext
@@ -106,10 +114,10 @@ func (s *StructType) Role() string {
 	return s.role
 }
 
-func (s *StructType) GenName() string {
-	return fmt.Sprintf("%s_%s", s.Name(), s.Role())
-}
-
-func (s *StructType) ClassAttrs() string {
-	return fmt.Sprintf("%s_attrs", s.GenName())
+func (s *StructType) StructName() string {
+	if s.role == "" {
+		return s.Name()
+	} else {
+		return fmt.Sprintf("%s_%s", s.Name(), s.Role())
+	}
 }

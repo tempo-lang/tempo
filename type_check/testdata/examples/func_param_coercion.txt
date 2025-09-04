@@ -1,0 +1,13 @@
+func@(A,B) send(val: Int@[A,B]) Int@B {
+  return await A->B val;
+}
+
+func@(A,B) call(f: func@(A,B)(Int@A)Int@B) Int@B {
+  return f(10);
+}
+
+func@(A,B) main() {
+  call@(A,B)(send@(A,B));
+}
+---
+E5 10:14: type `func@(A,B) send(Int@[A,B]) Int@B` is not compatible with type `func@(A,B)(Int@A)Int@B`

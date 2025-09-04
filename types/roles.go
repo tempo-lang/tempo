@@ -119,6 +119,14 @@ func EveryoneRole() *Roles {
 	return NewRole(nil, true)
 }
 
+// UnnamedRole constructs a new unnamed local role.
+func UnnamedRole() *Roles {
+	return &Roles{
+		roleType:     ROLE_LOCAL,
+		participants: []string{""}, // a single "unnamed" participant
+	}
+}
+
 // RoleIntersect calculates the intersection of participants between a list of roles.
 // It returns a new roles object containing the intersection and a boolean that is false if the intersection is empty.
 func RoleIntersect(roles ...*Roles) (*Roles, bool) {
@@ -179,6 +187,11 @@ func (r *Roles) IsSharedRole() bool {
 // IsDistributedRole returns true if the [RoleType] of the roles object is [ROLE_DISTRIBUTED].
 func (r *Roles) IsDistributedRole() bool {
 	return r.roleType == ROLE_DISTRIBUTED
+}
+
+// IsUnnamedRole returns true if the role is a local role without a name.
+func (r *Roles) IsUnnamedRole() bool {
+	return r.roleType == ROLE_LOCAL && r.participants[0] == ""
 }
 
 // Participants returns a copy of the participants involved in the roles object.
