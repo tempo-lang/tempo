@@ -207,6 +207,10 @@ func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callab
 			valid = false
 		}
 
+		if len(paramType.Roles().Participants()) == 0 {
+			paramType = paramType.ReplaceSharedRoles(funcRoles.Participants())
+		}
+
 		params = append(params, paramType)
 	}
 
@@ -218,6 +222,10 @@ func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callab
 			tc.reportError(err)
 			returnType = types.Invalid()
 			valid = false
+		}
+
+		if len(returnType.Roles().Participants()) == 0 {
+			returnType = returnType.ReplaceSharedRoles(funcRoles.Participants())
 		}
 	}
 

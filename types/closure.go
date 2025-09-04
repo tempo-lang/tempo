@@ -36,7 +36,9 @@ func (f *ClosureType) CoerceTo(other Type) (Type, bool) {
 	canCoerce := true
 	newParams := []Type{}
 	for i := range f.params {
-		if newParam, ok := f.params[i].CoerceTo(g.params[i]); ok {
+		newParam, okFtoG := f.params[i].CoerceTo(g.params[i])
+		_, okGtoF := g.params[i].CoerceTo(f.params[i])
+		if okFtoG && (f.Roles().IsSharedRole() || okGtoF) {
 			newParams = append(newParams, newParam)
 		} else {
 			newParams = append(newParams, Invalid())
