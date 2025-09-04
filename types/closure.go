@@ -83,7 +83,12 @@ func (c *ClosureType) ToString() string {
 	if c.returnType != Unit() {
 		returnType = c.returnType.ToString()
 	}
-	return fmt.Sprintf("func@%s(%s)%s", c.Roles().ToString(), params, returnType)
+
+	if c.Roles().IsUnnamedRole() {
+		return fmt.Sprintf("func(%s)%s", params, returnType)
+	} else {
+		return fmt.Sprintf("func@%s(%s)%s", c.Roles().ToString(), params, returnType)
+	}
 }
 
 func Closure(params []Type, returnType Type, roles *Roles) *ClosureType {

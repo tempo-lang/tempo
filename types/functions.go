@@ -94,7 +94,12 @@ func (f *FunctionType) ToString() string {
 	if f.returnType != Unit() {
 		returnType = " " + f.returnType.ToString()
 	}
-	return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.ident.GetText(), params, returnType)
+
+	if f.Roles().IsUnnamedRole() {
+		return fmt.Sprintf("func %s(%s)%s", f.ident.GetText(), params, returnType)
+	} else {
+		return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.ident.GetText(), params, returnType)
+	}
 }
 
 func (f *FunctionType) Params() []Type {

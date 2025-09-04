@@ -168,6 +168,10 @@ type callableTypeProps struct {
 }
 
 func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callableTypeProps, bool) {
+	if ctx == nil || ctx.FuncParamList() == nil {
+		return nil, false
+	}
+
 	funcRoles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
 		return nil, false
@@ -176,6 +180,15 @@ func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callab
 	if funcRoles.IsSharedRole() {
 		tc.reportError(type_error.NewUnexpectedSharedType(ctx.RoleType()))
 		funcRoles = types.NewRole(funcRoles.Participants(), false) // recover gracefully
+	}
+
+	// If function is defined within a scope, and roles are not explicitly stated,
+	// then inherit the roles from the scope
+	if funcRoles.IsUnnamedRole() {
+		scopeRoles := tc.currentScope.Roles().Participants()
+		if len(scopeRoles) > 0 {
+			funcRoles = types.NewRole(scopeRoles, false)
+		}
 	}
 
 	valid := true

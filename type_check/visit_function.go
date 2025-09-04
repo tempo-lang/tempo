@@ -63,7 +63,6 @@ func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any 
 // It returns the new symbol along with a success boolean.
 func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr.ParserRuleContext) (funcSym sym_table.Symbol, success bool) {
 	fnType, ok := tc.parseFuncType(fn)
-
 	if !ok {
 		return nil, false
 	}
