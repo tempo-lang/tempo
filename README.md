@@ -24,6 +24,7 @@ Here is a brief list of implemented things.
 - [ ] Maps
 - [ ] Co-routines
 - [ ] Unit tests
+- [ ] Generics
 
 ## Installation
 

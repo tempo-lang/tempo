@@ -95,7 +95,7 @@ var buildCmd = &cobra.Command{
 
 func init() {
 	buildCmd.Flags().StringVarP(&packageName, "package", "p", "choreography", "The Go package name for the generated code")
-	buildCmd.Flags().VarP(&targetLang, "lang", "l", `Target language, allowed: "go", "ts"`)
+	buildCmd.Flags().VarP(&targetLang, "lang", "l", `Target language, allowed: "go", "ts", "js", "java"`)
 	buildCmd.Flags().StringVarP(&runtimePath, "runtime", "r", "@tempo-lang/tempo/runtime", "The path to the Typescript runtime module")
 	rootCmd.AddCommand(buildCmd)
 }

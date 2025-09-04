@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import tempo.runtime.Env;
-import tempo.runtime.Transport;
 import tempo.transports.LocalQueue;
 import tempo.transports.Recorder;
 

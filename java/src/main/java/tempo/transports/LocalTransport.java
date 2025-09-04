@@ -1,7 +1,7 @@
 package tempo.transports;
 
-import java.util.Arrays;
 import java.util.concurrent.Future;
+
 import tempo.runtime.Transport;
 
 final class LocalTransport implements Transport {
