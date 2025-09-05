@@ -58,6 +58,7 @@ const (
 	CodeExpectedInterfaceType
 	CodeMissingImplementationMethod
 	CodeIncompatibleImplementationMethod
+	CodeMissingRoles
 )
 
 type AnnotationType string

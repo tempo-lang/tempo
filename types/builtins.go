@@ -36,9 +36,9 @@ type baseBuiltin struct {
 }
 
 func newBaseBuiltin(participants []string) baseBuiltin {
-	if len(participants) == 1 && participants[0] == "" {
-		participants = []string{}
-	}
+	// if len(participants) == 1 && participants[0] == "" {
+	// 	participants = []string{}
+	// }
 
 	return baseBuiltin{
 		participants: participants,
@@ -60,7 +60,7 @@ func (b *baseBuiltin) substituteParticipants(substMap *RoleSubst) []string {
 }
 
 func (b *baseBuiltin) formatType(t BuiltinType) string {
-	if len(b.participants) == 0 {
+	if len(b.participants) == 0 || b.Roles().IsUnnamedRole() {
 		return string(t)
 	} else {
 		return fmt.Sprintf("%s@%s", t, b.Roles().ToString())

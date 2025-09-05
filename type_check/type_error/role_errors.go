@@ -126,3 +126,26 @@ func (e *SharedRoleSingleParticipant) ParserRule() antlr.ParserRuleContext {
 func (e *SharedRoleSingleParticipant) Code() ErrorCode {
 	return CodeSharedRoleSingleParticipant
 }
+
+type MissingRoles struct {
+	baseError
+	ValueType parser.IValueTypeContext
+}
+
+func NewMissingRoles(valueType parser.IValueTypeContext) Error {
+	return &MissingRoles{
+		ValueType: valueType,
+	}
+}
+
+func (e *MissingRoles) Error() string {
+	return "unable to determine roles for this type"
+}
+
+func (e *MissingRoles) ParserRule() antlr.ParserRuleContext {
+	return e.ValueType
+}
+
+func (e *MissingRoles) Code() ErrorCode {
+	return CodeMissingRoles
+}

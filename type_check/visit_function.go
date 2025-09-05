@@ -62,13 +62,18 @@ func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any 
 // addFuncSymbol creates a new function symbol and stores it in the current scope.
 // It returns the new symbol along with a success boolean.
 func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr.ParserRuleContext) (funcSym sym_table.Symbol, success bool) {
-	fnType, ok := tc.parseFuncType(fn)
+	funcRoles, ok := tc.parseRoleType(fn.RoleType())
 	if !ok {
 		return nil, false
 	}
 
-	funcScope := tc.currentScope.MakeChild(scopeRange.GetStart(), scopeRange.GetStop(), fnType.Roles().Participants())
+	funcScope := tc.currentScope.MakeChild(scopeRange.GetStart(), scopeRange.GetStop(), funcRoles.Participants())
 	tc.currentScope = funcScope
+
+	fnType, ok := tc.parseFuncType(fn)
+	if !ok {
+		return nil, false
+	}
 
 	// return type
 	if fn.GetReturnType() != nil {

@@ -18,9 +18,9 @@ import (
 // }
 
 func ToBuiltinValue(name string, participants []string) (types.Type, bool) {
-	if len(participants) == 1 && participants[0] == "" {
-		participants = []string{}
-	}
+	// if len(participants) == 1 && participants[0] == "" {
+	// 	participants = []string{}
+	// }
 
 	switch name {
 	case "Int":
@@ -125,6 +125,10 @@ func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.
 	role, ok := tc.parseRoleType(ctx.RoleIdent().RoleType())
 	if !ok {
 		return types.Invalid(), nil
+	}
+
+	if !tc.currentScope.Roles().IsUnnamedRole() && role.IsUnnamedRole() {
+		return types.Invalid(), type_error.NewMissingRoles(&ctx.ValueTypeContext)
 	}
 
 	typeName := ctx.RoleIdent().Ident()

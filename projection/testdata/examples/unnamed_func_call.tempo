@@ -1,0 +1,8 @@
+func double(val: Int) Int {
+  return val * 2;
+}
+
+func@A main() {
+  let x: Int@A = 10;
+  let y = double(x);
+}
