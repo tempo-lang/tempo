@@ -16,7 +16,7 @@ export interface Writer_A {
 export interface Buffer_X_attrs {
   buf: number;
 }
-export class Buffer_X implements Buffer_X_attrs {
+export class Buffer_X implements Buffer_X_attrs, Reader_A, Writer_A {
   buf: number;
   
   constructor({ buf }: Buffer_X_attrs) {

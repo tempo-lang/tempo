@@ -14,7 +14,7 @@ export interface Combine_B {
 export interface Sum_X_attrs {
   x: number;
 }
-export class Sum_X implements Sum_X_attrs {
+export class Sum_X implements Sum_X_attrs, Combine_A {
   x: number;
   
   constructor({ x }: Sum_X_attrs) {
@@ -29,7 +29,7 @@ export class Sum_X implements Sum_X_attrs {
 export interface Sum_Y_attrs {
   y: number;
 }
-export class Sum_Y implements Sum_Y_attrs {
+export class Sum_Y implements Sum_Y_attrs, Combine_B {
   y: number;
   
   constructor({ y }: Sum_Y_attrs) {

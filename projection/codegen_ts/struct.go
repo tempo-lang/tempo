@@ -52,7 +52,12 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 	if gen.opts.DisableTypes {
 		out += gen.Writeln("export class %s {", s.StructName())
 	} else {
-		out += gen.Writeln("export class %s implements %s {", s.StructName(), structAttrs(s))
+		impls := []string{structAttrs(s)}
+		for _, impl := range s.Implements {
+			impls = append(impls, gen.GenType(impl))
+		}
+
+		out += gen.Writeln("export class %s implements %s {", s.StructName(), misc.JoinStrings(impls, ", "))
 	}
 	gen.IncIndent()
 
