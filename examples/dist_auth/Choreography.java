@@ -8,34 +8,34 @@ import tempo.runtime.Env;
 public final class Choreography {
   private Choreography() {}
   // Projection of interface `ClientRegistry`
-  public interface ClientRegistry_A {
+  public interface ClientRegistry {
     public String GetSalt(Env env, String username) throws Exception;
     public Boolean Check(Env env, String hash) throws Exception;
   }
   
   // Projection of interface `TokenGenerator`
-  public interface TokenGenerator_A {
+  public interface TokenGenerator {
     public String GenerateToken(Env env) throws Exception;
   }
   
   // Projection of interface `Hasher`
-  public interface Hasher_A {
+  public interface Hasher {
     public String CalcHash(Env env, String salt, String password) throws Exception;
   }
   
   // Projection of struct `Credentials`
-  public static final class Credentials_A implements Cloneable {
+  public static final class Credentials implements Cloneable {
     public String Username;
     public String Password;
     
-    public Credentials_A(String Username, String Password) {
+    public Credentials(String Username, String Password) {
       this.Username = Username;
       this.Password = Password;
     }
     
     @Override
     public String toString() {
-      return "Credentials_A[Username="+this.Username+", Password="+this.Password+"]";
+      return "Credentials[Username="+this.Username+", Password="+this.Password+"]";
     }
     
     @Override
@@ -43,13 +43,13 @@ public final class Choreography {
       if (this == o) return true;
       if (o == null) return false;
       if (getClass() != o.getClass()) return false;
-      Credentials_A oo = (Credentials_A) o;
+      Credentials oo = (Credentials) o;
       return Objects.equals(this.Username, oo.Username) && Objects.equals(this.Password, oo.Password);
     }
     
     @Override
-    public Credentials_A clone() {
-      return new Credentials_A(Username, Password);
+    public Credentials clone() {
+      return new Credentials(Username, Password);
     }
   }
   // Projection of struct `AuthResult`
@@ -111,10 +111,10 @@ public final class Choreography {
   }
   
   // Projection of choreography `Authenticate`
-  public static AuthResult_C Authenticate_Client(Env env, Credentials_A credentials, Hasher_A hasher) throws Exception {
+  public static AuthResult_C Authenticate_Client(Env env, Credentials credentials, Hasher hasher) throws Exception {
     env.send(credentials.Username, "IP");
     Future<String> salt = env.<String>recv("IP");
-    env.send(hasher.CalcHash(env.subst("Client", "A"), salt.get(), credentials.Password), "IP");
+    env.send(hasher.CalcHash(env.subst("Client", ""), salt.get(), credentials.Password), "IP");
     Future<Boolean> valid = env.<Boolean>recv("IP");
     if (valid.get()) {
       Future<String> token = env.<String>recv("IP");
@@ -132,13 +132,13 @@ public final class Choreography {
       return new AuthResult_S(false, "");
     }
   }
-  public static void Authenticate_IP(Env env, ClientRegistry_A registry, TokenGenerator_A tokenGen) throws Exception {
+  public static void Authenticate_IP(Env env, ClientRegistry registry, TokenGenerator tokenGen) throws Exception {
     Future<String> username = env.<String>recv("Client");
-    env.send(registry.GetSalt(env.subst("IP", "A"), username.get()), "Client");
+    env.send(registry.GetSalt(env.subst("IP", ""), username.get()), "Client");
     Future<String> hash = env.<String>recv("Client");
-    Future<Boolean> valid = env.send(registry.Check(env.subst("IP", "A"), hash.get()), "Client", "Service");
+    Future<Boolean> valid = env.send(registry.Check(env.subst("IP", ""), hash.get()), "Client", "Service");
     if (valid.get()) {
-      env.send(tokenGen.GenerateToken(env.subst("IP", "A")), "Client", "Service");
+      env.send(tokenGen.GenerateToken(env.subst("IP", "")), "Client", "Service");
     }
   }
 }

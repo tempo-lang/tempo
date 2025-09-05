@@ -68,7 +68,7 @@ func (gen *codegen) GenFunctionType(t *projection.FunctionType) string {
 }
 
 func (gen *codegen) GenInterfaceType(t *projection.InterfaceType) string {
-	return fmt.Sprintf("%s_%s", t.Name(), t.Role())
+	return t.InterfaceName()
 }
 
 func (gen *codegen) GenListType(t *projection.ListType) string {

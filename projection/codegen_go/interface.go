@@ -1,8 +1,6 @@
 package codegen_go
 
 import (
-	"fmt"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/tempo-lang/tempo/projection"
 )
@@ -26,5 +24,5 @@ func GenInterface(inf *projection.Interface) *jen.Statement {
 }
 
 func GenInterfaceType(t *projection.InterfaceType) jen.Code {
-	return jen.Id(fmt.Sprintf("%s_%s", t.Name(), t.Role()))
+	return jen.Id(t.InterfaceName())
 }

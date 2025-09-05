@@ -14,7 +14,7 @@ import (
 
 type mathImpl struct{}
 
-// Exp implements diffie_hellman.Math_A.
+// Exp implements diffie_hellman.Math.
 func (m *mathImpl) Exp(env *runtime.Env, base int, exp int) int {
 	return int(math.Pow(float64(base), float64(exp)))
 }

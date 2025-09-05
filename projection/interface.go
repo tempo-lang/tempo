@@ -83,3 +83,11 @@ func (c *InterfaceType) IsType() {}
 func (i *InterfaceType) Role() string {
 	return i.role
 }
+
+func (inf *InterfaceType) InterfaceName() string {
+	if inf.Role() == "" {
+		return inf.Name()
+	} else {
+		return fmt.Sprintf("%s_%s", inf.Name(), inf.Role())
+	}
+}

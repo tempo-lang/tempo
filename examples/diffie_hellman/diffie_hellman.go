@@ -4,7 +4,7 @@ package diffie_hellman
 import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of interface `Math`
-type Math_A interface {
+type Math interface {
 	Exp(env *runtime.Env, base int, exp int) int
 }
 
@@ -17,21 +17,21 @@ type Secret_B struct {
 }
 
 // Projection of choreography `DiffieHellman`
-func DiffieHellman_A(env *runtime.Env, mathA Math_A) Secret_A {
+func DiffieHellman_A(env *runtime.Env, mathA Math) Secret_A {
 	var p int = 23
 	_ = p
 	var g int = 5
 	_ = g
 	var a int = 4
 	_ = a
-	_ = runtime.Send(env, mathA.Exp(env, g, a)%p, "B")
+	_ = runtime.Send(env, mathA.Exp(env.Subst("A", ""), g, a)%p, "B")
 	var B *runtime.Async[int] = runtime.Recv[int](env, "B")
 	_ = B
-	var sA int = mathA.Exp(env, runtime.GetAsync(B), a) % p
+	var sA int = mathA.Exp(env.Subst("A", ""), runtime.GetAsync(B), a) % p
 	_ = sA
 	return Secret_A{A: sA}
 }
-func DiffieHellman_B(env *runtime.Env, mathB Math_A) Secret_B {
+func DiffieHellman_B(env *runtime.Env, mathB Math) Secret_B {
 	var p int = 23
 	_ = p
 	var g int = 5
@@ -40,8 +40,8 @@ func DiffieHellman_B(env *runtime.Env, mathB Math_A) Secret_B {
 	_ = b
 	var A *runtime.Async[int] = runtime.Recv[int](env, "A")
 	_ = A
-	_ = runtime.Send(env, mathB.Exp(env.Subst("B", "A"), g, b)%p, "A")
-	var sB int = mathB.Exp(env.Subst("B", "A"), runtime.GetAsync(A), b) % p
+	_ = runtime.Send(env, mathB.Exp(env.Subst("B", ""), g, b)%p, "A")
+	var sB int = mathB.Exp(env.Subst("B", ""), runtime.GetAsync(A), b) % p
 	_ = sB
 	return Secret_B{B: sB}
 }

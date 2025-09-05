@@ -3,31 +3,31 @@
 import { Env } from '../../typescript/runtime.ts';
 
 // Projection of interface `ClientRegistry`
-export interface ClientRegistry_A {
+export interface ClientRegistry {
   GetSalt(env: Env, username: string): Promise<string>;
   Check(env: Env, hash: string): Promise<boolean>;
 }
 
 // Projection of interface `TokenGenerator`
-export interface TokenGenerator_A {
+export interface TokenGenerator {
   GenerateToken(env: Env): Promise<string>;
 }
 
 // Projection of interface `Hasher`
-export interface Hasher_A {
+export interface Hasher {
   CalcHash(env: Env, salt: string, password: string): Promise<string>;
 }
 
 // Projection of struct `Credentials`
-export interface Credentials_A_attrs {
+export interface Credentials_attrs {
   Username: string;
   Password: string;
 }
-export class Credentials_A implements Credentials_A_attrs {
+export class Credentials implements Credentials_attrs {
   Username: string;
   Password: string;
   
-  constructor({ Username, Password }: Credentials_A_attrs) {
+  constructor({ Username, Password }: Credentials_attrs) {
     this.Username = Username;
     this.Password = Password;
   }
@@ -65,10 +65,10 @@ export class AuthResult_S implements AuthResult_S_attrs {
 
 
 // Projection of choreography `Authenticate`
-export async function Authenticate_Client(env: Env, credentials: Credentials_A, hasher: Hasher_A): Promise<AuthResult_C> {
+export async function Authenticate_Client(env: Env, credentials: Credentials, hasher: Hasher): Promise<AuthResult_C> {
   env.send(credentials.Username, "IP");
   let salt: Promise<string> = env.recv<string>("IP");
-  env.send(await hasher.CalcHash(env.subst("Client", "A"), await salt, credentials.Password), "IP");
+  env.send(await hasher.CalcHash(env.subst("Client", ""), await salt, credentials.Password), "IP");
   let valid: Promise<boolean> = env.recv<boolean>("IP");
   if (await valid) {
     let token: Promise<string> = env.recv<string>("IP");
@@ -86,13 +86,13 @@ export async function Authenticate_Service(env: Env): Promise<AuthResult_S> {
     return new AuthResult_S({ Success: false, Token: "" });
   }
 }
-export async function Authenticate_IP(env: Env, registry: ClientRegistry_A, tokenGen: TokenGenerator_A) {
+export async function Authenticate_IP(env: Env, registry: ClientRegistry, tokenGen: TokenGenerator) {
   let username: Promise<string> = env.recv<string>("Client");
-  env.send(await registry.GetSalt(env.subst("IP", "A"), await username), "Client");
+  env.send(await registry.GetSalt(env.subst("IP", ""), await username), "Client");
   let hash: Promise<string> = env.recv<string>("Client");
-  let valid: Promise<boolean> = env.send(await registry.Check(env.subst("IP", "A"), await hash), "Client", "Service");
+  let valid: Promise<boolean> = env.send(await registry.Check(env.subst("IP", ""), await hash), "Client", "Service");
   if (await valid) {
-    env.send(await tokenGen.GenerateToken(env.subst("IP", "A")), "Client", "Service");
+    env.send(await tokenGen.GenerateToken(env.subst("IP", "")), "Client", "Service");
   }
 }
 

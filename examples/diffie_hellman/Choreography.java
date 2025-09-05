@@ -8,7 +8,7 @@ import tempo.runtime.Env;
 public final class Choreography {
   private Choreography() {}
   // Projection of interface `Math`
-  public interface Math_A {
+  public interface Math {
     public Integer Exp(Env env, Integer base, Integer exp) throws Exception;
   }
   
@@ -67,22 +67,22 @@ public final class Choreography {
   }
   
   // Projection of choreography `DiffieHellman`
-  public static Secret_A DiffieHellman_A(Env env, Math_A mathA) throws Exception {
+  public static Secret_A DiffieHellman_A(Env env, Math mathA) throws Exception {
     Integer p = 23;
     Integer g = 5;
     Integer a = 4;
-    env.send(mathA.Exp(env, g, a) % p, "B");
+    env.send(mathA.Exp(env.subst("A", ""), g, a) % p, "B");
     Future<Integer> B = env.<Integer>recv("B");
-    Integer sA = mathA.Exp(env, B.get(), a) % p;
+    Integer sA = mathA.Exp(env.subst("A", ""), B.get(), a) % p;
     return new Secret_A(sA);
   }
-  public static Secret_B DiffieHellman_B(Env env, Math_A mathB) throws Exception {
+  public static Secret_B DiffieHellman_B(Env env, Math mathB) throws Exception {
     Integer p = 23;
     Integer g = 5;
     Integer b = 3;
     Future<Integer> A = env.<Integer>recv("A");
-    env.send(mathB.Exp(env.subst("B", "A"), g, b) % p, "A");
-    Integer sB = mathB.Exp(env.subst("B", "A"), A.get(), b) % p;
+    env.send(mathB.Exp(env.subst("B", ""), g, b) % p, "A");
+    Integer sB = mathB.Exp(env.subst("B", ""), A.get(), b) % p;
     return new Secret_B(sB);
   }
 }

@@ -3,14 +3,14 @@ import { simulate } from "../typescript/simulator.ts";
 import {
   DiffieHellman_A,
   DiffieHellman_B,
-  Math_A,
+  Math,
   Secret_A,
   Secret_B,
 } from "./diffie_hellman/diffie_hellman.ts";
 import { Env } from "../typescript/runtime.ts";
 
 Deno.test("simulate diffie hellman", async () => {
-  const mathImpl: Math_A = {
+  const mathImpl: Math = {
     Exp(_: Env, base: number, exp: number): Promise<number> {
       return Promise.resolve(base ** exp);
     },

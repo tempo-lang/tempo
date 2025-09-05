@@ -4,10 +4,10 @@ import {
   Authenticate_Client,
   Authenticate_IP,
   Authenticate_Service,
-  ClientRegistry_A,
-  Credentials_A,
-  Hasher_A,
-  TokenGenerator_A,
+  ClientRegistry,
+  Credentials,
+  Hasher,
+  TokenGenerator,
   AuthResult_S,
   AuthResult_C,
 } from "./dist_auth/dist_auth.ts";
@@ -16,7 +16,7 @@ import { crypto } from "@std/crypto";
 import { encodeBase64 } from "@std/encoding";
 import { randomSeeded, Prng } from "@std/random";
 
-class Hasher implements Hasher_A {
+class MockHasher implements Hasher {
   hashes: string[];
 
   constructor() {
@@ -32,7 +32,7 @@ class Hasher implements Hasher_A {
   }
 }
 
-class ClientRegistry implements ClientRegistry_A {
+class MockClientRegistry implements ClientRegistry {
   checkCalls: string[];
   getSalts: string[];
 
@@ -55,7 +55,7 @@ class ClientRegistry implements ClientRegistry_A {
   }
 }
 
-class TokenGenerator implements TokenGenerator_A {
+class MockTokenGenerator implements TokenGenerator {
   tokens: string[];
   rng: Prng;
 
@@ -73,14 +73,14 @@ class TokenGenerator implements TokenGenerator_A {
 }
 
 Deno.test("simulate distributed authentication", async () => {
-  const credentials: Credentials_A = {
+  const credentials: Credentials = {
     Username: "username",
     Password: "password",
   };
 
-  const hasher = new Hasher();
-  const registry = new ClientRegistry();
-  const tokenGen = new TokenGenerator();
+  const hasher = new MockHasher();
+  const registry = new MockClientRegistry();
+  const tokenGen = new MockTokenGenerator();
 
   const result = await simulate({
     Client: (env) => Authenticate_Client(env, credentials, hasher),

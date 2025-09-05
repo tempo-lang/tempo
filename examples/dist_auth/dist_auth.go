@@ -4,23 +4,23 @@ package dist_auth
 import runtime "github.com/tempo-lang/tempo/runtime"
 
 // Projection of interface `ClientRegistry`
-type ClientRegistry_A interface {
+type ClientRegistry interface {
 	GetSalt(env *runtime.Env, username string) string
 	Check(env *runtime.Env, hash string) bool
 }
 
 // Projection of interface `TokenGenerator`
-type TokenGenerator_A interface {
+type TokenGenerator interface {
 	GenerateToken(env *runtime.Env) string
 }
 
 // Projection of interface `Hasher`
-type Hasher_A interface {
+type Hasher interface {
 	CalcHash(env *runtime.Env, salt string, password string) string
 }
 
 // Projection of struct `Credentials`
-type Credentials_A struct {
+type Credentials struct {
 	Username string `json:"Username"`
 	Password string `json:"Password"`
 }
@@ -36,11 +36,11 @@ type AuthResult_S struct {
 }
 
 // Projection of choreography `Authenticate`
-func Authenticate_Client(env *runtime.Env, credentials Credentials_A, hasher Hasher_A) AuthResult_C {
+func Authenticate_Client(env *runtime.Env, credentials Credentials, hasher Hasher) AuthResult_C {
 	_ = runtime.Send(env, credentials.Username, "IP")
 	var salt *runtime.Async[string] = runtime.Recv[string](env, "IP")
 	_ = salt
-	_ = runtime.Send(env, hasher.CalcHash(env.Subst("Client", "A"), runtime.GetAsync(salt), credentials.Password), "IP")
+	_ = runtime.Send(env, hasher.CalcHash(env.Subst("Client", ""), runtime.GetAsync(salt), credentials.Password), "IP")
 	var valid *runtime.Async[bool] = runtime.Recv[bool](env, "IP")
 	_ = valid
 	if runtime.GetAsync(valid) {
@@ -74,15 +74,15 @@ func Authenticate_Service(env *runtime.Env) AuthResult_S {
 		}
 	}
 }
-func Authenticate_IP(env *runtime.Env, registry ClientRegistry_A, tokenGen TokenGenerator_A) {
+func Authenticate_IP(env *runtime.Env, registry ClientRegistry, tokenGen TokenGenerator) {
 	var username *runtime.Async[string] = runtime.Recv[string](env, "Client")
 	_ = username
-	_ = runtime.Send(env, registry.GetSalt(env.Subst("IP", "A"), runtime.GetAsync(username)), "Client")
+	_ = runtime.Send(env, registry.GetSalt(env.Subst("IP", ""), runtime.GetAsync(username)), "Client")
 	var hash *runtime.Async[string] = runtime.Recv[string](env, "Client")
 	_ = hash
-	var valid *runtime.Async[bool] = runtime.Send(env, registry.Check(env.Subst("IP", "A"), runtime.GetAsync(hash)), "Client", "Service")
+	var valid *runtime.Async[bool] = runtime.Send(env, registry.Check(env.Subst("IP", ""), runtime.GetAsync(hash)), "Client", "Service")
 	_ = valid
 	if runtime.GetAsync(valid) {
-		_ = runtime.Send(env, tokenGen.GenerateToken(env.Subst("IP", "A")), "Client", "Service")
+		_ = runtime.Send(env, tokenGen.GenerateToken(env.Subst("IP", "")), "Client", "Service")
 	}
 }

@@ -3,6 +3,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static diffie_hellman.Choreography.*;
+import diffie_hellman.Choreography;
+import java.lang.Math;
 import tempo.runtime.Env;
 import tempo.simulator.Result;
 import tempo.simulator.Simulator;
@@ -11,7 +13,7 @@ public class DiffieHellmanTest {
     @Test
     public void testDiffieHellmanSim() throws Exception {
 
-        Math_A math = new Math_A() {
+        Choreography.Math math = new Choreography.Math() {
             @Override
             public Integer Exp(Env env, Integer base, Integer exp) throws Exception {
                 return (int) Math.pow((double) base, (double) exp);

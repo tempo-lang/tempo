@@ -26,7 +26,7 @@ func (c *clientRegistry) Check(env *runtime.Env, hash string) bool {
 	return true
 }
 
-// GetSalt implements dist_auth.ClientRegistry_A.
+// GetSalt implements dist_auth.ClientRegistry.
 func (c *clientRegistry) GetSalt(env *runtime.Env, username string) string {
 	hash := sha256.Sum256([]byte(username))
 	salt := base64.StdEncoding.EncodeToString(hash[0:8])
@@ -38,7 +38,7 @@ type hasher struct {
 	hashes []string
 }
 
-// CalcHash implements dist_auth.Hasher_A.
+// CalcHash implements dist_auth.Hasher.
 func (h *hasher) CalcHash(env *runtime.Env, salt string, password string) string {
 	hashBytes := sha256.Sum256([]byte(salt + password))
 	hash := base64.StdEncoding.EncodeToString(hashBytes[:])
@@ -50,7 +50,7 @@ type tokenGen struct {
 	Tokens []string
 }
 
-// GenerateToken implements dist_auth.TokenGenerator_A.
+// GenerateToken implements dist_auth.TokenGenerator.
 func (t *tokenGen) GenerateToken(env *runtime.Env) string {
 	rng := rand.New(rand.NewSource(int64(len(t.Tokens))))
 
@@ -61,7 +61,7 @@ func (t *tokenGen) GenerateToken(env *runtime.Env) string {
 }
 
 func TestDistAuthSim(t *testing.T) {
-	credentials := dist_auth.Credentials_A{
+	credentials := dist_auth.Credentials{
 		Username: "username",
 		Password: "password",
 	}

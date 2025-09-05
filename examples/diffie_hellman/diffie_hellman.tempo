@@ -1,5 +1,5 @@
-interface@A Math {
-  func@A Exp(base: Int@A, exp: Int@A) Int@A;
+interface Math {
+  func Exp(base: Int, exp: Int) Int;
 }
 
 struct@(A,B) Secret {

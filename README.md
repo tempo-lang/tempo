@@ -45,13 +45,13 @@ Values are statically typed with the addition of roles.
 
 ```tempo
 struct@(A,B) Pair {
-  left: Int@A
-  right: Int@B
+  left: Int@A;
+  right: Int@B;
 }
 
-let x: Bool@A = true
-let y: String@[A,B] // shared
-let z: Pair@(A,B) // distributed
+let x: Bool@A = true; // local
+let y: String@[A,B] = "hello"; // shared
+let z: Pair@(A,B) = Pair@(A,B) { left: 1@A, right: 2@B }; // distributed
 ```
 
 ### Asynchronous types
@@ -62,17 +62,17 @@ Use the `await` expression to get the underlying value, which will wait until it
 Normal types can be coerced into asynchronous types that immediately return the result when `await` is used.
 
 ```tempo
-let x: async Bool@A = true
-let y: Bool@A = await x // value is already present
+let x: async Int@A = 1;
+let y: Int@A = await x; // value is already present
 
-let z: async Bool@A = 3 + x // expression will be coerced to async
+let z: async Int@A = 3 + x; // expression will be coerced to async
 
-func@(A,B) callback() async Int@A {
+let callback = func@(A,B) () async Int@A {
   return B->A 10;
-}
+};
 
-let list: [async Int@A] = [1, callback(), 3]
-await list // will wait for all elements in the list to finish
+let list: [async Int@A] = [1, callback(), 3];
+await list; // will wait for all elements in the list to finish
 ```
 
 ## Channels
@@ -81,11 +81,14 @@ Channels are built-in primitives.
 All roles can communicate with each other by writing `A->B` where `A` and `B` are roles.
 
 ```tempo
+// local value at A.
+let x = 10@A;
+
 // send value from A to B.
-let y@B = await A -> B x@A
+let y: Int@B = await A -> B x;
 
 // send value from A to B and C to obtain a shared value.
-let y@[A,B,C] = await A->[B,C] x@A
+let z: Int@[A,B,C] = await A->[B,C] x;
 ```
 
 ## Shared variables
@@ -95,15 +98,15 @@ A shared variable can be coerced to a shared variable of a subset of the roles o
 Constant literals are automatically shared between all roles and coerced to the subset needed.
 
 ```tempo
-let x: Bool@[A,B,C] = true
-let y: Bool[A,B] = x
+let x: Bool@[A,B,C] = true;
+let y: Bool[A,B] = x;
 ```
 
 Shared variables is an alternative to traditional labels for determining knowledge of choice.
 Instead, when a choice is made, all participants of the choice will calculate it independently using shared variables.
 
 ```tempo
-let x: Int@[A,B] = 3
+let x: Int@[A,B] = 3;
 if x > 0 {
   // both A and B knows choice
 }
@@ -116,9 +119,9 @@ Shared variables can be expanded by sending it to further participants transitiv
 
 ```tempo
 func@(A,B,C) shareTrans() {
-  let x: Int@A = 42
-  let y: Int@[A,B] = await A->B x
-  let z: Int@[A,B,C] = await B->C y
+  let x: Int@A = 42;
+  let y: Int@[A,B] = await A->B x;
+  let z: Int@[A,B,C] = await B->C y;
 }
 ```
 
@@ -129,8 +132,8 @@ Other functions can be called as long as they use a subset of the roles.
 
 ```tempo
 func@(A,B,C) hello() {
-  let hello: String@B = A->B "Hello"
-  let greeting: String@C = B->C (hello + ", World!")
+  let hello: String@B = await A->B "Hello";
+  let greeting: String@C = await B->C (hello + ", World!");
 }
 ```
 
@@ -138,7 +141,7 @@ If a function exists only at a single role, the role parameters can be omitted.
 
 ```tempo
 func greet(name: String) {
-  print("Hello " + name)
+  print("Hello " + name);
 }
 ```
 
@@ -147,8 +150,8 @@ func greet(name: String) {
 Functions from the host language can be called from Tempo through interfaces.
 
 ```tempo
-interface@A Printer {
-  func@A print(value: String@A);
+interface Printer {
+  func print(value: String);
 }
 
 func@(A,B) hello(printA: Printer@A, printB: Printer@B) {

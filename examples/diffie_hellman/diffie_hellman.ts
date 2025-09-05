@@ -3,7 +3,7 @@
 import { Env } from '../../typescript/runtime.ts';
 
 // Projection of interface `Math`
-export interface Math_A {
+export interface Math {
   Exp(env: Env, base: number, exp: number): Promise<number>;
 }
 
@@ -32,22 +32,22 @@ export class Secret_B implements Secret_B_attrs {
 
 
 // Projection of choreography `DiffieHellman`
-export async function DiffieHellman_A(env: Env, mathA: Math_A): Promise<Secret_A> {
+export async function DiffieHellman_A(env: Env, mathA: Math): Promise<Secret_A> {
   let p: number = 23;
   let g: number = 5;
   let a: number = 4;
-  env.send(Math.floor(await mathA.Exp(env, g, a) % p), "B");
+  env.send(Math.floor(await mathA.Exp(env.subst("A", ""), g, a) % p), "B");
   let B: Promise<number> = env.recv<number>("B");
-  let sA: number = Math.floor(await mathA.Exp(env, await B, a) % p);
+  let sA: number = Math.floor(await mathA.Exp(env.subst("A", ""), await B, a) % p);
   return new Secret_A({ A: sA });
 }
-export async function DiffieHellman_B(env: Env, mathB: Math_A): Promise<Secret_B> {
+export async function DiffieHellman_B(env: Env, mathB: Math): Promise<Secret_B> {
   let p: number = 23;
   let g: number = 5;
   let b: number = 3;
   let A: Promise<number> = env.recv<number>("A");
-  env.send(Math.floor(await mathB.Exp(env.subst("B", "A"), g, b) % p), "A");
-  let sB: number = Math.floor(await mathB.Exp(env.subst("B", "A"), await A, b) % p);
+  env.send(Math.floor(await mathB.Exp(env.subst("B", ""), g, b) % p), "A");
+  let sB: number = Math.floor(await mathB.Exp(env.subst("B", ""), await A, b) % p);
   return new Secret_B({ B: sB });
 }
 

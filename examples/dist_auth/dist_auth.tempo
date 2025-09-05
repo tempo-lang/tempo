@@ -1,6 +1,6 @@
-struct@A Credentials {
-  Username: String@A;
-  Password: String@A;
+struct Credentials {
+  Username: String;
+  Password: String;
 }
 
 struct@(C,S) AuthResult {
@@ -8,17 +8,17 @@ struct@(C,S) AuthResult {
   Token: String@[C,S];
 }
 
-interface@A ClientRegistry {
-  func@A GetSalt(username: String@A) String@A;
-  func@A Check(hash: String@A) Bool@A;
+interface ClientRegistry {
+  func GetSalt(username: String) String;
+  func Check(hash: String) Bool;
 }
 
-interface@A TokenGenerator {
-  func@A GenerateToken() String@A;
+interface TokenGenerator {
+  func GenerateToken() String;
 }
 
-interface@A Hasher {
-  func@A CalcHash(salt: String@A, password: String@A) String@A;
+interface Hasher {
+  func CalcHash(salt: String, password: String) String;
 }
 
 func@(Client, Service, IP) Authenticate(
