@@ -22,7 +22,7 @@ func (t *StructType) SubstituteRoles(substMap *RoleSubst) Type {
 		newImplements = append(newImplements, impl.SubstituteRoles(substMap))
 	}
 
-	newStruct := NewStructType(t.structIdent, newRoles, newImplements).(*StructType)
+	newStruct := Struct(t.structIdent, newRoles, newImplements).(*StructType)
 	newStruct.substMap = t.substMap.ApplySubst(substMap)
 
 	return newStruct
@@ -40,7 +40,7 @@ func (t *StructType) ReplaceSharedRoles(participants []string) Type {
 		newImplements = append(newImplements, impl.ReplaceSharedRoles(participants))
 	}
 
-	newStruct := NewStructType(t.structIdent, newRoles, newImplements).(*StructType)
+	newStruct := Struct(t.structIdent, newRoles, newImplements).(*StructType)
 
 	newSubst := NewRoleSubst()
 	from := t.substMap.Roles[0]
@@ -93,7 +93,7 @@ func (t *StructType) ToString() string {
 	}
 }
 
-func NewStructType(structIdent parser.IIdentContext, roles *Roles, implements []Type) Type {
+func Struct(structIdent parser.IIdentContext, roles *Roles, implements []Type) Type {
 	substMap, ok := roles.SubstituteMap(roles)
 	if !ok {
 		panic("should always be ok to substitute with itself")

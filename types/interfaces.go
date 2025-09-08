@@ -8,29 +8,42 @@ import (
 
 type InterfaceType struct {
 	baseType
-	ident        parser.IIdentContext
-	participants []string
-	substMap     *RoleSubst
+	ident    parser.IIdentContext
+	roles    *Roles
+	substMap *RoleSubst
 }
 
 func (t *InterfaceType) SubstituteRoles(substMap *RoleSubst) Type {
-	newParticipants := []string{}
-	for _, from := range t.participants {
-		newParticipants = append(newParticipants, substMap.Subst(from)[0])
-	}
+	newRoles := t.roles.SubstituteRoles(substMap)
 
-	newInf := Interface(t.ident, newParticipants).(*InterfaceType)
+	newInf := Interface(t.ident, newRoles).(*InterfaceType)
 	newInf.substMap = t.substMap.ApplySubst(substMap)
 
 	return newInf
 }
 
 func (t *InterfaceType) ReplaceSharedRoles(participants []string) Type {
-	return t
+	if t.roles.IsDistributedRole() || len(t.substMap.Roles) == 0 {
+		return t
+	}
+
+	newRoles := NewRole(participants, true)
+
+	newInf := Interface(t.ident, newRoles).(*InterfaceType)
+
+	newSubst := NewRoleSubst()
+	from := t.substMap.Roles[0]
+	for _, to := range participants {
+		newSubst.AddRole(from, to)
+	}
+
+	newInf.substMap = newSubst
+
+	return newInf
 }
 
 func (t *InterfaceType) Roles() *Roles {
-	return NewRole(t.participants, false)
+	return t.roles
 }
 
 func (t *InterfaceType) SubstMap() *RoleSubst {
@@ -49,7 +62,7 @@ func (t *InterfaceType) CoerceTo(other Type) (Type, bool) {
 }
 
 func (t *InterfaceType) IsEquatable() bool {
-	return true
+	return false
 }
 
 func (t *InterfaceType) ToString() string {
@@ -60,16 +73,16 @@ func (t *InterfaceType) ToString() string {
 	}
 }
 
-func Interface(ident parser.IIdentContext, participants []string) Type {
-	substMap := NewRoleSubst()
-	for _, role := range participants {
-		substMap.AddRole(role, role)
+func Interface(ident parser.IIdentContext, roles *Roles) Type {
+	substMap, ok := roles.SubstituteMap(roles)
+	if !ok {
+		panic("should always be ok to substitute with itself")
 	}
 
 	return &InterfaceType{
-		ident:        ident,
-		participants: participants,
-		substMap:     substMap,
+		ident:    ident,
+		roles:    roles,
+		substMap: substMap,
 	}
 }
 

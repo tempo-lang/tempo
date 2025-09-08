@@ -369,7 +369,7 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 		}
 	}
 
-	return types.NewStructType(ctx.Ident(), roles, implements), true
+	return types.Struct(ctx.Ident(), roles, implements), true
 }
 
 func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.Type, bool) {
@@ -384,7 +384,7 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.T
 		return types.Invalid(), false
 	}
 
-	return types.Interface(ctx.Ident(), roles.Participants()), true
+	return types.Interface(ctx.Ident(), roles), true
 }
 
 func findRoleType(ctx parser.IValueTypeContext) parser.IRoleTypeContext {

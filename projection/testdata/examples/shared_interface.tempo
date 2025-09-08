@@ -1,0 +1,22 @@
+interface@A Func {
+  func@A call(input: Int@A) Int@A;
+}
+
+struct@A Mult implements Func@A {
+  x: Int@A;
+
+  func@A call(input: Int@A) Int@A {
+    return input * x;
+  }
+}
+
+func@(A,B) main() {
+  let f = Mult@A { x: 4@A };
+
+  // When `f` is sent, it becomes a shared value Mult@[A,B],
+  // which can be coerced to the interface Func@[A,B].
+  let g: Func@[A,B] = await A->B f;
+
+  // Now all methods of the interface are shared.
+  let x: Int@[A,B] = g.call(10@[A,B]); // output: 40
+}
