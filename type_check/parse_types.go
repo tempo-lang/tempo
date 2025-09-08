@@ -328,6 +328,11 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 		return types.Invalid(), false
 	}
 
+	if roles.IsSharedRole() {
+		tc.reportError(type_error.NewUnexpectedSharedType(ctx.RoleType()))
+		return types.Invalid(), false
+	}
+
 	implements := []types.Type{}
 	if ctx.StructImplements() != nil {
 		for _, impl := range ctx.StructImplements().AllRoleIdent() {
@@ -381,6 +386,11 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.T
 	// name := ctx.Ident().GetText()
 	roles, ok := tc.parseRoleType(ctx.RoleType())
 	if !ok {
+		return types.Invalid(), false
+	}
+
+	if roles.IsSharedRole() {
+		tc.reportError(type_error.NewUnexpectedSharedType(ctx.RoleType()))
 		return types.Invalid(), false
 	}
 

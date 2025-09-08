@@ -1,0 +1,7 @@
+interface@[A,B] Bar {}
+struct@[A,B] Foo {}
+func@[A,B] foo() {}
+---
+E2 1:11: shared type is not allowed here
+E2 2:8: shared type is not allowed here
+E2 3:6: shared type is not allowed here
