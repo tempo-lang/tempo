@@ -12,7 +12,7 @@ export interface Point_attrs {
   x: number;
   y: number;
 }
-export class Point implements Point_attrs {
+export class Point implements Point_attrs, Printer {
   x: number;
   y: number;
   

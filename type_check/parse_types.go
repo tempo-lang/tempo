@@ -336,7 +336,7 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 	implements := []types.Type{}
 	if ctx.StructImplements() != nil {
 		for _, impl := range ctx.StructImplements().AllRoleIdent() {
-			if impl == nil || impl.Ident() == nil || impl.RoleType() == nil {
+			if impl == nil || impl.Ident() == nil {
 				continue // parser error
 			}
 
