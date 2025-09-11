@@ -170,6 +170,39 @@ func (e *MissingImplementationMethod) RelatedInfo() []RelatedInfo {
 	}}
 }
 
+func (e *MissingImplementationMethod) Annotations() []Annotation {
+
+	result := []Annotation{}
+
+	structType := e.structSym.Type().(*types.StructType)
+	for _, impl := range structType.Implements() {
+		inf := impl.(*types.InterfaceType)
+		if inf.Name() == e.interfaceSym.SymbolName() {
+
+			method, ok := e.interfaceSym.Method(e.methodName)
+			if !ok {
+				panic("method should exist")
+			}
+
+			subst, ok := e.interfaceSym.Type().Roles().SubstituteMap(inf.Roles())
+			if !ok {
+				break
+			}
+
+			methodType := method.FuncType().SubstituteRoles(subst).(*types.FunctionType)
+
+			result = append(result, Annotation{
+				Type:    AnnotationTypeHint,
+				Message: fmt.Sprintf("add method `%s` to struct", methodType.FormatFunctionSig()),
+			})
+
+			break
+		}
+	}
+
+	return result
+}
+
 func NewMissingImplementationMethod(structSym *sym_table.StructSymbol, interfaceSym *sym_table.InterfaceSymbol, methodName string) Error {
 	return &MissingImplementationMethod{
 		structSym:    structSym,

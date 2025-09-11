@@ -49,8 +49,6 @@ func tokenToRange(token antlr.Token) protocol.Range {
 }
 
 func posWithinRange(pos protocol.Position, span protocol.Range) bool {
-	// logger.Debugf("POS WITHIN RANGE: %d:%d <= %d:%d <= %d:%d", span.Start.Line, span.Start.Character, pos.Line, pos.Character, span.End.Line, span.End.Character)
-
 	if span.Start.Line <= pos.Line && span.End.Line >= pos.Line {
 		if span.Start.Line == pos.Line && pos.Character < span.Start.Character {
 			return false

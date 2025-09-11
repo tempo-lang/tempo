@@ -180,6 +180,18 @@ func (u *UnexpectedSharedType) Error() string {
 	return "shared type is not allowed here"
 }
 
+func (u *UnexpectedSharedType) CodeAction() *CodeAction {
+	roles := misc.JoinStringsFunc(parser.RoleTypeAllIdents(u.RoleType), ",", func(role parser.IIdentContext) string {
+		return role.GetText()
+	})
+
+	return &CodeAction{
+		Title:     "Change to distributed type",
+		Range:     u.RoleType,
+		NewSource: fmt.Sprintf("(%s)", roles),
+	}
+}
+
 func (u *UnexpectedSharedType) ParserRule() antlr.ParserRuleContext {
 	return u.RoleType
 }
@@ -330,7 +342,7 @@ func NewInvalidValue(expr parser.IExprContext, actualValue types.Type, expectedV
 
 type AwaitNonAsyncType struct {
 	baseError
-	Expr parser.IExprContext
+	Expr *parser.ExprAwaitContext
 	Type types.Type
 }
 
@@ -346,7 +358,7 @@ func (e *AwaitNonAsyncType) Code() ErrorCode {
 	return CodeExpectedAsyncType
 }
 
-func NewAwaitNonAsyncType(expr parser.IExprContext, errType types.Type) Error {
+func NewAwaitNonAsyncType(expr *parser.ExprAwaitContext, errType types.Type) Error {
 	return &AwaitNonAsyncType{
 		Expr: expr,
 		Type: errType,
