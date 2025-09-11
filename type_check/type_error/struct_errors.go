@@ -215,6 +215,14 @@ func (e *IncompatibleImplementationMethod) Annotations() []Annotation {
 	}}
 }
 
+func (e *IncompatibleImplementationMethod) CodeAction() *CodeAction {
+	return &CodeAction{
+		Title:     "Change function signature",
+		Range:     e.structFn.FuncSig(),
+		NewSource: e.interfaceFn.FormatFunctionSig(),
+	}
+}
+
 func NewIncompatibleImplementationMethod(structSym *sym_table.StructSymbol, interfaceSym *sym_table.InterfaceSymbol, structFn *types.FunctionType, interfaceFn *types.FunctionType) Error {
 	return &IncompatibleImplementationMethod{
 		structSym:    structSym,

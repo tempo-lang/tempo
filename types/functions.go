@@ -102,6 +102,29 @@ func (f *FunctionType) ToString() string {
 	}
 }
 
+// FormatFunctionSig returns a valid function signature for this function type
+func (f *FunctionType) FormatFunctionSig() string {
+	allParams := f.fnSig.GetParams().AllFuncParam()
+	params := []string{}
+	for i, paramType := range f.params {
+		paramName := allParams[i].Ident().GetText()
+		params = append(params, fmt.Sprintf("%s: %s", paramName, paramType.ToString()))
+	}
+
+	paramsStr := misc.JoinStrings(params, ", ")
+
+	returnType := ""
+	if f.returnType != Unit() {
+		returnType = " " + f.returnType.ToString()
+	}
+
+	if f.Roles().IsUnnamedRole() {
+		return fmt.Sprintf("func %s(%s)%s", f.NameIdent().GetText(), paramsStr, returnType)
+	} else {
+		return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.NameIdent().GetText(), paramsStr, returnType)
+	}
+}
+
 func (f *FunctionType) Params() []Type {
 	return f.params
 }

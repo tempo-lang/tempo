@@ -90,3 +90,18 @@ func astNodeAtPosition(node antlr.ParserRuleContext, pos protocol.Position) (ant
 
 	return node, parserRuleToRange(node)
 }
+
+func rangesOverlap(a, b protocol.Range) bool {
+	posLT := func(p1, p2 protocol.Position) bool {
+		if p1.Line != p2.Line {
+			return p1.Line < p2.Line
+		}
+		return p1.Character < p2.Character
+	}
+
+	// No overlap if a ends before b starts, or b ends before a starts.
+	if posLT(a.End, b.Start) || posLT(b.End, a.Start) {
+		return false
+	}
+	return true
+}

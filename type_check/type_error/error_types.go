@@ -78,12 +78,19 @@ type RelatedInfo struct {
 	ParserRule antlr.ParserRuleContext
 }
 
+type CodeAction struct {
+	Title     string
+	Range     antlr.ParserRuleContext
+	NewSource string
+}
+
 type Error interface {
 	error
 	ParserRule() antlr.ParserRuleContext
 	IsTypeError()
 	RelatedInfo() []RelatedInfo
 	Annotations() []Annotation
+	CodeAction() *CodeAction
 	Code() ErrorCode
 }
 
@@ -94,6 +101,9 @@ func (*baseError) RelatedInfo() []RelatedInfo {
 	return nil
 }
 func (*baseError) Annotations() []Annotation {
+	return nil
+}
+func (*baseError) CodeAction() *CodeAction {
 	return nil
 }
 

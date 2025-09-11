@@ -5,6 +5,7 @@ import (
 
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/type_check"
+	"github.com/tempo-lang/tempo/type_check/type_error"
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/tliron/glsp"
@@ -41,31 +42,11 @@ func (s *tempoServer) analyzeDocument(notify glsp.NotifyFunc, docUri protocol.UR
 	// type check ast
 	info, typeErrors := type_check.TypeCheck(sourceFile)
 
-	tempoDoc := newTempoDoc(docUri, version, source, sourceFile, info)
+	tempoDoc := newTempoDoc(docUri, version, source, sourceFile, info, typeErrors)
 	s.UpdateDocument(tempoDoc)
 
 	for _, err := range typeErrors {
-		relatedInfo := []protocol.DiagnosticRelatedInformation{}
-		for _, related := range err.RelatedInfo() {
-			relatedInfo = append(relatedInfo, protocol.DiagnosticRelatedInformation{
-				Location: protocol.Location{
-					URI:   docUri,
-					Range: parserRuleToRange(related.ParserRule),
-				},
-				Message: related.Message,
-			})
-		}
-
-		diagnostics = append(diagnostics, protocol.Diagnostic{
-			Range:              parserRuleToRange(err.ParserRule()),
-			Severity:           toPtr(protocol.DiagnosticSeverityError),
-			Message:            err.Error(),
-			RelatedInformation: relatedInfo,
-			Code: &protocol.IntegerOrString{
-				Value: fmt.Sprintf("E%d", err.Code()),
-			},
-			Source: toPtr("tempo"),
-		})
+		diagnostics = append(diagnostics, typeErrorToDiagnostic(docUri, err))
 	}
 
 	notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
@@ -73,4 +54,28 @@ func (s *tempoServer) analyzeDocument(notify glsp.NotifyFunc, docUri protocol.UR
 		Version:     toPtr(protocol.UInteger(version)),
 		Diagnostics: diagnostics,
 	})
+}
+
+func typeErrorToDiagnostic(docUri protocol.URI, err type_error.Error) protocol.Diagnostic {
+	relatedInfo := []protocol.DiagnosticRelatedInformation{}
+	for _, related := range err.RelatedInfo() {
+		relatedInfo = append(relatedInfo, protocol.DiagnosticRelatedInformation{
+			Location: protocol.Location{
+				URI:   docUri,
+				Range: parserRuleToRange(related.ParserRule),
+			},
+			Message: related.Message,
+		})
+	}
+
+	return protocol.Diagnostic{
+		Range:              parserRuleToRange(err.ParserRule()),
+		Severity:           toPtr(protocol.DiagnosticSeverityError),
+		Message:            err.Error(),
+		RelatedInformation: relatedInfo,
+		Code: &protocol.IntegerOrString{
+			Value: fmt.Sprintf("E%d", err.Code()),
+		},
+		Source: toPtr("tempo"),
+	}
 }
