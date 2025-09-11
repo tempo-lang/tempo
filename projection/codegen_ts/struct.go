@@ -61,7 +61,7 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 	}
 	gen.IncIndent()
 
-	if !gen.opts.DisableTypes {
+	if !gen.opts.DisableTypes && len(s.Fields) > 0 {
 		for _, field := range s.Fields {
 			out += gen.Writeln("%s: %s;", field.Name, gen.GenType(field.Type))
 		}

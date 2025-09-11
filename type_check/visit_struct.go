@@ -28,7 +28,7 @@ func (tc *typeChecker) VisitStruct(ctx *parser.StructContext) any {
 
 	tc.currentScope = tc.currentScope.Parent()
 
-	tc.checkStructImplements(structSym)
+	tc.checkStructImplementsConform(structSym)
 
 	return nil
 }
@@ -76,7 +76,7 @@ func (tc *typeChecker) VisitStructImplements(ctx *parser.StructImplementsContext
 	return nil
 }
 
-func (tc *typeChecker) checkStructImplements(sym *sym_table.StructSymbol) {
+func (tc *typeChecker) checkStructImplementsConform(sym *sym_table.StructSymbol) {
 	structType := sym.Type().(*types.StructType)
 
 	for _, impl := range structType.Implements() {
@@ -100,7 +100,7 @@ func (tc *typeChecker) checkStructImplements(sym *sym_table.StructSymbol) {
 			}
 
 			if _, canCoerce := fn.CoerceTo(method); !canCoerce {
-				tc.reportError(type_error.NewIncompatibleImplementationMethod(sym, infSym, fn.NameIdent().GetText()))
+				tc.reportError(type_error.NewIncompatibleImplementationMethod(sym, infSym, method.(*types.FunctionType), fn))
 				continue
 			}
 		}

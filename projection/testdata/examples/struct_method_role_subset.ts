@@ -6,7 +6,6 @@ import { Env } from '../../../typescript/runtime.ts';
 export interface Foo_A_attrs {
 }
 export class Foo_A implements Foo_A_attrs {
-  
   constructor({  }: Foo_A_attrs) {
   }
   
@@ -17,7 +16,6 @@ export class Foo_A implements Foo_A_attrs {
 export interface Foo_B_attrs {
 }
 export class Foo_B implements Foo_B_attrs {
-  
   constructor({  }: Foo_B_attrs) {
   }
 }

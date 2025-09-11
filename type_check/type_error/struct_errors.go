@@ -182,23 +182,19 @@ type IncompatibleImplementationMethod struct {
 	baseError
 	structSym    *sym_table.StructSymbol
 	interfaceSym *sym_table.InterfaceSymbol
-	methodName   string
+	structFn     *types.FunctionType
+	interfaceFn  *types.FunctionType
 }
 
 func (e *IncompatibleImplementationMethod) Error() string {
 	return fmt.Sprintf(
 		"method `%s` does not match the signature required by interface `%s`",
-		e.methodName, e.interfaceSym.SymbolName(),
+		e.structFn.NameIdent().GetText(), e.interfaceSym.SymbolName(),
 	)
 }
 
 func (e *IncompatibleImplementationMethod) ParserRule() antlr.ParserRuleContext {
-	fn, found := e.structSym.Method(e.methodName)
-	if !found {
-		panic("method should always exist")
-	}
-
-	return fn.FuncSig()
+	return e.structFn.FuncSig()
 }
 
 func (e *IncompatibleImplementationMethod) Code() ErrorCode {
@@ -206,38 +202,24 @@ func (e *IncompatibleImplementationMethod) Code() ErrorCode {
 }
 
 func (e *IncompatibleImplementationMethod) RelatedInfo() []RelatedInfo {
-	fn, found := e.interfaceSym.Method(e.methodName)
-	if !found {
-		panic("method should always exist")
-	}
-
 	return []RelatedInfo{{
 		Message:    "interface method declared here",
-		ParserRule: fn.FuncSig().Ident(),
+		ParserRule: e.interfaceFn.FuncSig().Ident(),
 	}}
 }
 
 func (e *IncompatibleImplementationMethod) Annotations() []Annotation {
-	fn, found := e.interfaceSym.Method(e.methodName)
-	if !found {
-		panic("method should always exist")
-	}
-
-	subst, ok := e.interfaceSym.Type().Roles().SubstituteMap(e.structSym.Type().Roles())
-	if !ok {
-		return []Annotation{}
-	}
-
 	return []Annotation{{
 		Type:    AnnotationTypeHint,
-		Message: fmt.Sprintf("change function signature to `%s`", fn.FuncType().SubstituteRoles(subst).ToString()),
+		Message: fmt.Sprintf("change function signature to `%s`", e.interfaceFn.ToString()),
 	}}
 }
 
-func NewIncompatibleImplementationMethod(structSym *sym_table.StructSymbol, interfaceSym *sym_table.InterfaceSymbol, methodName string) Error {
+func NewIncompatibleImplementationMethod(structSym *sym_table.StructSymbol, interfaceSym *sym_table.InterfaceSymbol, structFn *types.FunctionType, interfaceFn *types.FunctionType) Error {
 	return &IncompatibleImplementationMethod{
 		structSym:    structSym,
 		interfaceSym: interfaceSym,
-		methodName:   methodName,
+		structFn:     structFn,
+		interfaceFn:  interfaceFn,
 	}
 }

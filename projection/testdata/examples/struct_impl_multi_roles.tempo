@@ -1,0 +1,12 @@
+interface Bar {
+  func bar();
+}
+
+interface Baz {
+  func baz();
+}
+
+struct@(A,B) Foo implements Bar@A, Baz@B {
+  func@A bar() {}
+  func@B baz() {}
+}

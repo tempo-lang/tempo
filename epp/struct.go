@@ -17,7 +17,9 @@ func (epp *epp) eppStruct(st parser.IStructContext) *projection.ChoreographyStru
 
 		for _, impl := range stType.Implements() {
 			eppImpl := epp.eppType(role, impl)
-			str.AddImplements(eppImpl)
+			if eppImpl != projection.UnitType() {
+				str.AddImplements(eppImpl)
+			}
 		}
 
 		for _, field := range st.GetBody().AllStructField() {
