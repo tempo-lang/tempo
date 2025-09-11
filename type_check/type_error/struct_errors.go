@@ -89,7 +89,7 @@ func NewMissingStructField(expr *parser.ExprStructContext, field string, structT
 type StructWrongRoleCount struct {
 	baseError
 	sym        sym_table.Symbol
-	roleType   parser.IRoleTypeContext
+	roleType   parser.IRoleIdentContext
 	parsedRole *types.Roles
 }
 
@@ -105,7 +105,7 @@ func (e *StructWrongRoleCount) Code() ErrorCode {
 	return CodeStructWrongRoleCount
 }
 
-func NewWrongRoleCount(sym sym_table.Symbol, roleType parser.IRoleTypeContext, parsedRole *types.Roles) Error {
+func NewWrongRoleCount(sym sym_table.Symbol, roleType parser.IRoleIdentContext, parsedRole *types.Roles) Error {
 	return &StructWrongRoleCount{
 		sym:        sym,
 		roleType:   roleType,
@@ -223,9 +223,14 @@ func (e *IncompatibleImplementationMethod) Annotations() []Annotation {
 		panic("method should always exist")
 	}
 
+	subst, ok := e.interfaceSym.Type().Roles().SubstituteMap(e.structSym.Type().Roles())
+	if !ok {
+		return []Annotation{}
+	}
+
 	return []Annotation{{
 		Type:    AnnotationTypeHint,
-		Message: fmt.Sprintf("change function signature to `%s`", fn.FuncType().ToString()),
+		Message: fmt.Sprintf("change function signature to `%s`", fn.FuncType().SubstituteRoles(subst).ToString()),
 	}}
 }
 

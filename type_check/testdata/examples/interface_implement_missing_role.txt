@@ -1,0 +1,11 @@
+interface@A Call {
+  func call(val: Int) Int;
+}
+
+struct@X Mult implements Call {
+  func call(val: Int) Int {
+    return val * 2;
+  }
+}
+---
+E45 5:26: unable to determine roles for this type

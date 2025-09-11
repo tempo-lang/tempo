@@ -149,7 +149,7 @@ func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.
 
 	substMap, rolesMatch := sym.Type().Roles().SubstituteMap(role)
 	if !rolesMatch {
-		return types.Invalid(), type_error.NewWrongRoleCount(sym, ctx.RoleIdent().RoleType(), role)
+		return types.Invalid(), type_error.NewWrongRoleCount(sym, ctx.RoleIdent(), role)
 	}
 	typeValue := sym.Type().SubstituteRoles(substMap)
 
@@ -246,7 +246,7 @@ func (tc *typeChecker) parseFuncType(ctx parser.IFuncSigContext) (types.Type, bo
 		return types.Invalid(), false
 	}
 
-	fn := types.Function(ctx.Ident(), props.params, props.returnType, props.roles)
+	fn := types.Function(ctx, props.params, props.returnType, props.roles)
 	return fn, true
 }
 
@@ -345,6 +345,11 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 				continue
 			}
 
+			if !roles.IsUnnamedRole() && implRoles.IsUnnamedRole() {
+				tc.reportError(type_error.NewMissingRoles(impl))
+				continue
+			}
+
 			if implRoles.IsSharedRole() {
 				tc.reportError(type_error.NewUnexpectedSharedType(impl.RoleType()))
 			} else if unknownRoles := implRoles.SubtractParticipants(roles.Participants()); len(unknownRoles) > 0 {
@@ -366,7 +371,7 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 
 			infRoleSubst, ok := infType.Roles().SubstituteMap(implRoles)
 			if !ok {
-				tc.reportError(type_error.NewWrongRoleCount(sym, impl.RoleType(), infType.Roles()))
+				tc.reportError(type_error.NewWrongRoleCount(sym, impl, implRoles))
 				continue
 			}
 

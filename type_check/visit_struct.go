@@ -99,8 +99,7 @@ func (tc *typeChecker) checkStructImplements(sym *sym_table.StructSymbol) {
 				continue
 			}
 
-			_, canCoerce := fn.CoerceTo(method)
-			if !canCoerce {
+			if _, canCoerce := fn.CoerceTo(method); !canCoerce {
 				tc.reportError(type_error.NewIncompatibleImplementationMethod(sym, infSym, fn.NameIdent().GetText()))
 				continue
 			}

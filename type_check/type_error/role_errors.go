@@ -129,10 +129,10 @@ func (e *SharedRoleSingleParticipant) Code() ErrorCode {
 
 type MissingRoles struct {
 	baseError
-	ValueType parser.IValueTypeContext
+	ValueType antlr.ParserRuleContext
 }
 
-func NewMissingRoles(valueType parser.IValueTypeContext) Error {
+func NewMissingRoles(valueType antlr.ParserRuleContext) Error {
 	return &MissingRoles{
 		ValueType: valueType,
 	}
@@ -144,6 +144,15 @@ func (e *MissingRoles) Error() string {
 
 func (e *MissingRoles) ParserRule() antlr.ParserRuleContext {
 	return e.ValueType
+}
+
+func (e *MissingRoles) Annotations() []Annotation {
+	return []Annotation{
+		{
+			Type:    AnnotationTypeHint,
+			Message: fmt.Sprintf("specify roles explicitly, like so `%s@(A,B,C)`", e.ValueType.GetText()),
+		},
+	}
 }
 
 func (e *MissingRoles) Code() ErrorCode {

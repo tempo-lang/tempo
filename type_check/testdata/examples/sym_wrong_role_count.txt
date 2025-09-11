@@ -2,5 +2,5 @@ struct@(A) Foo {}
 interface@(A) Bar {}
 func@(A,B) test(s: Foo@(A,B), i: Bar@(A,B)) {}
 ---
-E21 3:24: wrong number of roles in `Foo`
-E21 3:38: wrong number of roles in `Bar`
+E21 3:20: wrong number of roles in `Foo`
+E21 3:34: wrong number of roles in `Bar`

@@ -9,7 +9,7 @@ import (
 
 type FunctionType struct {
 	baseType
-	ident      parser.IIdentContext
+	fnSig      parser.IFuncSigContext
 	params     []Type
 	returnType Type
 	roles      *Roles
@@ -22,7 +22,7 @@ func (f *FunctionType) SubstituteRoles(substMap *RoleSubst) Type {
 	}
 
 	return Function(
-		f.ident,
+		f.fnSig,
 		substParams,
 		f.ReturnType().SubstituteRoles(substMap),
 		f.Roles().SubstituteRoles(substMap),
@@ -47,7 +47,7 @@ func (f *FunctionType) CoerceTo(other Type) (Type, bool) {
 		return Invalid(), false
 	}
 
-	if f.ident.GetText() != g.ident.GetText() {
+	if f.NameIdent().GetText() != g.NameIdent().GetText() {
 		return Invalid(), false
 	}
 
@@ -75,7 +75,7 @@ func (f *FunctionType) CoerceTo(other Type) (Type, bool) {
 		canCoerce = false
 	}
 
-	newFunc := Function(f.ident, newParams, newReturn, f.roles)
+	newFunc := Function(f.fnSig, newParams, newReturn, f.roles)
 
 	return newFunc, canCoerce
 }
@@ -96,9 +96,9 @@ func (f *FunctionType) ToString() string {
 	}
 
 	if f.Roles().IsUnnamedRole() {
-		return fmt.Sprintf("func %s(%s)%s", f.ident.GetText(), params, returnType)
+		return fmt.Sprintf("func %s(%s)%s", f.NameIdent().GetText(), params, returnType)
 	} else {
-		return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.ident.GetText(), params, returnType)
+		return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.NameIdent().GetText(), params, returnType)
 	}
 }
 
@@ -111,16 +111,20 @@ func (f *FunctionType) ReturnType() Type {
 }
 
 func (f *FunctionType) NameIdent() parser.IIdentContext {
-	return f.ident
+	return f.fnSig.Ident()
+}
+
+func (f *FunctionType) FuncSig() parser.IFuncSigContext {
+	return f.fnSig
 }
 
 func (f *FunctionType) ToClosure() Type {
 	return Closure(f.Params(), f.ReturnType(), f.Roles())
 }
 
-func Function(ident parser.IIdentContext, params []Type, returnType Type, roles *Roles) Type {
+func Function(fnSig parser.IFuncSigContext, params []Type, returnType Type, roles *Roles) Type {
 	return &FunctionType{
-		ident:      ident,
+		fnSig:      fnSig,
 		params:     params,
 		returnType: returnType,
 		roles:      roles,

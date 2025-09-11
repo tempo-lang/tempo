@@ -1,0 +1,4 @@
+interface@(A,B) Bar {}
+struct Foo implements Bar {}
+---
+E21 2:23: wrong number of roles in `Bar`
