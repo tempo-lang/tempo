@@ -86,6 +86,40 @@ func NewMissingStructField(expr *parser.ExprStructContext, field string, structT
 	}
 }
 
+type DuplicateStructField struct {
+	baseError
+	expr           *parser.ExprStructContext
+	fieldDuplicate parser.IIdentContext
+	fieldFirst     parser.IIdentContext
+}
+
+func (e *DuplicateStructField) Error() string {
+	return fmt.Sprintf("duplicate field `%s`", e.fieldDuplicate.GetText())
+}
+
+func (e *DuplicateStructField) ParserRule() antlr.ParserRuleContext {
+	return e.fieldDuplicate
+}
+
+func (e *DuplicateStructField) RelatedInfo() []RelatedInfo {
+	return []RelatedInfo{{
+		Message:    "field already specified here",
+		ParserRule: e.fieldFirst,
+	}}
+}
+
+func (e *DuplicateStructField) Code() ErrorCode {
+	return CodeDuplicateStructField
+}
+
+func NewDuplicateStructField(expr *parser.ExprStructContext, fieldFirst parser.IIdentContext, fieldDuplicate parser.IIdentContext) Error {
+	return &DuplicateStructField{
+		expr:           expr,
+		fieldDuplicate: fieldDuplicate,
+		fieldFirst:     fieldFirst,
+	}
+}
+
 type StructWrongRoleCount struct {
 	baseError
 	sym        sym_table.Symbol

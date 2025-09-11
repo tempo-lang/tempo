@@ -375,6 +375,19 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	// check that no field is duplicated
+	fieldsCount := map[string]parser.IIdentContext{}
+	for _, fieldName := range ctx.ExprStructField().AllIdent() {
+		if first, found := fieldsCount[fieldName.GetText()]; found {
+			fieldsCount[fieldName.GetText()] = nil
+			if first != nil {
+				tc.reportError(type_error.NewDuplicateStructField(ctx, first, fieldName))
+			}
+		} else {
+			fieldsCount[fieldName.GetText()] = fieldName
+		}
+	}
+
 	// check that all struct fields are present
 	for _, defField := range stSym.Fields() {
 		found := false

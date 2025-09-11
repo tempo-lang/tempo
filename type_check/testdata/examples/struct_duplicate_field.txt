@@ -1,0 +1,9 @@
+struct Value {
+  x: Int;
+}
+
+func main() {
+  let val = Value { x: 10, x: 20 };
+}
+---
+E46 6:28: duplicate field `x`

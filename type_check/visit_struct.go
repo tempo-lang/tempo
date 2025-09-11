@@ -100,7 +100,11 @@ func (tc *typeChecker) checkStructImplementsConform(sym *sym_table.StructSymbol)
 			}
 
 			if _, canCoerce := fn.CoerceTo(method); !canCoerce {
-				tc.reportError(type_error.NewIncompatibleImplementationMethod(sym, infSym, method.(*types.FunctionType), fn))
+				methodFn, ok := method.(*types.FunctionType)
+				if !ok {
+					continue // likely due to parser error
+				}
+				tc.reportError(type_error.NewIncompatibleImplementationMethod(sym, infSym, methodFn, fn))
 				continue
 			}
 		}

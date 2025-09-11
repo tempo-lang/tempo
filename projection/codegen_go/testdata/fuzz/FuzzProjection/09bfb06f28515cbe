@@ -1,0 +1,2 @@
+go test fuzz v1
+string("struct@(A,B)Pair{x:Int@A;y:Int@A;}struct@(A,B,C)Foo{pairs:[Pair@(A,B)];z:Int@A;}func@(X,Y,Z)A00000(){let foo=Foo@(X,Y,Z){pairs:[],z:0};foo.pairs+[Pair@(X,Y){x:0,x:0,y:0}];}")
