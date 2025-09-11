@@ -81,7 +81,7 @@ var buildCmd = &cobra.Command{
 		if errors != nil {
 			for _, err := range errors {
 				if typeErr, ok := err.(type_error.Error); ok {
-					type_error.FormatError(os.Stdout, input, typeErr, !*disableTerminalColor)
+					type_error.FormatError(os.Stdout, &input.InputStream, input.GetSourceName(), typeErr, !*disableTerminalColor)
 				} else {
 					fmt.Printf("%v\n", err)
 				}

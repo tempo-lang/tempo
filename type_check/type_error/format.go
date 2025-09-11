@@ -10,7 +10,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func FormatError(w io.Writer, inputStream *antlr.FileStream, err Error, colorOutput bool) {
+func FormatError(w io.Writer, inputStream *antlr.InputStream, sourceName string, err Error, colorOutput bool) {
 	withColor := func(colorAttr color.Attribute, format string, args ...any) string {
 		if colorOutput {
 			return color.New(colorAttr).Sprintf(format, args...)
@@ -27,7 +27,7 @@ func FormatError(w io.Writer, inputStream *antlr.FileStream, err Error, colorOut
 	errorLength := err.ParserRule().GetStop().GetStop() - err.ParserRule().GetStart().GetStart() + 1
 
 	fmt.Fprintf(w, "%s: %s\n", withColor(color.FgRed, "error[E%d]", err.Code()), withColor(color.Bold, err.Error()))
-	fmt.Fprintf(w, "%s %s %s:%d:%d\n", lineNrStr, withColor(color.FgBlue, "->"), inputStream.GetSourceName(), token.GetLine(), tokenCol+1)
+	fmt.Fprintf(w, "%s %s %s:%d:%d\n", lineNrStr, withColor(color.FgBlue, "->"), sourceName, token.GetLine(), tokenCol+1)
 
 	sourceLines := strings.Split(inputStream.String(), "\n")
 
