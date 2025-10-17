@@ -61,6 +61,7 @@ const (
 	CodeMissingRoles
 	CodeDuplicateStructField
 	CodeTypeNotAnExpression
+	CodeIncompatibleTypeCast
 )
 
 type AnnotationType string

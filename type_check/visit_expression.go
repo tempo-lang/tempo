@@ -316,10 +316,52 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 				tc.info.Symbols[exprIdent.IdentAccess().Ident()] = typeSym
 				sym.AddRead(exprIdent.IdentAccess().Ident())
 
-				// Check type is compatible
-				// Check roles are compatible
+				validType := true
+				switch typeSym.Type().(type) {
+				case *types.FloatType:
+					switch argType.(type) {
+					case *types.FloatType:
+					case *types.IntType:
+					default:
+						validType = false
+					}
+				case *types.IntType:
+					switch argType.(type) {
+					case *types.IntType:
+					case *types.FloatType:
+					default:
+						validType = false
+					}
+				case *types.StringType:
+					switch argType.(type) {
+					case *types.StringType:
+					case *types.IntType:
+					case *types.FloatType:
+					case *types.BoolType:
+					default:
+						validType = false
+					}
+				}
+
+				if !validType {
+					tc.reportError(type_error.NewIncompatibleTypeCast(argType, typeSym.Type(), ctx))
+					return tc.registerType(ctx, types.Invalid())
+				}
 
 				newType := typeSym.Type().ReplaceSharedRoles(argType.Roles().Participants())
+
+				if exprIdent.IdentAccess().RoleType() != nil {
+					if explicitRoles, ok := tc.parseRoleType(exprIdent.IdentAccess().RoleType()); ok {
+						newRoles, ok := types.RoleIntersect(newType.Roles(), explicitRoles)
+						if !ok {
+							tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{newType.Roles(), explicitRoles}))
+							return tc.registerType(ctx, types.Invalid())
+						}
+
+						newType = newType.ReplaceSharedRoles(newRoles.Participants())
+					}
+				}
+
 				return tc.registerType(ctx, newType)
 			}
 		}

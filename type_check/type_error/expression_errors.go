@@ -187,3 +187,30 @@ func NewTypeNotAnExpression(ident *parser.ExprIdentContext) Error {
 		Ident: ident,
 	}
 }
+
+type IncompatibleTypeCast struct {
+	baseError
+	CastFrom types.Type
+	CastTo   types.Type
+	CastExpr *parser.ExprCallContext
+}
+
+func (e *IncompatibleTypeCast) Error() string {
+	return fmt.Sprintf("cannot cast value of type `%s` to `%s`", e.CastFrom.ToString(), e.CastTo.ToString())
+}
+
+func (e *IncompatibleTypeCast) ParserRule() antlr.ParserRuleContext {
+	return e.CastExpr
+}
+
+func (e *IncompatibleTypeCast) Code() ErrorCode {
+	return CodeIncompatibleTypeCast
+}
+
+func NewIncompatibleTypeCast(castFrom types.Type, castTo types.Type, castExpr *parser.ExprCallContext) Error {
+	return &IncompatibleTypeCast{
+		CastFrom: castFrom,
+		CastTo:   castTo,
+		CastExpr: castExpr,
+	}
+}

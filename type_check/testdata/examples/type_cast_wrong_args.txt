@@ -1,0 +1,7 @@
+func@A foo() {
+  let x = Float(1, 2, 3);
+  let y = Float();
+}
+---
+E32 2:16: function expected 1 argument, but 3 was given
+E32 3:16: function expected 1 argument, but only 0 was given

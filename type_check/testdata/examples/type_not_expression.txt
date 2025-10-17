@@ -1,0 +1,5 @@
+func@A foo() {
+  let x = Float;
+}
+---
+E47 2:11: type `Float` is not an expression

@@ -1,0 +1,5 @@
+func@A foo() {
+  let x = Float(false);
+}
+---
+E48 2:11: cannot cast value of type `Bool` to `Float`

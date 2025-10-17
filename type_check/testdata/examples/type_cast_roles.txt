@@ -1,0 +1,10 @@
+func@(A,B) foo() {
+  let x = 10@A;
+  let y = Float@B(x);
+
+  let z = Float@B(20);
+  z = 30.0@A;
+}
+---
+E13 3:11: cannot merge roles `A` and `B`
+E24 6:7: cannot assign type `Float@A` to `Float@B`
