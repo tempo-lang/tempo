@@ -293,3 +293,23 @@ func (i *InterfaceSymbol) Method(name string) (*FuncSymbol, bool) {
 func (i *InterfaceSymbol) AddMethod(fnSym *FuncSymbol) {
 	i.methods[fnSym.SymbolName()] = fnSym
 }
+
+type TypeSymbol struct {
+	baseSymbol
+	name string
+}
+
+func (t *TypeSymbol) IsAssignable() bool {
+	return false
+}
+
+func (s *TypeSymbol) SymbolName() string {
+	return s.name
+}
+
+func NewTypeSymbol(castType types.Type, globalScope *Scope) Symbol {
+	return &TypeSymbol{
+		baseSymbol: newBaseSymbol(nil, castType, globalScope),
+		name:       castType.ToString(),
+	}
+}

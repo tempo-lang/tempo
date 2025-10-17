@@ -15,7 +15,6 @@ import (
 func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projection.Expression, []projection.Statement) {
 
 	exprType := epp.info.Types[expr]
-	exprValue := epp.eppType(roleName, exprType)
 
 	switch expr := expr.(type) {
 	case *parser.ExprBinOpContext:
@@ -24,6 +23,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		aux = append(aux, rhsAux...)
 
 		if exprType.Roles().Contains(roleName) {
+			exprValue := epp.eppType(roleName, exprType)
 			operator := projection.ParseOperator(expr)
 			return projection.NewExprBinaryOp(operator, lhs, rhs, exprValue), aux
 		} else {
@@ -48,6 +48,8 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 		if exprType.Roles().Contains(roleName) {
 			name := sym.SymbolName()
+
+			exprValue := epp.eppType(roleName, exprType)
 
 			// check if identifier is struct attribute
 			structScope := epp.info.GlobalScope.Innermost(expr.GetStart()).GetStruct()
@@ -123,6 +125,23 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		// roles that are not a part of the com
 		return nil, aux
 	case *parser.ExprCallContext:
+		// Special case for type casting
+		if exprIdent, isIdent := expr.Expr().(*parser.ExprIdentContext); isIdent {
+			if sym, ok := epp.info.Symbols[exprIdent.IdentAccess().Ident()]; ok {
+				if _, ok := sym.(*sym_table.TypeSymbol); ok {
+					arg := expr.FuncArgList().AllExpr()[0]
+					inner, aux := epp.eppExpression(roleName, arg)
+
+					if exprType.Roles().Contains(roleName) {
+						castedType := epp.eppType(roleName, exprType)
+						return projection.NewExprTypeCast(inner, castedType), aux
+					} else {
+						return nil, aux
+					}
+				}
+			}
+		}
+
 		callExpr, aux := epp.eppExpression(roleName, expr.Expr())
 		callType := epp.info.Types[expr.Expr()]
 
@@ -227,7 +246,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		}
 
 		if exprType.Roles().Contains(roleName) {
-			structType := exprValue.(*projection.StructType)
+			structType := epp.eppType(roleName, exprType).(*projection.StructType)
 			return projection.NewExprStruct(structType, fieldNames, fields), aux
 		} else {
 			return nil, aux
@@ -236,6 +255,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		baseExpr, aux := epp.eppExpression(roleName, expr.Expr())
 
 		if exprType.Roles().Contains(roleName) {
+			exprValue := epp.eppType(roleName, exprType)
 			fieldName := expr.Ident().GetText()
 			fieldExpr := epp.eppField(baseExpr, fieldName, exprValue)
 			return fieldExpr, aux
@@ -280,6 +300,7 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 		}
 
 		if exprType.Roles().Contains(roleName) {
+			exprValue := epp.eppType(roleName, exprType)
 			return projection.NewExprList(items, exprValue), aux
 		} else {
 			for _, item := range items {

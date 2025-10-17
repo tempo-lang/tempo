@@ -5,11 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch tempo",
+      "name": "Launch Tempo",
       "type": "go",
       "args": ["build", "test.tempo"],
       "request": "launch",
-      "mode": "auto",
+      "mode": "debug",
       "program": "${workspaceFolder}"
     }
   ]

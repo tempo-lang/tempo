@@ -60,6 +60,7 @@ const (
 	CodeIncompatibleImplementationMethod
 	CodeMissingRoles
 	CodeDuplicateStructField
+	CodeTypeNotAnExpression
 )
 
 type AnnotationType string

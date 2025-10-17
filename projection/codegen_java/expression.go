@@ -50,6 +50,8 @@ func (gen *codegen) GenExpr(expr projection.Expression) string {
 		return gen.GenExprCopy(e)
 	case *projection.ExprSelf:
 		return gen.GenExprSelf(e)
+	case *projection.ExprTypeCast:
+		return gen.GenExprTypeCast(e)
 	}
 
 	panic(fmt.Sprintf("unexpected projection.Expression: %#v", expr))
@@ -223,6 +225,20 @@ func (gen *codegen) GenExprCopy(e *projection.ExprPassValue) string {
 	}
 }
 
+func (gen *codegen) GenExprTypeCast(e *projection.ExprTypeCast) string {
+	inner := gen.GenExpr(e.Inner)
+	switch e.NewType {
+	case projection.FloatType:
+		return fmt.Sprintf("(double) %s", inner)
+	case projection.IntType:
+		return fmt.Sprintf("(int) %s", inner)
+	case projection.StringType:
+		return fmt.Sprintf("%s.toString()", inner)
+	default:
+		panic(fmt.Sprintf("unsupported type cast: %v", e.NewType))
+	}
+}
+
 func CopyNecessary(e projection.Expression) bool {
 	switch e := e.(type) {
 	case *projection.ExprAsync:
@@ -263,6 +279,8 @@ func CopyNecessary(e projection.Expression) bool {
 		return false
 	case *projection.ExprStruct:
 		return false
+	case *projection.ExprTypeCast:
+		return CopyNecessary(e.Inner)
 	default:
 		panic(fmt.Sprintf("unexpected projection.Expression: %#v", e))
 	}

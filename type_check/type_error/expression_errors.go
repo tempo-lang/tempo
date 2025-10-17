@@ -164,3 +164,26 @@ func NewStructNotInitialized(ident *parser.ExprIdentContext) Error {
 		Ident: ident,
 	}
 }
+
+type TypeNotAnExpression struct {
+	baseError
+	Ident *parser.ExprIdentContext
+}
+
+func (e *TypeNotAnExpression) Error() string {
+	return fmt.Sprintf("type `%s` is not an expression", e.Ident.GetText())
+}
+
+func (e *TypeNotAnExpression) ParserRule() antlr.ParserRuleContext {
+	return e.Ident
+}
+
+func (e *TypeNotAnExpression) Code() ErrorCode {
+	return CodeTypeNotAnExpression
+}
+
+func NewTypeNotAnExpression(ident *parser.ExprIdentContext) Error {
+	return &TypeNotAnExpression{
+		Ident: ident,
+	}
+}

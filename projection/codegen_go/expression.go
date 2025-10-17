@@ -50,6 +50,8 @@ func GenExpression(expr projection.Expression) jen.Code {
 		return GenExprCopy(e)
 	case *projection.ExprSelf:
 		return GenExprSelf(e)
+	case *projection.ExprTypeCast:
+		return GenExprTypeCast(e)
 	default:
 		panic(fmt.Sprintf("unexpected projection.Expression: %#v", e))
 	}
@@ -180,6 +182,24 @@ func GenExprCopy(e *projection.ExprPassValue) jen.Code {
 	}
 }
 
+func GenExprTypeCast(e *projection.ExprTypeCast) jen.Code {
+	switch e.NewType {
+	case projection.StringType:
+		switch e.Inner.Type() {
+		case projection.IntType:
+			return RuntimeFunc("IntToString").Call(GenExpression(e.Inner))
+		case projection.FloatType:
+			return RuntimeFunc("FloatToString").Call(GenExpression(e.Inner))
+		case projection.BoolType:
+			return RuntimeFunc("BoolToString").Call(GenExpression(e.Inner))
+		default:
+			panic(fmt.Sprintf("unsupported conversion: %v to %v", e.Inner.Type(), e.NewType))
+		}
+	default:
+		return jen.Add(GenType(e.NewType)).Call(GenExpression(e.Inner))
+	}
+}
+
 func CopyNecessary(e projection.Expression) bool {
 	switch e := e.(type) {
 	case *projection.ExprAsync:
@@ -225,6 +245,8 @@ func CopyNecessary(e projection.Expression) bool {
 			}
 		}
 		return false
+	case *projection.ExprTypeCast:
+		return CopyNecessary(e.Inner)
 	default:
 		panic(fmt.Sprintf("unexpected projection.Expression: %#v", e))
 	}

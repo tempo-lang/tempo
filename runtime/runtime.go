@@ -3,6 +3,7 @@ package runtime
 
 import (
 	"reflect"
+	"strconv"
 )
 
 // The environment struct keeps track of the state of the choreography at a single process.
@@ -192,4 +193,18 @@ func Copy[T any](value T) T {
 
 	// implicit copy base type
 	return value
+}
+
+// MARK: Casting
+
+func IntToString(value int) string {
+	return strconv.Itoa(value)
+}
+
+func FloatToString(value float64) string {
+	return strconv.FormatFloat(value, 'g', -1, 64)
+}
+
+func BoolToString(value bool) string {
+	return strconv.FormatBool(value)
 }

@@ -1,0 +1,14 @@
+func main() {
+  let integer: Int = 10;
+  let int1: Float = Float(integer);
+  let int2: Int = Int(integer);
+  let int3: String = String(integer);
+
+  let float: Float = 8.2;
+  let float1: Int = Int(float);
+  let float2: Float = Float(float);
+  let float3: String = String(float);
+
+  let bool: Bool = true;
+  let bool1: String = String(bool);
+}

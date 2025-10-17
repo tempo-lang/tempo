@@ -49,6 +49,7 @@ func (tc *typeChecker) reportError(err ...type_error.Error) {
 func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result any) {
 	tc.info.GlobalScope = sym_table.NewScope(ctx.GetStart(), ctx.GetStop(), nil, nil)
 	tc.currentScope = tc.info.GlobalScope
+	tc.populateGlobalSymbols()
 
 	tc.addGlobalSymbols(ctx)
 

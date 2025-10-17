@@ -163,6 +163,11 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	if _, ok := sym.(*sym_table.TypeSymbol); ok {
+		tc.reportError(type_error.NewTypeNotAnExpression(ctx))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
 	tc.info.Symbols[ctx.IdentAccess().Ident()] = sym
 	sym.AddRead(ctx.IdentAccess().Ident())
 
@@ -295,6 +300,30 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 }
 
 func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
+
+	// Special case for type casting
+	if exprIdent, isIdent := ctx.Expr().(*parser.ExprIdentContext); isIdent {
+		if sym, err := tc.lookupSymbol(exprIdent.IdentAccess().Ident()); err == nil {
+			if typeSym, ok := sym.(*sym_table.TypeSymbol); ok {
+				args := ctx.FuncArgList().AllExpr()
+				if len(args) != 1 {
+					tc.reportError(type_error.NewCallWrongArgCount(ctx, 1, len(args)))
+					return tc.registerType(ctx, types.Invalid())
+				}
+
+				argType := tc.visitExpr(args[0])
+
+				tc.info.Symbols[exprIdent.IdentAccess().Ident()] = typeSym
+				sym.AddRead(exprIdent.IdentAccess().Ident())
+
+				// Check type is compatible
+				// Check roles are compatible
+
+				newType := typeSym.Type().ReplaceSharedRoles(argType.Roles().Participants())
+				return tc.registerType(ctx, newType)
+			}
+		}
+	}
 
 	callType := tc.visitExpr(ctx.Expr())
 	if callType.IsInvalid() {

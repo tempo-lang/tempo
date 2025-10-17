@@ -18,10 +18,10 @@ import (
 type CompilerLanguage string
 
 const (
-	LangGo   = "go"
-	LangTS   = "ts"
-	LangJS   = "js"
-	LangJava = "java"
+	LangGo   CompilerLanguage = "go"
+	LangTS   CompilerLanguage = "ts"
+	LangJS   CompilerLanguage = "js"
+	LangJava CompilerLanguage = "java"
 )
 
 // Options given to the compiler
