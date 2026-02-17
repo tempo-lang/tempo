@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func A0 func[0,1()Int 00")

@@ -94,7 +94,11 @@ func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (ty
 		params = append(params, paramType)
 
 		if unknownRoles := paramType.Roles().SubtractParticipants(roles.Participants()); len(unknownRoles) > 0 {
-			return types.Invalid(), type_error.NewRolesNotInScope(findRoleType(param), unknownRoles)
+			if roleType, found := parser.FindRoleType(param); found {
+				return types.Invalid(), type_error.NewRolesNotInScope(roleType, unknownRoles)
+			} else {
+				return types.Invalid(), type_error.NewRolesNotInScope(param, unknownRoles)
+			}
 		}
 	}
 
@@ -107,7 +111,11 @@ func (tc *typeChecker) parseClosureValueType(ctx *parser.ClosureTypeContext) (ty
 		returnType = ret
 
 		if unknownRoles := returnType.Roles().SubtractParticipants(roles.Participants()); len(unknownRoles) > 0 {
-			return types.Invalid(), type_error.NewRolesNotInScope(findRoleType(ctx.GetReturnType()), unknownRoles)
+			if roleType, found := parser.FindRoleType(ctx.GetReturnType()); found {
+				return types.Invalid(), type_error.NewRolesNotInScope(roleType, unknownRoles)
+			} else {
+				return types.Invalid(), type_error.NewRolesNotInScope(ctx.GetReturnType(), unknownRoles)
+			}
 		}
 	}
 
@@ -173,6 +181,7 @@ type callableTypeProps struct {
 
 func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callableTypeProps, bool) {
 	if ctx == nil || ctx.FuncParamList() == nil {
+		// parser error
 		return nil, false
 	}
 
@@ -207,7 +216,11 @@ func (tc *typeChecker) parseCallableType(ctx parser.CallableSigContext) (*callab
 		}
 
 		if unknownRoles := paramType.Roles().SubtractParticipants(funcRoles.Participants()); len(unknownRoles) > 0 {
-			tc.reportError(type_error.NewRolesNotInScope(findRoleType(param.ValueType()), unknownRoles))
+			if roleType, found := parser.FindRoleType(param.ValueType()); found {
+				tc.reportError(type_error.NewRolesNotInScope(roleType, unknownRoles))
+			} else {
+				tc.reportError(type_error.NewRolesNotInScope(param.ValueType(), unknownRoles))
+			}
 			valid = false
 		}
 
@@ -336,7 +349,7 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 	implements := []types.Type{}
 	if ctx.StructImplements() != nil {
 		for _, impl := range ctx.StructImplements().AllRoleIdent() {
-			if impl == nil || impl.Ident() == nil {
+			if impl == nil || impl.Ident() == nil || impl.Ident().GetText() == "" {
 				continue // parser error
 			}
 
@@ -400,27 +413,4 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.T
 	}
 
 	return types.Interface(ctx.Ident(), roles), true
-}
-
-func findRoleType(ctx parser.IValueTypeContext) parser.IRoleTypeContext {
-	// parser error
-	if ctx == nil {
-		return nil
-	}
-
-	switch ctx := ctx.(type) {
-	case *parser.AsyncTypeContext:
-		return findRoleType(ctx.GetInner())
-	case *parser.ClosureTypeContext:
-		return ctx.RoleType()
-	case *parser.ListTypeContext:
-		return findRoleType(ctx.GetInner())
-	case *parser.NamedTypeContext:
-		return ctx.RoleIdent().RoleType()
-	case *parser.ValueTypeContext:
-		// parser error
-		return nil
-	}
-
-	panic(fmt.Sprintf("findRoleType unknown type: %T", ctx))
 }

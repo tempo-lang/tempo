@@ -22,8 +22,10 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 			tc.reportError(err)
 			typeFailed = true
 		} else if !declType.IsInvalid() {
-			if !tc.checkRolesInScope(findRoleType(ctx.ValueType())) {
-				roleFailed = true
+			if roleType, found := parser.FindRoleType(ctx.ValueType()); found {
+				if !tc.checkRolesInScope(roleType) {
+					roleFailed = true
+				}
 			}
 
 			tc.currentTypeHint = declType

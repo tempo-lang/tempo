@@ -1,0 +1,2 @@
+go test fuzz v1
+string("func A)0func A A A")

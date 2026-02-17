@@ -78,10 +78,13 @@ func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr
 	// return type
 	if fn.GetReturnType() != nil {
 		fn.GetReturnType().Accept(tc)
-		if !tc.checkRolesInScope(findRoleType(fn.GetReturnType())) {
-			if fnValue, ok := fnType.(*types.FunctionType); ok {
-				// make return type invalid
-				fnType = types.Function(fnValue.FuncSig(), fnValue.Params(), types.Invalid(), fnValue.Roles())
+
+		if roleType, found := parser.FindRoleType(fn.GetReturnType()); found {
+			if !tc.checkRolesInScope(roleType) {
+				if fnValue, ok := fnType.(*types.FunctionType); ok {
+					// make return type invalid
+					fnType = types.Function(fnValue.FuncSig(), fnValue.Params(), types.Invalid(), fnValue.Roles())
+				}
 			}
 		}
 	}

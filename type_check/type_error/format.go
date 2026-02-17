@@ -19,30 +19,41 @@ func FormatError(w io.Writer, inputStream *antlr.InputStream, sourceName string,
 		}
 	}
 
-	token := err.ParserRule().GetStart()
-	tokenCol := token.GetColumn()
+	tokenStart := err.ParserRule().GetStart()
+	tokenEnd := err.ParserRule().GetStop()
 
-	lineNrSpace := int(math.Ceil(math.Log10(float64(token.GetLine() + 1))))
-	lineNrStr := strings.Repeat(" ", lineNrSpace)
-	errorLength := err.ParserRule().GetStop().GetStop() - err.ParserRule().GetStart().GetStart() + 1
-
-	fmt.Fprintf(w, "%s: %s\n", withColor(color.FgRed, "error[E%d]", err.Code()), withColor(color.Bold, err.Error()))
-	fmt.Fprintf(w, "%s %s %s:%d:%d\n", lineNrStr, withColor(color.FgBlue, "->"), sourceName, token.GetLine(), tokenCol+1)
-
-	sourceLines := strings.Split(inputStream.String(), "\n")
-
-	line := sourceLines[token.GetLine()-1]
-	if colorOutput {
-		line = fmt.Sprintf("%s%s%s", line[0:tokenCol], withColor(color.FgRed, line[tokenCol:tokenCol+errorLength]), line[tokenCol+errorLength:])
+	// Swap start and end tokens if their indices are reversed
+	if tokenStart.GetTokenIndex() > tokenEnd.GetTokenIndex() {
+		tokenStart, tokenEnd = tokenEnd, tokenStart
 	}
 
-	fmt.Fprintf(w, "%s %s\n", withColor(color.FgBlue, "%s |\n%d |", lineNrStr, token.GetLine()), line)
+	sourceLines := strings.Split(inputStream.String(), "\n")
+	line := sourceLines[tokenStart.GetLine()-1]
+
+	lineNrSpace := int(math.Ceil(math.Log10(float64(tokenStart.GetLine() + 1))))
+	lineNrStr := strings.Repeat(" ", lineNrSpace)
+
+	tokenCol := tokenStart.GetColumn()
+
+	errorLength := tokenEnd.GetStop() - tokenStart.GetStart() + 1
+	if tokenStart.GetLine() != tokenEnd.GetLine() {
+		errorLength = len(line) - tokenCol
+	}
+
+	fmt.Fprintf(w, "%s: %s\n", withColor(color.FgRed, "error[E%d]", err.Code()), withColor(color.Bold, "%s", err.Error()))
+	fmt.Fprintf(w, "%s %s %s:%d:%d\n", lineNrStr, withColor(color.FgBlue, "->"), sourceName, tokenStart.GetLine(), tokenCol+1)
+
+	if colorOutput {
+		line = fmt.Sprintf("%s%s%s", line[0:tokenCol], withColor(color.FgRed, "%s", line[tokenCol:tokenCol+errorLength]), line[tokenCol+errorLength:])
+	}
+
+	fmt.Fprintf(w, "%s %s\n", withColor(color.FgBlue, "%s |\n%d |", lineNrStr, tokenStart.GetLine()), line)
 
 	space := strings.Repeat(" ", tokenCol+1)
 	highlight := strings.Repeat("^", errorLength)
-	fmt.Fprintf(w, "%s%s%s\n\n", withColor(color.FgBlue, "%s |", lineNrStr), space, withColor(color.FgRed, highlight))
+	fmt.Fprintf(w, "%s%s%s\n\n", withColor(color.FgBlue, "%s |", lineNrStr), space, withColor(color.FgRed, "%s", highlight))
 
 	for _, annotation := range err.Annotations() {
-		fmt.Fprintf(w, "%s: %s\n\n", withColor(color.FgBlue, string(annotation.Type)), annotation.Message)
+		fmt.Fprintf(w, "%s: %s\n\n", withColor(color.FgBlue, "%s", string(annotation.Type)), annotation.Message)
 	}
 }

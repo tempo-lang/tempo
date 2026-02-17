@@ -48,11 +48,11 @@ func (e *DuplicateRoles) Code() ErrorCode {
 
 type RolesNotInScope struct {
 	baseError
-	RoleType     parser.IRoleTypeContext
+	RoleType     antlr.ParserRuleContext
 	UnknownRoles []string
 }
 
-func NewRolesNotInScope(roleType parser.IRoleTypeContext, unknownRoles []string) Error {
+func NewRolesNotInScope(roleType antlr.ParserRuleContext, unknownRoles []string) Error {
 	return &RolesNotInScope{
 		RoleType:     roleType,
 		UnknownRoles: unknownRoles,

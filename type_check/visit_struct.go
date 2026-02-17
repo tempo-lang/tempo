@@ -66,7 +66,9 @@ func (tc *typeChecker) VisitStructField(ctx *parser.StructFieldContext) any {
 	structSym.AddField(fieldSym.(*sym_table.StructFieldSymbol))
 
 	if !fieldType.IsInvalid() {
-		tc.checkRolesInScope(findRoleType(ctx.ValueType()))
+		if roleType, found := parser.FindRoleType(ctx.ValueType()); found {
+			tc.checkRolesInScope(roleType)
+		}
 	}
 
 	return nil

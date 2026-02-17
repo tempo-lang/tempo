@@ -1,6 +1,7 @@
 package compiler_test
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/tempo-lang/tempo/compiler"
 	"github.com/tempo-lang/tempo/misc"
+	"github.com/tempo-lang/tempo/type_check/type_error"
 )
 
 // FuzzExtendedCompile runs the compiler with a large corpus to look for crashes.
@@ -17,7 +19,10 @@ func FuzzExtendedCompile(f *testing.F) {
 
 	f.Add("") // empty input
 	for _, sample := range samples {
-		f.Add(sample)
+		for i := range len(sample) - 1 {
+			prefix := sample[0 : i+1]
+			f.Add(prefix)
+		}
 	}
 
 	opts := []*compiler.Options{
@@ -29,7 +34,14 @@ func FuzzExtendedCompile(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, source string) {
 		for _, opt := range opts {
-			compiler.Compile(antlr.NewInputStream(source), opt)
+			input_stream := antlr.NewInputStream(source)
+			_, type_errors := compiler.Compile(input_stream, opt)
+			for _, err := range type_errors {
+				if type_err, ok := err.(type_error.Error); ok {
+					type_error.FormatError(io.Discard, input_stream, "test_sample", type_err, false)
+					type_error.FormatError(io.Discard, input_stream, "test_sample", type_err, true)
+				}
+			}
 		}
 	})
 }

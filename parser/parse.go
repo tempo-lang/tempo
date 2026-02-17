@@ -57,6 +57,37 @@ func RoleTypeAllIdents(ctx IRoleTypeContext) []IIdentContext {
 	panic(fmt.Sprintf("unknown role type: %T", ctx))
 }
 
+// FindRoleType returns the role type and true if found,
+// otherwise, nil and false is returned.
+func FindRoleType(ctx IValueTypeContext) (IRoleTypeContext, bool) {
+	// parser error
+	if ctx == nil {
+		return nil, false
+	}
+
+	switch ctx := ctx.(type) {
+	case *AsyncTypeContext:
+		return FindRoleType(ctx.GetInner())
+	case *ClosureTypeContext:
+		if ctx.RoleType() == nil {
+			return nil, false
+		}
+		return ctx.RoleType(), true
+	case *ListTypeContext:
+		return FindRoleType(ctx.GetInner())
+	case *NamedTypeContext:
+		if ctx.RoleIdent().RoleType() == nil {
+			return nil, false
+		}
+		return ctx.RoleIdent().RoleType(), true
+	case *ValueTypeContext:
+		// parser error
+		return nil, false
+	}
+
+	panic(fmt.Sprintf("FindRoleType unknown type: %T", ctx))
+}
+
 // SyntaxError contains details about a syntax error in the source code.
 type SyntaxError struct {
 	line   int
