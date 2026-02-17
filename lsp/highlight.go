@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -19,21 +20,21 @@ func (s *tempoServer) highlight(context *glsp.Context, params *protocol.Document
 	highlights := []protocol.DocumentHighlight{
 		{
 			Range: parserRuleToRange(sym.Ident()),
-			Kind:  toPtr(protocol.DocumentHighlightKindWrite),
+			Kind:  misc.ToPtr(protocol.DocumentHighlightKindWrite),
 		},
 	}
 
 	for _, read := range sym.AccessReads() {
 		highlights = append(highlights, protocol.DocumentHighlight{
 			Range: parserRuleToRange(read),
-			Kind:  toPtr(protocol.DocumentHighlightKindRead),
+			Kind:  misc.ToPtr(protocol.DocumentHighlightKindRead),
 		})
 	}
 
 	for _, write := range sym.AccessWrites() {
 		highlights = append(highlights, protocol.DocumentHighlight{
 			Range: parserRuleToRange(write),
-			Kind:  toPtr(protocol.DocumentHighlightKindWrite),
+			Kind:  misc.ToPtr(protocol.DocumentHighlightKindWrite),
 		})
 	}
 

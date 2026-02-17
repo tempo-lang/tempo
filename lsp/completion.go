@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/sym_table"
 
@@ -107,23 +108,23 @@ func symbolToCompletionItem(sym sym_table.Symbol) protocol.CompletionItem {
 	var kind *protocol.CompletionItemKind = nil
 	switch sym.(type) {
 	case *sym_table.FuncParamSymbol:
-		kind = toPtr(protocol.CompletionItemKindProperty)
+		kind = misc.ToPtr(protocol.CompletionItemKindProperty)
 	case *sym_table.FuncSymbol:
-		kind = toPtr(protocol.CompletionItemKindFunction)
+		kind = misc.ToPtr(protocol.CompletionItemKindFunction)
 	case *sym_table.StructSymbol:
-		kind = toPtr(protocol.CompletionItemKindStruct)
+		kind = misc.ToPtr(protocol.CompletionItemKindStruct)
 	case *sym_table.StructFieldSymbol:
-		kind = toPtr(protocol.CompletionItemKindField)
+		kind = misc.ToPtr(protocol.CompletionItemKindField)
 	case *sym_table.VariableSymbol:
-		kind = toPtr(protocol.CompletionItemKindVariable)
+		kind = misc.ToPtr(protocol.CompletionItemKindVariable)
 	case *sym_table.InterfaceSymbol:
-		kind = toPtr(protocol.CompletionItemKindInterface)
+		kind = misc.ToPtr(protocol.CompletionItemKindInterface)
 	}
 
 	return protocol.CompletionItem{
 		Label:  sym.SymbolName(),
 		Kind:   kind,
-		Detail: toPtr(sym.Type().ToString()),
+		Detail: misc.ToPtr(sym.Type().ToString()),
 	}
 }
 
@@ -152,8 +153,8 @@ func completionItemsForFieldAccess(file *tempoDoc, fieldAccess *parser.ExprField
 	for name, fieldType := range file.info.Fields(exprType) {
 		completionItems = append(completionItems, protocol.CompletionItem{
 			Label:  name,
-			Kind:   toPtr(protocol.CompletionItemKindField),
-			Detail: toPtr(fieldType.ToString()),
+			Kind:   misc.ToPtr(protocol.CompletionItemKindField),
+			Detail: misc.ToPtr(fieldType.ToString()),
 		})
 	}
 

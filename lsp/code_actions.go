@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -32,11 +33,11 @@ func (s *tempoServer) codeAction(context *glsp.Context, params *protocol.CodeAct
 
 		actions = append(actions, protocol.CodeAction{
 			Title: action.Title,
-			Kind:  toPtr(protocol.CodeActionKindQuickFix),
+			Kind:  misc.ToPtr(protocol.CodeActionKindQuickFix),
 			Diagnostics: []protocol.Diagnostic{
 				typeErrorToDiagnostic(doc.uri, err),
 			},
-			IsPreferred: toPtr(true),
+			IsPreferred: misc.ToPtr(true),
 			Edit: &protocol.WorkspaceEdit{
 				Changes: map[protocol.DocumentUri][]protocol.TextEdit{
 					doc.uri: {textEdit},

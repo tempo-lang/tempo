@@ -3,6 +3,7 @@ package lsp
 import (
 	"fmt"
 
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/type_check"
 	"github.com/tempo-lang/tempo/type_check/type_error"
@@ -51,7 +52,7 @@ func (s *tempoServer) analyzeDocument(notify glsp.NotifyFunc, docUri protocol.UR
 
 	notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
 		URI:         docUri,
-		Version:     toPtr(protocol.UInteger(version)),
+		Version:     misc.ToPtr(protocol.UInteger(version)),
 		Diagnostics: diagnostics,
 	})
 }
@@ -70,12 +71,12 @@ func typeErrorToDiagnostic(docUri protocol.URI, err type_error.Error) protocol.D
 
 	return protocol.Diagnostic{
 		Range:              parserRuleToRange(err.ParserRule()),
-		Severity:           toPtr(protocol.DiagnosticSeverityError),
+		Severity:           misc.ToPtr(protocol.DiagnosticSeverityError),
 		Message:            err.Error(),
 		RelatedInformation: relatedInfo,
 		Code: &protocol.IntegerOrString{
 			Value: fmt.Sprintf("E%d", err.Code()),
 		},
-		Source: toPtr("tempo"),
+		Source: misc.ToPtr("tempo"),
 	}
 }

@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -28,7 +29,7 @@ func documentSymbolsInScope(scope *sym_table.Scope) []protocol.DocumentSymbol {
 		symNameRange := parserRuleToRange(sym.Ident())
 		newSym := protocol.DocumentSymbol{
 			Name:           sym.SymbolName(),
-			Detail:         toPtr(sym.Type().ToString()),
+			Detail:         misc.ToPtr(sym.Type().ToString()),
 			Range:          symNameRange,
 			SelectionRange: symNameRange,
 			Children:       []protocol.DocumentSymbol{},

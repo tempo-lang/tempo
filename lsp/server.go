@@ -7,6 +7,7 @@ package lsp
 import (
 	"sync"
 
+	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/type_check"
 	"github.com/tempo-lang/tempo/type_check/type_error"
@@ -125,7 +126,7 @@ func (s *tempoServer) initialize(context *glsp.Context, params *protocol.Initial
 	}
 
 	capabilities.RenameProvider = &protocol.RenameOptions{
-		PrepareProvider: toPtr(true),
+		PrepareProvider: misc.ToPtr(true),
 	}
 
 	logger.Infof("Capabilities: %#v", capabilities)
@@ -145,9 +146,4 @@ func (s *tempoServer) initialized(context *glsp.Context, params *protocol.Initia
 
 func (s *tempoServer) shutdown(context *glsp.Context) error {
 	return nil
-}
-
-// toPtr converts a value to a pointer to the value
-func toPtr[T any](val T) *T {
-	return &val
 }

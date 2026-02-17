@@ -14,6 +14,8 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
+// TestExamples finds all examples located in the testdata directory/examples,
+// compiles them and verifies that they match the expected outputs.
 func TestExamples(t *testing.T) {
 
 	paths, err := filepath.Glob(filepath.Join("testdata", "examples", "*.tempo"))
