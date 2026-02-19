@@ -2,24 +2,25 @@ package codegen_java
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
 )
 
 func (gen *codegen) GenChoreographyStruct(c *projection.ChoreographyStruct) string {
-	out := ""
-	out += gen.Writeln("// Projection of struct `%s`", c.Name)
+	var out strings.Builder
+	out.WriteString(gen.Writeln("// Projection of struct `%s`", c.Name))
 
 	for _, role := range c.Roles {
-		out += gen.GenStructDecl(c.Structs[role])
+		out.WriteString(gen.GenStructDecl(c.Structs[role]))
 	}
 
-	return out
+	return out.String()
 }
 
 func (gen *codegen) GenStructDecl(s *projection.Struct) string {
-	out := ""
+	var out strings.Builder
 
 	impls := misc.JoinStringsFunc(s.Implements, ", ", func(impl projection.Type) string {
 		return gen.GenType(impl)
@@ -31,55 +32,55 @@ func (gen *codegen) GenStructDecl(s *projection.Struct) string {
 		impls = "Cloneable"
 	}
 
-	out += gen.Writeln("public static final class %s implements %s {", s.StructName(), impls)
+	out.WriteString(gen.Writeln("public static final class %s implements %s {", s.StructName(), impls))
 	gen.IncIndent()
 
 	if len(s.Fields) > 0 {
 		for _, field := range s.Fields {
-			out += gen.Writeln("public %s %s;", gen.GenType(field.Type), field.Name)
+			out.WriteString(gen.Writeln("public %s %s;", gen.GenType(field.Type), field.Name))
 		}
-		out += gen.Writeln("")
+		out.WriteString(gen.Writeln(""))
 	}
 
 	fields := misc.JoinStringsFunc(s.Fields, ", ", func(field projection.StructField) string {
 		return fmt.Sprintf("%s %s", gen.GenType(field.Type), field.Name)
 	})
 
-	out += gen.Writeln("public %s(%s) {", s.StructName(), fields)
+	out.WriteString(gen.Writeln("public %s(%s) {", s.StructName(), fields))
 
 	gen.IncIndent()
 	for _, field := range s.Fields {
-		out += gen.Writeln("this.%s = %s;", field.Name, field.Name)
+		out.WriteString(gen.Writeln("this.%s = %s;", field.Name, field.Name))
 	}
 	gen.DecIndent()
-	out += gen.Writeln("}")
+	out.WriteString(gen.Writeln("}"))
 
-	out += gen.GenStructMethods(s)
+	out.WriteString(gen.GenStructMethods(s))
 
-	out += gen.GenStructDefaultMethods(s)
+	out.WriteString(gen.GenStructDefaultMethods(s))
 
 	gen.DecIndent()
-	out += gen.Writeln("}")
-	return out
+	out.WriteString(gen.Writeln("}"))
+	return out.String()
 }
 
 func (gen *codegen) GenStructMethods(s *projection.Struct) string {
-	out := ""
+	var out strings.Builder
 
 	for _, method := range s.Methods {
-		out += gen.Writeln("")
+		out.WriteString(gen.Writeln(""))
 		params := gen.GenFuncParams(method.FuncSig)
 
-		out += gen.Writeln("public %s %s(%s) throws Exception {", gen.GenType(method.FuncSig.ReturnValue), method.FuncSig.Name, params)
+		out.WriteString(gen.Writeln("public %s %s(%s) throws Exception {", gen.GenType(method.FuncSig.ReturnValue), method.FuncSig.Name, params))
 		gen.IncIndent()
 		for _, stmt := range method.Body {
-			out += gen.GenStmt(stmt)
+			out.WriteString(gen.GenStmt(stmt))
 		}
 		gen.DecIndent()
-		out += gen.Writeln("}")
+		out.WriteString(gen.Writeln("}"))
 	}
 
-	return out
+	return out.String()
 }
 
 func (gen *codegen) GenStructDefaultMethods(s *projection.Struct) string {

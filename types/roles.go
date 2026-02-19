@@ -247,12 +247,7 @@ func (r *Roles) Encompass(other *Roles) bool {
 			return true
 		}
 
-		for _, role := range r.participants {
-			if other.participants[0] == role {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(r.participants, other.participants[0])
 	}
 
 	if r.IsDistributedRole() && other.IsDistributedRole() {

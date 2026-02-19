@@ -3,6 +3,7 @@ package codegen_ts
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
@@ -160,24 +161,25 @@ func (gen *codegen) GenExprClosure(e *projection.ExprClosure) string {
 		}
 	}
 
-	out := fmt.Sprintf("async (%s)", misc.JoinStrings(params, ", "))
+	var out strings.Builder
+	out.WriteString(fmt.Sprintf("async (%s)", misc.JoinStrings(params, ", ")))
 
 	if e.ReturnType != projection.UnitType() && !gen.opts.DisableTypes {
-		out += fmt.Sprintf(": Promise<%s>", gen.GenType(e.ReturnType))
+		out.WriteString(fmt.Sprintf(": Promise<%s>", gen.GenType(e.ReturnType)))
 	}
 
-	out += " => {\n"
+	out.WriteString(" => {\n")
 	gen.IncIndent()
 
 	for _, stmt := range e.Body {
-		out += gen.GenStmt(stmt)
+		out.WriteString(gen.GenStmt(stmt))
 	}
 
 	gen.DecIndent()
 
-	out += gen.WriteIndent() + "}"
+	out.WriteString(gen.WriteIndent() + "}")
 
-	return out
+	return out.String()
 }
 
 func (gen *codegen) GenExprFieldAccess(e *projection.ExprFieldAccess) string {

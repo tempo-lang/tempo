@@ -2,22 +2,24 @@ package codegen_java
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
 )
 
 func (gen *codegen) GenFunc(f *projection.Func) string {
-	out := gen.Writeln("%s throws Exception {", gen.GenFuncSig(f.FuncSig))
+	var out strings.Builder
+	out.WriteString(gen.Writeln("%s throws Exception {", gen.GenFuncSig(f.FuncSig)))
 	gen.IncIndent()
 
 	for _, stmt := range f.Body {
-		out += gen.GenStmt(stmt)
+		out.WriteString(gen.GenStmt(stmt))
 	}
 
 	gen.DecIndent()
-	out += gen.Writeln("}")
-	return out
+	out.WriteString(gen.Writeln("}"))
+	return out.String()
 }
 
 func (gen *codegen) GenFuncParams(f *projection.FuncSig) string {

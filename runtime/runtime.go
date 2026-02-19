@@ -2,6 +2,7 @@
 package runtime
 
 import (
+	"maps"
 	"reflect"
 	"strconv"
 )
@@ -79,9 +80,7 @@ func (e *Env) Subst(roles ...string) *Env {
 // Clone will return a copy of the environment.
 func (e *Env) Clone() *Env {
 	newRoleSub := map[string]string{}
-	for key, value := range e.roleSub {
-		newRoleSub[key] = value
-	}
+	maps.Copy(newRoleSub, e.roleSub)
 
 	return &Env{
 		trans:   e.trans,

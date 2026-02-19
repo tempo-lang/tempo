@@ -1,14 +1,17 @@
 package codegen_ts
 
+import "strings"
+
 import "github.com/tempo-lang/tempo/projection"
 
 func (gen *codegen) GenChoreography(c *projection.Choreography) string {
-	out := gen.Writeln("// Projection of choreography `%s`", c.Name)
+	var out strings.Builder
+	out.WriteString(gen.Writeln("// Projection of choreography `%s`", c.Name))
 
 	for _, role := range c.Roles {
-		out += gen.GenFunc(c.Funcs[role])
+		out.WriteString(gen.GenFunc(c.Funcs[role]))
 	}
 
-	out += gen.Writeln("")
-	return out
+	out.WriteString(gen.Writeln(""))
+	return out.String()
 }

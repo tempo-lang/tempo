@@ -3,6 +3,7 @@ package codegen_java
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/projection"
@@ -129,24 +130,24 @@ func (gen *codegen) GenExprCallFunc(e *projection.ExprCallFunc) string {
 }
 
 func (gen *codegen) GenExprClosure(e *projection.ExprClosure) string {
-	out := ""
+	var out strings.Builder
 
 	params := []string{}
 	for _, p := range e.Params {
 		params = append(params, p.Name)
 	}
 
-	out += fmt.Sprintf("(%s) -> {\n", misc.JoinStrings(params, ", "))
+	out.WriteString(fmt.Sprintf("(%s) -> {\n", misc.JoinStrings(params, ", ")))
 	gen.IncIndent()
 
 	for _, stmt := range e.Body {
-		out += gen.GenStmt(stmt)
+		out.WriteString(gen.GenStmt(stmt))
 	}
 
 	gen.DecIndent()
-	out += gen.WriteIndent() + "}"
+	out.WriteString(gen.WriteIndent() + "}")
 
-	return out
+	return out.String()
 }
 
 func (gen *codegen) GenExprFieldAccess(e *projection.ExprFieldAccess) string {

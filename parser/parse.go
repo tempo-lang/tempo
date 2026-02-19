@@ -146,7 +146,7 @@ func (t *errorListener) ReportContextSensitivity(recognizer antlr.Parser, dfa *a
 }
 
 // SyntaxError implements antlr.ErrorListener.
-func (t *errorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol interface{}, line int, column int, msg string, e antlr.RecognitionException) {
+func (t *errorListener) SyntaxError(recognizer antlr.Recognizer, offendingSymbol any, line int, column int, msg string, e antlr.RecognitionException) {
 	t.Errors = append(
 		t.Errors,
 		newSyntaxError(line, column, msg),

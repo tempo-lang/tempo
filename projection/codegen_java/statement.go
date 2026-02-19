@@ -2,6 +2,7 @@ package codegen_java
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/tempo-lang/tempo/projection"
 )
@@ -51,27 +52,28 @@ func (gen *codegen) GenStmtExpr(s *projection.StmtExpr) string {
 }
 
 func (gen *codegen) GenStmtIf(s *projection.StmtIf) string {
-	out := gen.Writeln("if (%s) {", gen.GenExpr(s.Guard))
+	var out strings.Builder
+	out.WriteString(gen.Writeln("if (%s) {", gen.GenExpr(s.Guard)))
 
 	gen.IncIndent()
 	for _, stmt := range s.ThenBranch {
-		out += gen.GenStmt(stmt)
+		out.WriteString(gen.GenStmt(stmt))
 	}
 	gen.DecIndent()
 
 	if len(s.ElseBranch) > 0 {
-		out += gen.Writeln("} else {")
+		out.WriteString(gen.Writeln("} else {"))
 
 		gen.IncIndent()
 		for _, stmt := range s.ElseBranch {
-			out += gen.GenStmt(stmt)
+			out.WriteString(gen.GenStmt(stmt))
 		}
 		gen.DecIndent()
 	}
 
-	out += gen.Writeln("}")
+	out.WriteString(gen.Writeln("}"))
 
-	return out
+	return out.String()
 }
 
 func (gen *codegen) GenStmtReturn(s *projection.StmtReturn) string {
@@ -87,15 +89,16 @@ func (gen *codegen) GenStmtVarDecl(s *projection.StmtVarDecl) string {
 }
 
 func (gen *codegen) GenStmtWhile(s *projection.StmtWhile) string {
-	out := gen.Writeln("while (%s) {", gen.GenExpr(s.Cond))
+	var out strings.Builder
+	out.WriteString(gen.Writeln("while (%s) {", gen.GenExpr(s.Cond)))
 
 	gen.IncIndent()
 	for _, stmt := range s.Stmts {
-		out += gen.GenStmt(stmt)
+		out.WriteString(gen.GenStmt(stmt))
 	}
 	gen.DecIndent()
 
-	out += gen.Writeln("}")
+	out.WriteString(gen.Writeln("}"))
 
-	return out
+	return out.String()
 }
