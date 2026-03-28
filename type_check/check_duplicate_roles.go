@@ -12,7 +12,7 @@ func (tc typeChecker) checkDuplicateRoles(ctx antlr.ParserRuleContext, roleType 
 	duplications := []string{}
 	for i := range roles {
 		for j := i + 1; j < len(roles); j++ {
-			if roles[i] == roles[j] {
+			if roles[i] == roles[j] && roles[i] != "_" && roles[j] != "_" {
 				duplications = append(duplications, roles[i])
 			}
 		}

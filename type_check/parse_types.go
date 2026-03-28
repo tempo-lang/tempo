@@ -147,7 +147,6 @@ func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.
 		return builtinType, nil
 	}
 
-	var typeError type_error.Error = nil
 	sym, err := tc.lookupSymbol(typeName)
 	if err != nil {
 		return types.Invalid(), err
@@ -161,7 +160,7 @@ func (tc *typeChecker) parseNamedValueType(ctx *parser.NamedTypeContext) (types.
 	}
 	typeValue := sym.Type().SubstituteRoles(substMap)
 
-	return typeValue, typeError
+	return typeValue, nil
 }
 
 func (tc *typeChecker) parseListValueType(ctx *parser.ListTypeContext) (types.Type, type_error.Error) {

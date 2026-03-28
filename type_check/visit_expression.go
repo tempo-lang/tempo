@@ -14,11 +14,18 @@ func (tc *typeChecker) visitExpr(ctx parser.IExprContext) types.Type {
 	if ctx == nil {
 		return tc.registerType(ctx, types.Invalid())
 	}
-	exprType := ctx.Accept(tc)
-	if exprType == nil {
+	result := ctx.Accept(tc)
+	if result == nil {
 		return tc.registerType(ctx, types.Invalid())
 	}
-	return exprType.(types.Type)
+
+	exprType := result.(types.Type)
+
+	if exprType.Roles().IsHidden() {
+		tc.reportError(type_error.NewHiddenExpression(ctx, exprType))
+	}
+
+	return exprType
 }
 
 func (tc *typeChecker) registerType(expr parser.IExprContext, exprType types.Type) types.Type {

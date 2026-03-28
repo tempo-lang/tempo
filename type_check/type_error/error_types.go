@@ -63,6 +63,8 @@ const (
 	CodeTypeNotAnExpression
 	CodeIncompatibleTypeCast
 	CodeUnexpectedHiddenRoles
+	CodeHiddenExpression
+	CodeHiddenTypeSignature
 )
 
 type AnnotationType string
@@ -261,6 +263,40 @@ func (e *UnknownType) ParserRule() antlr.ParserRuleContext {
 
 func (e *UnknownType) Code() ErrorCode {
 	return CodeUnknownType
+}
+
+type HiddenTypeSignature struct {
+	baseError
+	ValueType parser.IValueTypeContext
+	Type      types.Type
+}
+
+func NewHiddenTypeSignature(valueType parser.IValueTypeContext, typeSig types.Type) Error {
+	return &HiddenTypeSignature{
+		ValueType: valueType,
+		Type:      typeSig,
+	}
+}
+
+func (e *HiddenTypeSignature) Error() string {
+	return fmt.Sprintf("hidden type signature `%s`", e.Type.ToString())
+}
+
+func (e *HiddenTypeSignature) Annotations() []Annotation {
+	return []Annotation{
+		{
+			Type:    AnnotationTypeNote,
+			Message: "all the roles in the type are hidden",
+		},
+	}
+}
+
+func (e *HiddenTypeSignature) ParserRule() antlr.ParserRuleContext {
+	return e.ValueType
+}
+
+func (e *HiddenTypeSignature) Code() ErrorCode {
+	return CodeHiddenTypeSignature
 }
 
 type ValueMismatch struct {

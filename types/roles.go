@@ -199,6 +199,17 @@ func (r *Roles) IsComplete() bool {
 	return !slices.Contains(r.participants, "_")
 }
 
+// IsHidden returns true if all participants are hidden.
+func (r *Roles) IsHidden() bool {
+	if len(r.participants) == 0 {
+		return false // unnamed roles are not hidden
+	}
+
+	return !slices.ContainsFunc(r.participants, func(ident string) bool {
+		return ident != "_"
+	})
+}
+
 // Participants returns a copy of the participants involved in the roles object.
 func (r *Roles) Participants() []string {
 	return slices.Clone(r.participants)

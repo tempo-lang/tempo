@@ -2,6 +2,7 @@ package type_check
 
 import (
 	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
 )
 
@@ -14,6 +15,10 @@ func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) types.Type {
 	if err != nil {
 		tc.reportError(err)
 		return types.Invalid()
+	}
+
+	if valType.Roles().IsHidden() {
+		tc.reportError(type_error.NewHiddenTypeSignature(ctx, valType))
 	}
 
 	return valType
