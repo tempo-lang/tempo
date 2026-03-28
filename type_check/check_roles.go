@@ -8,8 +8,9 @@ import (
 	"github.com/antlr4-go/antlr/v4"
 )
 
-func (tc *typeChecker) coerceExprToScope(value antlr.ParserRuleContext, exprType types.Type) types.Type {
+func (tc *typeChecker) coerceExprToScope(value parser.IExprContext, exprType types.Type) types.Type {
 	scopeRoles := tc.currentScope.Roles()
+	typeParticipants := exprType.Roles().Participants()
 
 	switch exprType.(type) {
 	case *types.ClosureType, *types.FunctionType:
@@ -21,16 +22,22 @@ func (tc *typeChecker) coerceExprToScope(value antlr.ParserRuleContext, exprType
 
 	if exprType.Roles().IsSharedRole() {
 		rolesInScope := []string{}
-		for _, role := range exprType.Roles().Participants() {
+		for _, role := range typeParticipants {
 			if scopeRoles.Contains(role) {
 				rolesInScope = append(rolesInScope, role)
 			}
 		}
+
+		if len(typeParticipants) > 0 && len(rolesInScope) == 0 {
+			tc.reportError(type_error.NewValueRoleNotInScope(value, exprType.Roles(), typeParticipants))
+			return types.Invalid()
+		}
+
 		return exprType.ReplaceSharedRoles(rolesInScope)
 	}
 
 	subst := types.NewRoleSubst()
-	for _, role := range exprType.Roles().Participants() {
+	for _, role := range typeParticipants {
 		if !scopeRoles.Contains(role) {
 			subst.AddRole(role, "_")
 		}
