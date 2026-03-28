@@ -1,0 +1,7 @@
+func@(A,_) foo() {}
+struct@(B,_) Bar {}
+interface@(_,C) Baz {}
+---
+E49 3:11: hidden roles '_' not allowed here
+E49 2:8: hidden roles '_' not allowed here
+E49 1:6: hidden roles '_' not allowed here

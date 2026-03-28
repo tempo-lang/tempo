@@ -22,8 +22,8 @@ valueType:
 role: ident | UNDERSCORE;
 
 roleType:
-	(LSQUARE ident (COMMA ident)* RSQUARE)				# roleTypeShared
-	| (ident | (LPAREN ident (COMMA ident)* RPAREN))	# roleTypeNormal;
+	(LSQUARE role (COMMA role)* RSQUARE)				# roleTypeShared
+	| (role | (LPAREN role (COMMA role)* RPAREN))	# roleTypeNormal;
 
 // closure
 closureParamList: LPAREN (valueType (COMMA valueType)*)? RPAREN;

@@ -62,6 +62,7 @@ const (
 	CodeDuplicateStructField
 	CodeTypeNotAnExpression
 	CodeIncompatibleTypeCast
+	CodeUnexpectedHiddenRoles
 )
 
 type AnnotationType string
@@ -184,7 +185,7 @@ func (u *UnexpectedSharedType) Error() string {
 }
 
 func (u *UnexpectedSharedType) CodeAction() *CodeAction {
-	roles := misc.JoinStringsFunc(parser.RoleTypeAllIdents(u.RoleType), ",", func(role parser.IIdentContext) string {
+	roles := misc.JoinStringsFunc(parser.RoleTypeAllRoles(u.RoleType), ",", func(role parser.IRoleContext) string {
 		return role.GetText()
 	})
 

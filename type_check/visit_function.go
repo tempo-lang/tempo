@@ -67,6 +67,10 @@ func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr
 		return nil, false
 	}
 
+	if !funcRoles.IsComplete() {
+		tc.reportError(type_error.NewUnexpectedHiddenRoles(fn.RoleType()))
+	}
+
 	funcScope := tc.currentScope.MakeChild(scopeRange.GetStart(), scopeRange.GetStop(), funcRoles.Participants())
 	tc.currentScope = funcScope
 

@@ -121,11 +121,11 @@ func tempoParserInit() {
 		85, 71, 1, 0, 0, 0, 85, 73, 1, 0, 0, 0, 85, 77, 1, 0, 0, 0, 85, 84, 1,
 		0, 0, 0, 86, 7, 1, 0, 0, 0, 87, 90, 3, 2, 1, 0, 88, 90, 5, 40, 0, 0, 89,
 		87, 1, 0, 0, 0, 89, 88, 1, 0, 0, 0, 90, 9, 1, 0, 0, 0, 91, 92, 5, 15, 0,
-		0, 92, 97, 3, 2, 1, 0, 93, 94, 5, 35, 0, 0, 94, 96, 3, 2, 1, 0, 95, 93,
+		0, 92, 97, 3, 8, 4, 0, 93, 94, 5, 35, 0, 0, 94, 96, 3, 8, 4, 0, 95, 93,
 		1, 0, 0, 0, 96, 99, 1, 0, 0, 0, 97, 95, 1, 0, 0, 0, 97, 98, 1, 0, 0, 0,
 		98, 100, 1, 0, 0, 0, 99, 97, 1, 0, 0, 0, 100, 101, 5, 18, 0, 0, 101, 117,
-		1, 0, 0, 0, 102, 115, 3, 2, 1, 0, 103, 104, 5, 14, 0, 0, 104, 109, 3, 2,
-		1, 0, 105, 106, 5, 35, 0, 0, 106, 108, 3, 2, 1, 0, 107, 105, 1, 0, 0, 0,
+		1, 0, 0, 0, 102, 115, 3, 8, 4, 0, 103, 104, 5, 14, 0, 0, 104, 109, 3, 8,
+		4, 0, 105, 106, 5, 35, 0, 0, 106, 108, 3, 8, 4, 0, 107, 105, 1, 0, 0, 0,
 		108, 111, 1, 0, 0, 0, 109, 107, 1, 0, 0, 0, 109, 110, 1, 0, 0, 0, 110,
 		112, 1, 0, 0, 0, 111, 109, 1, 0, 0, 0, 112, 113, 5, 17, 0, 0, 113, 115,
 		1, 0, 0, 0, 114, 102, 1, 0, 0, 0, 114, 103, 1, 0, 0, 0, 115, 117, 1, 0,
@@ -1598,20 +1598,20 @@ func (s *RoleTypeSharedContext) LSQUARE() antlr.TerminalNode {
 	return s.GetToken(TempoParserLSQUARE, 0)
 }
 
-func (s *RoleTypeSharedContext) AllIdent() []IIdentContext {
+func (s *RoleTypeSharedContext) AllRole() []IRoleContext {
 	children := s.GetChildren()
 	len := 0
 	for _, ctx := range children {
-		if _, ok := ctx.(IIdentContext); ok {
+		if _, ok := ctx.(IRoleContext); ok {
 			len++
 		}
 	}
 
-	tst := make([]IIdentContext, len)
+	tst := make([]IRoleContext, len)
 	i := 0
 	for _, ctx := range children {
-		if t, ok := ctx.(IIdentContext); ok {
-			tst[i] = t.(IIdentContext)
+		if t, ok := ctx.(IRoleContext); ok {
+			tst[i] = t.(IRoleContext)
 			i++
 		}
 	}
@@ -1619,11 +1619,11 @@ func (s *RoleTypeSharedContext) AllIdent() []IIdentContext {
 	return tst
 }
 
-func (s *RoleTypeSharedContext) Ident(i int) IIdentContext {
+func (s *RoleTypeSharedContext) Role(i int) IRoleContext {
 	var t antlr.RuleContext
 	j := 0
 	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IIdentContext); ok {
+		if _, ok := ctx.(IRoleContext); ok {
 			if j == i {
 				t = ctx.(antlr.RuleContext)
 				break
@@ -1636,7 +1636,7 @@ func (s *RoleTypeSharedContext) Ident(i int) IIdentContext {
 		return nil
 	}
 
-	return t.(IIdentContext)
+	return t.(IRoleContext)
 }
 
 func (s *RoleTypeSharedContext) RSQUARE() antlr.TerminalNode {
@@ -1691,20 +1691,20 @@ func (s *RoleTypeNormalContext) GetRuleContext() antlr.RuleContext {
 	return s
 }
 
-func (s *RoleTypeNormalContext) AllIdent() []IIdentContext {
+func (s *RoleTypeNormalContext) AllRole() []IRoleContext {
 	children := s.GetChildren()
 	len := 0
 	for _, ctx := range children {
-		if _, ok := ctx.(IIdentContext); ok {
+		if _, ok := ctx.(IRoleContext); ok {
 			len++
 		}
 	}
 
-	tst := make([]IIdentContext, len)
+	tst := make([]IRoleContext, len)
 	i := 0
 	for _, ctx := range children {
-		if t, ok := ctx.(IIdentContext); ok {
-			tst[i] = t.(IIdentContext)
+		if t, ok := ctx.(IRoleContext); ok {
+			tst[i] = t.(IRoleContext)
 			i++
 		}
 	}
@@ -1712,11 +1712,11 @@ func (s *RoleTypeNormalContext) AllIdent() []IIdentContext {
 	return tst
 }
 
-func (s *RoleTypeNormalContext) Ident(i int) IIdentContext {
+func (s *RoleTypeNormalContext) Role(i int) IRoleContext {
 	var t antlr.RuleContext
 	j := 0
 	for _, ctx := range s.GetChildren() {
-		if _, ok := ctx.(IIdentContext); ok {
+		if _, ok := ctx.(IRoleContext); ok {
 			if j == i {
 				t = ctx.(antlr.RuleContext)
 				break
@@ -1729,7 +1729,7 @@ func (s *RoleTypeNormalContext) Ident(i int) IIdentContext {
 		return nil
 	}
 
-	return t.(IIdentContext)
+	return t.(IRoleContext)
 }
 
 func (s *RoleTypeNormalContext) LPAREN() antlr.TerminalNode {
@@ -1795,7 +1795,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 		}
 		{
 			p.SetState(92)
-			p.Ident()
+			p.Role()
 		}
 		p.SetState(97)
 		p.GetErrorHandler().Sync(p)
@@ -1815,7 +1815,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 			}
 			{
 				p.SetState(94)
-				p.Ident()
+				p.Role()
 			}
 
 			p.SetState(99)
@@ -1834,7 +1834,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 			}
 		}
 
-	case TempoParserLPAREN, TempoParserID:
+	case TempoParserLPAREN, TempoParserUNDERSCORE, TempoParserID:
 		localctx = NewRoleTypeNormalContext(p, localctx)
 		p.EnterOuterAlt(localctx, 2)
 		p.SetState(114)
@@ -1844,10 +1844,10 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 		}
 
 		switch p.GetTokenStream().LA(1) {
-		case TempoParserID:
+		case TempoParserUNDERSCORE, TempoParserID:
 			{
 				p.SetState(102)
-				p.Ident()
+				p.Role()
 			}
 
 		case TempoParserLPAREN:
@@ -1861,7 +1861,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 			}
 			{
 				p.SetState(104)
-				p.Ident()
+				p.Role()
 			}
 			p.SetState(109)
 			p.GetErrorHandler().Sync(p)
@@ -1881,7 +1881,7 @@ func (p *TempoParser) RoleType() (localctx IRoleTypeContext) {
 				}
 				{
 					p.SetState(106)
-					p.Ident()
+					p.Role()
 				}
 
 				p.SetState(111)
@@ -4630,7 +4630,7 @@ func (p *TempoParser) FuncArgList() (localctx IFuncArgListContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&7215545118992) != 0 {
+	if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&8315056746768) != 0 {
 		{
 			p.SetState(224)
 			p.expr(0)
@@ -4836,7 +4836,7 @@ func (p *TempoParser) Scope() (localctx IScopeContext) {
 	}
 	_la = p.GetTokenStream().LA(1)
 
-	for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&7215545121648) != 0 {
+	for (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&8315056749424) != 0 {
 		{
 			p.SetState(237)
 			p.Stmt()
@@ -5621,7 +5621,7 @@ func (p *TempoParser) Stmt() (localctx IStmtContext) {
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&7215545118992) != 0 {
+		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&8315056746768) != 0 {
 			{
 				p.SetState(267)
 				p.expr(0)
@@ -7116,7 +7116,7 @@ func (p *TempoParser) expr(_p int) (localctx IExprContext) {
 		}
 		_la = p.GetTokenStream().LA(1)
 
-		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&7215545118992) != 0 {
+		if (int64(_la) & ^0x3f) == 0 && ((int64(1)<<_la)&8315056746768) != 0 {
 			{
 				p.SetState(308)
 				p.expr(0)

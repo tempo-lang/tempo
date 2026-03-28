@@ -194,6 +194,11 @@ func (r *Roles) IsUnnamedRole() bool {
 	return r.roleType == ROLE_LOCAL && r.participants[0] == ""
 }
 
+// IsComplete returns true if none of the role participants are hidden.
+func (r *Roles) IsComplete() bool {
+	return !slices.Contains(r.participants, "_")
+}
+
 // Participants returns a copy of the participants involved in the roles object.
 func (r *Roles) Participants() []string {
 	return slices.Clone(r.participants)

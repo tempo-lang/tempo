@@ -158,3 +158,26 @@ func (e *MissingRoles) Annotations() []Annotation {
 func (e *MissingRoles) Code() ErrorCode {
 	return CodeMissingRoles
 }
+
+type UnexpectedHiddenRoles struct {
+	baseError
+	RoleType parser.IRoleTypeContext
+}
+
+func NewUnexpectedHiddenRoles(roleType parser.IRoleTypeContext) Error {
+	return &UnexpectedHiddenRoles{
+		RoleType: roleType,
+	}
+}
+
+func (u *UnexpectedHiddenRoles) Code() ErrorCode {
+	return CodeUnexpectedHiddenRoles
+}
+
+func (u *UnexpectedHiddenRoles) Error() string {
+	return "hidden roles '_' not allowed here"
+}
+
+func (u *UnexpectedHiddenRoles) ParserRule() antlr.ParserRuleContext {
+	return u.RoleType
+}

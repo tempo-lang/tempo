@@ -27,7 +27,7 @@ func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType 
 }
 
 func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool {
-	idents := parser.RoleTypeAllIdents(roleType)
+	idents := parser.RoleTypeAllRoles(roleType)
 	scopeRoles := tc.currentScope.Roles()
 
 	unknownRoles := []string{}

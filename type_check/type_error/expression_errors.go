@@ -71,7 +71,7 @@ type ComValueNotAtSender struct {
 }
 
 func (c *ComValueNotAtSender) Error() string {
-	sender := parser.RoleTypeAllIdents(c.Com.RoleType(0))[0]
+	sender := parser.RoleTypeAllRoles(c.Com.RoleType(0))[0]
 	return fmt.Sprintf("value of type `%s` is not present at sender `%s`", c.ExprType.ToString(), sender.GetText())
 }
 

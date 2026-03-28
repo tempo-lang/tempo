@@ -293,7 +293,7 @@ func (tc *typeChecker) parseRoleType(ctx parser.IRoleTypeContext) (*types.Roles,
 
 func (tc *typeChecker) parseRoleTypeNormal(ctx *parser.RoleTypeNormalContext) (*types.Roles, bool) {
 	participants := []string{}
-	for _, role := range ctx.AllIdent() {
+	for _, role := range ctx.AllRole() {
 		participants = append(participants, role.GetText())
 	}
 
@@ -310,7 +310,7 @@ func (tc *typeChecker) parseRoleTypeNormal(ctx *parser.RoleTypeNormalContext) (*
 
 func (tc *typeChecker) parseRoleTypeShared(ctx *parser.RoleTypeSharedContext) (*types.Roles, bool) {
 	participants := []string{}
-	for _, role := range ctx.AllIdent() {
+	for _, role := range ctx.AllRole() {
 		participants = append(participants, role.GetText())
 	}
 
@@ -343,6 +343,11 @@ func (tc *typeChecker) parseStructType(ctx parser.IStructContext) (types.Type, b
 
 	if roles.IsSharedRole() {
 		tc.reportError(type_error.NewUnexpectedSharedType(ctx.RoleType()))
+		return types.Invalid(), false
+	}
+
+	if !roles.IsComplete() {
+		tc.reportError(type_error.NewUnexpectedHiddenRoles(ctx.RoleType()))
 		return types.Invalid(), false
 	}
 
@@ -409,6 +414,11 @@ func (tc *typeChecker) parseInterfaceType(ctx parser.IInterfaceContext) (types.T
 
 	if roles.IsSharedRole() {
 		tc.reportError(type_error.NewUnexpectedSharedType(ctx.RoleType()))
+		return types.Invalid(), false
+	}
+
+	if !roles.IsComplete() {
+		tc.reportError(type_error.NewUnexpectedHiddenRoles(ctx.RoleType()))
 		return types.Invalid(), false
 	}
 
