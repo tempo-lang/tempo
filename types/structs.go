@@ -60,7 +60,7 @@ func (t *StructType) CoerceTo(other Type) (Type, bool) {
 
 	if otherStruct, ok := other.(*StructType); ok {
 		if t.structIdent == otherStruct.structIdent {
-			return t, true
+			return otherStruct, true
 		}
 	}
 

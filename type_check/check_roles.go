@@ -13,6 +13,10 @@ func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType 
 	unknownRoles := []string{}
 
 	for _, ident := range idents {
+		if ident == "_" {
+			continue // skip hidden roles
+		}
+
 		if !tc.currentScope.Roles().Contains(ident) {
 			unknownRoles = append(unknownRoles, ident)
 		}
@@ -32,6 +36,10 @@ func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool 
 
 	unknownRoles := []string{}
 	for _, i := range idents {
+		if i.GetText() == "_" {
+			continue // skip hidden roles
+		}
+
 		if !scopeRoles.Contains(i.GetText()) {
 			unknownRoles = append(unknownRoles, i.GetText())
 		}

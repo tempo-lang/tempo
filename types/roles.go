@@ -261,6 +261,10 @@ func (r *Roles) Encompass(other *Roles) bool {
 		}
 
 		for i, role := range r.participants {
+			if other.participants[i] == "_" {
+				continue // hidden roles are always coerceable
+			}
+
 			if role != other.participants[i] {
 				return false
 			}
