@@ -40,9 +40,10 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 
 	stmtType := exprType
 
-	if !tc.checkExprInScope(ctx.Expr(), exprType.Roles()) {
-		roleFailed = true
-	}
+	exprType = tc.coerceExprToScope(ctx.Expr(), exprType)
+	// if !tc.checkExprInScope(ctx.Expr(), exprType.Roles()) {
+	// 	roleFailed = true
+	// }
 
 	if hasExplicitType {
 		if !typeFailed {
@@ -168,7 +169,7 @@ func (tc *typeChecker) VisitStmtIf(ctx *parser.StmtIfContext) any {
 		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), guardType, boolType))
 	}
 
-	tc.checkExprInScope(ctx.Expr(), guardType.Roles())
+	guardType = tc.coerceExprToScope(ctx.Expr(), guardType)
 
 	scopeRoles := guardType.Roles().Participants()
 
@@ -199,7 +200,7 @@ func (tc *typeChecker) VisitStmtWhile(ctx *parser.StmtWhileContext) any {
 		tc.reportError(type_error.NewInvalidValue(ctx.Expr(), condType, types.Bool(nil)))
 	}
 
-	tc.checkExprInScope(ctx.Expr(), condType.Roles())
+	condType = tc.coerceExprToScope(ctx.Expr(), condType)
 
 	scopeRoles := condType.Roles().Participants()
 

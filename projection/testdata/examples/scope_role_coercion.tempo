@@ -1,0 +1,13 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B,C) main() {
+  let pair: Pair@(A,C) = Pair@(A,C) { x: 10, y: 20 };
+  let x: Int@[B,C] = 10;
+  if true@[A,B] {
+    let y: Int@B = x;
+    let inner: Pair@(A,_) = pair;
+  }
+}

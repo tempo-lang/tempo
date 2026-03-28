@@ -223,7 +223,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		}
 	}
 
-	tc.checkExprInScope(ctx, identType.Roles())
+	identType = tc.coerceExprToScope(ctx, identType)
 
 	return tc.registerType(ctx, identType)
 }
