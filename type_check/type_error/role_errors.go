@@ -175,7 +175,7 @@ func (u *UnexpectedHiddenRoles) Code() ErrorCode {
 }
 
 func (u *UnexpectedHiddenRoles) Error() string {
-	return "hidden roles '_' not allowed here"
+	return "hidden roles `_` not allowed here"
 }
 
 func (u *UnexpectedHiddenRoles) ParserRule() antlr.ParserRuleContext {

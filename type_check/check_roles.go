@@ -11,6 +11,14 @@ import (
 func (tc *typeChecker) coerceExprToScope(value antlr.ParserRuleContext, exprType types.Type) types.Type {
 	scopeRoles := tc.currentScope.Roles()
 
+	switch exprType.(type) {
+	case *types.ClosureType, *types.FunctionType:
+		inScope := tc.checkExprInScope(value, exprType.Roles())
+		if !inScope {
+			return types.Invalid()
+		}
+	}
+
 	if exprType.Roles().IsSharedRole() {
 		rolesInScope := []string{}
 		for _, role := range exprType.Roles().Participants() {

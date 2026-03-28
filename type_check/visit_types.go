@@ -21,6 +21,13 @@ func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) types.Type {
 		tc.reportError(type_error.NewHiddenTypeSignature(ctx, valType))
 	}
 
+	if fnType, ok := valType.(*types.ClosureType); ok {
+		if !fnType.Roles().IsComplete() {
+			closureCtx := ctx.(*parser.ClosureTypeContext)
+			tc.reportError(type_error.NewUnexpectedHiddenRoles(closureCtx.RoleType()))
+		}
+	}
+
 	return valType
 }
 
