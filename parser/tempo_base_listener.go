@@ -62,6 +62,12 @@ func (s *BaseTempoListener) EnterNamedType(ctx *NamedTypeContext) {}
 // ExitNamedType is called when production namedType is exited.
 func (s *BaseTempoListener) ExitNamedType(ctx *NamedTypeContext) {}
 
+// EnterRole is called when production role is entered.
+func (s *BaseTempoListener) EnterRole(ctx *RoleContext) {}
+
+// ExitRole is called when production role is exited.
+func (s *BaseTempoListener) ExitRole(ctx *RoleContext) {}
+
 // EnterRoleTypeShared is called when production roleTypeShared is entered.
 func (s *BaseTempoListener) EnterRoleTypeShared(ctx *RoleTypeSharedContext) {}
 

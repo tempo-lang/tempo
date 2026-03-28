@@ -13,8 +13,7 @@ export interface RPC_B {
 // Projection of struct `RemoteCall`
 export interface RemoteCall_A_attrs {
 }
-export class RemoteCall_A implements RemoteCall_A_attrs {
-  
+export class RemoteCall_A implements RemoteCall_A_attrs, RPC_A {
   constructor({  }: RemoteCall_A_attrs) {
   }
   
@@ -27,7 +26,7 @@ export class RemoteCall_A implements RemoteCall_A_attrs {
 export interface RemoteCall_B_attrs {
   Fn: (env: Env, arg0: number) => Promise<number>;
 }
-export class RemoteCall_B implements RemoteCall_B_attrs {
+export class RemoteCall_B implements RemoteCall_B_attrs, RPC_B {
   Fn: (env: Env, arg0: number) => Promise<number>;
   
   constructor({ Fn }: RemoteCall_B_attrs) {

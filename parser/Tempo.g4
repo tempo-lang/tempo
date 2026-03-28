@@ -19,6 +19,8 @@ valueType:
 	| FUNC ROLE_AT roleType params = closureParamList returnType = valueType?	# closureType
 	| roleIdent																	# namedType;
 
+role: ident | UNDERSCORE;
+
 roleType:
 	(LSQUARE ident (COMMA ident)* RSQUARE)				# roleTypeShared
 	| (ident | (LPAREN ident (COMMA ident)* RPAREN))	# roleTypeNormal;
@@ -172,7 +174,8 @@ STRING: '"' (ESC | SAFECODEPOINT)* '"';
 fragment ESC: '\\' (["\\nrt]);
 fragment SAFECODEPOINT: ~ ["\\\u0000-\u001F];
 
-ID: ('_' [a-zA-Z_0-9]+ | [a-zA-Z][a-zA-Z_0-9]*);
+UNDERSCORE: '_';
+ID: (UNDERSCORE [a-zA-Z_0-9]+ | [a-zA-Z][a-zA-Z_0-9]*);
 NUMBER: [0-9]+;
 END: ';';
 WHITESPACE: [ \t\r\n]+ -> skip;

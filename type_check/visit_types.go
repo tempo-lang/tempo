@@ -43,6 +43,10 @@ func (tc *typeChecker) VisitValueType(ctx *parser.ValueTypeContext) any {
 	return nil
 }
 
+func (tc *typeChecker) VisitRole(ctx *parser.RoleContext) any {
+	return nil
+}
+
 func (tc *typeChecker) VisitRoleType(ctx *parser.RoleTypeContext) any {
 	return nil
 }
