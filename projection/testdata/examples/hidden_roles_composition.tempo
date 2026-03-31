@@ -1,0 +1,15 @@
+struct@(A,B) Pair {
+  x:Int@A;
+  y:Int@B;
+}
+
+func@(A,B) combine(pairA: Pair@(A,_), pairB: Pair@(_,B)) Pair@(A,B) {
+return Pair@(A,B) { x: pairA.x, y: pairB.y };
+}
+
+func@(A,B) main() {
+  let pairA = Pair@(A,_) { x: 10, y: 20 };
+  let pairB = Pair@(_,B) { y: 20 };
+
+  let result = combine@(A,B)(pairA, pairB);
+}

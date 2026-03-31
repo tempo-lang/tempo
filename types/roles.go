@@ -240,10 +240,15 @@ func (r *Roles) ToString() string {
 
 // SubtractParticipants returns a list of the participants in this roles object,
 // without any of the roles in the `other` list.
+// All hidden roles are also removed.
 func (r *Roles) SubtractParticipants(other []string) []string {
 	result := []string{}
 
 	for _, role := range r.participants {
+		if role == "_" {
+			continue
+		}
+
 		if !slices.Contains(other, role) {
 			result = append(result, role)
 		}

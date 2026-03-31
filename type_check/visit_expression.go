@@ -453,7 +453,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	// check that no field is duplicated
+	// check that no fields are duplicated
 	fieldsCount := map[string]parser.IIdentContext{}
 	for _, fieldName := range ctx.ExprStructField().AllIdent() {
 		if first, found := fieldsCount[fieldName.GetText()]; found {
@@ -466,8 +466,26 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		}
 	}
 
+	// calculate role substitution map
+	structRoles := defStructType.Roles()
+	defRoleSubst, ok := structRoles.SubstituteMap(roles)
+	if !ok {
+		tc.reportError(type_error.NewWrongRoleCount(sym, ctx.RoleIdent(), roles))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	structType := defStructType.SubstituteRoles(defRoleSubst)
+
 	// check that all struct fields are present
 	for _, defField := range stSym.Fields() {
+		if fieldType, ok := tc.info.Field(structType, defField.SymbolName()); ok {
+			if fieldType.Roles().IsHidden() {
+				continue
+			}
+		} else {
+			panic("type should have same fields as definition")
+		}
+
 		found := false
 		for _, exprField := range ctx.ExprStructField().AllIdent() {
 			if exprField.GetText() == defField.SymbolName() {
@@ -480,16 +498,6 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 			tc.reportError(type_error.NewMissingStructField(ctx, defField.SymbolName(), defStructType))
 		}
 	}
-
-	// calculate role substitution map
-	structRoles := defStructType.Roles()
-	defRoleSubst, ok := structRoles.SubstituteMap(roles)
-	if !ok {
-		tc.reportError(type_error.NewWrongRoleCount(sym, ctx.RoleIdent(), roles))
-		return tc.registerType(ctx, types.Invalid())
-	}
-
-	structType := defStructType.SubstituteRoles(defRoleSubst)
 
 	fieldIdents := ctx.ExprStructField().AllIdent()
 	for i, fieldExpr := range ctx.ExprStructField().AllExpr() {

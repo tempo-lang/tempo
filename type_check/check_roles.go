@@ -90,7 +90,7 @@ func limitTypeToRoles(exprType types.Type, roles []string) (types.Type, bool) {
 // checkExprInScope returns true if the roles in the expression is in scope.
 // Otherwise it returns false and reports an appropriate error.
 func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType *types.Roles) bool {
-	unknownRoles := tc.rolesNotInScope(roleType.Participants())
+	unknownRoles := roleType.SubtractParticipants(tc.currentScope.Roles().Participants())
 
 	if len(unknownRoles) > 0 {
 		tc.reportError(type_error.NewValueRoleNotInScope(value, roleType, unknownRoles))
@@ -109,29 +109,11 @@ func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool 
 		participants = append(participants, p.GetText())
 	}
 
-	unknownRoles := tc.rolesNotInScope(participants)
+	unknownRoles := types.NewRole(participants, false).SubtractParticipants(tc.currentScope.Roles().Participants())
 	if len(unknownRoles) > 0 {
 		tc.reportError(type_error.NewRolesNotInScope(roleType, unknownRoles))
 		return false
 	}
 
 	return true
-}
-
-// rolesNotInScope returns the participants that are not in scope.
-// Hidden roles are removed from the result as well.
-func (tc *typeChecker) rolesNotInScope(participants []string) []string {
-	scopeRoles := tc.currentScope.Roles()
-	unknownRoles := []string{}
-	for _, p := range participants {
-		if p == "_" {
-			continue // skip hidden roles
-		}
-
-		if !scopeRoles.Contains(p) {
-			unknownRoles = append(unknownRoles, p)
-		}
-	}
-
-	return unknownRoles
 }

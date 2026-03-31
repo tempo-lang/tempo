@@ -293,25 +293,24 @@ func (epp *epp) eppExprCall(roleName string, expr *parser.ExprCallContext, exprT
 
 func (epp *epp) eppExprStruct(roleName string, expr *parser.ExprStructContext, exprType types.Type) (projection.Expression, []projection.Statement) {
 	stSym := epp.info.Symbols[expr.RoleIdent().Ident()].(*sym_table.StructSymbol)
-
 	defRoleSubst, _ := stSym.Type().Roles().SubstituteMap(exprType.Roles())
-	// exprRoleSubst, _ := exprType.Roles().SubstituteMap(stSym.Type().Roles())
 
 	aux := []projection.Statement{}
-
 	fields := map[string]projection.Expression{}
 	fieldNames := []string{}
 
 	fieldNamesIdents := expr.ExprStructField().AllIdent()
 	for i, fieldExpr := range expr.ExprStructField().AllExpr() {
 		fieldName := fieldNamesIdents[i].GetText()
+		symField, ok := stSym.Field(fieldName)
+		if !ok {
+			panic("assuming field exists when expr is well-typed")
+		}
 
 		field, a := epp.eppExpression(roleName, fieldExpr)
 		aux = append(aux, a...)
 
-		containsRole := stSym.Fields()[i].Type().Roles().
-			SubstituteRoles(defRoleSubst).Contains(roleName)
-
+		containsRole := symField.Type().Roles().SubstituteRoles(defRoleSubst).Contains(roleName)
 		if containsRole {
 			fields[fieldName] = field
 			fieldNames = append(fieldNames, fieldName)
