@@ -14,10 +14,10 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 
 	switch stmt := stmt.(type) {
 	case *parser.StmtAssignContext:
-		sym := epp.info.Symbols[stmt.Ident()]
+		sym := epp.info.Symbols[stmt.AssignExpr().Ident()]
 		assignType := sym.Type()
 		specifiers := []projection.AssignSpecifier{}
-		for _, specifier := range stmt.AllAssignSpecifier() {
+		for _, specifier := range stmt.AssignExpr().AllAssignSpecifier() {
 			switch specifier := specifier.(type) {
 			case *parser.AssignFieldContext:
 				specifiers = append(specifiers, projection.AssignSpecifier{
@@ -46,7 +46,7 @@ func (epp *epp) EppStmt(roleName string, stmt parser.IStmtContext) (result []pro
 			varibleType := epp.eppType(roleName, assignType)
 			expr = epp.storeExpression(roleName, expr, varibleType)
 
-			varName := stmt.Ident().GetText()
+			varName := stmt.AssignExpr().Ident().GetText()
 
 			// check if identifier is struct attribute
 			structScope := epp.info.GlobalScope.Innermost(stmt.GetStart()).GetStruct()

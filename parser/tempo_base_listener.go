@@ -206,6 +206,12 @@ func (s *BaseTempoListener) EnterStmtExpr(ctx *StmtExprContext) {}
 // ExitStmtExpr is called when production stmtExpr is exited.
 func (s *BaseTempoListener) ExitStmtExpr(ctx *StmtExprContext) {}
 
+// EnterAssignExpr is called when production assignExpr is entered.
+func (s *BaseTempoListener) EnterAssignExpr(ctx *AssignExprContext) {}
+
+// ExitAssignExpr is called when production assignExpr is exited.
+func (s *BaseTempoListener) ExitAssignExpr(ctx *AssignExprContext) {}
+
 // EnterAssignField is called when production assignField is entered.
 func (s *BaseTempoListener) EnterAssignField(ctx *AssignFieldContext) {}
 

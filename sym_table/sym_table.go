@@ -161,6 +161,11 @@ func (scope *Scope) Innermost(pos antlr.Token) *Scope {
 // MakeChild creates a new child scope and adds it to the list of children of this scope.
 // The newly created child scope is returned.
 func (scope *Scope) MakeChild(pos antlr.Token, end antlr.Token, roles []string) *Scope {
+	if len(roles) == 0 {
+		// empty roles implicitly means everyone
+		roles = scope.roles
+	}
+
 	child := NewScope(pos, end, scope, roles)
 	scope.children = append(scope.children, child)
 	return child

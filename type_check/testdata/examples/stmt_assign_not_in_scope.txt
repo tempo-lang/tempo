@@ -1,0 +1,13 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B) main() {
+  let pairs = Pair@(A,B) { x: 10, y: 20 };
+  if true@A {
+    pairs.y = 30;
+  }
+}
+---
+E1 9:5: value `pairs.y` contains role `B` that is not in scope

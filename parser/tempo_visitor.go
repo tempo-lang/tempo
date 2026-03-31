@@ -100,6 +100,9 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#stmtExpr.
 	VisitStmtExpr(ctx *StmtExprContext) interface{}
 
+	// Visit a parse tree produced by TempoParser#assignExpr.
+	VisitAssignExpr(ctx *AssignExprContext) interface{}
+
 	// Visit a parse tree produced by TempoParser#assignField.
 	VisitAssignField(ctx *AssignFieldContext) interface{}
 

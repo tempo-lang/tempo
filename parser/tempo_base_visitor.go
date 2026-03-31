@@ -131,6 +131,10 @@ func (v *BaseTempoVisitor) VisitStmtExpr(ctx *StmtExprContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitAssignExpr(ctx *AssignExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitAssignField(ctx *AssignFieldContext) interface{} {
 	return v.VisitChildren(ctx)
 }

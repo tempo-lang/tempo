@@ -1,0 +1,14 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B) main() {
+  let pairs = Pair@(A,B) { x: 10, y: 20 };
+  if true@A {
+    pairs = Pair@(A,_) { x: 10 };
+  }
+}
+---
+E1 9:5: value `pairs` contains role `B` that is not in scope
+E24 9:13: cannot assign type `struct@(A,_) Pair` to `struct@(A,B) Pair`

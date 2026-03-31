@@ -80,23 +80,22 @@ func (tc *typeChecker) VisitStmtVarDecl(ctx *parser.StmtVarDeclContext) any {
 
 func (tc *typeChecker) VisitStmtAssign(ctx *parser.StmtAssignContext) any {
 
-	sym, err := tc.lookupSymbol(ctx.Ident())
+	sym, err := tc.lookupSymbol(ctx.AssignExpr().Ident())
 	if err != nil {
 		tc.reportError(err)
 		return nil
 	}
 
-	tc.info.Symbols[ctx.Ident()] = sym
-	sym.AddWrite(ctx.Ident())
+	tc.info.Symbols[ctx.AssignExpr().Ident()] = sym
+	sym.AddWrite(ctx.AssignExpr().Ident())
 
 	if !sym.IsAssignable() {
 		tc.reportError(type_error.NewUnassignableSymbol(ctx, sym.Type()))
 		return false
 	}
 
-	tc.checkExprInScope(ctx.Ident(), sym.Type().Roles())
-
 	assignType := tc.stmtAssignType(ctx, sym)
+	tc.checkExprInScope(ctx.AssignExpr(), assignType.Roles())
 
 	exprType := tc.visitExpr(ctx.Expr())
 
@@ -111,7 +110,7 @@ func (tc *typeChecker) stmtAssignType(ctx *parser.StmtAssignContext, sym sym_tab
 	trailIndexExprs := []parser.IExprContext{}
 
 	assignType := sym.Type()
-	for _, access := range ctx.AllAssignSpecifier() {
+	for _, access := range ctx.AssignExpr().AllAssignSpecifier() {
 		switch access := access.(type) {
 		case *parser.AssignFieldContext:
 			if structType, ok := assignType.(*types.StructType); ok {
@@ -151,6 +150,10 @@ func (tc *typeChecker) stmtAssignType(ctx *parser.StmtAssignContext, sym sym_tab
 	}
 
 	return assignType
+}
+
+func (tc *typeChecker) VisitAssignExpr(ctx *parser.AssignExprContext) any {
+	return nil
 }
 
 func (tc *typeChecker) VisitAssignField(ctx *parser.AssignFieldContext) any {

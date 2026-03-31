@@ -100,6 +100,9 @@ type TempoListener interface {
 	// EnterStmtExpr is called when entering the stmtExpr production.
 	EnterStmtExpr(c *StmtExprContext)
 
+	// EnterAssignExpr is called when entering the assignExpr production.
+	EnterAssignExpr(c *AssignExprContext)
+
 	// EnterAssignField is called when entering the assignField production.
 	EnterAssignField(c *AssignFieldContext)
 
@@ -252,6 +255,9 @@ type TempoListener interface {
 
 	// ExitStmtExpr is called when exiting the stmtExpr production.
 	ExitStmtExpr(c *StmtExprContext)
+
+	// ExitAssignExpr is called when exiting the assignExpr production.
+	ExitAssignExpr(c *AssignExprContext)
 
 	// ExitAssignField is called when exiting the assignField production.
 	ExitAssignField(c *AssignFieldContext)

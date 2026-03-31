@@ -70,8 +70,10 @@ stmt:
 	| IF expr thenScope = scope (ELSE elseScope = scope)?	# stmtIf
 	| WHILE expr scope										# stmtWhile
 	| RETURN expr? END										# stmtReturn
-	| ident assignSpecifier* IS expr END					# stmtAssign
+	| assignExpr IS expr END					# stmtAssign
 	| expr END												# stmtExpr;
+
+assignExpr: ident assignSpecifier*;
 
 assignSpecifier:
 	DOT ident				# assignField

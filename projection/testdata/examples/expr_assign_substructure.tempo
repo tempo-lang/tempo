@@ -1,0 +1,12 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B) main() {
+  let pairs = [Pair@(A,B) { x: 10, y: 20 }];
+  let i = 0;
+  if true@A {
+    pairs[i].x = 30;
+  }
+}
