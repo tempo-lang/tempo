@@ -35,6 +35,10 @@ func (v *BaseTempoVisitor) VisitNamedType(ctx *NamedTypeContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseTempoVisitor) VisitRole(ctx *RoleContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseTempoVisitor) VisitRoleTypeShared(ctx *RoleTypeSharedContext) interface{} {
 	return v.VisitChildren(ctx)
 }

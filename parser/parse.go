@@ -37,8 +37,8 @@ func Parse(input antlr.CharStream) (sourceFile ISourceFileContext, errors []*Syn
 	return
 }
 
-// RoleTypeAllIdents extracts all `identifiers` from a `role type`.
-func RoleTypeAllIdents(ctx IRoleTypeContext) []IIdentContext {
+// RoleTypeAllRoles extracts all `identifiers` from a `role type`.
+func RoleTypeAllRoles(ctx IRoleTypeContext) []IRoleContext {
 	// parser error
 	if ctx == nil {
 		return nil
@@ -46,9 +46,9 @@ func RoleTypeAllIdents(ctx IRoleTypeContext) []IIdentContext {
 
 	switch ctx := ctx.(type) {
 	case *RoleTypeNormalContext:
-		return ctx.AllIdent()
+		return ctx.AllRole()
 	case *RoleTypeSharedContext:
-		return ctx.AllIdent()
+		return ctx.AllRole()
 	case *RoleTypeContext:
 		// parser error
 		return nil

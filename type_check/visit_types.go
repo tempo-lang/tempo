@@ -2,6 +2,7 @@ package type_check
 
 import (
 	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
 )
 
@@ -14,6 +15,17 @@ func (tc *typeChecker) visitValueType(ctx parser.IValueTypeContext) types.Type {
 	if err != nil {
 		tc.reportError(err)
 		return types.Invalid()
+	}
+
+	if valType.Roles().IsHidden() {
+		tc.reportError(type_error.NewHiddenTypeSignature(ctx, valType))
+	}
+
+	if fnType, ok := valType.(*types.ClosureType); ok {
+		if !fnType.Roles().IsComplete() {
+			closureCtx := ctx.(*parser.ClosureTypeContext)
+			tc.reportError(type_error.NewUnexpectedHiddenRoles(closureCtx.RoleType()))
+		}
 	}
 
 	return valType
@@ -40,6 +52,10 @@ func (tc *typeChecker) VisitClosureParamList(ctx *parser.ClosureParamListContext
 }
 
 func (tc *typeChecker) VisitValueType(ctx *parser.ValueTypeContext) any {
+	return nil
+}
+
+func (tc *typeChecker) VisitRole(ctx *parser.RoleContext) any {
 	return nil
 }
 

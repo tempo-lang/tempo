@@ -1,0 +1,18 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+
+  func@(A,B) exchange() Pair@(B,A) {
+    return Pair@(B,A) {
+      x: await B->A y,
+      y: await A->B x
+    };
+  }
+}
+
+func@(A,B,C) foo() {
+  let pair: Pair@(A,_) = Pair@(A,B) { x: 10, y: 20 };
+  let p = pair.exchange;
+}
+---
+E52 15:16: function of type `func@(A,_) exchange() struct@(_,A) Pair` is incomplete

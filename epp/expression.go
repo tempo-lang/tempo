@@ -18,315 +18,29 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 
 	switch expr := expr.(type) {
 	case *parser.ExprBinOpContext:
-		lhs, aux := epp.eppExpression(roleName, expr.Expr(0))
-		rhs, rhsAux := epp.eppExpression(roleName, expr.Expr(1))
-		aux = append(aux, rhsAux...)
-
-		if exprType.Roles().Contains(roleName) {
-			exprValue := epp.eppType(roleName, exprType)
-			operator := projection.ParseOperator(expr)
-			return projection.NewExprBinaryOp(operator, lhs, rhs, exprValue), aux
-		} else {
-			if lhs != nil && lhs.HasSideEffects() {
-				aux = append(aux, projection.NewStmtExpr(lhs))
-			}
-			if rhs != nil && rhs.HasSideEffects() {
-				aux = append(aux, projection.NewStmtExpr(rhs))
-			}
-			return nil, aux
-		}
+		return epp.eppExprBinOp(roleName, expr, exprType)
 	case *parser.ExprPrimitiveContext:
-		if exprType.Roles().Contains(roleName) {
-			return epp.eppLiteral(expr.Literal()), []projection.Statement{}
-		} else {
-			return nil, []projection.Statement{}
-		}
+		return epp.eppExprPrimitive(roleName, expr, exprType)
 	case *parser.ExprGroupContext:
 		return epp.eppExpression(roleName, expr.Expr())
 	case *parser.ExprIdentContext:
-		sym := epp.info.Symbols[expr.IdentAccess().Ident()]
-
-		if exprType.Roles().Contains(roleName) {
-			name := sym.SymbolName()
-
-			exprValue := epp.eppType(roleName, exprType)
-
-			// check if identifier is struct attribute
-			structScope := epp.info.GlobalScope.Innermost(expr.GetStart()).GetStruct()
-			if structScope != nil && sym.Parent() == structScope.Scope() {
-				selfExpr := projection.NewExprSelf(epp.eppType(roleName, structScope.Type()))
-				return projection.NewExprFieldAccess(selfExpr, name, exprValue), []projection.Statement{}
-			}
-
-			switch sym := sym.(type) {
-			case *sym_table.FuncSymbol:
-				funcType := exprValue.(*projection.FunctionType)
-
-				if !sym.Roles().IsUnnamedRole() {
-					substMap, ok := funcType.Roles().SubstituteMap(sym.Roles())
-					if !ok {
-						panic("type check ensures substitution is valid")
-					}
-
-					roleSubst := substMap.Subst(roleName)[0]
-					name += "_" + roleSubst
-				}
-			}
-
-			return projection.NewExprIdent(name, exprValue), []projection.Statement{}
-		} else {
-			return nil, []projection.Statement{}
-		}
+		return epp.eppExprIdent(roleName, expr, exprType)
 	case *parser.ExprAwaitContext:
-		asyncExpr, aux := epp.eppExpression(roleName, expr.Expr())
-		if asyncExpr != nil {
-			if innerExprAsync, innerIsFixedAsync := asyncExpr.(*projection.ExprAsync); innerIsFixedAsync {
-				// await fixed async cancels out
-				return innerExprAsync.Inner(), aux
-			} else {
-				asyncType := asyncExpr.Type().(*projection.AsyncType)
-				return projection.NewExprAwait(asyncExpr, asyncType.Inner), aux
-			}
-		}
-		return nil, aux
+		return epp.eppExprAwait(roleName, expr)
 	case *parser.ExprComContext:
-		sender := expr.GetSender().(*parser.RoleTypeNormalContext)
-		senderRole := sender.Ident(0).GetText()
-
-		receivers := parser.RoleTypeAllIdents(expr.GetReceiver())
-		inner, aux := epp.eppExpression(roleName, expr.Expr())
-
-		receiverRoles := []string{}
-		for _, receiver := range receivers {
-			receiverRoles = append(receiverRoles, receiver.GetText())
-		}
-
-		isReceiver := slices.Contains(receiverRoles, roleName)
-
-		exprValue := projection.NewExprAsync(inner)
-		if roleName == senderRole {
-			if !isReceiver {
-				exprValue = projection.NewExprSend(inner, receiverRoles)
-			} else {
-				aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(inner, receiverRoles)))
-			}
-		}
-
-		if isReceiver {
-			innerType := epp.eppType(senderRole, epp.info.Types[expr.Expr()])
-			return projection.NewExprRecv(innerType, senderRole), aux
-		}
-
-		valueType := epp.info.Types[expr.Expr()]
-		if valueType.Roles().Contains(roleName) {
-			return exprValue, aux
-		}
-
-		// roles that are not a part of the com
-		return nil, aux
+		return epp.eppExprCom(roleName, expr)
 	case *parser.ExprCallContext:
-		// Special case for type casting
-		if exprIdent, isIdent := expr.Expr().(*parser.ExprIdentContext); isIdent {
-			if sym, ok := epp.info.Symbols[exprIdent.IdentAccess().Ident()]; ok {
-				if _, ok := sym.(*sym_table.TypeSymbol); ok {
-					arg := expr.FuncArgList().AllExpr()[0]
-					inner, aux := epp.eppExpression(roleName, arg)
-
-					if exprType.Roles().Contains(roleName) {
-						castedType := epp.eppType(roleName, exprType)
-						return projection.NewExprTypeCast(inner, castedType), aux
-					} else {
-						return nil, aux
-					}
-				}
-			}
-		}
-
-		callExpr, aux := epp.eppExpression(roleName, expr.Expr())
-		callType := epp.info.Types[expr.Expr()]
-
-		callFuncValue := epp.eppType(roleName, callType)
-
-		switch callType.(type) {
-		case *types.FunctionType:
-			callFuncValue, _ := callFuncValue.(*projection.FunctionType)
-			funcType := callType.(*types.FunctionType)
-
-			argValues := []projection.Expression{}
-			for i, arg := range expr.FuncArgList().AllExpr() {
-				argVal, extra := epp.eppExpression(roleName, arg)
-				aux = append(aux, extra...)
-
-				funcParam := funcType.Params()[i]
-				if funcParam.Roles().Contains(roleName) {
-					paramType := callFuncValue.Params()[len(argValues)]
-					argStored := epp.storeExpression(roleName, argVal, paramType)
-					argValues = append(argValues, argStored)
-				} else if argVal != nil && argVal.HasSideEffects() {
-					aux = append(aux, projection.NewStmtExpr(argVal))
-				}
-			}
-
-			if callType.Roles().Contains(roleName) {
-				funcSym := epp.info.Symbols[callFuncValue.NameIdent()].(*sym_table.FuncSymbol)
-				returnValue := callFuncValue.ReturnType()
-
-				callExpr := projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, funcSym.Roles(), callType.Roles())
-				if returnValue == projection.UnitType() {
-					aux = append(aux, projection.NewStmtExpr(callExpr))
-					return nil, aux
-				} else {
-					return callExpr, aux
-				}
-			} else {
-				return nil, aux
-			}
-		case *types.ClosureType:
-			callFuncValue, _ := callFuncValue.(*projection.ClosureType)
-			closureType := callType.(*types.ClosureType)
-
-			argValues := []projection.Expression{}
-			for i, arg := range expr.FuncArgList().AllExpr() {
-				argVal, extra := epp.eppExpression(roleName, arg)
-				aux = append(aux, extra...)
-
-				closureParam := closureType.Params()[i]
-				if closureParam.Roles().Contains(roleName) {
-					paramType := callFuncValue.Params()[len(argValues)]
-					argStored := epp.storeExpression(roleName, argVal, paramType)
-					argValues = append(argValues, argStored)
-				} else if argVal != nil && argVal.HasSideEffects() {
-					aux = append(aux, projection.NewStmtExpr(argVal))
-				}
-			}
-
-			if callType.Roles().Contains(roleName) {
-				returnValue := callFuncValue.ReturnType()
-				callExpr := projection.NewExprCallClosure(callExpr, roleName, argValues, returnValue)
-				if returnValue == projection.UnitType() {
-					aux = append(aux, projection.NewStmtExpr(callExpr))
-					return nil, aux
-				} else {
-					return callExpr, aux
-				}
-			} else {
-				return nil, aux
-			}
-		default:
-			panic("unreachable")
-		}
-
+		return epp.eppExprCall(roleName, expr, exprType)
 	case *parser.ExprStructContext:
-		stSym := epp.info.Symbols[expr.RoleIdent().Ident()].(*sym_table.StructSymbol)
-
-		defRoleSubst, _ := stSym.Type().Roles().SubstituteMap(exprType.Roles())
-		// exprRoleSubst, _ := exprType.Roles().SubstituteMap(stSym.Type().Roles())
-
-		aux := []projection.Statement{}
-
-		fields := map[string]projection.Expression{}
-		fieldNames := []string{}
-
-		fieldNamesIdents := expr.ExprStructField().AllIdent()
-		for i, fieldExpr := range expr.ExprStructField().AllExpr() {
-			fieldName := fieldNamesIdents[i].GetText()
-
-			field, a := epp.eppExpression(roleName, fieldExpr)
-			aux = append(aux, a...)
-
-			containsRole := stSym.Fields()[i].Type().Roles().
-				SubstituteRoles(defRoleSubst).Contains(roleName)
-
-			if containsRole {
-				fields[fieldName] = field
-				fieldNames = append(fieldNames, fieldName)
-			} else if field != nil && field.HasSideEffects() {
-				aux = append(aux, projection.NewStmtExpr(field))
-			}
-		}
-
-		if exprType.Roles().Contains(roleName) {
-			structType := epp.eppType(roleName, exprType).(*projection.StructType)
-			return projection.NewExprStruct(structType, fieldNames, fields), aux
-		} else {
-			return nil, aux
-		}
+		return epp.eppExprStruct(roleName, expr, exprType)
 	case *parser.ExprFieldAccessContext:
-		baseExpr, aux := epp.eppExpression(roleName, expr.Expr())
-
-		if exprType.Roles().Contains(roleName) {
-			exprValue := epp.eppType(roleName, exprType)
-			fieldName := expr.Ident().GetText()
-			fieldExpr := epp.eppField(baseExpr, fieldName, exprValue)
-			return fieldExpr, aux
-		} else {
-			if baseExpr != nil && baseExpr.HasSideEffects() {
-				aux = append(aux, projection.NewStmtExpr(baseExpr))
-			}
-			return nil, aux
-		}
+		return epp.eppExprFieldAccess(roleName, expr, exprType)
 	case *parser.ExprClosureContext:
-		if !exprType.Roles().Contains(roleName) {
-			return nil, []projection.Statement{}
-		}
-
-		closureType := exprType.(*types.ClosureType)
-
-		params := []projection.ClosureParam{}
-		for i, param := range expr.ClosureSig().FuncParamList().AllFuncParam() {
-			paramType := closureType.Params()[i]
-			if paramType.Roles().Contains(roleName) {
-				paramValue := epp.eppType(roleName, paramType)
-				params = append(params, projection.NewClosureParam(param.Ident().GetText(), paramValue))
-			}
-		}
-
-		returnType := epp.eppType(roleName, closureType.ReturnType())
-
-		body := []projection.Statement{}
-		for _, stmt := range expr.Scope().AllStmt() {
-			eppStmts := epp.EppStmt(roleName, stmt)
-			body = append(body, eppStmts...)
-		}
-
-		return projection.NewExprClosure(params, returnType, body), []projection.Statement{}
+		return epp.eppExprClosure(roleName, expr, exprType)
 	case *parser.ExprListContext:
-		items := []projection.Expression{}
-		aux := []projection.Statement{}
-		for _, item := range expr.AllExpr() {
-			itemExpr, ax := epp.eppExpression(roleName, item)
-			aux = append(aux, ax...)
-			items = append(items, itemExpr)
-		}
-
-		if exprType.Roles().Contains(roleName) {
-			exprValue := epp.eppType(roleName, exprType)
-			return projection.NewExprList(items, exprValue), aux
-		} else {
-			for _, item := range items {
-				if item != nil && item.HasSideEffects() {
-					aux = append(aux, projection.NewStmtExpr(item))
-				}
-			}
-			return nil, aux
-		}
+		return epp.eppExprList(roleName, expr, exprType)
 	case *parser.ExprIndexContext:
-		baseExpr, aux := epp.eppExpression(roleName, expr.GetBaseExpr())
-
-		indexExpr, a := epp.eppExpression(roleName, expr.GetIndexExpr())
-		aux = append(aux, a...)
-
-		if exprType.Roles().Contains(roleName) {
-			return projection.NewExprIndex(baseExpr, indexExpr), aux
-		} else {
-			if baseExpr != nil && baseExpr.HasSideEffects() {
-				aux = append(aux, projection.NewStmtExpr(baseExpr))
-			}
-			if indexExpr != nil && indexExpr.HasSideEffects() {
-				aux = append(aux, projection.NewStmtExpr(indexExpr))
-			}
-			return nil, aux
-		}
+		return epp.eppExprIndex(roleName, expr, exprType)
 	case *parser.ExprContext:
 		panic("expr should never be base type")
 	}
@@ -334,41 +48,365 @@ func (epp *epp) eppExpression(roleName string, expr parser.IExprContext) (projec
 	panic(fmt.Sprintf("unknown expression: %#v", expr))
 }
 
-func (epp *epp) eppLiteral(lit parser.ILiteralContext) projection.Expression {
-	switch lit := lit.(type) {
-	case *parser.BoolContext:
-		value := lit.TRUE() != nil
-		return projection.NewExprBool(value)
-	case *parser.FloatContext:
-		num, err := strconv.ParseFloat(lit.GetText(), 64)
-		if err != nil {
-			panic(fmt.Sprintf("could not parse float: %s", lit.GetText()))
-		}
-		return projection.NewExprFloat(num)
-	case *parser.IntContext:
-		num, err := strconv.Atoi(lit.GetText())
-		if err != nil {
-			panic(fmt.Sprintf("could not parse int: %s", lit.GetText()))
-		}
-		return projection.NewExprInt(num)
-	case *parser.StringContext:
-		str := lit.STRING().GetText()
-		str = str[1 : len(str)-1] // remote quotes
+func (epp *epp) eppExprBinOp(roleName string, expr *parser.ExprBinOpContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	lhs, aux := epp.eppExpression(roleName, expr.Expr(0))
+	rhs, rhsAux := epp.eppExpression(roleName, expr.Expr(1))
+	aux = append(aux, rhsAux...)
 
-		escapes := map[string]string{
-			`\\`: `\`,
-			`\"`: `"`,
-			`\n`: "\n",
-			`\r`: "\r",
-			`\t`: "\t",
+	if exprType.Roles().Contains(roleName) {
+		exprValue := epp.eppType(roleName, exprType)
+		operator := projection.ParseOperator(expr)
+		return projection.NewExprBinaryOp(operator, lhs, rhs, exprValue), aux
+	} else {
+		if lhs != nil && lhs.HasSideEffects() {
+			aux = append(aux, projection.NewStmtExpr(lhs))
+		}
+		if rhs != nil && rhs.HasSideEffects() {
+			aux = append(aux, projection.NewStmtExpr(rhs))
+		}
+		return nil, aux
+	}
+}
+
+func (epp *epp) eppExprPrimitive(roleName string, expr *parser.ExprPrimitiveContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	if exprType.Roles().Contains(roleName) {
+		switch lit := expr.Literal().(type) {
+		case *parser.BoolContext:
+			value := lit.TRUE() != nil
+			return projection.NewExprBool(value), []projection.Statement{}
+		case *parser.FloatContext:
+			num, err := strconv.ParseFloat(lit.GetText(), 64)
+			if err != nil {
+				panic(fmt.Sprintf("could not parse float: %s", lit.GetText()))
+			}
+			return projection.NewExprFloat(num), []projection.Statement{}
+		case *parser.IntContext:
+			num, err := strconv.Atoi(lit.GetText())
+			if err != nil {
+				panic(fmt.Sprintf("could not parse int: %s", lit.GetText()))
+			}
+			return projection.NewExprInt(num), []projection.Statement{}
+		case *parser.StringContext:
+			str := lit.STRING().GetText()
+			str = str[1 : len(str)-1] // remote quotes
+
+			escapes := map[string]string{
+				`\\`: `\`,
+				`\"`: `"`,
+				`\n`: "\n",
+				`\r`: "\r",
+				`\t`: "\t",
+			}
+
+			for from, to := range escapes {
+				str = strings.ReplaceAll(str, from, to)
+			}
+
+			return projection.NewExprString(str), []projection.Statement{}
 		}
 
-		for from, to := range escapes {
-			str = strings.ReplaceAll(str, from, to)
+		panic(fmt.Sprintf("unknown literal: %#v", expr.Literal()))
+	} else {
+		return nil, []projection.Statement{}
+	}
+}
+
+func (epp *epp) eppExprIdent(roleName string, expr *parser.ExprIdentContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	sym := epp.info.Symbols[expr.IdentAccess().Ident()]
+
+	if exprType.Roles().Contains(roleName) {
+		name := sym.SymbolName()
+
+		exprValue := epp.eppType(roleName, exprType)
+
+		// check if identifier is struct attribute
+		structScope := epp.info.GlobalScope.Innermost(expr.GetStart()).GetStruct()
+		if structScope != nil && sym.Parent() == structScope.Scope() {
+			selfExpr := projection.NewExprSelf(epp.eppType(roleName, structScope.Type()))
+			return projection.NewExprFieldAccess(selfExpr, name, exprValue), []projection.Statement{}
 		}
 
-		return projection.NewExprString(str)
+		switch sym := sym.(type) {
+		case *sym_table.FuncSymbol:
+			funcType := exprValue.(*projection.FunctionType)
+
+			if !sym.Roles().IsUnnamedRole() {
+				substMap, ok := funcType.Roles().SubstituteMap(sym.Roles())
+				if !ok {
+					panic("type check ensures substitution is valid")
+				}
+
+				roleSubst := substMap.Subst(roleName)[0]
+				name += "_" + roleSubst
+			}
+		}
+
+		return projection.NewExprIdent(name, exprValue), []projection.Statement{}
+	} else {
+		return nil, []projection.Statement{}
+	}
+}
+
+func (epp *epp) eppExprAwait(roleName string, expr *parser.ExprAwaitContext) (projection.Expression, []projection.Statement) {
+	asyncExpr, aux := epp.eppExpression(roleName, expr.Expr())
+	if asyncExpr != nil {
+		if innerExprAsync, innerIsFixedAsync := asyncExpr.(*projection.ExprAsync); innerIsFixedAsync {
+			// await fixed async cancels out
+			return innerExprAsync.Inner(), aux
+		} else {
+			asyncType := asyncExpr.Type().(*projection.AsyncType)
+			return projection.NewExprAwait(asyncExpr, asyncType.Inner), aux
+		}
+	}
+	return nil, aux
+}
+
+func (epp *epp) eppExprCom(roleName string, expr *parser.ExprComContext) (projection.Expression, []projection.Statement) {
+	sender := expr.GetSender().(*parser.RoleTypeNormalContext)
+	senderRole := sender.Role(0).GetText()
+
+	receivers := parser.RoleTypeAllRoles(expr.GetReceiver())
+	inner, aux := epp.eppExpression(roleName, expr.Expr())
+
+	receiverRoles := []string{}
+	for _, receiver := range receivers {
+		receiverRoles = append(receiverRoles, receiver.GetText())
 	}
 
-	panic(fmt.Sprintf("unknown literal: %#v", lit))
+	isReceiver := slices.Contains(receiverRoles, roleName)
+
+	exprValue := projection.NewExprAsync(inner)
+	if roleName == senderRole {
+		if !isReceiver {
+			exprValue = projection.NewExprSend(inner, receiverRoles)
+		} else {
+			aux = append(aux, projection.NewStmtExpr(projection.NewExprSend(inner, receiverRoles)))
+		}
+	}
+
+	if isReceiver {
+		innerType := epp.eppType(senderRole, epp.info.Types[expr.Expr()])
+		return projection.NewExprRecv(innerType, senderRole), aux
+	}
+
+	valueType := epp.info.Types[expr.Expr()]
+	if valueType.Roles().Contains(roleName) {
+		return exprValue, aux
+	}
+
+	// roles that are not a part of the com
+	return nil, aux
+}
+
+func (epp *epp) eppExprCall(roleName string, expr *parser.ExprCallContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	// Special case for type casting
+	if exprIdent, isIdent := expr.Expr().(*parser.ExprIdentContext); isIdent {
+		if sym, ok := epp.info.Symbols[exprIdent.IdentAccess().Ident()]; ok {
+			if _, ok := sym.(*sym_table.TypeSymbol); ok {
+				arg := expr.FuncArgList().AllExpr()[0]
+				inner, aux := epp.eppExpression(roleName, arg)
+
+				if exprType.Roles().Contains(roleName) {
+					castedType := epp.eppType(roleName, exprType)
+					return projection.NewExprTypeCast(inner, castedType), aux
+				} else {
+					return nil, aux
+				}
+			}
+		}
+	}
+
+	callExpr, aux := epp.eppExpression(roleName, expr.Expr())
+	callType := epp.info.Types[expr.Expr()]
+
+	callFuncValue := epp.eppType(roleName, callType)
+
+	switch callType.(type) {
+	case *types.FunctionType:
+		callFuncValue, _ := callFuncValue.(*projection.FunctionType)
+		funcType := callType.(*types.FunctionType)
+
+		argValues := []projection.Expression{}
+		for i, arg := range expr.FuncArgList().AllExpr() {
+			argVal, extra := epp.eppExpression(roleName, arg)
+			aux = append(aux, extra...)
+
+			funcParam := funcType.Params()[i]
+			if funcParam.Roles().Contains(roleName) {
+				paramType := callFuncValue.Params()[len(argValues)]
+				argStored := epp.storeExpression(roleName, argVal, paramType)
+				argValues = append(argValues, argStored)
+			} else if argVal != nil && argVal.HasSideEffects() {
+				aux = append(aux, projection.NewStmtExpr(argVal))
+			}
+		}
+
+		if callType.Roles().Contains(roleName) {
+			funcSym := epp.info.Symbols[callFuncValue.NameIdent()].(*sym_table.FuncSymbol)
+			returnValue := callFuncValue.ReturnType()
+
+			callExpr := projection.NewExprCallFunc(callExpr, roleName, argValues, returnValue, funcSym.Roles(), callType.Roles())
+			if returnValue == projection.UnitType() {
+				aux = append(aux, projection.NewStmtExpr(callExpr))
+				return nil, aux
+			} else {
+				return callExpr, aux
+			}
+		} else {
+			return nil, aux
+		}
+	case *types.ClosureType:
+		callFuncValue, _ := callFuncValue.(*projection.ClosureType)
+		closureType := callType.(*types.ClosureType)
+
+		argValues := []projection.Expression{}
+		for i, arg := range expr.FuncArgList().AllExpr() {
+			argVal, extra := epp.eppExpression(roleName, arg)
+			aux = append(aux, extra...)
+
+			closureParam := closureType.Params()[i]
+			if closureParam.Roles().Contains(roleName) {
+				paramType := callFuncValue.Params()[len(argValues)]
+				argStored := epp.storeExpression(roleName, argVal, paramType)
+				argValues = append(argValues, argStored)
+			} else if argVal != nil && argVal.HasSideEffects() {
+				aux = append(aux, projection.NewStmtExpr(argVal))
+			}
+		}
+
+		if callType.Roles().Contains(roleName) {
+			returnValue := callFuncValue.ReturnType()
+			callExpr := projection.NewExprCallClosure(callExpr, roleName, argValues, returnValue)
+			if returnValue == projection.UnitType() {
+				aux = append(aux, projection.NewStmtExpr(callExpr))
+				return nil, aux
+			} else {
+				return callExpr, aux
+			}
+		} else {
+			return nil, aux
+		}
+	default:
+		panic("unreachable")
+	}
+}
+
+func (epp *epp) eppExprStruct(roleName string, expr *parser.ExprStructContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	stSym := epp.info.Symbols[expr.RoleIdent().Ident()].(*sym_table.StructSymbol)
+	defRoleSubst, _ := stSym.Type().Roles().SubstituteMap(exprType.Roles())
+
+	aux := []projection.Statement{}
+	fields := map[string]projection.Expression{}
+	fieldNames := []string{}
+
+	fieldNamesIdents := expr.ExprStructField().AllIdent()
+	for i, fieldExpr := range expr.ExprStructField().AllExpr() {
+		fieldName := fieldNamesIdents[i].GetText()
+		symField, ok := stSym.Field(fieldName)
+		if !ok {
+			panic("assuming field exists when expr is well-typed")
+		}
+
+		field, a := epp.eppExpression(roleName, fieldExpr)
+		aux = append(aux, a...)
+
+		containsRole := symField.Type().Roles().SubstituteRoles(defRoleSubst).Contains(roleName)
+		if containsRole {
+			fields[fieldName] = field
+			fieldNames = append(fieldNames, fieldName)
+		} else if field != nil && field.HasSideEffects() {
+			aux = append(aux, projection.NewStmtExpr(field))
+		}
+	}
+
+	if exprType.Roles().Contains(roleName) {
+		structType := epp.eppType(roleName, exprType).(*projection.StructType)
+		return projection.NewExprStruct(structType, fieldNames, fields), aux
+	} else {
+		return nil, aux
+	}
+}
+
+func (epp *epp) eppExprFieldAccess(roleName string, expr *parser.ExprFieldAccessContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	baseExpr, aux := epp.eppExpression(roleName, expr.Expr())
+
+	if exprType.Roles().Contains(roleName) {
+		exprValue := epp.eppType(roleName, exprType)
+		fieldName := expr.Ident().GetText()
+		fieldExpr := epp.eppField(baseExpr, fieldName, exprValue)
+		return fieldExpr, aux
+	} else {
+		if baseExpr != nil && baseExpr.HasSideEffects() {
+			aux = append(aux, projection.NewStmtExpr(baseExpr))
+		}
+		return nil, aux
+	}
+}
+
+func (epp *epp) eppExprClosure(roleName string, expr *parser.ExprClosureContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	if !exprType.Roles().Contains(roleName) {
+		return nil, []projection.Statement{}
+	}
+
+	closureType := exprType.(*types.ClosureType)
+
+	params := []projection.ClosureParam{}
+	for i, param := range expr.ClosureSig().FuncParamList().AllFuncParam() {
+		paramType := closureType.Params()[i]
+		if paramType.Roles().Contains(roleName) {
+			paramValue := epp.eppType(roleName, paramType)
+			params = append(params, projection.NewClosureParam(param.Ident().GetText(), paramValue))
+		}
+	}
+
+	returnType := epp.eppType(roleName, closureType.ReturnType())
+
+	body := []projection.Statement{}
+	for _, stmt := range expr.Scope().AllStmt() {
+		eppStmts := epp.EppStmt(roleName, stmt)
+		body = append(body, eppStmts...)
+	}
+
+	return projection.NewExprClosure(params, returnType, body), []projection.Statement{}
+}
+
+func (epp *epp) eppExprList(roleName string, expr *parser.ExprListContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	items := []projection.Expression{}
+	aux := []projection.Statement{}
+	for _, item := range expr.AllExpr() {
+		itemExpr, ax := epp.eppExpression(roleName, item)
+		aux = append(aux, ax...)
+		items = append(items, itemExpr)
+	}
+
+	if exprType.Roles().Contains(roleName) {
+		exprValue := epp.eppType(roleName, exprType)
+		return projection.NewExprList(items, exprValue), aux
+	} else {
+		for _, item := range items {
+			if item != nil && item.HasSideEffects() {
+				aux = append(aux, projection.NewStmtExpr(item))
+			}
+		}
+		return nil, aux
+	}
+}
+
+func (epp *epp) eppExprIndex(roleName string, expr *parser.ExprIndexContext, exprType types.Type) (projection.Expression, []projection.Statement) {
+	baseExpr, aux := epp.eppExpression(roleName, expr.GetBaseExpr())
+
+	indexExpr, a := epp.eppExpression(roleName, expr.GetIndexExpr())
+	aux = append(aux, a...)
+
+	if exprType.Roles().Contains(roleName) {
+		return projection.NewExprIndex(baseExpr, indexExpr), aux
+	} else {
+		if baseExpr != nil && baseExpr.HasSideEffects() {
+			aux = append(aux, projection.NewStmtExpr(baseExpr))
+		}
+		if indexExpr != nil && indexExpr.HasSideEffects() {
+			aux = append(aux, projection.NewStmtExpr(indexExpr))
+		}
+		return nil, aux
+	}
 }

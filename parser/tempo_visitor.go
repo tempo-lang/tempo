@@ -28,6 +28,9 @@ type TempoVisitor interface {
 	// Visit a parse tree produced by TempoParser#namedType.
 	VisitNamedType(ctx *NamedTypeContext) interface{}
 
+	// Visit a parse tree produced by TempoParser#role.
+	VisitRole(ctx *RoleContext) interface{}
+
 	// Visit a parse tree produced by TempoParser#roleTypeShared.
 	VisitRoleTypeShared(ctx *RoleTypeSharedContext) interface{}
 

@@ -38,6 +38,20 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 				return hoverCode(fmt.Sprintf("return %s", exprType.ToString()), &stmtRange), nil
 			}
 		case *parser.IdentContext:
+			isExpr := false
+			var cursor antlr.Tree = node
+			for cursor != nil {
+				if _, ok := cursor.(parser.IExprContext); ok {
+					isExpr = true
+					break
+				}
+				cursor = cursor.GetParent()
+			}
+			if isExpr {
+				// prefer expression interpretation of ident if possible
+				break
+			}
+
 			if identSym, ok := doc.info.Symbols[node]; ok {
 				identRange := parserRuleToRange(node)
 				identCode := fmt.Sprintf("let %s: %s", identSym.SymbolName(), identSym.Type().ToString())

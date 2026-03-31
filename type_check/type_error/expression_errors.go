@@ -71,7 +71,7 @@ type ComValueNotAtSender struct {
 }
 
 func (c *ComValueNotAtSender) Error() string {
-	sender := parser.RoleTypeAllIdents(c.Com.RoleType(0))[0]
+	sender := parser.RoleTypeAllRoles(c.Com.RoleType(0))[0]
 	return fmt.Sprintf("value of type `%s` is not present at sender `%s`", c.ExprType.ToString(), sender.GetText())
 }
 
@@ -213,4 +213,38 @@ func NewIncompatibleTypeCast(castFrom types.Type, castTo types.Type, castExpr *p
 		CastTo:   castTo,
 		CastExpr: castExpr,
 	}
+}
+
+type HiddenExpression struct {
+	baseError
+	Expr parser.IExprContext
+	Type types.Type
+}
+
+func NewHiddenExpression(expr parser.IExprContext, exprType types.Type) Error {
+	return &HiddenExpression{
+		Expr: expr,
+		Type: exprType,
+	}
+}
+
+func (e *HiddenExpression) Error() string {
+	return fmt.Sprintf("hidden expression of type `%s`", e.Type.ToString())
+}
+
+func (e *HiddenExpression) Annotations() []Annotation {
+	return []Annotation{
+		{
+			Type:    AnnotationTypeNote,
+			Message: "all the roles in the expression are hidden",
+		},
+	}
+}
+
+func (e *HiddenExpression) ParserRule() antlr.ParserRuleContext {
+	return e.Expr
+}
+
+func (e *HiddenExpression) Code() ErrorCode {
+	return CodeHiddenExpression
 }

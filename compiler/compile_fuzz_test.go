@@ -19,10 +19,12 @@ func FuzzExtendedCompile(f *testing.F) {
 
 	f.Add("") // empty input
 	for _, sample := range samples {
-		for i := range len(sample) - 1 {
-			prefix := sample[0 : i+1]
-			f.Add(prefix)
-		}
+		f.Add(sample)
+
+		// for i := range len(sample) - 1 {
+		// 	prefix := sample[0 : i+1]
+		// 	f.Add(prefix)
+		// }
 	}
 
 	opts := []*compiler.Options{

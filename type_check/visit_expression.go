@@ -14,11 +14,18 @@ func (tc *typeChecker) visitExpr(ctx parser.IExprContext) types.Type {
 	if ctx == nil {
 		return tc.registerType(ctx, types.Invalid())
 	}
-	exprType := ctx.Accept(tc)
-	if exprType == nil {
+	result := ctx.Accept(tc)
+	if result == nil {
 		return tc.registerType(ctx, types.Invalid())
 	}
-	return exprType.(types.Type)
+
+	exprType := result.(types.Type)
+
+	if exprType.Roles().IsHidden() {
+		tc.reportError(type_error.NewHiddenExpression(ctx, exprType))
+	}
+
+	return exprType
 }
 
 func (tc *typeChecker) registerType(expr parser.IExprContext, exprType types.Type) types.Type {
@@ -216,7 +223,7 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		}
 	}
 
-	tc.checkExprInScope(ctx, identType.Roles())
+	identType = tc.coerceExprToScope(ctx, identType)
 
 	return tc.registerType(ctx, identType)
 }
@@ -446,7 +453,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	// check that no field is duplicated
+	// check that no fields are duplicated
 	fieldsCount := map[string]parser.IIdentContext{}
 	for _, fieldName := range ctx.ExprStructField().AllIdent() {
 		if first, found := fieldsCount[fieldName.GetText()]; found {
@@ -459,21 +466,6 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		}
 	}
 
-	// check that all struct fields are present
-	for _, defField := range stSym.Fields() {
-		found := false
-		for _, exprField := range ctx.ExprStructField().AllIdent() {
-			if exprField.GetText() == defField.SymbolName() {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			tc.reportError(type_error.NewMissingStructField(ctx, defField.SymbolName(), defStructType))
-		}
-	}
-
 	// calculate role substitution map
 	structRoles := defStructType.Roles()
 	defRoleSubst, ok := structRoles.SubstituteMap(roles)
@@ -483,6 +475,30 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	}
 
 	structType := defStructType.SubstituteRoles(defRoleSubst)
+
+	// check that all struct fields are present
+	for _, defField := range stSym.Fields() {
+		var exprFieldIdent parser.IIdentContext = nil
+		for _, field := range ctx.ExprStructField().AllIdent() {
+			if field.GetText() == defField.SymbolName() {
+				exprFieldIdent = field
+				break
+			}
+		}
+
+		fieldType, ok := tc.info.Field(structType, defField.SymbolName())
+		if !ok {
+			panic("type should have same fields as definition")
+		}
+
+		if exprFieldIdent != nil && fieldType.Roles().IsHidden() {
+			tc.reportError(type_error.NewHiddenStructField(ctx, exprFieldIdent, fieldType))
+		}
+
+		if exprFieldIdent == nil && !fieldType.Roles().IsHidden() {
+			tc.reportError(type_error.NewMissingStructField(ctx, defField.SymbolName(), defStructType))
+		}
+	}
 
 	fieldIdents := ctx.ExprStructField().AllIdent()
 	for i, fieldExpr := range ctx.ExprStructField().AllExpr() {
@@ -531,6 +547,13 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	switch fieldType.(type) {
+	case *types.FunctionType, *types.ClosureType:
+		if !fieldType.Roles().IsComplete() {
+			tc.reportError(type_error.NewIncompleteFunction(ctx.Ident(), fieldType))
+		}
+	}
+
 	return tc.registerType(ctx, fieldType)
 }
 
@@ -552,25 +575,18 @@ func (tc *typeChecker) VisitExprIndex(ctx *parser.ExprIndexContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	// find roles
-	if innerType.Roles().IsDistributedRole() {
-		for _, role := range innerType.Roles().Participants() {
-			if !indexType.Roles().Contains(role) {
-				tc.reportError(type_error.NewIndexRoleNotEncompassBase(ctx, innerType, indexType.Roles()))
-				return tc.registerType(ctx, types.Invalid())
-			}
-		}
-
-		return tc.registerType(ctx, innerType)
-	} else {
-		intersectingRoles, ok := types.RoleIntersect(innerType.Roles(), indexType.Roles())
-		if !ok {
-			tc.reportError(type_error.NewIndexRoleNotEncompassBase(ctx, innerType, indexType.Roles()))
-			return tc.registerType(ctx, types.Invalid())
-		}
-
-		return tc.registerType(ctx, innerType.ReplaceSharedRoles(intersectingRoles.Participants()))
+	indexRoles := indexType.Roles().Participants()
+	if len(indexRoles) == 0 {
+		indexRoles = tc.currentScope.Roles().Participants()
 	}
+
+	limitedInnerType, ok := limitTypeToRoles(innerType, indexRoles)
+	if !ok {
+		tc.reportError(type_error.NewIndexRoleNotEncompassBase(ctx, innerType, types.NewRole(indexRoles, true)))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	return tc.registerType(ctx, limitedInnerType)
 }
 
 func (tc *typeChecker) VisitExprList(ctx *parser.ExprListContext) any {

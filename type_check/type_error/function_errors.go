@@ -116,7 +116,7 @@ func (e *FunctionNotInstantiated) Error() string {
 
 func (e *FunctionNotInstantiated) Annotations() []Annotation {
 	return []Annotation{{
-		Type:    "hint",
+		Type:    AnnotationTypeHint,
 		Message: fmt.Sprintf("add roles after the name of the function, like %s@(A,B,C)", e.identAccess.GetText()),
 	}}
 }
@@ -181,5 +181,37 @@ func (e *ReturnValueMissing) RelatedInfo() []RelatedInfo {
 	return []RelatedInfo{{
 		Message:    "return type is specified here",
 		ParserRule: e.callableEnv.ReturnCtx(),
+	}}
+}
+
+type IncompleteFunction struct {
+	baseError
+	FnIdent parser.IIdentContext
+	FnType  types.Type
+}
+
+func NewIncompleteFunction(fn parser.IIdentContext, fnType types.Type) Error {
+	return &IncompleteFunction{
+		FnIdent: fn,
+		FnType:  fnType,
+	}
+}
+
+func (e *IncompleteFunction) Error() string {
+	return fmt.Sprintf("function of type `%s` is incomplete", e.FnType.ToString())
+}
+
+func (e *IncompleteFunction) ParserRule() antlr.ParserRuleContext {
+	return e.FnIdent
+}
+
+func (e *IncompleteFunction) Code() ErrorCode {
+	return CodeIncompleteFunction
+}
+
+func (e *IncompleteFunction) Annotations() []Annotation {
+	return []Annotation{{
+		Type:    AnnotationTypeNote,
+		Message: "the function is incomplete because some of its roles are hidden `_`",
 	}}
 }

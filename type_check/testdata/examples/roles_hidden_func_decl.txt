@@ -1,0 +1,7 @@
+func@(A,B) foo() {}
+
+func@(A,B) main() {
+  let x: func@(A,_)() = foo@(A,B);
+}
+---
+E49 4:15: hidden roles `_` not allowed here

@@ -194,6 +194,22 @@ func (r *Roles) IsUnnamedRole() bool {
 	return r.roleType == ROLE_LOCAL && r.participants[0] == ""
 }
 
+// IsComplete returns true if none of the role participants are hidden.
+func (r *Roles) IsComplete() bool {
+	return !slices.Contains(r.participants, "_")
+}
+
+// IsHidden returns true if all participants are hidden.
+func (r *Roles) IsHidden() bool {
+	if len(r.participants) == 0 {
+		return false // unnamed roles are not hidden
+	}
+
+	return !slices.ContainsFunc(r.participants, func(ident string) bool {
+		return ident != "_"
+	})
+}
+
 // Participants returns a copy of the participants involved in the roles object.
 func (r *Roles) Participants() []string {
 	return slices.Clone(r.participants)
@@ -224,10 +240,15 @@ func (r *Roles) ToString() string {
 
 // SubtractParticipants returns a list of the participants in this roles object,
 // without any of the roles in the `other` list.
+// All hidden roles are also removed.
 func (r *Roles) SubtractParticipants(other []string) []string {
 	result := []string{}
 
 	for _, role := range r.participants {
+		if role == "_" {
+			continue
+		}
+
 		if !slices.Contains(other, role) {
 			result = append(result, role)
 		}
@@ -256,6 +277,10 @@ func (r *Roles) Encompass(other *Roles) bool {
 		}
 
 		for i, role := range r.participants {
+			if other.participants[i] == "_" {
+				continue // hidden roles are always coerceable
+			}
+
 			if role != other.participants[i] {
 				return false
 			}

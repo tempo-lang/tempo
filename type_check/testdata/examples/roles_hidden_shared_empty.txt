@@ -1,0 +1,8 @@
+func@(A,B,C) main() {
+  let x = 10@[B,C];
+  if true@A {
+    let y = x;
+  }
+}
+---
+E1 4:13: value `x` contains roles `B` and `C` that are not in scope

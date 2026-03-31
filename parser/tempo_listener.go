@@ -28,6 +28,9 @@ type TempoListener interface {
 	// EnterNamedType is called when entering the namedType production.
 	EnterNamedType(c *NamedTypeContext)
 
+	// EnterRole is called when entering the role production.
+	EnterRole(c *RoleContext)
+
 	// EnterRoleTypeShared is called when entering the roleTypeShared production.
 	EnterRoleTypeShared(c *RoleTypeSharedContext)
 
@@ -177,6 +180,9 @@ type TempoListener interface {
 
 	// ExitNamedType is called when exiting the namedType production.
 	ExitNamedType(c *NamedTypeContext)
+
+	// ExitRole is called when exiting the role production.
+	ExitRole(c *RoleContext)
 
 	// ExitRoleTypeShared is called when exiting the roleTypeShared production.
 	ExitRoleTypeShared(c *RoleTypeSharedContext)

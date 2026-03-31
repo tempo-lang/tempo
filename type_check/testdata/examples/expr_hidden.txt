@@ -1,0 +1,11 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B) main() {
+  let pair: Pair@(A,_) = Pair@(A,B) { x: 10, y: 20 };
+  let y = pair.y;
+}
+---
+E50 8:11: hidden expression of type `Int@_`

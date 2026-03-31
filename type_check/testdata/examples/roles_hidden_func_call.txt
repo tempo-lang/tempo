@@ -1,0 +1,10 @@
+func@(A,B) foo() {}
+
+func@(A,B) main() {
+  let x: func@(A,B)() = foo@(A,B);
+  if true@A {
+    x();
+  }
+}
+---
+E1 6:5: value `x` contains role `B` that is not in scope
