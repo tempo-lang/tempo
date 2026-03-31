@@ -538,6 +538,13 @@ func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) 
 		return tc.registerType(ctx, types.Invalid())
 	}
 
+	switch fieldType.(type) {
+	case *types.FunctionType, *types.ClosureType:
+		if !fieldType.Roles().IsComplete() {
+			tc.reportError(type_error.NewIncompleteFunction(ctx.Ident(), fieldType))
+		}
+	}
+
 	return tc.registerType(ctx, fieldType)
 }
 

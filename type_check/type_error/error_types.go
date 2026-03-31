@@ -65,6 +65,7 @@ const (
 	CodeUnexpectedHiddenRoles
 	CodeHiddenExpression
 	CodeHiddenTypeSignature
+	CodeIncompleteFunction
 )
 
 type AnnotationType string
