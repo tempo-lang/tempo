@@ -478,23 +478,24 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 
 	// check that all struct fields are present
 	for _, defField := range stSym.Fields() {
-		if fieldType, ok := tc.info.Field(structType, defField.SymbolName()); ok {
-			if fieldType.Roles().IsHidden() {
-				continue
-			}
-		} else {
-			panic("type should have same fields as definition")
-		}
-
-		found := false
-		for _, exprField := range ctx.ExprStructField().AllIdent() {
-			if exprField.GetText() == defField.SymbolName() {
-				found = true
+		var exprFieldIdent parser.IIdentContext = nil
+		for _, field := range ctx.ExprStructField().AllIdent() {
+			if field.GetText() == defField.SymbolName() {
+				exprFieldIdent = field
 				break
 			}
 		}
 
-		if !found {
+		fieldType, ok := tc.info.Field(structType, defField.SymbolName())
+		if !ok {
+			panic("type should have same fields as definition")
+		}
+
+		if exprFieldIdent != nil && fieldType.Roles().IsHidden() {
+			tc.reportError(type_error.NewHiddenStructField(ctx, exprFieldIdent, fieldType))
+		}
+
+		if exprFieldIdent == nil && !fieldType.Roles().IsHidden() {
 			tc.reportError(type_error.NewMissingStructField(ctx, defField.SymbolName(), defStructType))
 		}
 	}

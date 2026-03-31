@@ -66,6 +66,7 @@ const (
 	CodeHiddenExpression
 	CodeHiddenTypeSignature
 	CodeIncompleteFunction
+	CodeHiddenStructField
 )
 
 type AnnotationType string

@@ -1,0 +1,10 @@
+struct@(A,B) Pair {
+  x:Int@A;
+  y:Int@B;
+}
+
+func@(A,B) main() {
+  let pairA = Pair@(A,_) { x: 10, y: 20 };
+}
+---
+E53 7:35: hidden field `y` of type `Int@_`

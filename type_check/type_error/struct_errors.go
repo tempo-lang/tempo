@@ -120,6 +120,42 @@ func NewDuplicateStructField(expr *parser.ExprStructContext, fieldFirst parser.I
 	}
 }
 
+type HiddenStructField struct {
+	baseError
+	Expr      *parser.ExprStructContext
+	Field     parser.IIdentContext
+	FieldType types.Type
+}
+
+func NewHiddenStructField(expr *parser.ExprStructContext, field parser.IIdentContext, fieldType types.Type) Error {
+	return &HiddenStructField{
+		Expr:      expr,
+		Field:     field,
+		FieldType: fieldType,
+	}
+}
+
+func (e *HiddenStructField) Error() string {
+	return fmt.Sprintf("hidden field `%s` of type `%s`", e.Field.GetText(), e.FieldType.ToString())
+}
+
+func (e *HiddenStructField) ParserRule() antlr.ParserRuleContext {
+	return e.Field
+}
+
+func (e *HiddenStructField) Code() ErrorCode {
+	return CodeHiddenStructField
+}
+
+func (e *HiddenStructField) Annotations() []Annotation {
+	return []Annotation{
+		{
+			Type:    AnnotationTypeHint,
+			Message: fmt.Sprintf("remove the hidden field `%s` from the constructor", e.Field.GetText()),
+		},
+	}
+}
+
 type StructWrongRoleCount struct {
 	baseError
 	sym        sym_table.Symbol
