@@ -1,0 +1,15 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B,C) foo() {
+  let pair: [Pair@(A,B)] = [Pair@(A,B) { x: 10, y: 20 }];
+
+  let i = 0@A;
+  let x: Int@A = pair[i].x; // valid since `i` and `x` both at `A`
+
+  if true@B {
+    let y: Int@B = pair[0].y; // valid since `y` at `B` which is in scope
+  }
+}

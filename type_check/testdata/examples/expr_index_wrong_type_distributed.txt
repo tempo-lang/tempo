@@ -5,7 +5,7 @@ struct@(A,B) Pair {
 
 func@(A,B,C) foo() {
   let x: [Pair@(A,B)] = [Pair@(A,B) { first: 10, second: 20 }];
-  let y = x[1@A];
+  let y = x[1@A].second;
 }
 ---
-E40 8:13: index role `A` does not encompass roles in base type `struct@(A,B) Pair`
+E50 8:11: hidden expression of type `Int@_`

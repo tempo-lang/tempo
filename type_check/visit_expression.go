@@ -566,25 +566,18 @@ func (tc *typeChecker) VisitExprIndex(ctx *parser.ExprIndexContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	// find roles
-	if innerType.Roles().IsDistributedRole() {
-		for _, role := range innerType.Roles().Participants() {
-			if !indexType.Roles().Contains(role) {
-				tc.reportError(type_error.NewIndexRoleNotEncompassBase(ctx, innerType, indexType.Roles()))
-				return tc.registerType(ctx, types.Invalid())
-			}
-		}
-
-		return tc.registerType(ctx, innerType)
-	} else {
-		intersectingRoles, ok := types.RoleIntersect(innerType.Roles(), indexType.Roles())
-		if !ok {
-			tc.reportError(type_error.NewIndexRoleNotEncompassBase(ctx, innerType, indexType.Roles()))
-			return tc.registerType(ctx, types.Invalid())
-		}
-
-		return tc.registerType(ctx, innerType.ReplaceSharedRoles(intersectingRoles.Participants()))
+	indexRoles := indexType.Roles().Participants()
+	if len(indexRoles) == 0 {
+		indexRoles = tc.currentScope.Roles().Participants()
 	}
+
+	limitedInnerType, ok := limitTypeToRoles(innerType, indexRoles)
+	if !ok {
+		tc.reportError(type_error.NewIndexRoleNotEncompassBase(ctx, innerType, types.NewRole(indexRoles, true)))
+		return tc.registerType(ctx, types.Invalid())
+	}
+
+	return tc.registerType(ctx, limitedInnerType)
 }
 
 func (tc *typeChecker) VisitExprList(ctx *parser.ExprListContext) any {
