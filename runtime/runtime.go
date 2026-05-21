@@ -5,6 +5,7 @@ import (
 	"maps"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 // The environment struct keeps track of the state of the choreography at a single process.
@@ -201,7 +202,11 @@ func IntToString(value int) string {
 }
 
 func FloatToString(value float64) string {
-	return strconv.FormatFloat(value, 'g', -1, 64)
+	s := strconv.FormatFloat(value, 'g', -1, 64)
+	if !strings.ContainsAny(s, ".eE") {
+		s = s + ".0"
+	}
+	return s
 }
 
 func BoolToString(value bool) string {

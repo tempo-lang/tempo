@@ -1,0 +1,5 @@
+func@A floats(){
+  let a: Float@A = 10.5;
+  let b: Float@A = 10.00000009;
+  let c: Float@A = 1.00000;
+}
