@@ -3,6 +3,7 @@ package codegen_java
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/tempo-lang/tempo/misc"
@@ -155,7 +156,11 @@ func (gen *codegen) GenExprFieldAccess(e *projection.ExprFieldAccess) string {
 }
 
 func (gen *codegen) GenExprFloat(e *projection.ExprFloat) string {
-	return fmt.Sprintf("%f", e.Value)
+	s := strconv.FormatFloat(e.Value, 'g', -1, 64)
+	if !strings.ContainsAny(s, ".eE") {
+		s = s + ".0"
+	}
+	return s
 }
 
 func (gen *codegen) GenExprIdent(e *projection.ExprIdent) string {
