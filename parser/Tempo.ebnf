@@ -1,0 +1,153 @@
+SourceFile
+  = Function
+  | Struct
+  | Interface;
+
+(* Functions *)
+Function
+  = FuncSig, Scope;
+
+FuncSig
+  = "func", [ "@", RoleType ], ident, FuncParamList, ValueType;
+
+FuncParamList
+  = "(", [ FuncParam, { ",", FuncParam } ], ")";
+
+FuncParam
+  = ident, ":", ValueType;
+
+FuncArgList
+  = "(", [ Expression, { ",", Expression } ], ")";
+
+(* Structs *)
+Struct
+  = "struct", [ "@", RoleType ], ident, [ StructImplements ], StructBody;
+
+StructImplements
+  = "implements", RoleIdent, { ",", RoleIdent };
+
+StructBody
+  = "{", { StructField
+  | Function }, "}";
+
+StructField
+  = ident, ":", ValueType, ";";
+
+(* Interfaces *)
+Interface
+  = "interface", [ "@", RoleType ], ident, InterfaceMethodsList;
+
+InterfaceMethodsList
+  = "{", { InterfaceMethod }, "}";
+
+InterfaceMethod
+  = FuncSig, ";";
+
+(* Statements *)
+Statement
+  = "let", ident, [ ":", ValueType ], "=", Expression, ";"
+  | "if", Expression, Scope, [ "else", Scope ]
+  | "while", Expression, Scope
+  | "return", [ Expression ], ";"
+  | AssignExpr, "=", Expression, ";"
+  | Expression, ";";
+
+AssignExpr
+  = ident, { AssignSpecifier };
+
+AssignSpecifier
+  = ".", ident
+  | "[", Expression, "]";
+
+Scope
+  = "{", { Statement }, "}";
+
+(* Expressions *)
+Expression
+  = Expression, BinaryOp, Expression (* binary op *)
+  | Literal, [ "@", RoleType ] (* literal *)
+  | ClosureSig, Scope (* closure *)
+  | RoleIdent, ExprStructField (* struct *)
+  | Expression, FuncArgList (* function call *)
+  | Expression, ".", ident (* field access *)
+  | Expression, "[", Expression, "]" (* array indexing *)
+  | "[", [ Expression, { ",", Expression } ], "]" (* array literal *)
+  | ident, [ "@", RoleType ] (* identifier *)
+  | RoleType, "->", RoleType, Expression (* communication *)
+  | "await", Expression (* await *)
+  | "(", Expression, ")" (* group *);
+
+BinaryOp
+  = "+"
+  | "-"
+  | "*"
+  | "/"
+  | "%"
+  | "=="
+  | "!="
+  | "<"
+  | "<="
+  | ">"
+  | ">="
+  | "&&"
+  | "||";
+
+ExprStructField
+  = "{", [ ident, ":", Expression, { ",", ident, ":", Expression } ], "}";
+
+ClosureSig
+  = "func", "@", RoleType, FuncParamList, [ ValueType ];
+
+ClosureParamList
+  = "(", [ ValueType, { ",", ValueType } ], ")";
+
+Literal
+  = Float
+  | Int
+  | String
+  | "true"
+  | "false";
+
+Float
+  = Number, ".", Number
+  | Number, "."
+  | ".", Number;
+
+Int
+  = Number;
+
+(* Types *)
+ValueType
+  = "async", ValueType
+  | "[", ValueType, "]"
+  | "func", "@", RoleType, ClosureParamList, [ ValueType ]
+  | RoleIdent;
+
+RoleIdent
+  = ident, [ "@", RoleType ];
+
+RoleType
+  = "[", Role, { ",", Role }, "]"
+  | Role
+  | "(", Role, { ",", Role }, ")";
+
+Role
+  = ident
+  | "_";
+
+(* Tokens *)
+ident
+  = unicode_letter
+  | "_";
+
+unicode_letter
+  = ? a unicode letter ?;
+
+digit
+  = ? a decimal digit from 0 to 9 ?;
+
+Number
+  = digit, { digit };
+
+String
+  = ? a double-quoted string with escape sequences ?;
