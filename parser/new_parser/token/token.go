@@ -97,5 +97,6 @@ const (
 	// Literals and identifiers
 	STRING TokenType = "STRING"
 	IDENT  TokenType = "IDENT"
-	NUMBER TokenType = "NUMBER"
+	FLOAT  TokenType = "FLOAT"
+	INT    TokenType = "INT"
 )

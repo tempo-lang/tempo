@@ -1,7 +1,9 @@
 package lexer
 
 import (
+	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -146,6 +148,9 @@ func (l *Lexer) ReadToken() token.Token {
 		return token.New(token.COMMA, ",", startPos, nil)
 	case '.':
 		l.advance()
+		if isDigit(l.rune) {
+			return l.readNumber(true)
+		}
 		return token.New(token.DOT, ".", startPos, nil)
 	case ':':
 		l.advance()
@@ -166,9 +171,17 @@ func (l *Lexer) ReadToken() token.Token {
 			return l.readIdentifier()
 		}
 
+		if isDigit(ch) {
+			return l.readNumber(false)
+		}
+
 		l.advance()
 		return token.Error(string(ch), startPos, "unexpected character")
 	}
+}
+
+func isDigit(r rune) bool {
+	return '0' <= r && r <= '9'
 }
 
 func isWhitespace(r rune) bool {
@@ -227,4 +240,37 @@ func (l *Lexer) readIdentifier() token.Token {
 	}
 
 	return token.New(token.IDENT, sb.String(), startPos, sb.String())
+}
+
+func (l *Lexer) readNumber(prefixDot bool) token.Token {
+	startPos := l.pos
+	containsDot := prefixDot
+	var sb strings.Builder
+	if prefixDot {
+		startPos.Col -= 1
+		sb.WriteRune('.')
+	}
+
+	for isDigit(l.rune) || (l.rune == '.' && !containsDot) {
+		if l.rune == '.' {
+			containsDot = true
+		}
+		sb.WriteRune(l.rune)
+		l.advance()
+	}
+
+	literal := sb.String()
+	if containsDot {
+		value, err := strconv.ParseFloat(literal, 64)
+		if err != nil {
+			panic(fmt.Sprintf("lexer: literal should be a valid float: %v", err))
+		}
+		return token.New(token.FLOAT, literal, startPos, value)
+	} else {
+		value, err := strconv.ParseInt(literal, 10, 64)
+		if err != nil {
+			panic(fmt.Sprintf("lexer: literal should be a valid int: %v", err))
+		}
+		return token.New(token.INT, literal, startPos, int(value))
+	}
 }
