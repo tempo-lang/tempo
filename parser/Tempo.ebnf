@@ -104,7 +104,7 @@ ClosureParamList
 Literal
   = Float
   | Int
-  | String
+  | string
   | "true"
   | "false";
 
@@ -138,7 +138,7 @@ Role
 (* Tokens *)
 ident
   = unicode_letter
-  | "_";
+  | "_", unicode_letter;
 
 unicode_letter
   = ? a unicode letter ?;
@@ -149,5 +149,5 @@ digit
 Number
   = digit, { digit };
 
-String
+string
   = ? a double-quoted string with escape sequences ?;
