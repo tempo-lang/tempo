@@ -221,7 +221,7 @@ func (l *Lexer) readIdentifier() token.Token {
 	startPos := l.pos
 
 	var sb strings.Builder
-	for l.rune != 0 && (unicode.IsLetter(l.rune) || unicode.IsNumber(l.rune)) {
+	for l.rune != 0 && (unicode.IsLetter(l.rune) || unicode.IsNumber(l.rune) || l.rune == '_') {
 		sb.WriteRune(l.rune)
 		l.advance()
 	}
