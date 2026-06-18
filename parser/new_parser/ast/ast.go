@@ -17,6 +17,21 @@ type Expr interface {
 	expressionNode()
 }
 
+type InvalidExpr struct {
+	ErrorToken  token.Token
+	PartialExpr Expr
+}
+
+func (e *InvalidExpr) StartToken() token.Token {
+	return e.ErrorToken
+}
+
+func (e *InvalidExpr) EndToken() token.Token {
+	return e.ErrorToken
+}
+
+func (e *InvalidExpr) expressionNode() {}
+
 // type SourceFile struct {
 // 	Functions []Function
 // }
@@ -102,3 +117,39 @@ func (i *Identifier) EndToken() token.Token {
 }
 
 func (i *Identifier) expressionNode() {}
+
+type FloatExpr struct {
+	FloatToken token.Token
+}
+
+func (n *FloatExpr) Value() float64 {
+	return n.FloatToken.Value.(float64)
+}
+
+func (n *FloatExpr) StartToken() token.Token {
+	return n.FloatToken
+}
+
+func (n *FloatExpr) EndToken() token.Token {
+	return n.FloatToken
+}
+
+func (n *FloatExpr) expressionNode() {}
+
+type IntExpr struct {
+	IntToken token.Token
+}
+
+func (n *IntExpr) Value() int {
+	return n.IntToken.Value.(int)
+}
+
+func (n *IntExpr) StartToken() token.Token {
+	return n.IntToken
+}
+
+func (n *IntExpr) EndToken() token.Token {
+	return n.IntToken
+}
+
+func (n *IntExpr) expressionNode() {}

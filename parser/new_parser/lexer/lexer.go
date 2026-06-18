@@ -168,7 +168,12 @@ func (l *Lexer) ReadToken() token.Token {
 
 	default:
 		if unicode.IsLetter(ch) {
-			return l.readIdentifier()
+			tok := l.readIdentifier()
+			switch tok.Value {
+			case "let":
+				tok.Type = token.LET
+			}
+			return tok
 		}
 
 		if isDigit(ch) {

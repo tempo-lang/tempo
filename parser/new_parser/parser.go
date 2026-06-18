@@ -75,12 +75,13 @@ func (p *Parser) ParseScope() *ast.Scope {
 		stmt, needsRecover := p.parseStmt()
 		stmts = append(stmts, stmt)
 
-		if needsRecover {
+		for needsRecover {
 			for !p.curTokenIs(token.RCURLY, token.SEMICOLON, token.EOF) {
 				p.readToken()
 			}
-			if p.curTokenIs(token.SEMICOLON) {
+			if p.curTokenIs(token.RCURLY, token.SEMICOLON) {
 				p.readToken()
+				break
 			}
 			if p.curTokenIs(token.EOF) {
 				return &ast.Scope{
@@ -116,7 +117,7 @@ func (p *Parser) parseStmt() (ast.Stmt, bool) {
 		}, true
 	}
 
-	if p.curToken.Type != token.SEMICOLON {
+	if p.readToken().Type != token.SEMICOLON {
 		return &ast.InvalidStmt{
 			ErrorToken:  token.Error(p.prevToken.Literal, p.prevToken.Pos, "missing semicolon"),
 			PartialStmt: stmt,
@@ -136,6 +137,13 @@ func (p *Parser) parseLetStmt() (ast.Stmt, bool) {
 	if needsRecover {
 		return &ast.InvalidStmt{
 			ErrorToken:  p.errorToken("expected identifier when parsing let statement"),
+			PartialStmt: stmt,
+		}, true
+	}
+
+	if p.readToken().Type != token.ASSIGN {
+		return &ast.InvalidStmt{
+			ErrorToken:  p.errorToken("expected `=` when parsing let statement"),
 			PartialStmt: stmt,
 		}, true
 	}
@@ -162,5 +170,22 @@ func (p *Parser) parseIdentifier() (*ast.Identifier, bool) {
 }
 
 func (p *Parser) parseExpr() (ast.Expr, bool) {
-	return nil, false
+	return p.parseBaseExpr()
+}
+
+func (p *Parser) parseBaseExpr() (ast.Expr, bool) {
+	switch p.curToken.Type {
+	case token.FLOAT:
+		return &ast.FloatExpr{FloatToken: p.readToken()}, false
+	case token.INT:
+		return &ast.IntExpr{IntToken: p.readToken()}, false
+	case token.IDENT:
+		return p.parseIdentifier()
+	default:
+		err := p.errorToken("not an expression")
+		return &ast.InvalidExpr{
+			ErrorToken:  err,
+			PartialExpr: nil,
+		}, true
+	}
 }
