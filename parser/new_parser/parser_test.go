@@ -11,12 +11,7 @@ import (
 
 func TestParser(t *testing.T) {
 	// Helper to create a token for testing
-	makeToken := func(tokenType token.TokenType, literal string, line, col int) token.Token {
-		// For identifiers, the value is the literal string
-		var value any
-		if tokenType == token.IDENT {
-			value = literal
-		}
+	makeToken := func(tokenType token.TokenType, literal string, value any, line, col int) token.Token {
 		return token.New(tokenType, literal, token.SourcePos{Line: line, Col: col}, value)
 	}
 
@@ -29,8 +24,8 @@ func TestParser(t *testing.T) {
 			name:  "empty block",
 			input: "{}",
 			expected_ast: &ast.Scope{
-				OpenToken:  makeToken(token.LCURLY, "{", 1, 1),
-				CloseToken: makeToken(token.RCURLY, "}", 1, 2),
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 2),
 				Stmts:      []ast.Stmt{},
 			},
 		},
@@ -38,14 +33,104 @@ func TestParser(t *testing.T) {
 			name:  "let decl block",
 			input: "{let x = x;}",
 			expected_ast: &ast.Scope{
-				OpenToken:  makeToken(token.LCURLY, "{", 1, 1),
-				CloseToken: makeToken(token.RCURLY, "}", 1, 12),
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 12),
 				Stmts: []ast.Stmt{
 					&ast.LetStmt{
-						LetToken:  makeToken(token.LET, "let", 1, 2),
-						Name:      &ast.Identifier{Token: makeToken(token.IDENT, "x", 1, 6)},
-						Expr:      &ast.Identifier{Token: makeToken(token.IDENT, "x", 1, 10)},
-						SemiToken: makeToken(token.SEMICOLON, ";", 1, 11),
+						LetToken:  makeToken(token.LET, "let", nil, 1, 2),
+						Name:      &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
+						Expr:      &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 10)},
+						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 11),
+					},
+				},
+			},
+		},
+		{
+			name:  "let with binary addition",
+			input: "{let x = 1 + 2;}",
+			expected_ast: &ast.Scope{
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 16),
+				Stmts: []ast.Stmt{
+					&ast.LetStmt{
+						LetToken: makeToken(token.LET, "let", nil, 1, 2),
+						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
+						Expr: &ast.BinaryExpr{
+							Left:     &ast.IntExpr{IntToken: makeToken(token.INT, "1", 1, 1, 10)},
+							Operator: makeToken(token.PLUS, "+", nil, 1, 12),
+							Right:    &ast.IntExpr{IntToken: makeToken(token.INT, "2", 2, 1, 14)},
+						},
+						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 15),
+					},
+				},
+			},
+		},
+		{
+			name:  "let with binary multiplication",
+			input: "{let x = a * b;}",
+			expected_ast: &ast.Scope{
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 16),
+				Stmts: []ast.Stmt{
+					&ast.LetStmt{
+						LetToken: makeToken(token.LET, "let", nil, 1, 2),
+						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
+						Expr: &ast.BinaryExpr{
+							Left:     &ast.Identifier{Token: makeToken(token.IDENT, "a", "a", 1, 10)},
+							Operator: makeToken(token.MULTIPLY, "*", nil, 1, 12),
+							Right:    &ast.Identifier{Token: makeToken(token.IDENT, "b", "b", 1, 14)},
+						},
+						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 15),
+					},
+				},
+			},
+		},
+		{
+			name:  "let with chained addition (left associative)",
+			input: "{let x = 1 + 2 + 3;}",
+			expected_ast: &ast.Scope{
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 20),
+				Stmts: []ast.Stmt{
+					&ast.LetStmt{
+						LetToken: makeToken(token.LET, "let", nil, 1, 2),
+						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
+						// (1 + 2) + 3
+						Expr: &ast.BinaryExpr{
+							Left: &ast.BinaryExpr{
+								Left:     &ast.IntExpr{IntToken: makeToken(token.INT, "1", 1, 1, 10)},
+								Operator: makeToken(token.PLUS, "+", nil, 1, 12),
+								Right:    &ast.IntExpr{IntToken: makeToken(token.INT, "2", 2, 1, 14)},
+							},
+							Operator: makeToken(token.PLUS, "+", nil, 1, 16),
+							Right:    &ast.IntExpr{IntToken: makeToken(token.INT, "3", 3, 1, 18)},
+						},
+						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 19),
+					},
+				},
+			},
+		},
+		{
+			name:  "let with precedence: addition and multiplication",
+			input: "{let x = 1 + 2 * 3;}",
+			expected_ast: &ast.Scope{
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 20),
+				Stmts: []ast.Stmt{
+					&ast.LetStmt{
+						LetToken: makeToken(token.LET, "let", nil, 1, 2),
+						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
+						// 1 + (2 * 3)
+						Expr: &ast.BinaryExpr{
+							Left:     &ast.IntExpr{IntToken: makeToken(token.INT, "1", 1, 1, 10)},
+							Operator: makeToken(token.PLUS, "+", nil, 1, 12),
+							Right: &ast.BinaryExpr{
+								Left:     &ast.IntExpr{IntToken: makeToken(token.INT, "2", 2, 1, 14)},
+								Operator: makeToken(token.MULTIPLY, "*", nil, 1, 16),
+								Right:    &ast.IntExpr{IntToken: makeToken(token.INT, "3", 3, 1, 18)},
+							},
+						},
+						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 19),
 					},
 				},
 			},

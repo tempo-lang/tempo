@@ -153,3 +153,20 @@ func (n *IntExpr) EndToken() token.Token {
 }
 
 func (n *IntExpr) expressionNode() {}
+
+// BinaryExpr represents a binary operation like a + b, x * y, etc.
+type BinaryExpr struct {
+	Left     Expr
+	Operator token.Token
+	Right    Expr
+}
+
+func (e *BinaryExpr) StartToken() token.Token {
+	return e.Left.StartToken()
+}
+
+func (e *BinaryExpr) EndToken() token.Token {
+	return e.Right.EndToken()
+}
+
+func (e *BinaryExpr) expressionNode() {}

@@ -11,6 +11,14 @@ import (
 	"github.com/tempo-lang/tempo/parser/new_parser/token"
 )
 
+// Precedence levels for binary operators (Pratt parsing)
+const (
+	PREC_LOWEST  = iota
+	PREC_SUM     // + and -
+	PREC_PRODUCT // * and /
+	PREC_PREFIX  // unary operators (future use)
+)
+
 type Parser struct {
 	l      *lexer.Lexer
 	errors []token.Token
@@ -66,6 +74,18 @@ func (p *Parser) errorToken(errorMessage string) token.Token {
 	)
 	p.errors = append(p.errors, errToken)
 	return errToken
+}
+
+// getPrecedence returns the precedence level for a token type
+func getPrecedence(tokenType token.TokenType) int {
+	switch tokenType {
+	case token.PLUS, token.MINUS:
+		return PREC_SUM
+	case token.MULTIPLY, token.DIVIDE:
+		return PREC_PRODUCT
+	default:
+		return PREC_LOWEST
+	}
 }
 
 func (p *Parser) expectSemicolon(stmt ast.Stmt) (actualToken token.Token, errorStmt *ast.InvalidStmt) {
@@ -196,10 +216,38 @@ func (p *Parser) parseIdentifier() (*ast.Identifier, bool) {
 }
 
 func (p *Parser) parseExpr() (ast.Expr, bool) {
-	return p.parseBaseExpr()
+	return p.parseExprWithPrecedence(PREC_LOWEST)
 }
 
-func (p *Parser) parseBaseExpr() (ast.Expr, bool) {
+func (p *Parser) parseExprWithPrecedence(precedence int) (ast.Expr, bool) {
+	left, needsRecover := p.parsePrimaryExpr()
+	if needsRecover {
+		return left, true
+	}
+
+	// While the next token is a binary operator with precedence > current precedence level
+	// Using strict inequality ensures left-associativity for operators at the same precedence
+	for precedence < getPrecedence(p.curToken.Type) {
+		op := p.readToken()
+
+		// Parse the right-hand side with higher precedence for left-associative operators
+		right, needsRecover := p.parseExprWithPrecedence(precedence + 1)
+		if needsRecover {
+			return left, true
+		}
+
+		// Wrap in BinaryExpr and continue parsing
+		left = &ast.BinaryExpr{
+			Left:     left,
+			Operator: op,
+			Right:    right,
+		}
+	}
+
+	return left, false
+}
+
+func (p *Parser) parsePrimaryExpr() (ast.Expr, bool) {
 	switch p.curToken.Type {
 	case token.FLOAT:
 		return &ast.FloatExpr{FloatToken: p.readToken()}, false
