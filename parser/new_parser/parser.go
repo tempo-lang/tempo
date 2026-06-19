@@ -49,6 +49,8 @@ func (p *Parser) curTokenIs(tokenTypes ...token.TokenType) bool {
 	return slices.Contains(tokenTypes, p.curToken.Type)
 }
 
+// assertToken will read the next token and panic if it does not match the expected token type.
+// This function should only be used when an earlier check ensures that the token type is correct.
 func (p *Parser) assertToken(tokenType token.TokenType) token.Token {
 	if p.curToken.Type != tokenType {
 		panic(fmt.Sprintf("expected token type '%s' got '%v'", tokenType, p.curToken))
@@ -67,12 +69,16 @@ func (p *Parser) errorToken(errorMessage string) token.Token {
 }
 
 func (p *Parser) expectSemicolon(stmt ast.Stmt) (actualToken token.Token, errorStmt *ast.InvalidStmt) {
-	actualToken = p.readToken()
+	actualToken = p.curToken
 	if actualToken.Type != token.SEMICOLON {
+		errToken := token.Error(p.prevToken.Literal, p.prevToken.Pos, "missing semicolon")
+		p.errors = append(p.errors, errToken)
 		errorStmt = &ast.InvalidStmt{
-			ErrorToken:  token.Error(p.prevToken.Literal, p.prevToken.Pos, "missing semicolon"),
+			ErrorToken:  errToken,
 			PartialStmt: stmt,
 		}
+	} else {
+		p.readToken() // consume semicolon if successfully found
 	}
 	return // output variables assigned
 }
@@ -83,18 +89,27 @@ func (p *Parser) ParseScope() *ast.Scope {
 	stmts := []ast.Stmt{}
 
 	for p.curToken.Type != token.RCURLY {
+		if p.curToken.Type == token.EOF {
+			return &ast.Scope{
+				OpenToken:  openToken,
+				CloseToken: p.errorToken("unexpected EOF when parsing scope"),
+				Stmts:      stmts,
+			}
+		}
+
 		stmt, needsRecover := p.parseStmt()
 		stmts = append(stmts, stmt)
 
-		for needsRecover {
+		if needsRecover {
 			for !p.curTokenIs(token.RCURLY, token.SEMICOLON, token.EOF) {
 				p.readToken()
 			}
-			if p.curTokenIs(token.RCURLY, token.SEMICOLON) {
-				p.readToken()
+			switch p.curToken.Type {
+			case token.RCURLY:
 				break
-			}
-			if p.curTokenIs(token.EOF) {
+			case token.SEMICOLON:
+				p.readToken()
+			case token.EOF:
 				return &ast.Scope{
 					OpenToken:  openToken,
 					CloseToken: p.errorToken("unexpected EOF when parsing scope"),
@@ -145,12 +160,13 @@ func (p *Parser) parseLetStmt() (ast.Stmt, bool) {
 		}, true
 	}
 
-	if p.readToken().Type != token.ASSIGN {
+	if p.curToken.Type != token.ASSIGN {
 		return &ast.InvalidStmt{
 			ErrorToken:  p.errorToken("expected `=` when parsing let statement"),
 			PartialStmt: stmt,
 		}, true
 	}
+	p.assertToken(token.ASSIGN)
 
 	expr, needsRecover := p.parseExpr()
 	stmt.Expr = expr
