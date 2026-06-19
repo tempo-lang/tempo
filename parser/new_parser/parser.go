@@ -66,6 +66,17 @@ func (p *Parser) errorToken(errorMessage string) token.Token {
 	return errToken
 }
 
+func (p *Parser) expectSemicolon(stmt ast.Stmt) (actualToken token.Token, errorStmt *ast.InvalidStmt) {
+	actualToken = p.readToken()
+	if actualToken.Type != token.SEMICOLON {
+		errorStmt = &ast.InvalidStmt{
+			ErrorToken:  token.Error(p.prevToken.Literal, p.prevToken.Pos, "missing semicolon"),
+			PartialStmt: stmt,
+		}
+	}
+	return // output variables assigned
+}
+
 func (p *Parser) ParseScope() *ast.Scope {
 	openToken := p.assertToken(token.LCURLY)
 
@@ -117,13 +128,6 @@ func (p *Parser) parseStmt() (ast.Stmt, bool) {
 		}, true
 	}
 
-	if p.readToken().Type != token.SEMICOLON {
-		return &ast.InvalidStmt{
-			ErrorToken:  token.Error(p.prevToken.Literal, p.prevToken.Pos, "missing semicolon"),
-			PartialStmt: stmt,
-		}, true
-	}
-
 	return stmt, false
 }
 
@@ -156,6 +160,12 @@ func (p *Parser) parseLetStmt() (ast.Stmt, bool) {
 			PartialStmt: stmt,
 		}, true
 	}
+
+	semi, errStmt := p.expectSemicolon(stmt)
+	if errStmt != nil {
+		return errStmt, true
+	}
+	stmt.SemiToken = semi
 
 	return stmt, false
 }

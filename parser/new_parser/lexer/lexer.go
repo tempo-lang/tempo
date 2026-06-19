@@ -172,6 +172,7 @@ func (l *Lexer) ReadToken() token.Token {
 			switch tok.Value {
 			case "let":
 				tok.Type = token.LET
+				tok.Value = nil
 			}
 			return tok
 		}
