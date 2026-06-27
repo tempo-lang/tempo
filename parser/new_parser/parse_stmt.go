@@ -29,9 +29,12 @@ func (p *Parser) ParseStmt() (ast.Stmt, bool) {
 				return assignStmt, true
 			}
 		} else {
-			return &ast.InvalidStmt{
-				ErrorToken: p.errorToken("invalid statement"),
-			}, true
+			// Try to parse as an expression statement
+			exprStmt, needsRecovery := p.parseExprStmt()
+			if needsRecovery {
+				return exprStmt, true
+			}
+			stmt = exprStmt
 		}
 	}
 
@@ -210,4 +213,27 @@ func (p *Parser) parseAssignSpecifier() (ast.AssignSpecifier, bool) {
 	default:
 		return nil, true
 	}
+}
+
+func (p *Parser) parseExprStmt() (ast.Stmt, bool) {
+	// Parse the expression
+	expr, needsRecover := p.ParseExpr()
+	if needsRecover {
+		return &ast.InvalidStmt{
+			ErrorToken: p.errorToken("expected expression when parsing expression statement"),
+		}, true
+	}
+
+	// Expect semicolon
+	semi, errStmt := p.expectSemicolon(&ast.ExprStmt{
+		Expr: expr,
+	})
+	if errStmt != nil {
+		return errStmt, true
+	}
+
+	return &ast.ExprStmt{
+		Expr:      expr,
+		SemiToken: semi,
+	}, false
 }

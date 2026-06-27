@@ -104,13 +104,6 @@ func TestParseScopeWithErrors(t *testing.T) {
 			},
 		},
 		{
-			name:  "number as statement",
-			input: "{123;}",
-			expectedErrors: []token.Token{
-				makeError("123", 1, 2, "invalid statement"),
-			},
-		},
-		{
 			name:  "invalid expression in let",
 			input: "{let x = +;}",
 			expectedErrors: []token.Token{

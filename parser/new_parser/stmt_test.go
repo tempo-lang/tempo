@@ -204,3 +204,33 @@ func TestParseAssignStmt(t *testing.T) {
 
 	runStmtTest(t, tests)
 }
+
+func TestParseExprStmt(t *testing.T) {
+	// Helper to create a token for testing
+	makeToken := func(tokenType token.TokenType, literal string, value any, line, col int) token.Token {
+		return token.New(tokenType, literal, token.SourcePos{Line: line, Col: col}, value)
+	}
+
+	tests := []stmtTestCase{
+		{
+			name:  "simple expression statement",
+			input: "42;",
+			expected_stmt: &ast.ExprStmt{
+				Expr: &ast.PrimitiveExpr{
+					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "42", 42, 1, 1)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 3),
+			},
+			expectError: false,
+		},
+		{
+			name:        "expression statement without semicolon",
+			input:       "a + b;",
+			expectError: true,
+		},
+	}
+
+	runStmtTest(t, tests)
+}
