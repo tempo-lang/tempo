@@ -171,9 +171,45 @@ func (l *Lexer) ReadToken() token.Token {
 		if unicode.IsLetter(ch) {
 			tok := l.readIdentifier()
 			switch tok.Value {
+			case "struct":
+				tok.Type = token.STRUCT
+				tok.Value = nil
+			case "interface":
+				tok.Type = token.INTERFACE
+				tok.Value = nil
+			case "implements":
+				tok.Type = token.IMPLEMENTS
+				tok.Value = nil
+			case "func":
+				tok.Type = token.FUNC
+				tok.Value = nil
+			case "return":
+				tok.Type = token.RETURN
+				tok.Value = nil
 			case "let":
 				tok.Type = token.LET
 				tok.Value = nil
+			case "async":
+				tok.Type = token.ASYNC
+				tok.Value = nil
+			case "await":
+				tok.Type = token.AWAIT
+				tok.Value = nil
+			case "if":
+				tok.Type = token.IF
+				tok.Value = nil
+			case "else":
+				tok.Type = token.ELSE
+				tok.Value = nil
+			case "while":
+				tok.Type = token.WHILE
+				tok.Value = nil
+			case "true":
+				tok.Type = token.TRUE
+				tok.Value = true
+			case "false":
+				tok.Type = token.FALSE
+				tok.Value = false
 			}
 			return tok
 		}

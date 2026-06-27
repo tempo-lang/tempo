@@ -25,7 +25,7 @@ func getPrecedence(tokenType token.TokenType) int {
 	}
 }
 
-func (p *Parser) parseExpr() (ast.Expr, bool) {
+func (p *Parser) ParseExpr() (ast.Expr, bool) {
 	return p.parseExprWithPrecedence(PREC_LOWEST)
 }
 

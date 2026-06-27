@@ -97,7 +97,7 @@ func (p *Parser) ParseScope() *ast.Scope {
 			}
 		}
 
-		stmt, needsRecover := p.parseStmt()
+		stmt, needsRecover := p.ParseStmt()
 		stmts = append(stmts, stmt)
 
 		if needsRecover {

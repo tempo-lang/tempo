@@ -5,7 +5,7 @@ import (
 	"github.com/tempo-lang/tempo/parser/new_parser/token"
 )
 
-func (p *Parser) parseStmt() (ast.Stmt, bool) {
+func (p *Parser) ParseStmt() (ast.Stmt, bool) {
 	var stmt ast.Stmt
 	switch p.curToken.Type {
 	case token.LET:
@@ -45,7 +45,7 @@ func (p *Parser) parseLetStmt() (ast.Stmt, bool) {
 	}
 	p.assertToken(token.ASSIGN)
 
-	expr, needsRecover := p.parseExpr()
+	expr, needsRecover := p.ParseExpr()
 	stmt.Expr = expr
 	if needsRecover {
 		return &ast.InvalidStmt{
