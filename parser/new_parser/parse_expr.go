@@ -57,14 +57,54 @@ func (p *Parser) parseExprWithPrecedence(precedence int) (ast.Expr, bool) {
 	return left, false
 }
 
+func (p *Parser) parseLiteralWithRole(lit ast.Literal) (ast.Expr, bool) {
+	// // Check for optional role annotation: ROLE_AT roleType
+	// if p.curToken.Type == token.ROLE_AT {
+	// 	roleAtToken := p.readToken()
+	// 	roleType := p.parseRoleType()
+	// 	if roleType == nil {
+	// 		// If role type parsing failed, return the literal as-is
+	// 		return &ast.PrimitiveExpr{
+	// 			Literal:  lit,
+	// 			RoleAt:   roleAtToken,
+	// 			RoleType: nil,
+	// 		}, false
+	// 	}
+	// 	return &ast.PrimitiveExpr{
+	// 		Literal:  lit,
+	// 		RoleAt:   roleAtToken,
+	// 		RoleType: roleType,
+	// 	}, false
+	// }
+
+	// No role annotation, return the literal directly as a PrimitiveExpr
+	return &ast.PrimitiveExpr{
+		Literal:  lit,
+		RoleAt:   token.Token{},
+		RoleType: nil,
+	}, false
+}
+
 func (p *Parser) parsePrimaryExpr() (ast.Expr, bool) {
 	switch p.curToken.Type {
 	case token.FLOAT:
-		return &ast.FloatExpr{FloatToken: p.readToken()}, false
+		lit := &ast.FloatLit{FloatToken: p.readToken()}
+		return p.parseLiteralWithRole(lit)
 	case token.INT:
-		return &ast.IntExpr{IntToken: p.readToken()}, false
+		lit := &ast.IntLit{IntToken: p.readToken()}
+		return p.parseLiteralWithRole(lit)
+	case token.STRING:
+		lit := &ast.StringLit{StringToken: p.readToken()}
+		return p.parseLiteralWithRole(lit)
+	case token.TRUE, token.FALSE:
+		lit := &ast.BoolLit{BoolToken: p.readToken()}
+		return p.parseLiteralWithRole(lit)
 	case token.IDENT:
-		return p.parseIdentifier()
+		ident, err := p.parseIdentifier()
+		if err {
+			return nil, true
+		}
+		return ident, false
 	default:
 		err := p.errorToken("not an expression")
 		return &ast.InvalidExpr{

@@ -56,9 +56,9 @@ func TestParser(t *testing.T) {
 						LetToken: makeToken(token.LET, "let", nil, 1, 2),
 						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
 						Expr: &ast.BinaryExpr{
-							Left:     &ast.IntExpr{IntToken: makeToken(token.INT, "1", 1, 1, 10)},
+							Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 10)}},
 							Operator: makeToken(token.PLUS, "+", nil, 1, 12),
-							Right:    &ast.IntExpr{IntToken: makeToken(token.INT, "2", 2, 1, 14)},
+							Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 14)}},
 						},
 						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 15),
 					},
@@ -98,12 +98,12 @@ func TestParser(t *testing.T) {
 						// (1 + 2) + 3
 						Expr: &ast.BinaryExpr{
 							Left: &ast.BinaryExpr{
-								Left:     &ast.IntExpr{IntToken: makeToken(token.INT, "1", 1, 1, 10)},
+								Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 10)}},
 								Operator: makeToken(token.PLUS, "+", nil, 1, 12),
-								Right:    &ast.IntExpr{IntToken: makeToken(token.INT, "2", 2, 1, 14)},
+								Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 14)}},
 							},
 							Operator: makeToken(token.PLUS, "+", nil, 1, 16),
-							Right:    &ast.IntExpr{IntToken: makeToken(token.INT, "3", 3, 1, 18)},
+							Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "3", 3, 1, 18)}},
 						},
 						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 19),
 					},
@@ -122,12 +122,12 @@ func TestParser(t *testing.T) {
 						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
 						// 1 + (2 * 3)
 						Expr: &ast.BinaryExpr{
-							Left:     &ast.IntExpr{IntToken: makeToken(token.INT, "1", 1, 1, 10)},
+							Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 10)}},
 							Operator: makeToken(token.PLUS, "+", nil, 1, 12),
 							Right: &ast.BinaryExpr{
-								Left:     &ast.IntExpr{IntToken: makeToken(token.INT, "2", 2, 1, 14)},
+								Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 14)}},
 								Operator: makeToken(token.MULTIPLY, "*", nil, 1, 16),
-								Right:    &ast.IntExpr{IntToken: makeToken(token.INT, "3", 3, 1, 18)},
+								Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "3", 3, 1, 18)}},
 							},
 						},
 						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 19),
