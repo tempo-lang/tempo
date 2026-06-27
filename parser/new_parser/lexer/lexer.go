@@ -162,6 +162,7 @@ func (l *Lexer) ReadToken() token.Token {
 		l.advance()
 		return token.New(token.ROLE_AT, "@", startPos, nil)
 	case '_':
+		// l.readIdentifier() will either parse as `_` or `ident`
 		return l.readIdentifier()
 	case '"':
 		return l.readStringLiteral()

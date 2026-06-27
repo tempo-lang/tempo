@@ -141,7 +141,9 @@ func (s *Scope) EndToken() token.Token {
 type RoleType struct {
 	Start token.Token
 	End   token.Token
-	Roles []*Role
+	// RoleNodes contains all parsed roles (including errors)
+	// Use [RoleType.Roles] to get all successfully parsed roles.
+	RoleNodes []*Role
 }
 
 func (r *RoleType) StartToken() token.Token {
@@ -154,6 +156,32 @@ func (r *RoleType) EndToken() token.Token {
 
 func (r *RoleType) IsShared() bool {
 	return r.Start.Type == token.LSQUARE
+}
+
+// Error returns the error token in the role type, or nil if there are no errors.
+func (r *RoleType) Error() *token.Token {
+	if r.Start.Type == token.ILLEGAL {
+		return &r.Start
+	}
+	for _, role := range r.RoleNodes {
+		if role.Token.Type == token.ILLEGAL {
+			return &role.Token
+		}
+	}
+	if r.End.Type == token.ILLEGAL {
+		return &r.End
+	}
+	return nil
+}
+
+// Roles returns all successfully parsed roles.
+func (r *RoleType) Roles() (roles []*Role) {
+	for _, role := range r.RoleNodes {
+		if role.Token.Type != token.ILLEGAL {
+			roles = append(roles, role)
+		}
+	}
+	return
 }
 
 type Role struct {

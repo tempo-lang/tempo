@@ -10,7 +10,7 @@ import (
 // - (A,B) or A (normal role type)
 func (p *Parser) parseRoleType() (*ast.RoleType, bool) {
 	var startToken token.Token
-	var roles []*ast.Role
+	var roleNodes []*ast.Role
 	var endToken token.Token
 
 	switch p.curToken.Type {
@@ -20,12 +20,12 @@ func (p *Parser) parseRoleType() (*ast.RoleType, bool) {
 
 		// Parse first role
 		role, needsRecover := p.parseRole()
-		roles = append(roles, role)
+		roleNodes = append(roleNodes, role)
 		if needsRecover {
 			return &ast.RoleType{
-				Start: startToken,
-				End:   token.Token{},
-				Roles: roles,
+				Start:     startToken,
+				End:       token.Token{},
+				RoleNodes: roleNodes,
 			}, true
 		}
 
@@ -34,12 +34,12 @@ func (p *Parser) parseRoleType() (*ast.RoleType, bool) {
 			p.assertToken(token.COMMA)
 
 			role, needsRecover := p.parseRole()
-			roles = append(roles, role)
+			roleNodes = append(roleNodes, role)
 			if needsRecover {
 				return &ast.RoleType{
-					Start: startToken,
-					End:   token.Token{},
-					Roles: roles,
+					Start:     startToken,
+					End:       token.Token{},
+					RoleNodes: roleNodes,
 				}, true
 			}
 		}
@@ -47,9 +47,9 @@ func (p *Parser) parseRoleType() (*ast.RoleType, bool) {
 		// Expect RSQUARE
 		if p.curToken.Type != token.RSQUARE {
 			return &ast.RoleType{
-				Start: startToken,
-				End:   p.errorToken("expected ']'"),
-				Roles: roles,
+				Start:     startToken,
+				End:       p.errorToken("expected ']'"),
+				RoleNodes: roleNodes,
 			}, true
 		}
 		endToken = p.assertToken(token.RSQUARE)
@@ -60,12 +60,12 @@ func (p *Parser) parseRoleType() (*ast.RoleType, bool) {
 
 		// Parse first role
 		role, needsRecover := p.parseRole()
-		roles = append(roles, role)
+		roleNodes = append(roleNodes, role)
 		if needsRecover {
 			return &ast.RoleType{
-				Start: startToken,
-				End:   token.Token{},
-				Roles: roles,
+				Start:     startToken,
+				End:       token.Token{},
+				RoleNodes: roleNodes,
 			}, true
 		}
 
@@ -74,12 +74,12 @@ func (p *Parser) parseRoleType() (*ast.RoleType, bool) {
 			p.assertToken(token.COMMA)
 
 			role, needsRecover := p.parseRole()
-			roles = append(roles, role)
+			roleNodes = append(roleNodes, role)
 			if needsRecover {
 				return &ast.RoleType{
-					Start: startToken,
-					End:   token.Token{},
-					Roles: roles,
+					Start:     startToken,
+					End:       token.Token{},
+					RoleNodes: roleNodes,
 				}, true
 			}
 		}
@@ -87,9 +87,9 @@ func (p *Parser) parseRoleType() (*ast.RoleType, bool) {
 		// Expect RPAREN
 		if p.curToken.Type != token.RPAREN {
 			return &ast.RoleType{
-				Start: startToken,
-				End:   p.errorToken("expected ')'"),
-				Roles: roles,
+				Start:     startToken,
+				End:       p.errorToken("expected ')'"),
+				RoleNodes: roleNodes,
 			}, true
 		}
 		endToken = p.assertToken(token.RPAREN)
@@ -97,24 +97,24 @@ func (p *Parser) parseRoleType() (*ast.RoleType, bool) {
 	default:
 		// Single role type: role
 		role, needsRecover := p.parseRole()
-		roles = append(roles, role)
+		roleNodes = append(roleNodes, role)
 		// For single role, both start and end are the role's token
 		startToken = role.Token
 		endToken = role.Token
 
 		if needsRecover {
 			return &ast.RoleType{
-				Start: startToken,
-				End:   endToken,
-				Roles: roles,
+				Start:     startToken,
+				End:       endToken,
+				RoleNodes: roleNodes,
 			}, true
 		}
 	}
 
 	return &ast.RoleType{
-		Start: startToken,
-		End:   endToken,
-		Roles: roles,
+		Start:     startToken,
+		End:       endToken,
+		RoleNodes: roleNodes,
 	}, false
 }
 

@@ -135,6 +135,85 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:  "let with literal and single role annotation",
+			input: "{let x = 42@A;}",
+			expected_ast: &ast.Scope{
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 15),
+				Stmts: []ast.Stmt{
+					&ast.LetStmt{
+						LetToken: makeToken(token.LET, "let", nil, 1, 2),
+						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
+						Expr: &ast.PrimitiveExpr{
+							Literal: &ast.IntLit{IntToken: makeToken(token.INT, "42", 42, 1, 10)},
+							RoleAt:  makeToken(token.ROLE_AT, "@", nil, 1, 12),
+							RoleType: &ast.RoleType{
+								Start: makeToken(token.IDENT, "A", "A", 1, 13),
+								End:   makeToken(token.IDENT, "A", "A", 1, 13),
+								RoleNodes: []*ast.Role{
+									{Token: makeToken(token.IDENT, "A", "A", 1, 13)},
+								},
+							},
+						},
+						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 14),
+					},
+				},
+			},
+		},
+		{
+			name:  "let with literal and shared role annotation",
+			input: "{let x = 42@[A,B];}",
+			expected_ast: &ast.Scope{
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 19),
+				Stmts: []ast.Stmt{
+					&ast.LetStmt{
+						LetToken: makeToken(token.LET, "let", nil, 1, 2),
+						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
+						Expr: &ast.PrimitiveExpr{
+							Literal: &ast.IntLit{IntToken: makeToken(token.INT, "42", 42, 1, 10)},
+							RoleAt:  makeToken(token.ROLE_AT, "@", nil, 1, 12),
+							RoleType: &ast.RoleType{
+								Start: makeToken(token.LSQUARE, "[", nil, 1, 13),
+								End:   makeToken(token.RSQUARE, "]", nil, 1, 17),
+								RoleNodes: []*ast.Role{
+									{Token: makeToken(token.IDENT, "A", "A", 1, 14)},
+									{Token: makeToken(token.IDENT, "B", "B", 1, 16)},
+								},
+							},
+						},
+						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 18),
+					},
+				},
+			},
+		},
+		{
+			name:  "let with string literal and role annotation",
+			input: "{let x = \"hello\"@A;}",
+			expected_ast: &ast.Scope{
+				OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 1),
+				CloseToken: makeToken(token.RCURLY, "}", nil, 1, 20),
+				Stmts: []ast.Stmt{
+					&ast.LetStmt{
+						LetToken: makeToken(token.LET, "let", nil, 1, 2),
+						Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 6)},
+						Expr: &ast.PrimitiveExpr{
+							Literal: &ast.StringLit{StringToken: makeToken(token.STRING, "\"hello\"", "hello", 1, 10)},
+							RoleAt:  makeToken(token.ROLE_AT, "@", nil, 1, 17),
+							RoleType: &ast.RoleType{
+								Start: makeToken(token.IDENT, "A", "A", 1, 18),
+								End:   makeToken(token.IDENT, "A", "A", 1, 18),
+								RoleNodes: []*ast.Role{
+									{Token: makeToken(token.IDENT, "A", "A", 1, 18)},
+								},
+							},
+						},
+						SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 19),
+					},
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {
