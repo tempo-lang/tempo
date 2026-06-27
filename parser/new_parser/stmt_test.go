@@ -113,3 +113,94 @@ func TestParseReturnStmt(t *testing.T) {
 
 	runStmtTest(t, tests)
 }
+
+func TestParseAssignStmt(t *testing.T) {
+	// Helper to create a token for testing
+	makeToken := func(tokenType token.TokenType, literal string, value any, line, col int) token.Token {
+		return token.New(tokenType, literal, token.SourcePos{Line: line, Col: col}, value)
+	}
+
+	tests := []stmtTestCase{
+		{
+			name:  "simple assignment",
+			input: "x = 42;",
+			expected_stmt: &ast.AssignStmt{
+				AssignExpr: &ast.AssignExpr{
+					Ident:      &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
+					Specifiers: nil,
+				},
+				AssignToken: makeToken(token.ASSIGN, "=", nil, 1, 3),
+				Expr: &ast.PrimitiveExpr{
+					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "42", 42, 1, 5)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 7),
+			},
+			expectError: false,
+		},
+		{
+			name:  "assignment with field access",
+			input: "x.y = 100;",
+			expected_stmt: &ast.AssignStmt{
+				AssignExpr: &ast.AssignExpr{
+					Ident: &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
+					Specifiers: []ast.AssignSpecifier{
+						&ast.AssignFieldSpecifier{
+							DotToken: makeToken(token.DOT, ".", nil, 1, 2),
+							Ident:    &ast.Identifier{Token: makeToken(token.IDENT, "y", "y", 1, 3)},
+						},
+					},
+				},
+				AssignToken: makeToken(token.ASSIGN, "=", nil, 1, 5),
+				Expr: &ast.PrimitiveExpr{
+					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "100", 100, 1, 7)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 10),
+			},
+			expectError: false,
+		},
+		{
+			name:  "assignment with index access",
+			input: "arr[0] = 5;",
+			expected_stmt: &ast.AssignStmt{
+				AssignExpr: &ast.AssignExpr{
+					Ident: &ast.Identifier{Token: makeToken(token.IDENT, "arr", "arr", 1, 1)},
+					Specifiers: []ast.AssignSpecifier{
+						&ast.AssignIndexSpecifier{
+							OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 4),
+							IndexExpr: &ast.PrimitiveExpr{
+								Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 5)},
+								RoleAt:   token.Token{},
+								RoleType: nil,
+							},
+							CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 6),
+						},
+					},
+				},
+				AssignToken: makeToken(token.ASSIGN, "=", nil, 1, 8),
+				Expr: &ast.PrimitiveExpr{
+					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "5", 5, 1, 10)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 11),
+			},
+			expectError: false,
+		},
+		{
+			name:        "assignment without semicolon",
+			input:       "x = 42",
+			expectError: true,
+		},
+		{
+			name:        "assignment without equals",
+			input:       "x 42;",
+			expectError: true,
+		},
+	}
+
+	runStmtTest(t, tests)
+}
