@@ -7,18 +7,23 @@ import (
 
 // Precedence levels for binary operators (Pratt parsing)
 const (
-	PREC_LOWEST  = iota
-	PREC_SUM     // + and -
-	PREC_PRODUCT // * and /
-	PREC_PREFIX  // unary operators (future use)
+	PREC_LOWEST     = iota
+	PREC_LOGICAL    // && and ||
+	PREC_COMPARISON // ==, !=, <, <=, >, >=
+	PREC_SUM        // + and -
+	PREC_PRODUCT    // *, /, %
 )
 
 // getPrecedence returns the precedence level for a token type
 func getPrecedence(tokenType token.TokenType) int {
 	switch tokenType {
+	case token.OR, token.AND:
+		return PREC_LOGICAL
+	case token.EQUAL, token.NOT_EQUAL, token.LESS, token.LESS_EQ, token.GREATER, token.GREATER_EQ:
+		return PREC_COMPARISON
 	case token.PLUS, token.MINUS:
 		return PREC_SUM
-	case token.MULTIPLY, token.DIVIDE:
+	case token.MULTIPLY, token.DIVIDE, token.MODULO:
 		return PREC_PRODUCT
 	default:
 		return PREC_LOWEST
@@ -36,12 +41,14 @@ func (p *Parser) parseExprWithPrecedence(precedence int) (ast.Expr, bool) {
 	}
 
 	// While the next token is a binary operator with precedence > current precedence level
-	// Using strict inequality ensures left-associativity for operators at the same precedence
+	// Strict inequality combined with passing currentPrec to the recursive call ensures left-associativity
 	for precedence < getPrecedence(p.curToken.Type) {
 		op := p.readToken()
 
-		// Parse the right-hand side with higher precedence for left-associative operators
-		right, needsRecover := p.parseExprWithPrecedence(precedence + 1)
+		// Parse the right-hand side with the same precedence for the current operator
+		// Same-precedence operators are not consumed by the recursive call due to strict inequality
+		currentPrec := getPrecedence(op.Type)
+		right, needsRecover := p.parseExprWithPrecedence(currentPrec)
 		if needsRecover {
 			return left, true
 		}

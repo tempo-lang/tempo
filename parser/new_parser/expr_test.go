@@ -206,6 +206,208 @@ func TestParseExpr(t *testing.T) {
 			},
 			expectError: false,
 		},
+		// New binary operator tests
+		{
+			name:  "binary modulo",
+			input: "1 % 2",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+				Operator: makeToken(token.MODULO, "%", nil, 1, 3),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 5)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "binary equality",
+			input: "1 == 2",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+				Operator: makeToken(token.EQUAL, "==", nil, 1, 3),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 6)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "binary not equal",
+			input: "1 != 2",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+				Operator: makeToken(token.NOT_EQUAL, "!=", nil, 1, 3),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 6)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "binary less than",
+			input: "1 < 2",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+				Operator: makeToken(token.LESS, "<", nil, 1, 3),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 5)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "binary less than or equal",
+			input: "1 <= 2",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+				Operator: makeToken(token.LESS_EQ, "<=", nil, 1, 3),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 6)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "binary greater than",
+			input: "1 > 2",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+				Operator: makeToken(token.GREATER, ">", nil, 1, 3),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 5)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "binary greater than or equal",
+			input: "1 >= 2",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+				Operator: makeToken(token.GREATER_EQ, ">=", nil, 1, 3),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 6)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "binary logical and",
+			input: "true && false",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.BoolLit{BoolToken: makeToken(token.TRUE, "true", true, 1, 1)}},
+				Operator: makeToken(token.AND, "&&", nil, 1, 6),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.BoolLit{BoolToken: makeToken(token.FALSE, "false", false, 1, 9)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "binary logical or",
+			input: "true || false",
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.BoolLit{BoolToken: makeToken(token.TRUE, "true", true, 1, 1)}},
+				Operator: makeToken(token.OR, "||", nil, 1, 6),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.BoolLit{BoolToken: makeToken(token.FALSE, "false", false, 1, 9)}},
+			},
+			expectError: false,
+		},
+		// Precedence tests for new operators
+		{
+			name:  "precedence: product and modulo",
+			input: "1 * 2 % 3",
+			// (1 * 2) % 3 - left associative at same precedence
+			expected_expr: &ast.BinaryExpr{
+				Left: &ast.BinaryExpr{
+					Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+					Operator: makeToken(token.MULTIPLY, "*", nil, 1, 3),
+					Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 5)}},
+				},
+				Operator: makeToken(token.MODULO, "%", nil, 1, 7),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "3", 3, 1, 9)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "precedence: sum and product with modulo",
+			input: "1 + 2 * 3 % 4",
+			// 1 + ((2 * 3) % 4)
+			expected_expr: &ast.BinaryExpr{
+				Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+				Operator: makeToken(token.PLUS, "+", nil, 1, 3),
+				Right: &ast.BinaryExpr{
+					Left: &ast.BinaryExpr{
+						Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 5)}},
+						Operator: makeToken(token.MULTIPLY, "*", nil, 1, 7),
+						Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "3", 3, 1, 9)}},
+					},
+					Operator: makeToken(token.MODULO, "%", nil, 1, 11),
+					Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "4", 4, 1, 13)}},
+				},
+			},
+			expectError: false,
+		},
+		{
+			name:  "precedence: comparison and sum",
+			input: "1 + 2 == 3 * 4",
+			// (1 + 2) == (3 * 4)
+			expected_expr: &ast.BinaryExpr{
+				Left: &ast.BinaryExpr{
+					Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+					Operator: makeToken(token.PLUS, "+", nil, 1, 3),
+					Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 5)}},
+				},
+				Operator: makeToken(token.EQUAL, "==", nil, 1, 7),
+				Right: &ast.BinaryExpr{
+					Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "3", 3, 1, 10)}},
+					Operator: makeToken(token.MULTIPLY, "*", nil, 1, 12),
+					Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "4", 4, 1, 14)}},
+				},
+			},
+			expectError: false,
+		},
+		{
+			name:  "precedence: comparison chaining",
+			input: "1 == 2 != 3",
+			// (1 == 2) != 3 - left associative at same precedence
+			expected_expr: &ast.BinaryExpr{
+				Left: &ast.BinaryExpr{
+					Left:     &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 1)}},
+					Operator: makeToken(token.EQUAL, "==", nil, 1, 3),
+					Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "2", 2, 1, 6)}},
+				},
+				Operator: makeToken(token.NOT_EQUAL, "!=", nil, 1, 8),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.IntLit{IntToken: makeToken(token.INT, "3", 3, 1, 11)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "precedence: logical operators",
+			input: "true && false || true",
+			// (true && false) || true - left associative at same precedence
+			expected_expr: &ast.BinaryExpr{
+				Left: &ast.BinaryExpr{
+					Left:     &ast.PrimitiveExpr{Literal: &ast.BoolLit{BoolToken: makeToken(token.TRUE, "true", true, 1, 1)}},
+					Operator: makeToken(token.AND, "&&", nil, 1, 6),
+					Right:    &ast.PrimitiveExpr{Literal: &ast.BoolLit{BoolToken: makeToken(token.FALSE, "false", false, 1, 9)}},
+				},
+				Operator: makeToken(token.OR, "||", nil, 1, 15),
+				Right:    &ast.PrimitiveExpr{Literal: &ast.BoolLit{BoolToken: makeToken(token.TRUE, "true", true, 1, 18)}},
+			},
+			expectError: false,
+		},
+		{
+			name:  "precedence: complex mixed operators",
+			input: "a * b + c == d && e || f",
+			// (((a * b) + c) == d) && e) || f
+			expected_expr: &ast.BinaryExpr{
+				Left: &ast.BinaryExpr{
+					Left: &ast.BinaryExpr{
+						Left: &ast.BinaryExpr{
+							Left: &ast.BinaryExpr{
+								Left:     &ast.Identifier{Token: makeToken(token.IDENT, "a", "a", 1, 1)},
+								Operator: makeToken(token.MULTIPLY, "*", nil, 1, 3),
+								Right:    &ast.Identifier{Token: makeToken(token.IDENT, "b", "b", 1, 5)},
+							},
+							Operator: makeToken(token.PLUS, "+", nil, 1, 7),
+							Right:    &ast.Identifier{Token: makeToken(token.IDENT, "c", "c", 1, 9)},
+						},
+						Operator: makeToken(token.EQUAL, "==", nil, 1, 11),
+						Right:    &ast.Identifier{Token: makeToken(token.IDENT, "d", "d", 1, 14)},
+					},
+					Operator: makeToken(token.AND, "&&", nil, 1, 16),
+					Right:    &ast.Identifier{Token: makeToken(token.IDENT, "e", "e", 1, 19)},
+				},
+				Operator: makeToken(token.OR, "||", nil, 1, 21),
+				Right:    &ast.Identifier{Token: makeToken(token.IDENT, "f", "f", 1, 24)},
+			},
+			expectError: false,
+		},
 	}
 
 	for _, test := range tests {
