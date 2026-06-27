@@ -58,24 +58,16 @@ func (p *Parser) parseExprWithPrecedence(precedence int) (ast.Expr, bool) {
 }
 
 func (p *Parser) parseLiteralWithRole(lit ast.Literal) (ast.Expr, bool) {
-	// // Check for optional role annotation: ROLE_AT roleType
-	// if p.curToken.Type == token.ROLE_AT {
-	// 	roleAtToken := p.readToken()
-	// 	roleType := p.parseRoleType()
-	// 	if roleType == nil {
-	// 		// If role type parsing failed, return the literal as-is
-	// 		return &ast.PrimitiveExpr{
-	// 			Literal:  lit,
-	// 			RoleAt:   roleAtToken,
-	// 			RoleType: nil,
-	// 		}, false
-	// 	}
-	// 	return &ast.PrimitiveExpr{
-	// 		Literal:  lit,
-	// 		RoleAt:   roleAtToken,
-	// 		RoleType: roleType,
-	// 	}, false
-	// }
+	// Check for optional role annotation: ROLE_AT roleType
+	if p.curToken.Type == token.ROLE_AT {
+		roleAtToken := p.readToken()
+		roleType, needsRecover := p.parseRoleType()
+		return &ast.PrimitiveExpr{
+			Literal:  lit,
+			RoleAt:   roleAtToken,
+			RoleType: roleType,
+		}, needsRecover
+	}
 
 	// No role annotation, return the literal directly as a PrimitiveExpr
 	return &ast.PrimitiveExpr{
