@@ -86,13 +86,14 @@ const (
 	OR  TokenType = "OR"
 
 	// Assignment and symbols
-	ASSIGN    TokenType = "ASSIGN"
-	ROLE_AT   TokenType = "ROLE_AT"
-	COMMA     TokenType = "COMMA"
-	DOT       TokenType = "DOT"
-	COLON     TokenType = "COLON"
-	SEMICOLON TokenType = "SEMICOLON"
-	COM       TokenType = "COM"
+	ASSIGN     TokenType = "ASSIGN"     // =
+	ROLE_AT    TokenType = "ROLE_AT"    // @
+	COMMA      TokenType = "COMMA"      // ,
+	DOT        TokenType = "DOT"        // .
+	COLON      TokenType = "COLON"      // :
+	SEMICOLON  TokenType = "SEMICOLON"  // ;
+	UNDERSCORE TokenType = "UNDERSCORE" // _
+	COM        TokenType = "COM"        // ->
 
 	// Literals and identifiers
 	STRING TokenType = "STRING"

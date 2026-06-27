@@ -245,7 +245,11 @@ func (l *Lexer) readIdentifier() token.Token {
 		l.advance()
 	}
 
-	return token.New(token.IDENT, sb.String(), startPos, sb.String())
+	result := sb.String()
+	if result == "_" {
+		return token.New(token.UNDERSCORE, result, startPos, nil)
+	}
+	return token.New(token.IDENT, result, startPos, result)
 }
 
 func (l *Lexer) readNumber(prefixDot bool) token.Token {

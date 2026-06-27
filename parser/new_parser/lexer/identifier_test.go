@@ -32,6 +32,12 @@ func TestReadIdentifier(t *testing.T) {
 			expectedType:  token.IDENT,
 			expectedValue: "hello123",
 		},
+		{
+			name:          "underscore",
+			input:         "_",
+			expectedType:  token.UNDERSCORE,
+			expectedValue: nil,
+		},
 	}
 
 	for _, tt := range tests {
