@@ -93,14 +93,14 @@ func (s *ReturnStmt) EndToken() token.Token {
 func (s *ReturnStmt) statementNode() {}
 
 type AssignStmt struct {
-	AssignExpr  *AssignExpr
+	LHS         Expr
 	AssignToken token.Token
-	Expr        Expr
+	RHS         Expr
 	SemiToken   token.Token
 }
 
 func (s *AssignStmt) StartToken() token.Token {
-	return s.AssignExpr.StartToken()
+	return s.LHS.StartToken()
 }
 
 func (s *AssignStmt) EndToken() token.Token {
@@ -123,59 +123,3 @@ func (s *ExprStmt) EndToken() token.Token {
 }
 
 func (s *ExprStmt) statementNode() {}
-
-// AssignExpr
-type AssignExpr struct {
-	Ident      *Identifier
-	Specifiers []AssignSpecifier
-}
-
-func (e *AssignExpr) StartToken() token.Token {
-	return e.Ident.StartToken()
-}
-
-func (e *AssignExpr) EndToken() token.Token {
-	if len(e.Specifiers) > 0 {
-		return e.Specifiers[len(e.Specifiers)-1].EndToken()
-	}
-	return e.Ident.EndToken()
-}
-
-// AssignSpecifier is an interface for the different types of assignment specifiers
-type AssignSpecifier interface {
-	Node
-	assignSpecifierNode()
-}
-
-// AssignFieldSpecifier represents a field access specifier (e.g., .field)
-type AssignFieldSpecifier struct {
-	DotToken token.Token
-	Ident    *Identifier
-}
-
-func (s *AssignFieldSpecifier) StartToken() token.Token {
-	return s.DotToken
-}
-
-func (s *AssignFieldSpecifier) EndToken() token.Token {
-	return s.Ident.EndToken()
-}
-
-func (s *AssignFieldSpecifier) assignSpecifierNode() {}
-
-// AssignIndexSpecifier represents an index access specifier (e.g., [index])
-type AssignIndexSpecifier struct {
-	OpenBracket  token.Token
-	IndexExpr    Expr
-	CloseBracket token.Token
-}
-
-func (s *AssignIndexSpecifier) StartToken() token.Token {
-	return s.OpenBracket
-}
-
-func (s *AssignIndexSpecifier) EndToken() token.Token {
-	return s.CloseBracket
-}
-
-func (s *AssignIndexSpecifier) assignSpecifierNode() {}

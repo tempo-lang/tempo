@@ -21,20 +21,10 @@ func (p *Parser) ParseStmt() (ast.Stmt, bool) {
 			return returnStmt, true
 		}
 	default:
-		// Check if this could be an assignment statement
-		if p.curToken.Type == token.IDENT {
-			assignStmt, needsRecovery := p.parseAssignStmt()
-			stmt = assignStmt
-			if needsRecovery {
-				return assignStmt, true
-			}
-		} else {
-			// Try to parse as an expression statement
-			exprStmt, needsRecovery := p.parseExprStmt()
-			if needsRecovery {
-				return exprStmt, true
-			}
-			stmt = exprStmt
+		exprStmt, needsRecovery := p.parseExprOrAssignStmt()
+		stmt = exprStmt
+		if needsRecovery {
+			return exprStmt, true
 		}
 	}
 
@@ -107,111 +97,60 @@ func (p *Parser) parseLetStmt() (ast.Stmt, bool) {
 	return stmt, false
 }
 
-func (p *Parser) parseAssignStmt() (ast.Stmt, bool) {
-	// Parse the assign expression (identifier with optional specifiers)
-	assignExpr, needsRecover := p.parseAssignExpr()
+func (p *Parser) parseExprOrAssignStmt() (ast.Stmt, bool) {
+	// Parse the left-hand side expression
+	lhs, needsRecover := p.ParseExpr()
 	if needsRecover {
 		return &ast.InvalidStmt{
-			ErrorToken: p.errorToken("expected assignment expression"),
+			ErrorToken: p.errorToken("expected expression"),
 		}, true
 	}
 
-	// Check for assignment token
-	if p.curToken.Type != token.ASSIGN {
-		return &ast.InvalidStmt{
-			ErrorToken: p.errorToken("expected `=` in assignment statement"),
-			PartialStmt: &ast.AssignStmt{
-				AssignExpr: assignExpr,
-			},
-		}, true
-	}
-	assignToken := p.assertToken(token.ASSIGN)
+	// Check if this is an assignment
+	if p.curToken.Type == token.ASSIGN {
+		assignToken := p.assertToken(token.ASSIGN)
 
-	// Parse the right-hand side expression
-	expr, needsRecover := p.ParseExpr()
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken: expr.StartToken(),
-			PartialStmt: &ast.AssignStmt{
-				AssignExpr:  assignExpr,
-				AssignToken: assignToken,
-			},
-		}, true
-	}
-
-	// Expect semicolon
-	semi, errStmt := p.expectSemicolon(&ast.AssignStmt{
-		AssignExpr:  assignExpr,
-		AssignToken: assignToken,
-		Expr:        expr,
-	})
-	if errStmt != nil {
-		return errStmt, true
-	}
-
-	return &ast.AssignStmt{
-		AssignExpr:  assignExpr,
-		AssignToken: assignToken,
-		Expr:        expr,
-		SemiToken:   semi,
-	}, false
-}
-
-func (p *Parser) parseAssignExpr() (*ast.AssignExpr, bool) {
-	// Start with an identifier
-	ident, needsRecover := p.parseIdentifier()
-	if needsRecover {
-		return nil, true
-	}
-
-	// Parse optional specifiers
-	var specifiers []ast.AssignSpecifier
-	for p.curToken.Type == token.DOT || p.curToken.Type == token.LSQUARE {
-		specifier, needsRecover := p.parseAssignSpecifier()
+		// Parse the right-hand side expression
+		rhs, needsRecover := p.ParseExpr()
 		if needsRecover {
-			return nil, true
+			return &ast.InvalidStmt{
+				ErrorToken: p.errorToken("expected expression after assignment"),
+				PartialStmt: &ast.AssignStmt{
+					LHS:         lhs,
+					AssignToken: assignToken,
+				},
+			}, true
 		}
-		specifiers = append(specifiers, specifier)
-	}
 
-	return &ast.AssignExpr{
-		Ident:      ident,
-		Specifiers: specifiers,
-	}, false
-}
-
-func (p *Parser) parseAssignSpecifier() (ast.AssignSpecifier, bool) {
-	switch p.curToken.Type {
-	case token.DOT:
-		// Field access specifier: .field
-		dotToken := p.assertToken(token.DOT)
-		ident, needsRecover := p.parseIdentifier()
-		if needsRecover {
-			return nil, true
+		// Expect semicolon
+		semi, errStmt := p.expectSemicolon(&ast.AssignStmt{
+			LHS:         lhs,
+			AssignToken: assignToken,
+			RHS:         rhs,
+		})
+		if errStmt != nil {
+			return errStmt, true
 		}
-		return &ast.AssignFieldSpecifier{
-			DotToken: dotToken,
-			Ident:    ident,
+
+		return &ast.AssignStmt{
+			LHS:         lhs,
+			AssignToken: assignToken,
+			RHS:         rhs,
+			SemiToken:   semi,
 		}, false
-	case token.LSQUARE:
-		// Index access specifier: [expr]
-		openBracket := p.assertToken(token.LSQUARE)
-		indexExpr, needsRecover := p.ParseExpr()
-		if needsRecover {
-			return nil, true
+	} else {
+		// This is an expression statement
+		semi, errStmt := p.expectSemicolon(&ast.ExprStmt{
+			Expr: lhs,
+		})
+		if errStmt != nil {
+			return errStmt, true
 		}
-		if p.curToken.Type != token.RSQUARE {
-			p.errorToken("expected `]` in index specifier")
-			return nil, true
-		}
-		closeBracket := p.assertToken(token.RSQUARE)
-		return &ast.AssignIndexSpecifier{
-			OpenBracket:  openBracket,
-			IndexExpr:    indexExpr,
-			CloseBracket: closeBracket,
+
+		return &ast.ExprStmt{
+			Expr:      lhs,
+			SemiToken: semi,
 		}, false
-	default:
-		return nil, true
 	}
 }
 
