@@ -9,35 +9,16 @@ import (
 	"github.com/tempo-lang/tempo/parser/new_parser/token"
 )
 
-func TestParseLetStmt(t *testing.T) {
-	// Helper to create a token for testing
-	makeToken := func(tokenType token.TokenType, literal string, value any, line, col int) token.Token {
-		return token.New(tokenType, literal, token.SourcePos{Line: line, Col: col}, value)
-	}
+// stmtTestCase is a shared test case structure for statement parsing tests
+type stmtTestCase struct {
+	name          string
+	input         string
+	expected_stmt ast.Stmt
+	expectError   bool
+}
 
-	tests := []struct {
-		name          string
-		input         string
-		expected_stmt ast.Stmt
-		expectError   bool
-	}{
-		{
-			name:  "let declaration with string expression",
-			input: "let x = \"hello\";",
-			expected_stmt: &ast.LetStmt{
-				LetToken: makeToken(token.LET, "let", nil, 1, 1),
-				Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 5)},
-				Expr: &ast.PrimitiveExpr{
-					Literal:  &ast.StringLit{StringToken: makeToken(token.STRING, "\"hello\"", "hello", 1, 9)},
-					RoleAt:   token.Token{},
-					RoleType: nil,
-				},
-				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 16),
-			},
-			expectError: false,
-		},
-	}
-
+// runStmtTest is a shared test function for statement parsing
+func runStmtTest(t *testing.T, tests []stmtTestCase) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			p := new_parser.FromString(test.input)
@@ -63,4 +44,72 @@ func TestParseLetStmt(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParseLetStmt(t *testing.T) {
+	// Helper to create a token for testing
+	makeToken := func(tokenType token.TokenType, literal string, value any, line, col int) token.Token {
+		return token.New(tokenType, literal, token.SourcePos{Line: line, Col: col}, value)
+	}
+
+	tests := []stmtTestCase{
+		{
+			name:  "let declaration with string expression",
+			input: "let x = \"hello\";",
+			expected_stmt: &ast.LetStmt{
+				LetToken: makeToken(token.LET, "let", nil, 1, 1),
+				Name:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 5)},
+				Expr: &ast.PrimitiveExpr{
+					Literal:  &ast.StringLit{StringToken: makeToken(token.STRING, "\"hello\"", "hello", 1, 9)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 16),
+			},
+			expectError: false,
+		},
+	}
+
+	runStmtTest(t, tests)
+}
+
+func TestParseReturnStmt(t *testing.T) {
+	// Helper to create a token for testing
+	makeToken := func(tokenType token.TokenType, literal string, value any, line, col int) token.Token {
+		return token.New(tokenType, literal, token.SourcePos{Line: line, Col: col}, value)
+	}
+
+	tests := []stmtTestCase{
+		{
+			name:  "return with expression",
+			input: "return 42;",
+			expected_stmt: &ast.ReturnStmt{
+				ReturnToken: makeToken(token.RETURN, "return", nil, 1, 1),
+				Expr: &ast.PrimitiveExpr{
+					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "42", 42, 1, 8)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 10),
+			},
+			expectError: false,
+		},
+		{
+			name:  "return without expression",
+			input: "return;",
+			expected_stmt: &ast.ReturnStmt{
+				ReturnToken: makeToken(token.RETURN, "return", nil, 1, 1),
+				Expr:        nil,
+				SemiToken:   makeToken(token.SEMICOLON, ";", nil, 1, 7),
+			},
+			expectError: false,
+		},
+		{
+			name:        "return without semicolon",
+			input:       "return 42",
+			expectError: true,
+		},
+	}
+
+	runStmtTest(t, tests)
 }

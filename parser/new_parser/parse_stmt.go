@@ -14,11 +14,43 @@ func (p *Parser) ParseStmt() (ast.Stmt, bool) {
 		if needsRecovery {
 			return letStmt, true
 		}
+	case token.RETURN:
+		returnStmt, needsRecovery := p.parseReturnStmt()
+		stmt = returnStmt
+		if needsRecovery {
+			return returnStmt, true
+		}
 	default:
 		return &ast.InvalidStmt{
 			ErrorToken: p.errorToken("invalid statement"),
 		}, true
 	}
+
+	return stmt, false
+}
+
+func (p *Parser) parseReturnStmt() (ast.Stmt, bool) {
+	stmt := &ast.ReturnStmt{
+		ReturnToken: p.assertToken(token.RETURN),
+	}
+
+	// The expression is optional
+	if p.curToken.Type != token.SEMICOLON {
+		expr, needsRecover := p.ParseExpr()
+		if needsRecover {
+			return &ast.InvalidStmt{
+				ErrorToken:  p.errorToken("expected expression when parsing return statement"),
+				PartialStmt: stmt,
+			}, true
+		}
+		stmt.Expr = expr
+	}
+
+	semi, errStmt := p.expectSemicolon(stmt)
+	if errStmt != nil {
+		return errStmt, true
+	}
+	stmt.SemiToken = semi
 
 	return stmt, false
 }
