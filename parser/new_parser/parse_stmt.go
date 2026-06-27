@@ -153,26 +153,3 @@ func (p *Parser) parseExprOrAssignStmt() (ast.Stmt, bool) {
 		}, false
 	}
 }
-
-func (p *Parser) parseExprStmt() (ast.Stmt, bool) {
-	// Parse the expression
-	expr, needsRecover := p.ParseExpr()
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken: p.errorToken("expected expression when parsing expression statement"),
-		}, true
-	}
-
-	// Expect semicolon
-	semi, errStmt := p.expectSemicolon(&ast.ExprStmt{
-		Expr: expr,
-	})
-	if errStmt != nil {
-		return errStmt, true
-	}
-
-	return &ast.ExprStmt{
-		Expr:      expr,
-		SemiToken: semi,
-	}, false
-}

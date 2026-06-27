@@ -12,6 +12,8 @@ const (
 	PREC_COMPARISON // ==, !=, <, <=, >, >=
 	PREC_SUM        // + and -
 	PREC_PRODUCT    // *, /, %
+	PREC_FIELD      // . (field access)
+	PREC_INDEX      // [] (index access)
 )
 
 // getPrecedence returns the precedence level for a token type
@@ -25,6 +27,10 @@ func getPrecedence(tokenType token.TokenType) int {
 		return PREC_SUM
 	case token.MULTIPLY, token.DIVIDE, token.MODULO:
 		return PREC_PRODUCT
+	case token.DOT:
+		return PREC_FIELD
+	case token.LSQUARE:
+		return PREC_INDEX
 	default:
 		return PREC_LOWEST
 	}
@@ -99,7 +105,7 @@ func (p *Parser) parsePrimaryExpr() (ast.Expr, bool) {
 		lit := &ast.BoolLit{BoolToken: p.readToken()}
 		return p.parseLiteralWithRole(lit)
 	case token.IDENT:
-		ident, err := p.parseIdentifier()
+		ident, err := p.parseIdentifierOrAccess()
 		if err {
 			return nil, true
 		}
@@ -111,4 +117,82 @@ func (p *Parser) parsePrimaryExpr() (ast.Expr, bool) {
 			PartialExpr: nil,
 		}, true
 	}
+}
+
+// parseIdentifierOrAccess parses an identifier followed by optional field/index access
+func (p *Parser) parseIdentifierOrAccess() (ast.Expr, bool) {
+	// Start with identifier
+	ident, needsRecover := p.parseIdentifier()
+	if needsRecover {
+		return nil, true
+	}
+
+	var expr ast.Expr = ident
+
+	// Handle chained field/index access
+	for {
+		switch p.curToken.Type {
+		case token.DOT:
+			// Parse field access: .field
+			fieldExpr, needsRecover := p.parseFieldAccess(expr)
+			if needsRecover {
+				return expr, true // Return what we have so far
+			}
+			expr = fieldExpr
+		case token.LSQUARE:
+			// Parse index access: [index]
+			indexExpr, needsRecover := p.parseIndexAccess(expr)
+			if needsRecover {
+				return expr, true // Return what we have so far
+			}
+			expr = indexExpr
+		default:
+			return expr, false
+		}
+	}
+}
+
+// parseFieldAccess parses a field access expression: object.field
+func (p *Parser) parseFieldAccess(object ast.Expr) (ast.Expr, bool) {
+	dotToken := p.assertToken(token.DOT)
+
+	field, needsRecover := p.parseIdentifier()
+	if needsRecover {
+		return &ast.InvalidExpr{
+			ErrorToken: p.errorToken("expected field name after dot"),
+		}, true
+	}
+
+	return &ast.FieldAccessExpr{
+		Object:   object,
+		DotToken: dotToken,
+		Field:    field,
+	}, false
+}
+
+// parseIndexAccess parses an index access expression: object[index]
+func (p *Parser) parseIndexAccess(object ast.Expr) (ast.Expr, bool) {
+	openBracket := p.assertToken(token.LSQUARE)
+
+	index, needsRecover := p.ParseExpr()
+	if needsRecover {
+		return &ast.InvalidExpr{
+			ErrorToken: p.errorToken("expected expression in index"),
+		}, true
+	}
+
+	if p.curToken.Type != token.RSQUARE {
+		errToken := p.errorToken("expected closing bracket")
+		return &ast.InvalidExpr{
+			ErrorToken: errToken,
+		}, true
+	}
+	closeBracket := p.readToken()
+
+	return &ast.IndexExpr{
+		Object:       object,
+		OpenBracket:  openBracket,
+		Index:        index,
+		CloseBracket: closeBracket,
+	}, false
 }

@@ -408,6 +408,92 @@ func TestParseExpr(t *testing.T) {
 			},
 			expectError: false,
 		},
+		{
+			name:  "field access expression",
+			input: "x.y",
+			expected_expr: &ast.FieldAccessExpr{
+				Object:   &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
+				DotToken: makeToken(token.DOT, ".", nil, 1, 2),
+				Field:    &ast.Identifier{Token: makeToken(token.IDENT, "y", "y", 1, 3)},
+			},
+			expectError: false,
+		},
+		{
+			name:  "index access expression",
+			input: "arr[0]",
+			expected_expr: &ast.IndexExpr{
+				Object:      &ast.Identifier{Token: makeToken(token.IDENT, "arr", "arr", 1, 1)},
+				OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 4),
+				Index: &ast.PrimitiveExpr{
+					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 5)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 6),
+			},
+			expectError: false,
+		},
+		{
+			name:  "chained field access",
+			input: "x.y.z",
+			expected_expr: &ast.FieldAccessExpr{
+				Object: &ast.FieldAccessExpr{
+					Object:   &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
+					DotToken: makeToken(token.DOT, ".", nil, 1, 2),
+					Field:    &ast.Identifier{Token: makeToken(token.IDENT, "y", "y", 1, 3)},
+				},
+				DotToken: makeToken(token.DOT, ".", nil, 1, 4),
+				Field:    &ast.Identifier{Token: makeToken(token.IDENT, "z", "z", 1, 5)},
+			},
+			expectError: false,
+		},
+		{
+			name:  "chained index access",
+			input: "arr[0][1]",
+			expected_expr: &ast.IndexExpr{
+				Object: &ast.IndexExpr{
+					Object:      &ast.Identifier{Token: makeToken(token.IDENT, "arr", "arr", 1, 1)},
+					OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 4),
+					Index: &ast.PrimitiveExpr{
+						Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 5)},
+						RoleAt:   token.Token{},
+						RoleType: nil,
+					},
+					CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 6),
+				},
+				OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 7),
+				Index: &ast.PrimitiveExpr{
+					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 8)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 9),
+			},
+			expectError: false,
+		},
+		{
+			name:  "mixed field and index access",
+			input: "x.arr[0].field",
+			expected_expr: &ast.FieldAccessExpr{
+				Object: &ast.IndexExpr{
+					Object: &ast.FieldAccessExpr{
+						Object:   &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
+						DotToken: makeToken(token.DOT, ".", nil, 1, 2),
+						Field:    &ast.Identifier{Token: makeToken(token.IDENT, "arr", "arr", 1, 3)},
+					},
+					OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 6),
+					Index: &ast.PrimitiveExpr{
+						Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 7)},
+						RoleAt:   token.Token{},
+						RoleType: nil,
+					},
+					CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 8),
+				},
+				DotToken: makeToken(token.DOT, ".", nil, 1, 9),
+				Field:    &ast.Identifier{Token: makeToken(token.IDENT, "field", "field", 1, 10)},
+			},
+			expectError: false,
+		},
 	}
 
 	for _, test := range tests {

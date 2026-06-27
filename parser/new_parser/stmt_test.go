@@ -125,12 +125,9 @@ func TestParseAssignStmt(t *testing.T) {
 			name:  "simple assignment",
 			input: "x = 42;",
 			expected_stmt: &ast.AssignStmt{
-				AssignExpr: &ast.AssignExpr{
-					Ident:      &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
-					Specifiers: nil,
-				},
+				LHS:         &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
 				AssignToken: makeToken(token.ASSIGN, "=", nil, 1, 3),
-				Expr: &ast.PrimitiveExpr{
+				RHS: &ast.PrimitiveExpr{
 					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "42", 42, 1, 5)},
 					RoleAt:   token.Token{},
 					RoleType: nil,
@@ -143,17 +140,13 @@ func TestParseAssignStmt(t *testing.T) {
 			name:  "assignment with field access",
 			input: "x.y = 100;",
 			expected_stmt: &ast.AssignStmt{
-				AssignExpr: &ast.AssignExpr{
-					Ident: &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
-					Specifiers: []ast.AssignSpecifier{
-						&ast.AssignFieldSpecifier{
-							DotToken: makeToken(token.DOT, ".", nil, 1, 2),
-							Ident:    &ast.Identifier{Token: makeToken(token.IDENT, "y", "y", 1, 3)},
-						},
-					},
+				LHS: &ast.FieldAccessExpr{
+					Object:   &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
+					DotToken: makeToken(token.DOT, ".", nil, 1, 2),
+					Field:    &ast.Identifier{Token: makeToken(token.IDENT, "y", "y", 1, 3)},
 				},
 				AssignToken: makeToken(token.ASSIGN, "=", nil, 1, 5),
-				Expr: &ast.PrimitiveExpr{
+				RHS: &ast.PrimitiveExpr{
 					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "100", 100, 1, 7)},
 					RoleAt:   token.Token{},
 					RoleType: nil,
@@ -166,22 +159,18 @@ func TestParseAssignStmt(t *testing.T) {
 			name:  "assignment with index access",
 			input: "arr[0] = 5;",
 			expected_stmt: &ast.AssignStmt{
-				AssignExpr: &ast.AssignExpr{
-					Ident: &ast.Identifier{Token: makeToken(token.IDENT, "arr", "arr", 1, 1)},
-					Specifiers: []ast.AssignSpecifier{
-						&ast.AssignIndexSpecifier{
-							OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 4),
-							IndexExpr: &ast.PrimitiveExpr{
-								Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 5)},
-								RoleAt:   token.Token{},
-								RoleType: nil,
-							},
-							CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 6),
-						},
+				LHS: &ast.IndexExpr{
+					Object:      &ast.Identifier{Token: makeToken(token.IDENT, "arr", "arr", 1, 1)},
+					OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 4),
+					Index: &ast.PrimitiveExpr{
+						Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 5)},
+						RoleAt:   token.Token{},
+						RoleType: nil,
 					},
+					CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 6),
 				},
 				AssignToken: makeToken(token.ASSIGN, "=", nil, 1, 8),
-				Expr: &ast.PrimitiveExpr{
+				RHS: &ast.PrimitiveExpr{
 					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "5", 5, 1, 10)},
 					RoleAt:   token.Token{},
 					RoleType: nil,
@@ -199,6 +188,38 @@ func TestParseAssignStmt(t *testing.T) {
 			name:        "assignment without equals",
 			input:       "x 42;",
 			expectError: true,
+		},
+		{
+			name:  "assignment with chained field and index access",
+			input: "x.arr[0].field = 42;",
+			expected_stmt: &ast.AssignStmt{
+				LHS: &ast.FieldAccessExpr{
+					Object: &ast.IndexExpr{
+						Object: &ast.FieldAccessExpr{
+							Object:   &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
+							DotToken: makeToken(token.DOT, ".", nil, 1, 2),
+							Field:    &ast.Identifier{Token: makeToken(token.IDENT, "arr", "arr", 1, 3)},
+						},
+						OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 6),
+						Index: &ast.PrimitiveExpr{
+							Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 7)},
+							RoleAt:   token.Token{},
+							RoleType: nil,
+						},
+						CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 8),
+					},
+					DotToken: makeToken(token.DOT, ".", nil, 1, 9),
+					Field:    &ast.Identifier{Token: makeToken(token.IDENT, "field", "field", 1, 10)},
+				},
+				AssignToken: makeToken(token.ASSIGN, "=", nil, 1, 16),
+				RHS: &ast.PrimitiveExpr{
+					Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "42", 42, 1, 18)},
+					RoleAt:   token.Token{},
+					RoleType: nil,
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 20),
+			},
+			expectError: false,
 		},
 	}
 
@@ -226,9 +247,48 @@ func TestParseExprStmt(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:        "expression statement without semicolon",
-			input:       "a + b;",
-			expectError: true,
+			name:  "binary expression statement",
+			input: "a + b;",
+			expected_stmt: &ast.ExprStmt{
+				Expr: &ast.BinaryExpr{
+					Left:     &ast.Identifier{Token: makeToken(token.IDENT, "a", "a", 1, 1)},
+					Operator: makeToken(token.PLUS, "+", nil, 1, 3),
+					Right:    &ast.Identifier{Token: makeToken(token.IDENT, "b", "b", 1, 5)},
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 6),
+			},
+			expectError: false,
+		},
+		{
+			name:  "field access expression statement",
+			input: "x.y;",
+			expected_stmt: &ast.ExprStmt{
+				Expr: &ast.FieldAccessExpr{
+					Object:   &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 1)},
+					DotToken: makeToken(token.DOT, ".", nil, 1, 2),
+					Field:    &ast.Identifier{Token: makeToken(token.IDENT, "y", "y", 1, 3)},
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 4),
+			},
+			expectError: false,
+		},
+		{
+			name:  "index access expression statement",
+			input: "arr[0];",
+			expected_stmt: &ast.ExprStmt{
+				Expr: &ast.IndexExpr{
+					Object:      &ast.Identifier{Token: makeToken(token.IDENT, "arr", "arr", 1, 1)},
+					OpenBracket: makeToken(token.LSQUARE, "[", nil, 1, 4),
+					Index: &ast.PrimitiveExpr{
+						Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 5)},
+						RoleAt:   token.Token{},
+						RoleType: nil,
+					},
+					CloseBracket: makeToken(token.RSQUARE, "]", nil, 1, 6),
+				},
+				SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 7),
+			},
+			expectError: false,
 		},
 	}
 
