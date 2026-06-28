@@ -20,6 +20,18 @@ func (p *Parser) ParseStmt() (ast.Stmt, bool) {
 		if needsRecovery {
 			return returnStmt, true
 		}
+	case token.IF:
+		ifStmt, needsRecovery := p.parseIfStmt()
+		stmt = ifStmt
+		if needsRecovery {
+			return ifStmt, true
+		}
+	case token.WHILE:
+		whileStmt, needsRecovery := p.parseWhileStmt()
+		stmt = whileStmt
+		if needsRecovery {
+			return whileStmt, true
+		}
 	default:
 		exprStmt, needsRecovery := p.parseExprOrAssignStmt()
 		stmt = exprStmt
@@ -93,6 +105,75 @@ func (p *Parser) parseLetStmt() (ast.Stmt, bool) {
 		return errStmt, true
 	}
 	stmt.SemiToken = semi
+
+	return stmt, false
+}
+
+func (p *Parser) parseIfStmt() (ast.Stmt, bool) {
+	stmt := &ast.IfStmt{
+		IfToken: p.assertToken(token.IF),
+	}
+
+	// Parse condition
+	condition, needsRecover := p.ParseExpr()
+	stmt.Condition = condition
+	if needsRecover {
+		return &ast.InvalidStmt{
+			ErrorToken:  p.errorToken("expected expression in if condition"),
+			PartialStmt: stmt,
+		}, true
+	}
+
+	// Parse then scope
+	thenScope, needsRecover := p.ParseScope()
+	stmt.ThenScope = thenScope
+	if needsRecover {
+		return &ast.InvalidStmt{
+			ErrorToken:  p.errorToken("expected scope after if condition"),
+			PartialStmt: stmt,
+		}, true
+	}
+
+	// Check for else clause
+	if p.curToken.Type == token.ELSE {
+		stmt.ElseToken = p.readToken()
+		elseScope, needsRecover := p.ParseScope()
+		stmt.ElseScope = elseScope
+		if needsRecover {
+			return &ast.InvalidStmt{
+				ErrorToken:  p.errorToken("expected scope after else"),
+				PartialStmt: stmt,
+			}, true
+		}
+	}
+
+	return stmt, false
+}
+
+func (p *Parser) parseWhileStmt() (ast.Stmt, bool) {
+	stmt := &ast.WhileStmt{
+		WhileKeyword: p.assertToken(token.WHILE),
+	}
+
+	// Parse condition
+	condition, needsRecover := p.ParseExpr()
+	stmt.Condition = condition
+	if needsRecover {
+		return &ast.InvalidStmt{
+			ErrorToken:  p.errorToken("expected expression in while condition"),
+			PartialStmt: stmt,
+		}, true
+	}
+
+	// Parse scope
+	scope, needsRecover := p.ParseScope()
+	stmt.Scope = scope
+	if needsRecover {
+		return &ast.InvalidStmt{
+			ErrorToken:  p.errorToken("expected scope after while condition"),
+			PartialStmt: stmt,
+		}, true
+	}
 
 	return stmt, false
 }

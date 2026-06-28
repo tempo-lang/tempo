@@ -83,7 +83,14 @@ func (p *Parser) expectSemicolon(stmt ast.Stmt) (actualToken token.Token, errorS
 	return // output variables assigned
 }
 
-func (p *Parser) ParseScope() *ast.Scope {
+func (p *Parser) ParseScope() (*ast.Scope, bool) {
+	if p.curToken.Type != token.LCURLY {
+		return &ast.Scope{
+			OpenToken:  p.errorToken("expected scope"),
+			CloseToken: token.Token{},
+			Stmts:      []ast.Stmt{},
+		}, true
+	}
 	openToken := p.assertToken(token.LCURLY)
 
 	stmts := []ast.Stmt{}
@@ -94,7 +101,7 @@ func (p *Parser) ParseScope() *ast.Scope {
 				OpenToken:  openToken,
 				CloseToken: p.errorToken("unexpected EOF when parsing scope"),
 				Stmts:      stmts,
-			}
+			}, true
 		}
 
 		stmt, needsRecover := p.ParseStmt()
@@ -114,7 +121,7 @@ func (p *Parser) ParseScope() *ast.Scope {
 					OpenToken:  openToken,
 					CloseToken: p.errorToken("unexpected EOF when parsing scope"),
 					Stmts:      stmts,
-				}
+				}, true
 			}
 		}
 	}
@@ -125,7 +132,7 @@ func (p *Parser) ParseScope() *ast.Scope {
 		OpenToken:  openToken,
 		CloseToken: closeToken,
 		Stmts:      stmts,
-	}
+	}, false
 }
 
 func (p *Parser) parseIdentifier() (*ast.Identifier, bool) {

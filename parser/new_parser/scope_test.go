@@ -64,7 +64,11 @@ func TestScope(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			p := new_parser.FromString(test.input)
-			actual_ast := p.ParseScope()
+			actual_ast, needs_recover := p.ParseScope()
+
+			if needs_recover {
+				t.Fatalf("Parser needs recovery")
+			}
 
 			if len(p.ParserErrors()) > 0 {
 				t.Fatalf("Got %d parser errors: %v", len(p.ParserErrors()), p.ParserErrors())

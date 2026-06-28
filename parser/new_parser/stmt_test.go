@@ -294,3 +294,220 @@ func TestParseExprStmt(t *testing.T) {
 
 	runStmtTest(t, tests)
 }
+
+func TestParseIfStmt(t *testing.T) {
+	// Helper to create a token for testing
+	makeToken := func(tokenType token.TokenType, literal string, value any, line, col int) token.Token {
+		return token.New(tokenType, literal, token.SourcePos{Line: line, Col: col}, value)
+	}
+
+	tests := []stmtTestCase{
+		{
+			name:  "simple if statement",
+			input: "if x > 0 { return 1; }",
+			expected_stmt: &ast.IfStmt{
+				IfToken: makeToken(token.IF, "if", nil, 1, 1),
+				Condition: &ast.BinaryExpr{
+					Left:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 4)},
+					Operator: makeToken(token.GREATER, ">", nil, 1, 6),
+					Right: &ast.PrimitiveExpr{
+						Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 8)},
+						RoleAt:   token.Token{},
+						RoleType: nil,
+					},
+				},
+				ThenScope: &ast.Scope{
+					OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 10),
+					CloseToken: makeToken(token.RCURLY, "}", nil, 1, 22),
+					Stmts: []ast.Stmt{
+						&ast.ReturnStmt{
+							ReturnToken: makeToken(token.RETURN, "return", nil, 1, 12),
+							Expr: &ast.PrimitiveExpr{
+								Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 19)},
+								RoleAt:   token.Token{},
+								RoleType: nil,
+							},
+							SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 20),
+						},
+					},
+				},
+				ElseToken: token.Token{},
+				ElseScope: nil,
+			},
+			expectError: false,
+		},
+		{
+			name:  "if with else",
+			input: "if x > 0 { return 1; } else { return 0; }",
+			expected_stmt: &ast.IfStmt{
+				IfToken: makeToken(token.IF, "if", nil, 1, 1),
+				Condition: &ast.BinaryExpr{
+					Left:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 4)},
+					Operator: makeToken(token.GREATER, ">", nil, 1, 6),
+					Right: &ast.PrimitiveExpr{
+						Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 8)},
+						RoleAt:   token.Token{},
+						RoleType: nil,
+					},
+				},
+				ThenScope: &ast.Scope{
+					OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 10),
+					CloseToken: makeToken(token.RCURLY, "}", nil, 1, 22),
+					Stmts: []ast.Stmt{
+						&ast.ReturnStmt{
+							ReturnToken: makeToken(token.RETURN, "return", nil, 1, 12),
+							Expr: &ast.PrimitiveExpr{
+								Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 19)},
+								RoleAt:   token.Token{},
+								RoleType: nil,
+							},
+							SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 20),
+						},
+					},
+				},
+				ElseToken: makeToken(token.ELSE, "else", nil, 1, 24),
+				ElseScope: &ast.Scope{
+					OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 29),
+					CloseToken: makeToken(token.RCURLY, "}", nil, 1, 41),
+					Stmts: []ast.Stmt{
+						&ast.ReturnStmt{
+							ReturnToken: makeToken(token.RETURN, "return", nil, 1, 31),
+							Expr: &ast.PrimitiveExpr{
+								Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 38)},
+								RoleAt:   token.Token{},
+								RoleType: nil,
+							},
+							SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 39),
+						},
+					},
+				},
+			},
+			expectError: false,
+		},
+		{
+			name:  "nested if statements",
+			input: "if x > 0 { if y > 0 { return 1; } }",
+			expected_stmt: &ast.IfStmt{
+				IfToken: makeToken(token.IF, "if", nil, 1, 1),
+				Condition: &ast.BinaryExpr{
+					Left:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 4)},
+					Operator: makeToken(token.GREATER, ">", nil, 1, 6),
+					Right: &ast.PrimitiveExpr{
+						Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 8)},
+						RoleAt:   token.Token{},
+						RoleType: nil,
+					},
+				},
+				ThenScope: &ast.Scope{
+					OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 10),
+					CloseToken: makeToken(token.RCURLY, "}", nil, 1, 35),
+					Stmts: []ast.Stmt{
+						&ast.IfStmt{
+							IfToken: makeToken(token.IF, "if", nil, 1, 12),
+							Condition: &ast.BinaryExpr{
+								Left:     &ast.Identifier{Token: makeToken(token.IDENT, "y", "y", 1, 15)},
+								Operator: makeToken(token.GREATER, ">", nil, 1, 17),
+								Right: &ast.PrimitiveExpr{
+									Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 19)},
+									RoleAt:   token.Token{},
+									RoleType: nil,
+								},
+							},
+							ThenScope: &ast.Scope{
+								OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 21),
+								CloseToken: makeToken(token.RCURLY, "}", nil, 1, 33),
+								Stmts: []ast.Stmt{
+									&ast.ReturnStmt{
+										ReturnToken: makeToken(token.RETURN, "return", nil, 1, 23),
+										Expr: &ast.PrimitiveExpr{
+											Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 30)},
+											RoleAt:   token.Token{},
+											RoleType: nil,
+										},
+										SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 31),
+									},
+								},
+							},
+							ElseToken: token.Token{},
+							ElseScope: nil,
+						},
+					},
+				},
+				ElseToken: token.Token{},
+				ElseScope: nil,
+			},
+			expectError: false,
+		},
+		{
+			name:        "if without condition",
+			input:       "if { return 1; }",
+			expectError: true,
+		},
+		{
+			name:        "if without scope",
+			input:       "if x > 0 return 1;",
+			expectError: true,
+		},
+	}
+
+	runStmtTest(t, tests)
+}
+
+func TestParseWhileStmt(t *testing.T) {
+	// Helper to create a token for testing
+	makeToken := func(tokenType token.TokenType, literal string, value any, line, col int) token.Token {
+		return token.New(tokenType, literal, token.SourcePos{Line: line, Col: col}, value)
+	}
+
+	tests := []stmtTestCase{
+		{
+			name:  "simple while statement",
+			input: "while x > 0 { x = x - 1; }",
+			expected_stmt: &ast.WhileStmt{
+				WhileKeyword: makeToken(token.WHILE, "while", nil, 1, 1),
+				Condition: &ast.BinaryExpr{
+					Left:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 7)},
+					Operator: makeToken(token.GREATER, ">", nil, 1, 9),
+					Right: &ast.PrimitiveExpr{
+						Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "0", 0, 1, 11)},
+						RoleAt:   token.Token{},
+						RoleType: nil,
+					},
+				},
+				Scope: &ast.Scope{
+					OpenToken:  makeToken(token.LCURLY, "{", nil, 1, 13),
+					CloseToken: makeToken(token.RCURLY, "}", nil, 1, 26),
+					Stmts: []ast.Stmt{
+						&ast.AssignStmt{
+							LHS:         &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 15)},
+							AssignToken: makeToken(token.ASSIGN, "=", nil, 1, 17),
+							RHS: &ast.BinaryExpr{
+								Left:     &ast.Identifier{Token: makeToken(token.IDENT, "x", "x", 1, 19)},
+								Operator: makeToken(token.MINUS, "-", nil, 1, 21),
+								Right: &ast.PrimitiveExpr{
+									Literal:  &ast.IntLit{IntToken: makeToken(token.INT, "1", 1, 1, 23)},
+									RoleAt:   token.Token{},
+									RoleType: nil,
+								},
+							},
+							SemiToken: makeToken(token.SEMICOLON, ";", nil, 1, 24),
+						},
+					},
+				},
+			},
+			expectError: false,
+		},
+		{
+			name:        "while without condition",
+			input:       "while { x = x - 1; }",
+			expectError: true,
+		},
+		{
+			name:        "while without scope",
+			input:       "while x > 0 x = x - 1;",
+			expectError: true,
+		},
+	}
+
+	runStmtTest(t, tests)
+}
