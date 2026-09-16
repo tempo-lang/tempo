@@ -23,9 +23,10 @@ func@(A,B) foo() {
         (role B)) foo
       (params))
     (scope "{"
-      (let x call@
-        (role-type
-          (role A)) ";")
+      (let x
+        (at call
+          (role-type
+            (role A))) ";")
       (expr
         (call x
           (int 10) ")") ";") "}")))

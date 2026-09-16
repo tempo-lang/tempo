@@ -113,6 +113,14 @@ func TestSExprGeneratorFormatting(t *testing.T) {
 	}
 }
 
+func TestSExprRoleAnnotationsRemainNested(t *testing.T) {
+	r := ParseExpression("foo@A(1@A)")
+	want := `(call (at foo (role-type (role A))) (at (int 1) (role-type (role A))) ")")`
+	if got := ast.SExpr(r.Node); got != want {
+		t.Fatalf("role annotations escaped their expression nodes.\nWant: %s\nGot:  %s", want, got)
+	}
+}
+
 func TestRecoveryLocality(t *testing.T) {
 	r := ParseScopeText("{let x = arr[0; let y = 2;}")
 	got := ast.SExpr(r.Node)

@@ -45,9 +45,10 @@ func@(A,B) main() {
       (let i
         (int 0) ";")
       (if
-        (bool true)@
-        (role-type
-          (role A))
+        (at
+          (bool true)
+          (role-type
+            (role A)))
         (scope "{"
           (assign
             (field

@@ -14,9 +14,10 @@ func bar() {
       (params))
     (scope "{"
       (expr
-        (call bar@
-          (role-type
-            (role A)) ")") ";") "}"))
+        (call
+          (at bar
+            (role-type
+              (role A))) ")") ";") "}"))
   (func
     (func-sig bar
       (params))

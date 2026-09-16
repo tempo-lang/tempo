@@ -35,9 +35,10 @@ func@(A,B) foo() {
             (type-params
               (named-type Int@
                 (role-type
-                  (role A)))))) call@
-        (role-type
-          (role A)) ";")
+                  (role A))))))
+        (at call
+          (role-type
+            (role A))) ";")
       (let y
         (type
           (closure-type
@@ -46,9 +47,10 @@ func@(A,B) foo() {
             (type-params
               (named-type Int@
                 (role-type
-                  (role B)))))) call@
-        (role-type
-          (role B)) ";")
+                  (role B))))))
+        (at call
+          (role-type
+            (role B))) ";")
       (let val
         (int 10) ";")
       (expr

@@ -32,6 +32,12 @@ func TestExamples(t *testing.T) {
 
 			source, expected, hasExpectation := splitExample(string(data))
 			result := Parse(source)
+			if len(result.Diagnostics) != 0 {
+				t.Fatalf("example produced diagnostics: %v", result.Diagnostics)
+			}
+			if err := ast.Validate(result.Root, result.Tokens, result.Source.Len()); err != nil {
+				t.Fatalf("example produced an invalid AST: %v", err)
+			}
 			actual := strings.TrimSpace((ast.SExprGenerator{Indent: "  "}).Generate(result.Root, result.Tokens))
 
 			if !hasExpectation {

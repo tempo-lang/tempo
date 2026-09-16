@@ -83,7 +83,8 @@ func@(A,B) main() {
       (params))
     (scope "{"
       (let x
-        (call foo@
-          (shared-role-type
-            (role A)
-            (role B)) ")") ";") "}")))
+        (call
+          (at foo
+            (shared-role-type
+              (role A)
+              (role B))) ")") ";") "}")))

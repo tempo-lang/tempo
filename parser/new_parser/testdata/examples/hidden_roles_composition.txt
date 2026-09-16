@@ -80,7 +80,8 @@ func@(A,B) main() {
           (field-init y
             (int 20)) "}") ";")
       (let result
-        (call combine@
-          (role-type
-            (role A)
-            (role B)) pairA pairB ")") ";") "}")))
+        (call
+          (at combine
+            (role-type
+              (role A)
+              (role B))) pairA pairB ")") ";") "}")))

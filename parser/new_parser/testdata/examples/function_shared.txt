@@ -36,8 +36,9 @@ func@(A,B) main() {
             (shared-role-type
               (role A)
               (role B))))
-        (call double@
-          (shared-role-type
-            (role A)
-            (role B))
+        (call
+          (at double
+            (shared-role-type
+              (role A)
+              (role B)))
           (int 10) ")") ";") "}")))

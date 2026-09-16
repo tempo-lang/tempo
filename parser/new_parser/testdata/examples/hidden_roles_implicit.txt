@@ -53,9 +53,10 @@ func@(A,B,C) foo() {
             (field-init y
               (int 20)) "}") "]") ";")
       (let i
-        (int 0)@
-        (role-type
-          (role A)) ";")
+        (at
+          (int 0)
+          (role-type
+            (role A))) ";")
       (let x
         (type
           (named-type Int@
@@ -64,9 +65,10 @@ func@(A,B,C) foo() {
         (field
           (index pair i "]") x) ";")
       (if
-        (bool true)@
-        (role-type
-          (role B))
+        (at
+          (bool true)
+          (role-type
+            (role B)))
         (scope "{"
           (let y
             (type

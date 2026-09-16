@@ -13,9 +13,10 @@ func@(A) countdown() {
       (params))
     (scope "{"
       (let x
-        (int 10)@
-        (role-type
-          (role A)) ";")
+        (at
+          (int 10)
+          (role-type
+            (role A))) ";")
       (while
         (binary > x
           (int 0))
