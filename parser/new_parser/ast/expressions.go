@@ -5,11 +5,13 @@ import "github.com/tempo-lang/tempo/parser/new_parser/token"
 // Expressions
 
 type Identifier struct {
-	Token token.Token
+	Token   token.Token
+	Invalid bool
 }
 
 func (i *Identifier) Value() string {
-	return i.Token.Value.(string)
+	v, _ := i.Token.Value.(string)
+	return v
 }
 
 func (i *Identifier) StartToken() token.Token {
@@ -105,7 +107,7 @@ type BoolLit struct {
 }
 
 func (b *BoolLit) Value() bool {
-	return b.BoolToken.Type == token.TRUE
+	return b.BoolToken.Kind == token.TRUE
 }
 
 func (b *BoolLit) StartToken() token.Token {

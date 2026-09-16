@@ -4,6 +4,15 @@ import "github.com/tempo-lang/tempo/parser/new_parser/token"
 
 // Types
 
+type InvalidType struct {
+	Token   token.Token
+	Skipped []token.Ref
+}
+
+func (t *InvalidType) StartToken() token.Token { return t.Token }
+func (t *InvalidType) EndToken() token.Token   { return t.Token }
+func (t *InvalidType) valueTypeNode()          {}
+
 type RoleType struct {
 	Start token.Token
 	End   token.Token
@@ -21,20 +30,20 @@ func (r *RoleType) EndToken() token.Token {
 }
 
 func (r *RoleType) IsShared() bool {
-	return r.Start.Type == token.LSQUARE
+	return r.Start.Kind == token.LSQUARE
 }
 
 // Error returns the error token in the role type, or nil if there are no errors.
 func (r *RoleType) Error() *token.Token {
-	if r.Start.Type == token.ILLEGAL {
+	if r.Start.Kind == token.BadToken || r.Start.Synthetic {
 		return &r.Start
 	}
 	for _, role := range r.RoleNodes {
-		if role.Token.Type == token.ILLEGAL {
+		if role.Invalid || role.Token.Kind == token.BadToken {
 			return &role.Token
 		}
 	}
-	if r.End.Type == token.ILLEGAL {
+	if r.End.Kind == token.BadToken || r.End.Synthetic {
 		return &r.End
 	}
 	return nil
@@ -43,7 +52,7 @@ func (r *RoleType) Error() *token.Token {
 // Roles returns all successfully parsed roles.
 func (r *RoleType) Roles() (roles []*Role) {
 	for _, role := range r.RoleNodes {
-		if role.Token.Type != token.ILLEGAL {
+		if !role.Invalid && role.Token.Kind != token.BadToken {
 			roles = append(roles, role)
 		}
 	}
@@ -52,7 +61,9 @@ func (r *RoleType) Roles() (roles []*Role) {
 
 type Role struct {
 	// ident or _
-	Token token.Token
+	Token   token.Token
+	Invalid bool
+	Skipped []token.Ref
 }
 
 func (r *Role) StartToken() token.Token {

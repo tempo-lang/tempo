@@ -5,194 +5,139 @@ import (
 	"github.com/tempo-lang/tempo/parser/new_parser/token"
 )
 
-// Precedence levels for binary operators (Pratt parsing)
 const (
-	PREC_LOWEST     = iota
-	PREC_LOGICAL    // && and ||
-	PREC_COMPARISON // ==, !=, <, <=, >, >=
-	PREC_SUM        // + and -
-	PREC_PRODUCT    // *, /, %
-	PREC_FIELD      // . (field access)
-	PREC_INDEX      // [] (index access)
+	precLowest = iota
+	precLogical
+	precComparison
+	precSum
+	precProduct
+	precPostfix
 )
 
-// getPrecedence returns the precedence level for a token type
-func getPrecedence(tokenType token.TokenType) int {
-	switch tokenType {
+func precedence(k token.Kind) int {
+	switch k {
 	case token.OR, token.AND:
-		return PREC_LOGICAL
+		return precLogical
 	case token.EQUAL, token.NOT_EQUAL, token.LESS, token.LESS_EQ, token.GREATER, token.GREATER_EQ:
-		return PREC_COMPARISON
+		return precComparison
 	case token.PLUS, token.MINUS:
-		return PREC_SUM
+		return precSum
 	case token.MULTIPLY, token.DIVIDE, token.MODULO:
-		return PREC_PRODUCT
-	case token.DOT:
-		return PREC_FIELD
-	case token.LSQUARE:
-		return PREC_INDEX
-	default:
-		return PREC_LOWEST
+		return precProduct
 	}
+	return precLowest
 }
-
+func exprStart(k token.Kind) bool {
+	return k == token.FLOAT || k == token.INT || k == token.STRING || k == token.TRUE || k == token.FALSE || k == token.IDENT || k == token.LPAREN || k == token.LSQUARE || k == token.AWAIT
+}
 func (p *Parser) ParseExpr() (ast.Expr, bool) {
-	return p.parseExprWithPrecedence(PREC_LOWEST)
+	before := len(p.diagnostics)
+	e := p.parseExpr(TokenSet{token.EOF})
+	p.expectEOF()
+	return e, len(p.diagnostics) > before
 }
-
-func (p *Parser) parseExprWithPrecedence(precedence int) (ast.Expr, bool) {
-	left, needsRecover := p.parsePrimaryExpr()
-	if needsRecover {
-		return left, true
-	}
-
-	// While the next token is a binary operator with precedence > current precedence level
-	// Strict inequality combined with passing currentPrec to the recursive call ensures left-associativity
-	for precedence < getPrecedence(p.curToken.Type) {
-		op := p.readToken()
-
-		// Parse the right-hand side with the same precedence for the current operator
-		// Same-precedence operators are not consumed by the recursive call due to strict inequality
-		currentPrec := getPrecedence(op.Type)
-		right, needsRecover := p.parseExprWithPrecedence(currentPrec)
-		if needsRecover {
-			return left, true
-		}
-
-		// Wrap in BinaryExpr and continue parsing
-		left = &ast.BinaryExpr{
-			Left:     left,
-			Operator: op,
-			Right:    right,
-		}
-	}
-
-	return left, false
-}
-
-func (p *Parser) parseLiteralWithRole(lit ast.Literal) (ast.Expr, bool) {
-	// Check for optional role annotation: ROLE_AT roleType
-	if p.curToken.Type == token.ROLE_AT {
-		roleAtToken := p.readToken()
-		roleType, needsRecover := p.parseRoleType()
-		return &ast.PrimitiveExpr{
-			Literal:  lit,
-			RoleAt:   roleAtToken,
-			RoleType: roleType,
-		}, needsRecover
-	}
-
-	// No role annotation, return the literal directly as a PrimitiveExpr
-	return &ast.PrimitiveExpr{
-		Literal:  lit,
-		RoleAt:   token.Token{},
-		RoleType: nil,
-	}, false
-}
-
-func (p *Parser) parsePrimaryExpr() (ast.Expr, bool) {
-	switch p.curToken.Type {
-	case token.FLOAT:
-		lit := &ast.FloatLit{FloatToken: p.readToken()}
-		return p.parseLiteralWithRole(lit)
-	case token.INT:
-		lit := &ast.IntLit{IntToken: p.readToken()}
-		return p.parseLiteralWithRole(lit)
-	case token.STRING:
-		lit := &ast.StringLit{StringToken: p.readToken()}
-		return p.parseLiteralWithRole(lit)
-	case token.TRUE, token.FALSE:
-		lit := &ast.BoolLit{BoolToken: p.readToken()}
-		return p.parseLiteralWithRole(lit)
-	case token.IDENT:
-		ident, err := p.parseIdentifierOrAccess()
-		if err {
-			return nil, true
-		}
-		return ident, false
-	default:
-		err := p.errorToken("not an expression")
-		return &ast.InvalidExpr{
-			ErrorToken:  err,
-			PartialExpr: nil,
-		}, true
-	}
-}
-
-// parseIdentifierOrAccess parses an identifier followed by optional field/index access
-func (p *Parser) parseIdentifierOrAccess() (ast.Expr, bool) {
-	// Start with identifier
-	ident, needsRecover := p.parseIdentifier()
-	if needsRecover {
-		return nil, true
-	}
-
-	var expr ast.Expr = ident
-
-	// Handle chained field/index access
-	for {
-		switch p.curToken.Type {
+func (p *Parser) parseExpr(stop TokenSet) ast.Expr { return p.parsePrecedence(stop, precLowest) }
+func (p *Parser) parsePrecedence(stop TokenSet, min int) ast.Expr {
+	left := p.parsePrefix(stop)
+	for !stop.Contains(p.current().Kind) {
+		switch p.current().Kind {
 		case token.DOT:
-			// Parse field access: .field
-			fieldExpr, needsRecover := p.parseFieldAccess(expr)
-			if needsRecover {
-				return expr, true // Return what we have so far
-			}
-			expr = fieldExpr
+			dot := p.advance()
+			field := p.parseIdentifier()
+			left = &ast.FieldAccessExpr{Object: left, DotToken: dot, Field: field}
+			continue
 		case token.LSQUARE:
-			// Parse index access: [index]
-			indexExpr, needsRecover := p.parseIndexAccess(expr)
-			if needsRecover {
-				return expr, true // Return what we have so far
+			open := p.advance()
+			idx := p.parseExpr(stop.Union(TokenSet{token.RSQUARE, token.COMMA, token.SEMICOLON, token.RPAREN, token.RCURLY, token.EOF}))
+			close := p.expect(token.RSQUARE, stop.Union(TokenSet{token.COMMA, token.SEMICOLON, token.RPAREN, token.RCURLY, token.EOF}))
+			left = &ast.IndexExpr{Object: left, OpenBracket: open, Index: idx, CloseBracket: close}
+			continue
+		case token.LPAREN:
+			open := p.advance()
+			var args []ast.Expr
+			for p.current().Kind != token.RPAREN && p.current().Kind != token.EOF {
+				pos := p.cursor.Position()
+				args = append(args, p.parseExpr(TokenSet{token.COMMA, token.RPAREN, token.EOF}))
+				if p.current().Kind == token.COMMA {
+					p.advance()
+					continue
+				}
+				if p.cursor.Position() == pos {
+					break
+				}
+				break
 			}
-			expr = indexExpr
-		default:
-			return expr, false
+			close := p.expect(token.RPAREN, stop)
+			left = &ast.CallExpr{Function: left, OpenParen: open, Args: args, CloseParen: close}
+			continue
 		}
+		prec := precedence(p.current().Kind)
+		if prec == precLowest || prec <= min {
+			break
+		}
+		op := p.advance()
+		right := p.parsePrecedence(stop, prec)
+		left = &ast.BinaryExpr{Left: left, Operator: op, Right: right}
+	}
+	return left
+}
+func (p *Parser) parsePrefix(stop TokenSet) ast.Expr {
+	cur := p.current()
+	switch cur.Kind {
+	case token.FLOAT:
+		lit := &ast.FloatLit{FloatToken: p.advance()}
+		return p.primitive(lit, stop)
+	case token.INT:
+		lit := &ast.IntLit{IntToken: p.advance()}
+		return p.primitive(lit, stop)
+	case token.STRING:
+		lit := &ast.StringLit{StringToken: p.advance()}
+		return p.primitive(lit, stop)
+	case token.TRUE, token.FALSE:
+		lit := &ast.BoolLit{BoolToken: p.advance()}
+		return p.primitive(lit, stop)
+	case token.IDENT:
+		return p.parseIdentifier()
+	case token.AWAIT:
+		a := p.advance()
+		return &ast.AwaitExpr{AwaitToken: a, Expr: p.parsePrecedence(stop, precPostfix-1)}
+	case token.LPAREN:
+		o := p.advance()
+		e := p.parseExpr(stop.Union(TokenSet{token.RPAREN, token.COMMA, token.SEMICOLON, token.RSQUARE, token.RCURLY, token.EOF}))
+		c := p.expect(token.RPAREN, stop)
+		return &ast.GroupExpr{OpenParen: o, Expr: e, CloseParen: c}
+	case token.LSQUARE:
+		o := p.advance()
+		var es []ast.Expr
+		for p.current().Kind != token.RSQUARE && p.current().Kind != token.EOF {
+			pos := p.cursor.Position()
+			es = append(es, p.parseExpr(TokenSet{token.COMMA, token.RSQUARE, token.EOF}))
+			if p.current().Kind == token.COMMA {
+				p.advance()
+				continue
+			}
+			if p.cursor.Position() == pos {
+				break
+			}
+			break
+		}
+		c := p.expect(token.RSQUARE, stop)
+		return &ast.ListExpr{OpenBracket: o, Elements: es, CloseBracket: c}
+	default:
+		p.add(Diagnostic{Code: CodeExpectedExpression, Message: "expected expression", PrimarySpan: cur.Span, Expected: []token.Kind{token.IDENT, token.INT, token.FLOAT, token.STRING, token.TRUE, token.FALSE, token.LPAREN, token.LSQUARE}, Found: cur.Kind})
+		invalid := &ast.InvalidExpr{ErrorToken: token.Missing(token.Ref(len(p.tokens)), token.BadToken, cur.Span.Start, p.source)}
+		if !stop.Contains(cur.Kind) && cur.Kind != token.EOF && closing(cur.Kind) == false {
+			invalid.Skipped = []token.Ref{cur.Index}
+			p.advance()
+		}
+		return invalid
 	}
 }
-
-// parseFieldAccess parses a field access expression: object.field
-func (p *Parser) parseFieldAccess(object ast.Expr) (ast.Expr, bool) {
-	dotToken := p.assertToken(token.DOT)
-
-	field, needsRecover := p.parseIdentifier()
-	if needsRecover {
-		return &ast.InvalidExpr{
-			ErrorToken: p.errorToken("expected field name after dot"),
-		}, true
+func (p *Parser) primitive(l ast.Literal, stop TokenSet) ast.Expr {
+	r := &ast.PrimitiveExpr{Literal: l}
+	if p.current().Kind == token.ROLE_AT {
+		r.RoleAt = p.advance()
+		r.RoleType = p.parseRoleType(stop)
 	}
-
-	return &ast.FieldAccessExpr{
-		Object:   object,
-		DotToken: dotToken,
-		Field:    field,
-	}, false
-}
-
-// parseIndexAccess parses an index access expression: object[index]
-func (p *Parser) parseIndexAccess(object ast.Expr) (ast.Expr, bool) {
-	openBracket := p.assertToken(token.LSQUARE)
-
-	index, needsRecover := p.ParseExpr()
-	if needsRecover {
-		return &ast.InvalidExpr{
-			ErrorToken: p.errorToken("expected expression in index"),
-		}, true
-	}
-
-	if p.curToken.Type != token.RSQUARE {
-		errToken := p.errorToken("expected closing bracket")
-		return &ast.InvalidExpr{
-			ErrorToken: errToken,
-		}, true
-	}
-	closeBracket := p.readToken()
-
-	return &ast.IndexExpr{
-		Object:       object,
-		OpenBracket:  openBracket,
-		Index:        index,
-		CloseBracket: closeBracket,
-	}, false
+	return r
 }

@@ -5,232 +5,131 @@ import (
 	"github.com/tempo-lang/tempo/parser/new_parser/token"
 )
 
+var stmtBoundaries = TokenSet{
+	token.SEMICOLON, token.RCURLY, token.EOF,
+	token.LET, token.RETURN, token.IF, token.WHILE,
+	token.FLOAT, token.INT, token.STRING, token.TRUE, token.FALSE,
+	token.IDENT, token.LPAREN, token.LSQUARE, token.AWAIT,
+}
+
+func isStmtStart(k token.Kind) bool {
+	return k == token.LET || k == token.RETURN || k == token.IF || k == token.WHILE || exprStart(k)
+}
 func (p *Parser) ParseStmt() (ast.Stmt, bool) {
-	var stmt ast.Stmt
-	switch p.curToken.Type {
+	before := len(p.diagnostics)
+	s := p.parseStmt()
+	p.expectEOF()
+	return s, len(p.diagnostics) > before
+}
+func (p *Parser) parseStmt() ast.Stmt {
+	switch p.current().Kind {
 	case token.LET:
-		letStmt, needsRecovery := p.parseLetStmt()
-		stmt = letStmt
-		if needsRecovery {
-			return letStmt, true
-		}
+		return p.parseLet()
 	case token.RETURN:
-		returnStmt, needsRecovery := p.parseReturnStmt()
-		stmt = returnStmt
-		if needsRecovery {
-			return returnStmt, true
-		}
+		return p.parseReturn()
 	case token.IF:
-		ifStmt, needsRecovery := p.parseIfStmt()
-		stmt = ifStmt
-		if needsRecovery {
-			return ifStmt, true
-		}
+		return p.parseIf()
 	case token.WHILE:
-		whileStmt, needsRecovery := p.parseWhileStmt()
-		stmt = whileStmt
-		if needsRecovery {
-			return whileStmt, true
-		}
+		return p.parseWhile()
 	default:
-		exprStmt, needsRecovery := p.parseExprOrAssignStmt()
-		stmt = exprStmt
-		if needsRecovery {
-			return exprStmt, true
-		}
+		return p.parseExprStmt()
 	}
-
-	return stmt, false
 }
-
-func (p *Parser) parseReturnStmt() (ast.Stmt, bool) {
-	stmt := &ast.ReturnStmt{
-		ReturnToken: p.assertToken(token.RETURN),
+func (p *Parser) semicolon() token.Token {
+	if p.current().Kind == token.SEMICOLON {
+		return p.advance()
 	}
-
-	// The expression is optional
-	if p.curToken.Type != token.SEMICOLON {
-		expr, needsRecover := p.ParseExpr()
-		if needsRecover {
-			return &ast.InvalidStmt{
-				ErrorToken:  p.errorToken("expected expression when parsing return statement"),
-				PartialStmt: stmt,
-			}, true
-		}
-		stmt.Expr = expr
-	}
-
-	semi, errStmt := p.expectSemicolon(stmt)
-	if errStmt != nil {
-		return errStmt, true
-	}
-	stmt.SemiToken = semi
-
-	return stmt, false
+	anchor := p.previous.Span
+	at := anchor.End
+	p.add(Diagnostic{Code: CodeMissingToken, Message: "missing semicolon", PrimarySpan: anchor, Expected: []token.Kind{token.SEMICOLON}, Found: p.current().Kind, Fixes: []TextEdit{{Span: Span{Start: at, End: at}, NewText: ";"}}})
+	return token.Missing(token.Ref(len(p.tokens)), token.SEMICOLON, at, p.source)
 }
-
-func (p *Parser) parseLetStmt() (ast.Stmt, bool) {
-	stmt := &ast.LetStmt{
-		LetToken: p.assertToken(token.LET),
+func (p *Parser) parseLet() ast.Stmt {
+	s := &ast.LetStmt{LetToken: p.advance()}
+	s.Name = p.parseIdentifier()
+	if p.current().Kind == token.COLON {
+		s.Colon = p.advance()
+		s.Type = p.parseValueType(stmtBoundaries.With(token.ASSIGN))
 	}
-
-	ident, needsRecover := p.parseIdentifier()
-	stmt.Name = ident
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken:  p.errorToken("expected identifier when parsing let statement"),
-			PartialStmt: stmt,
-		}, true
-	}
-
-	if p.curToken.Type != token.ASSIGN {
-		return &ast.InvalidStmt{
-			ErrorToken:  p.errorToken("expected `=` when parsing let statement"),
-			PartialStmt: stmt,
-		}, true
-	}
-	p.assertToken(token.ASSIGN)
-
-	expr, needsRecover := p.ParseExpr()
-	stmt.Expr = expr
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken:  expr.StartToken(),
-			PartialStmt: stmt,
-		}, true
-	}
-
-	semi, errStmt := p.expectSemicolon(stmt)
-	if errStmt != nil {
-		return errStmt, true
-	}
-	stmt.SemiToken = semi
-
-	return stmt, false
+	s.AssignToken = p.expect(token.ASSIGN, stmtBoundaries)
+	s.Expr = p.parseExpr(stmtBoundaries)
+	s.SemiToken = p.semicolon()
+	return s
 }
-
-func (p *Parser) parseIfStmt() (ast.Stmt, bool) {
-	stmt := &ast.IfStmt{
-		IfToken: p.assertToken(token.IF),
+func (p *Parser) parseReturn() ast.Stmt {
+	s := &ast.ReturnStmt{ReturnToken: p.advance()}
+	if p.current().Kind != token.SEMICOLON && !stmtBoundaries.With(token.RCURLY).Contains(p.current().Kind) {
+		s.Expr = p.parseExpr(stmtBoundaries)
 	}
-
-	// Parse condition
-	condition, needsRecover := p.ParseExpr()
-	stmt.Condition = condition
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken:  p.errorToken("expected expression in if condition"),
-			PartialStmt: stmt,
-		}, true
-	}
-
-	// Parse then scope
-	thenScope, needsRecover := p.ParseScope()
-	stmt.ThenScope = thenScope
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken:  p.errorToken("expected scope after if condition"),
-			PartialStmt: stmt,
-		}, true
-	}
-
-	// Check for else clause
-	if p.curToken.Type == token.ELSE {
-		stmt.ElseToken = p.readToken()
-		elseScope, needsRecover := p.ParseScope()
-		stmt.ElseScope = elseScope
-		if needsRecover {
-			return &ast.InvalidStmt{
-				ErrorToken:  p.errorToken("expected scope after else"),
-				PartialStmt: stmt,
-			}, true
-		}
-	}
-
-	return stmt, false
+	s.SemiToken = p.semicolon()
+	return s
 }
-
-func (p *Parser) parseWhileStmt() (ast.Stmt, bool) {
-	stmt := &ast.WhileStmt{
-		WhileKeyword: p.assertToken(token.WHILE),
+func (p *Parser) parseIf() ast.Stmt {
+	s := &ast.IfStmt{IfToken: p.advance()}
+	stops := stmtBoundaries.With(token.LCURLY)
+	s.Condition = p.parseExpr(stops)
+	s.ThenScope = p.parseScope()
+	if p.current().Kind == token.ELSE {
+		s.ElseToken = p.advance()
+		s.ElseScope = p.parseScope()
 	}
-
-	// Parse condition
-	condition, needsRecover := p.ParseExpr()
-	stmt.Condition = condition
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken:  p.errorToken("expected expression in while condition"),
-			PartialStmt: stmt,
-		}, true
-	}
-
-	// Parse scope
-	scope, needsRecover := p.ParseScope()
-	stmt.Scope = scope
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken:  p.errorToken("expected scope after while condition"),
-			PartialStmt: stmt,
-		}, true
-	}
-
-	return stmt, false
+	return s
 }
-
-func (p *Parser) parseExprOrAssignStmt() (ast.Stmt, bool) {
-	// Parse the left-hand side expression
-	lhs, needsRecover := p.ParseExpr()
-	if needsRecover {
-		return &ast.InvalidStmt{
-			ErrorToken: p.errorToken("expected expression"),
-		}, true
+func (p *Parser) parseWhile() ast.Stmt {
+	s := &ast.WhileStmt{WhileKeyword: p.advance()}
+	s.Condition = p.parseExpr(stmtBoundaries.With(token.LCURLY))
+	s.Scope = p.parseScope()
+	return s
+}
+func assignable(e ast.Expr) bool {
+	switch e.(type) {
+	case *ast.Identifier, *ast.FieldAccessExpr, *ast.IndexExpr:
+		return true
 	}
-
-	// Check if this is an assignment
-	if p.curToken.Type == token.ASSIGN {
-		assignToken := p.assertToken(token.ASSIGN)
-
-		// Parse the right-hand side expression
-		rhs, needsRecover := p.ParseExpr()
-		if needsRecover {
-			return &ast.InvalidStmt{
-				ErrorToken: p.errorToken("expected expression after assignment"),
-				PartialStmt: &ast.AssignStmt{
-					LHS:         lhs,
-					AssignToken: assignToken,
-				},
-			}, true
+	return false
+}
+func (p *Parser) parseExprStmt() ast.Stmt {
+	lhs := p.parseExpr(stmtBoundaries.With(token.ASSIGN))
+	if p.current().Kind == token.ASSIGN {
+		op := p.advance()
+		if !assignable(lhs) {
+			p.add(Diagnostic{Code: CodeInvalidAssignmentTarget, Message: "invalid assignment target", PrimarySpan: lhs.StartToken().Span, Found: op.Kind})
 		}
-
-		// Expect semicolon
-		semi, errStmt := p.expectSemicolon(&ast.AssignStmt{
-			LHS:         lhs,
-			AssignToken: assignToken,
-			RHS:         rhs,
-		})
-		if errStmt != nil {
-			return errStmt, true
-		}
-
-		return &ast.AssignStmt{
-			LHS:         lhs,
-			AssignToken: assignToken,
-			RHS:         rhs,
-			SemiToken:   semi,
-		}, false
-	} else {
-		// This is an expression statement
-		semi, errStmt := p.expectSemicolon(&ast.ExprStmt{
-			Expr: lhs,
-		})
-		if errStmt != nil {
-			return errStmt, true
-		}
-
-		return &ast.ExprStmt{
-			Expr:      lhs,
-			SemiToken: semi,
-		}, false
+		rhs := p.parseExpr(stmtBoundaries)
+		s := &ast.AssignStmt{LHS: lhs, AssignToken: op, RHS: rhs}
+		s.SemiToken = p.semicolon()
+		return s
 	}
+	s := &ast.ExprStmt{Expr: lhs}
+	s.SemiToken = p.semicolon()
+	return s
+}
+func (p *Parser) ParseScope() (*ast.Scope, bool) {
+	before := len(p.diagnostics)
+	s := p.parseScope()
+	p.expectEOF()
+	return s, len(p.diagnostics) > before
+}
+func (p *Parser) parseScope() *ast.Scope {
+	s := &ast.Scope{OpenToken: p.expect(token.LCURLY, stmtBoundaries)}
+	for p.current().Kind != token.RCURLY && p.current().Kind != token.EOF {
+		pos := p.cursor.Position()
+		if !isStmtStart(p.current().Kind) {
+			p.skipUntil(stmtBoundaries.Union(TokenSet{token.RCURLY}))
+			if p.current().Kind == token.SEMICOLON {
+				p.advance()
+			}
+		} else {
+			s.Stmts = append(s.Stmts, p.parseStmt())
+		}
+		if p.cursor.Position() == pos {
+			p.add(Diagnostic{Code: CodeInternalRecovery, Message: "parser made no progress", PrimarySpan: p.current().Span, Found: p.current().Kind})
+			if p.current().Kind == token.EOF || p.current().Kind == token.RCURLY {
+				break
+			}
+			p.advance()
+		}
+	}
+	s.CloseToken = p.expect(token.RCURLY, TokenSet{token.EOF})
+	return s
 }

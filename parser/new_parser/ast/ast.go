@@ -30,6 +30,7 @@ type ValueType interface {
 type InvalidExpr struct {
 	ErrorToken  token.Token
 	PartialExpr Expr
+	Skipped     []token.Ref
 }
 
 func (e *InvalidExpr) StartToken() token.Token {
@@ -51,6 +52,7 @@ type SourceFile struct {
 	Functions  []*Func
 	Structs    []*Struct
 	Interfaces []*Interface
+	Tokens     []token.Token
 }
 
 func (f *SourceFile) StartToken() token.Token {
