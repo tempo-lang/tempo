@@ -1,0 +1,47 @@
+interface Bar {
+  func bar();
+}
+
+interface Baz {
+  func baz();
+}
+
+struct@(A,B) Foo implements Bar@A, Baz@B {
+  func@A bar() {}
+  func@B baz() {}
+}
+---
+(source-file
+  (interface Bar
+    (methods
+      (method
+        (func-sig bar
+          (params)))))
+  (interface Baz
+    (methods
+      (method
+        (func-sig baz
+          (params)))))
+  (struct
+    (role-type
+      (role A)
+      (role B)) Foo
+    (implements Bar@
+      (role-type
+        (role A)))
+    (implements Baz@
+      (role-type
+        (role B)))
+    (struct-body
+      (func
+        (func-sig
+          (role-type
+            (role A)) bar
+          (params))
+        (scope "{" "}"))
+      (func
+        (func-sig
+          (role-type
+            (role B)) baz
+          (params))
+        (scope "{" "}")))))

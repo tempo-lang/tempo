@@ -1,0 +1,107 @@
+interface@(A,B) Combine {
+  func@(A,B) combine() Int@[A,B];
+}
+
+struct@(X,Y) Sum implements Combine@(X,Y) {
+  x: Int@X;
+  y: Int@Y;
+
+  func@(X,Y) combine() Int@[X,Y] {
+    return (await X->Y x) + (await Y->X y);
+  }
+}
+
+func@(L,M) main() {
+  let sum: Combine@(L,M) = Sum@(L,M) { x: 10, y: 20 };
+  let result: Int@[L,M] = sum.combine();
+}
+---
+(source-file
+  (interface
+    (role-type
+      (role A)
+      (role B)) Combine
+    (methods
+      (method
+        (func-sig
+          (role-type
+            (role A)
+            (role B)) combine
+          (params)
+          (named-type Int@
+            (shared-role-type
+              (role A)
+              (role B)))))))
+  (struct
+    (role-type
+      (role X)
+      (role Y)) Sum
+    (implements Combine@
+      (role-type
+        (role X)
+        (role Y)))
+    (struct-body
+      (struct-field x
+        (named-type Int@
+          (role-type
+            (role X))))
+      (struct-field y
+        (named-type Int@
+          (role-type
+            (role Y))))
+      (func
+        (func-sig
+          (role-type
+            (role X)
+            (role Y)) combine
+          (params)
+          (named-type Int@
+            (shared-role-type
+              (role X)
+              (role Y))))
+        (scope "{"
+          (return
+            (binary +
+              (group
+                (await
+                  (com
+                    (role-type
+                      (role X))
+                    (role-type
+                      (role Y)) x)) ")")
+              (group
+                (await
+                  (com
+                    (role-type
+                      (role Y))
+                    (role-type
+                      (role X)) y)) ")")) ";") "}"))))
+  (func
+    (func-sig
+      (role-type
+        (role L)
+        (role M)) main
+      (params))
+    (scope "{"
+      (let sum
+        (type
+          (named-type Combine@
+            (role-type
+              (role L)
+              (role M))))
+        (struct-expr Sum@
+          (role-type
+            (role L)
+            (role M))
+          (field-init x
+            (int 10))
+          (field-init y
+            (int 20)) "}") ";")
+      (let result
+        (type
+          (named-type Int@
+            (shared-role-type
+              (role L)
+              (role M))))
+        (call
+          (field sum combine) ")") ";") "}")))

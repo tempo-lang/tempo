@@ -1,0 +1,11 @@
+func@(X,Y,Z) foo() {}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role X)
+        (role Y)
+        (role Z)) foo
+      (params))
+    (scope "{" "}")))

@@ -1,0 +1,25 @@
+func@(A) countdown() {
+   let x = 10@A;
+   while x > 0 {
+      x = x - 1;
+   }
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)) countdown
+      (params))
+    (scope "{"
+      (let x
+        (int 10)@
+        (role-type
+          (role A)) ";")
+      (while
+        (binary > x
+          (int 0))
+        (scope "{"
+          (assign x
+            (binary - x
+              (int 1)) ";") "}")) "}")))

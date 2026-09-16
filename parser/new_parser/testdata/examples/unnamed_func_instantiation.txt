@@ -1,0 +1,25 @@
+func@A foo() {
+  bar@A();
+}
+
+func bar() {
+  foo();
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)) foo
+      (params))
+    (scope "{"
+      (expr
+        (call bar@
+          (role-type
+            (role A)) ")") ";") "}"))
+  (func
+    (func-sig bar
+      (params))
+    (scope "{"
+      (expr
+        (call foo ")") ";") "}")))

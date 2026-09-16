@@ -1,0 +1,34 @@
+func@(A,B,C) foo() {
+    let x: Int@A = 10;
+    let y: Int@[A,B,C] = await A->[B,C] x;
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)
+        (role C)) foo
+      (params))
+    (scope "{"
+      (let x
+        (type
+          (named-type Int@
+            (role-type
+              (role A))))
+        (int 10) ";")
+      (let y
+        (type
+          (named-type Int@
+            (shared-role-type
+              (role A)
+              (role B)
+              (role C))))
+        (await
+          (com
+            (role-type
+              (role A))
+            (shared-role-type
+              (role B)
+              (role C)) x)) ";") "}")))

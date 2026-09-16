@@ -1,0 +1,100 @@
+struct@(A,B) Foo {
+  first: Bar@(A,B);
+  second: Bar@(B,A);
+}
+
+struct@(X,Y) Bar {
+  num: Int@X;
+  logic: Bool@Y;
+}
+
+func@(P,Q) foo() {
+  let x: Int@P = 10;
+  let y: Int@Q = 20;
+
+  let nested: Foo@(P,Q) = Foo@(P,Q) {
+    first: Bar@(P,Q) {
+      num: x,
+      logic: true
+    },
+    second: Bar@(Q,P) {
+      num: y,
+      logic: false
+    }
+  };
+}
+---
+(source-file
+  (struct
+    (role-type
+      (role A)
+      (role B)) Foo
+    (struct-body
+      (struct-field first
+        (named-type Bar@
+          (role-type
+            (role A)
+            (role B))))
+      (struct-field second
+        (named-type Bar@
+          (role-type
+            (role B)
+            (role A))))))
+  (struct
+    (role-type
+      (role X)
+      (role Y)) Bar
+    (struct-body
+      (struct-field num
+        (named-type Int@
+          (role-type
+            (role X))))
+      (struct-field logic
+        (named-type Bool@
+          (role-type
+            (role Y))))))
+  (func
+    (func-sig
+      (role-type
+        (role P)
+        (role Q)) foo
+      (params))
+    (scope "{"
+      (let x
+        (type
+          (named-type Int@
+            (role-type
+              (role P))))
+        (int 10) ";")
+      (let y
+        (type
+          (named-type Int@
+            (role-type
+              (role Q))))
+        (int 20) ";")
+      (let nested
+        (type
+          (named-type Foo@
+            (role-type
+              (role P)
+              (role Q))))
+        (struct-expr Foo@
+          (role-type
+            (role P)
+            (role Q))
+          (field-init first
+            (struct-expr Bar@
+              (role-type
+                (role P)
+                (role Q))
+              (field-init num x)
+              (field-init logic
+                (bool true)) "}"))
+          (field-init second
+            (struct-expr Bar@
+              (role-type
+                (role Q)
+                (role P))
+              (field-init num y)
+              (field-init logic
+                (bool false)) "}")) "}") ";") "}")))

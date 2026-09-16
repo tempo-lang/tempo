@@ -32,7 +32,7 @@ func TestExamples(t *testing.T) {
 
 			source, expected, hasExpectation := splitExample(string(data))
 			result := Parse(source)
-			actual := strings.TrimSpace(ast.SExpr(result.Root, result.Tokens))
+			actual := strings.TrimSpace((ast.SExprGenerator{Indent: "  "}).Generate(result.Root, result.Tokens))
 
 			if !hasExpectation {
 				if err := writeExampleExpectation(path, source, actual); err != nil {

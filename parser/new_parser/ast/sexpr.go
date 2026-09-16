@@ -4,35 +4,56 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/tempo-lang/tempo/parser/new_parser/token"
 )
 
-var sexprTokens []token.Token
-var sexprMu sync.Mutex
+// SExprGenerator controls how AST S-expressions are rendered.
+//
+// Indent is used for each nesting level in multiline output. An empty Indent
+// defaults to two spaces. SingleLine preserves the compact representation used
+// by SExpr.
+type SExprGenerator struct {
+	Indent     string
+	SingleLine bool
+}
 
+// SExpr returns the compact, single-line representation kept for compatibility
+// with existing assertions.
 func SExpr(n Node, streams ...[]token.Token) string {
-	sexprMu.Lock()
-	defer sexprMu.Unlock()
-	var b strings.Builder
-	old := sexprTokens
+	return (SExprGenerator{SingleLine: true}).Generate(n, streams...)
+}
+
+// Generate returns an S-expression using the generator's formatting settings.
+func (g SExprGenerator) Generate(n Node, streams ...[]token.Token) string {
+	var b sexprWriter
 	if len(streams) > 0 {
-		sexprTokens = streams[0]
-	} else {
-		sexprTokens = nil
+		b.tokens = streams[0]
 	}
 	writeNode(&b, n)
-	sexprTokens = old
-	return b.String()
+	compact := b.String()
+	if g.SingleLine {
+		return compact
+	}
+	indent := g.Indent
+	if indent == "" {
+		indent = "  "
+	}
+	return indentSExpr(compact, indent)
 }
+
+type sexprWriter struct {
+	strings.Builder
+	tokens []token.Token
+}
+
 func tok(t token.Token) string {
 	if t.Synthetic {
 		return "(missing " + string(t.Kind) + ")"
 	}
 	return strconv.Quote(t.Text)
 }
-func writeNode(b *strings.Builder, n Node) {
+func writeNode(b *sexprWriter, n Node) {
 	if n == nil {
 		b.WriteString("nil")
 		return
@@ -384,11 +405,56 @@ func writeNode(b *strings.Builder, n Node) {
 		fmt.Fprintf(b, "(%T)", n)
 	}
 }
-func writeSkipped(b *strings.Builder, r token.Ref) {
+func writeSkipped(b *sexprWriter, r token.Ref) {
 	i := int(r)
-	if i >= 0 && i < len(sexprTokens) {
-		fmt.Fprintf(b, " (skipped %s %q)", sexprTokens[i].Kind, sexprTokens[i].Text)
+	if i >= 0 && i < len(b.tokens) {
+		fmt.Fprintf(b, " (skipped %s %q)", b.tokens[i].Kind, b.tokens[i].Text)
 		return
 	}
 	fmt.Fprintf(b, " (skipped %d)", r)
+}
+
+// indentSExpr keeps atoms on their parent's line and starts each nested list on
+// a new, indented line. Quoted strings are copied verbatim, including escaped
+// quotes and parentheses.
+func indentSExpr(compact, indent string) string {
+	var out strings.Builder
+	depth := 0
+	inString := false
+	escaped := false
+	for i, r := range compact {
+		if inString {
+			out.WriteRune(r)
+			if escaped {
+				escaped = false
+			} else if r == '\\' {
+				escaped = true
+			} else if r == '"' {
+				inString = false
+			}
+			continue
+		}
+		if r == '"' {
+			inString = true
+			out.WriteRune(r)
+			continue
+		}
+		if r == ' ' && i+1 < len(compact) && compact[i+1] == '(' {
+			continue
+		}
+		if r == '(' {
+			if i > 0 {
+				out.WriteByte('\n')
+				out.WriteString(strings.Repeat(indent, depth))
+			}
+			depth++
+			out.WriteRune(r)
+			continue
+		}
+		if r == ')' {
+			depth--
+		}
+		out.WriteRune(r)
+	}
+	return out.String()
 }

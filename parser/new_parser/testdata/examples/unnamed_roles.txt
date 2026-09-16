@@ -1,0 +1,89 @@
+struct Point implements Printer {
+  x: Int;
+  y: Int;
+
+  func print() String {
+    return "Point";
+  }
+}
+
+interface Printer {
+  func print() String;
+}
+
+func foo() Int {
+  let x: Int = 10;
+  let y: [Int] = [1,2,3];
+
+  let p: Point = Point { x: x, y: y[0] };
+  let str = p.print();
+
+  return x;
+}
+
+func@(A,B) main() {
+  let x = foo@[A,B]();
+}
+---
+(source-file
+  (struct Point
+    (implements Printer)
+    (struct-body
+      (struct-field x
+        (named-type Int))
+      (struct-field y
+        (named-type Int))
+      (func
+        (func-sig print
+          (params)
+          (named-type String))
+        (scope "{"
+          (return
+            (string "Point") ";") "}"))))
+  (interface Printer
+    (methods
+      (method
+        (func-sig print
+          (params)
+          (named-type String)))))
+  (func
+    (func-sig foo
+      (params)
+      (named-type Int))
+    (scope "{"
+      (let x
+        (type
+          (named-type Int))
+        (int 10) ";")
+      (let y
+        (type
+          (list-type
+            (named-type Int) "]"))
+        (list
+          (int 1)
+          (int 2)
+          (int 3) "]") ";")
+      (let p
+        (type
+          (named-type Point))
+        (struct-expr Point
+          (field-init x x)
+          (field-init y
+            (index y
+              (int 0) "]")) "}") ";")
+      (let str
+        (call
+          (field p print) ")") ";")
+      (return x ";") "}"))
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) main
+      (params))
+    (scope "{"
+      (let x
+        (call foo@
+          (shared-role-type
+            (role A)
+            (role B)) ")") ";") "}")))

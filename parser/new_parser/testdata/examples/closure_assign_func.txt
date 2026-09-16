@@ -1,0 +1,31 @@
+func@X call(val: Int@X) {}
+
+func@(A,B) foo() {
+  let x = call@A;
+  x(10);
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role X)) call
+      (params
+        (param val
+          (named-type Int@
+            (role-type
+              (role X))))))
+    (scope "{" "}"))
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) foo
+      (params))
+    (scope "{"
+      (let x call@
+        (role-type
+          (role A)) ";")
+      (expr
+        (call x
+          (int 10) ")") ";") "}")))

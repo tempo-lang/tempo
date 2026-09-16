@@ -98,6 +98,21 @@ func TestExpressionSuites(t *testing.T) {
 		}
 	}
 }
+
+func TestSExprGeneratorFormatting(t *testing.T) {
+	r := ParseExpression("1 + 2 * 3")
+
+	compact := (ast.SExprGenerator{SingleLine: true}).Generate(r.Node)
+	if compact != ast.SExpr(r.Node) {
+		t.Fatalf("single-line output changed: %q", compact)
+	}
+
+	want := "(binary +\n--(int 1)\n--(binary *\n----(int 2)\n----(int 3)))"
+	if got := (ast.SExprGenerator{Indent: "--"}).Generate(r.Node); got != want {
+		t.Fatalf("multiline output did not match.\nWant:\n%s\nGot:\n%s", want, got)
+	}
+}
+
 func TestRecoveryLocality(t *testing.T) {
 	r := ParseScopeText("{let x = arr[0; let y = 2;}")
 	got := ast.SExpr(r.Node)

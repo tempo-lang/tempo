@@ -1,0 +1,103 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+struct@(A,B,C) Foo {
+  pairs: [Pair@(A,B)];
+  z: Int@C;
+}
+
+func@(X,Y,Z) main() {
+  let foo = Foo@(X,Y,Z) {
+    pairs: [],
+    z: 1
+  };
+
+  foo.pairs = [
+    Pair@(X,Y) { x: 1, y: 2 },
+    Pair@(X,Y) { x: 3, y: 4 }
+  ];
+  
+  foo.pairs[await Z->X foo.z].x = 10;
+}
+---
+(source-file
+  (struct
+    (role-type
+      (role A)
+      (role B)) Pair
+    (struct-body
+      (struct-field x
+        (named-type Int@
+          (role-type
+            (role A))))
+      (struct-field y
+        (named-type Int@
+          (role-type
+            (role B))))))
+  (struct
+    (role-type
+      (role A)
+      (role B)
+      (role C)) Foo
+    (struct-body
+      (struct-field pairs
+        (list-type
+          (named-type Pair@
+            (role-type
+              (role A)
+              (role B))) "]"))
+      (struct-field z
+        (named-type Int@
+          (role-type
+            (role C))))))
+  (func
+    (func-sig
+      (role-type
+        (role X)
+        (role Y)
+        (role Z)) main
+      (params))
+    (scope "{"
+      (let foo
+        (struct-expr Foo@
+          (role-type
+            (role X)
+            (role Y)
+            (role Z))
+          (field-init pairs
+            (list "]"))
+          (field-init z
+            (int 1)) "}") ";")
+      (assign
+        (field foo pairs)
+        (list
+          (struct-expr Pair@
+            (role-type
+              (role X)
+              (role Y))
+            (field-init x
+              (int 1))
+            (field-init y
+              (int 2)) "}")
+          (struct-expr Pair@
+            (role-type
+              (role X)
+              (role Y))
+            (field-init x
+              (int 3))
+            (field-init y
+              (int 4)) "}") "]") ";")
+      (assign
+        (field
+          (index
+            (field foo pairs)
+            (await
+              (com
+                (role-type
+                  (role Z))
+                (role-type
+                  (role X))
+                (field foo z))) "]") x)
+        (int 10) ";") "}")))

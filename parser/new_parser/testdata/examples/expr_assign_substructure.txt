@@ -1,0 +1,55 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B) main() {
+  let pairs = [Pair@(A,B) { x: 10, y: 20 }];
+  let i = 0;
+  if true@A {
+    pairs[i].x = 30;
+  }
+}
+---
+(source-file
+  (struct
+    (role-type
+      (role A)
+      (role B)) Pair
+    (struct-body
+      (struct-field x
+        (named-type Int@
+          (role-type
+            (role A))))
+      (struct-field y
+        (named-type Int@
+          (role-type
+            (role B))))))
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) main
+      (params))
+    (scope "{"
+      (let pairs
+        (list
+          (struct-expr Pair@
+            (role-type
+              (role A)
+              (role B))
+            (field-init x
+              (int 10))
+            (field-init y
+              (int 20)) "}") "]") ";")
+      (let i
+        (int 0) ";")
+      (if
+        (bool true)@
+        (role-type
+          (role A))
+        (scope "{"
+          (assign
+            (field
+              (index pairs i "]") x)
+            (int 30) ";") "}")) "}")))

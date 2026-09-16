@@ -1,0 +1,51 @@
+struct@(A,B) Pair {
+  num: Int@A;
+  logic: Bool@B;
+}
+
+func@(X,Y) foo() {
+  let p: Pair@(X,Y) = Pair@(X,Y) { num: 1, logic: true };
+  let x: Int@X = p.num;
+}
+---
+(source-file
+  (struct
+    (role-type
+      (role A)
+      (role B)) Pair
+    (struct-body
+      (struct-field num
+        (named-type Int@
+          (role-type
+            (role A))))
+      (struct-field logic
+        (named-type Bool@
+          (role-type
+            (role B))))))
+  (func
+    (func-sig
+      (role-type
+        (role X)
+        (role Y)) foo
+      (params))
+    (scope "{"
+      (let p
+        (type
+          (named-type Pair@
+            (role-type
+              (role X)
+              (role Y))))
+        (struct-expr Pair@
+          (role-type
+            (role X)
+            (role Y))
+          (field-init num
+            (int 1))
+          (field-init logic
+            (bool true)) "}") ";")
+      (let x
+        (type
+          (named-type Int@
+            (role-type
+              (role X))))
+        (field p num) ";") "}")))

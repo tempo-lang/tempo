@@ -1,0 +1,12 @@
+func@A foo() {
+  return;
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)) foo
+      (params))
+    (scope "{"
+      (return ";") "}")))

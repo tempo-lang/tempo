@@ -1,0 +1,43 @@
+func@A double(val: Int@A) Int@A {
+  return val * 2;
+}
+
+func@(A,B) main() {
+  let x: Int@[A,B] = double@[A,B](10);
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)) double
+      (params
+        (param val
+          (named-type Int@
+            (role-type
+              (role A)))))
+      (named-type Int@
+        (role-type
+          (role A))))
+    (scope "{"
+      (return
+        (binary * val
+          (int 2)) ";") "}"))
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) main
+      (params))
+    (scope "{"
+      (let x
+        (type
+          (named-type Int@
+            (shared-role-type
+              (role A)
+              (role B))))
+        (call double@
+          (shared-role-type
+            (role A)
+            (role B))
+          (int 10) ")") ";") "}")))

@@ -1,0 +1,81 @@
+func@(A) binOps() {
+    let a: Int@A = 1 + 2 - 3 * 4 / 5 % 6;
+    let b: Bool@A = true == true;
+    let c: Bool@A = false != false;
+    let d: Bool@A = 10 < 20;
+    let e: Bool@A = 10 <= 20;
+    let f: Bool@A = 10 > 20;
+    let g: Bool@A = 10 >= 20;
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)) binOps
+      (params))
+    (scope "{"
+      (let a
+        (type
+          (named-type Int@
+            (role-type
+              (role A))))
+        (binary -
+          (binary +
+            (int 1)
+            (int 2))
+          (binary %
+            (binary /
+              (binary *
+                (int 3)
+                (int 4))
+              (int 5))
+            (int 6))) ";")
+      (let b
+        (type
+          (named-type Bool@
+            (role-type
+              (role A))))
+        (binary ==
+          (bool true)
+          (bool true)) ";")
+      (let c
+        (type
+          (named-type Bool@
+            (role-type
+              (role A))))
+        (binary !=
+          (bool false)
+          (bool false)) ";")
+      (let d
+        (type
+          (named-type Bool@
+            (role-type
+              (role A))))
+        (binary <
+          (int 10)
+          (int 20)) ";")
+      (let e
+        (type
+          (named-type Bool@
+            (role-type
+              (role A))))
+        (binary <=
+          (int 10)
+          (int 20)) ";")
+      (let f
+        (type
+          (named-type Bool@
+            (role-type
+              (role A))))
+        (binary >
+          (int 10)
+          (int 20)) ";")
+      (let g
+        (type
+          (named-type Bool@
+            (role-type
+              (role A))))
+        (binary >=
+          (int 10)
+          (int 20)) ";") "}")))

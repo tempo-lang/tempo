@@ -1,0 +1,15 @@
+func@(B,A) foo(snd: Int@[B,A]) {}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role B)
+        (role A)) foo
+      (params
+        (param snd
+          (named-type Int@
+            (shared-role-type
+              (role B)
+              (role A))))))
+    (scope "{" "}")))
