@@ -138,7 +138,7 @@ func optionalField(parent, name string, parentValue reflect.Value) bool {
 	case "InvalidExpr.PartialExpr", "InvalidStmt.PartialStmt",
 		"StringLit.RoleType", "BoolLit.RoleType", "PrimitiveExpr.RoleType",
 		"IdentAccessExpr.RoleType",
-		"ClosureSig.ReturnType", "FuncSig.RoleType", "FuncSig.ReturnType",
+		"ClosureSig.ReturnType", "FuncSig.RoleType", "FuncSig.ReturnType", "Interface.RoleType",
 		"IfStmt.ElseScope", "ReturnStmt.Expr", "Struct.RoleType",
 		"ClosureType.ReturnType", "RoleIdent.RoleType",
 		"PrimitiveExpr.RoleAt", "IdentAccessExpr.RoleAt", "RoleIdent.RoleAt",

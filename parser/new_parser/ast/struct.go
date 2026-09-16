@@ -23,6 +23,7 @@ type StructBody struct {
 	OpenToken  token.Token
 	Fields     []*StructField
 	Functions  []*Func
+	Members    []Node
 	CloseToken token.Token
 }
 

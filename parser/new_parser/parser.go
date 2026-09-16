@@ -172,6 +172,10 @@ func (p *Parser) add(d Diagnostic) {
 	p.diagnostics = append(p.diagnostics, d)
 }
 
+func (p *Parser) trailingComma(close token.Kind) {
+	p.add(Diagnostic{Code: CodeUnexpectedToken, Message: "trailing comma", PrimarySpan: p.current().Span, Expected: []token.Kind{token.IDENT}, Found: close})
+}
+
 func first(s []token.Kind) token.Kind {
 	if len(s) > 0 {
 		return s[0]
@@ -267,9 +271,28 @@ func Parse(text string) Result {
 		root.LastToken = p.tokens[len(p.tokens)-1]
 	}
 	for p.current().Kind != token.EOF {
-		cur := p.current()
-		p.add(Diagnostic{Code: CodeUnexpectedToken, Message: "declaration parsing is not implemented in phase one", PrimarySpan: cur.Span, Expected: []token.Kind{token.FUNC, token.STRUCT, token.INTERFACE}, Found: cur.Kind})
-		p.skipUntil(TokenSet{token.EOF})
+		pos := p.cursor.Position()
+		switch p.current().Kind {
+		case token.FUNC:
+			d := p.parseFunc()
+			root.Functions = append(root.Functions, d)
+			root.Declarations = append(root.Declarations, d)
+		case token.STRUCT:
+			d := p.parseStruct()
+			root.Structs = append(root.Structs, d)
+			root.Declarations = append(root.Declarations, d)
+		case token.INTERFACE:
+			d := p.parseInterface()
+			root.Interfaces = append(root.Interfaces, d)
+			root.Declarations = append(root.Declarations, d)
+		default:
+			cur := p.current()
+			p.add(Diagnostic{Code: CodeUnexpectedToken, Message: "expected declaration", PrimarySpan: cur.Span, Expected: []token.Kind{token.FUNC, token.STRUCT, token.INTERFACE}, Found: cur.Kind})
+			p.skipUntil(declarationStart)
+		}
+		if p.cursor.Position() == pos {
+			p.advance()
+		}
 	}
 	return Result{Root: root, Source: p.source, Tokens: p.Tokens(), Diagnostics: p.Diagnostics()}
 }

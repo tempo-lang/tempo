@@ -12,6 +12,8 @@ var stmtBoundaries = TokenSet{
 	token.IDENT, token.LPAREN, token.LSQUARE, token.AWAIT,
 }
 
+var exprStmtEnd = TokenSet{token.SEMICOLON, token.RCURLY, token.EOF, token.LET, token.RETURN, token.IF, token.WHILE}
+
 func isStmtStart(k token.Kind) bool {
 	return k == token.LET || k == token.RETURN || k == token.IF || k == token.WHILE || exprStart(k)
 }
@@ -49,24 +51,24 @@ func (p *Parser) parseLet() ast.Stmt {
 	s.Name = p.parseIdentifier()
 	if p.current().Kind == token.COLON {
 		s.Colon = p.advance()
-		s.Type = p.parseValueType(stmtBoundaries.With(token.ASSIGN))
+		s.Type = p.parseValueType(exprStmtEnd.With(token.ASSIGN))
 	}
 	s.AssignToken = p.expect(token.ASSIGN, stmtBoundaries)
-	s.Expr = p.parseExpr(stmtBoundaries)
+	s.Expr = p.parseExpr(exprStmtEnd)
 	s.SemiToken = p.semicolon()
 	return s
 }
 func (p *Parser) parseReturn() ast.Stmt {
 	s := &ast.ReturnStmt{ReturnToken: p.advance()}
-	if p.current().Kind != token.SEMICOLON && !stmtBoundaries.With(token.RCURLY).Contains(p.current().Kind) {
-		s.Expr = p.parseExpr(stmtBoundaries)
+	if p.current().Kind != token.SEMICOLON && p.current().Kind != token.RCURLY && p.current().Kind != token.EOF {
+		s.Expr = p.parseExpr(exprStmtEnd)
 	}
 	s.SemiToken = p.semicolon()
 	return s
 }
 func (p *Parser) parseIf() ast.Stmt {
 	s := &ast.IfStmt{IfToken: p.advance()}
-	stops := stmtBoundaries.With(token.LCURLY)
+	stops := exprStmtEnd.With(token.LCURLY)
 	s.Condition = p.parseExpr(stops)
 	s.ThenScope = p.parseScope()
 	if p.current().Kind == token.ELSE {
@@ -77,25 +79,42 @@ func (p *Parser) parseIf() ast.Stmt {
 }
 func (p *Parser) parseWhile() ast.Stmt {
 	s := &ast.WhileStmt{WhileKeyword: p.advance()}
-	s.Condition = p.parseExpr(stmtBoundaries.With(token.LCURLY))
+	s.Condition = p.parseExpr(exprStmtEnd.With(token.LCURLY))
 	s.Scope = p.parseScope()
 	return s
 }
 func assignable(e ast.Expr) bool {
-	switch e.(type) {
-	case *ast.Identifier, *ast.FieldAccessExpr, *ast.IndexExpr:
+	switch x := e.(type) {
+	case *ast.Identifier:
+		return true
+	case *ast.IdentAccessExpr:
+		return x.RoleType == nil
+	case *ast.FieldAccessExpr, *ast.IndexExpr:
+		return assignableRoot(e)
+	}
+	return false
+}
+func assignableRoot(e ast.Expr) bool {
+	switch x := e.(type) {
+	case *ast.FieldAccessExpr:
+		return assignableRoot(x.Object)
+	case *ast.IndexExpr:
+		return assignableRoot(x.Object)
+	case *ast.IdentAccessExpr:
+		return x.RoleType == nil
+	case *ast.Identifier:
 		return true
 	}
 	return false
 }
 func (p *Parser) parseExprStmt() ast.Stmt {
-	lhs := p.parseExpr(stmtBoundaries.With(token.ASSIGN))
+	lhs := p.parseExpr(exprStmtEnd.With(token.ASSIGN))
 	if p.current().Kind == token.ASSIGN {
 		op := p.advance()
 		if !assignable(lhs) {
 			p.add(Diagnostic{Code: CodeInvalidAssignmentTarget, Message: "invalid assignment target", PrimarySpan: lhs.StartToken().Span, Found: op.Kind})
 		}
-		rhs := p.parseExpr(stmtBoundaries)
+		rhs := p.parseExpr(exprStmtEnd)
 		s := &ast.AssignStmt{LHS: lhs, AssignToken: op, RHS: rhs}
 		s.SemiToken = p.semicolon()
 		return s

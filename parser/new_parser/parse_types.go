@@ -15,6 +15,16 @@ func (p *Parser) parseValueType(stop TokenSet) ast.ValueType {
 		inner := p.parseValueType(stop.With(token.RSQUARE))
 		c := p.expect(token.RSQUARE, stop)
 		return &ast.ListType{OpenBracket: o, Inner: inner, CloseBracket: c}
+	case token.FUNC:
+		f := p.advance()
+		at := p.expect(token.ROLE_AT, TokenSet{token.IDENT, token.UNDERSCORE, token.LSQUARE, token.LPAREN})
+		rt := p.parseRoleType(TokenSet{token.LPAREN})
+		params := p.parseClosureTypeParams(stop)
+		var ret ast.ValueType
+		if valueTypeStart(p.current().Kind) {
+			ret = p.parseValueType(stop)
+		}
+		return &ast.ClosureType{FuncToken: f, RoleAtToken: at, RoleType: rt, Params: params, ReturnType: ret}
 	case token.IDENT:
 		id := p.parseIdentifier()
 		r := &ast.RoleIdent{Ident: id}
@@ -29,6 +39,36 @@ func (p *Parser) parseValueType(stop TokenSet) ast.ValueType {
 		sk := p.skipUntil(stop)
 		return &ast.InvalidType{Token: token.Missing(token.Ref(len(p.tokens)), token.IDENT, cur.Span.Start, p.source), Skipped: sk}
 	}
+}
+
+func valueTypeStart(k token.Kind) bool {
+	return k == token.ASYNC || k == token.LSQUARE || k == token.FUNC || k == token.IDENT
+}
+
+func (p *Parser) parseRoleIdent(stop TokenSet) *ast.RoleIdent {
+	r := &ast.RoleIdent{Ident: p.parseIdentifier()}
+	if p.current().Kind == token.ROLE_AT {
+		r.RoleAt = p.advance()
+		r.RoleType = p.parseRoleType(stop)
+	}
+	return r
+}
+
+func (p *Parser) parseClosureTypeParams(stop TokenSet) *ast.ClosureTypeParams {
+	r := &ast.ClosureTypeParams{OpenParen: p.expect(token.LPAREN, TokenSet{token.RPAREN}.Union(stop))}
+	for p.current().Kind != token.RPAREN && p.current().Kind != token.EOF {
+		r.Params = append(r.Params, p.parseValueType(TokenSet{token.COMMA, token.RPAREN, token.EOF}))
+		if p.current().Kind != token.COMMA {
+			break
+		}
+		p.advance()
+		if p.current().Kind == token.RPAREN {
+			p.add(Diagnostic{Code: CodeExpectedExpression, Message: "trailing comma", PrimarySpan: p.current().Span, Found: p.current().Kind})
+			break
+		}
+	}
+	r.CloseParen = p.expect(token.RPAREN, stop)
+	return r
 }
 func ParseType(s string) ProductionResult {
 	p := FromString(s)
@@ -62,6 +102,10 @@ func (p *Parser) parseRoleType(caller TokenSet) *ast.RoleType {
 		r.RoleNodes = append(r.RoleNodes, p.parseRole(stops))
 		if p.current().Kind == token.COMMA {
 			p.advance()
+			if p.current().Kind == closeKind {
+				p.trailingComma(closeKind)
+				break
+			}
 			continue
 		}
 		if p.cursor.Position() == pos {

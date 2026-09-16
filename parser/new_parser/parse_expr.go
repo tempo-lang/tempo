@@ -28,7 +28,7 @@ func precedence(k token.Kind) int {
 	return precLowest
 }
 func exprStart(k token.Kind) bool {
-	return k == token.FLOAT || k == token.INT || k == token.STRING || k == token.TRUE || k == token.FALSE || k == token.IDENT || k == token.LPAREN || k == token.LSQUARE || k == token.AWAIT
+	return k == token.FLOAT || k == token.INT || k == token.STRING || k == token.TRUE || k == token.FALSE || k == token.IDENT || k == token.UNDERSCORE || k == token.LPAREN || k == token.LSQUARE || k == token.AWAIT || k == token.FUNC
 }
 func (p *Parser) ParseExpr() (ast.Expr, bool) {
 	before := len(p.diagnostics)
@@ -60,6 +60,10 @@ func (p *Parser) parsePrecedence(stop TokenSet, min int) ast.Expr {
 				args = append(args, p.parseExpr(TokenSet{token.COMMA, token.RPAREN, token.EOF}))
 				if p.current().Kind == token.COMMA {
 					p.advance()
+					if p.current().Kind == token.RPAREN {
+						p.trailingComma(token.RPAREN)
+						break
+					}
 					continue
 				}
 				if p.cursor.Position() == pos {
@@ -97,11 +101,35 @@ func (p *Parser) parsePrefix(stop TokenSet) ast.Expr {
 		lit := &ast.BoolLit{BoolToken: p.advance()}
 		return p.primitive(lit, stop)
 	case token.IDENT:
-		return p.parseIdentifier()
+		if p.roleTypeFollowedByCom() {
+			return p.parseComExpr(stop)
+		}
+		ri := p.parseRoleIdent(stop.Union(TokenSet{token.LCURLY, token.DOT, token.LSQUARE, token.LPAREN}))
+		// A brace following an identifier is also the boundary between an
+		// if/while condition and its scope. In that context only commit to a
+		// struct literal when the body visibly starts with `name:`.
+		if p.current().Kind == token.LCURLY && (!stop.Contains(token.LCURLY) || (p.peek(1).Kind == token.IDENT && p.peek(2).Kind == token.COLON)) {
+			return p.parseStructExpr(ri, stop)
+		}
+		return &ast.IdentAccessExpr{Ident: ri.Ident, RoleAt: ri.RoleAt, RoleType: ri.RoleType}
+	case token.UNDERSCORE:
+		if p.roleTypeFollowedByCom() {
+			return p.parseComExpr(stop)
+		}
+		fallthrough
+	case token.FUNC:
+		if cur.Kind == token.FUNC {
+			sig := p.parseClosureSig()
+			return &ast.ClosureExpr{ClosureSig: sig, Scope: p.parseScope()}
+		}
+		fallthrough
 	case token.AWAIT:
 		a := p.advance()
 		return &ast.AwaitExpr{AwaitToken: a, Expr: p.parsePrecedence(stop, precPostfix-1)}
 	case token.LPAREN:
+		if p.roleTypeFollowedByCom() {
+			return p.parseComExpr(stop)
+		}
 		o := p.advance()
 		e := p.parseExpr(stop.Union(TokenSet{token.RPAREN, token.COMMA, token.SEMICOLON, token.RSQUARE, token.RCURLY, token.EOF}))
 		c := p.expect(token.RPAREN, stop)
@@ -114,6 +142,10 @@ func (p *Parser) parsePrefix(stop TokenSet) ast.Expr {
 			es = append(es, p.parseExpr(TokenSet{token.COMMA, token.RSQUARE, token.EOF}))
 			if p.current().Kind == token.COMMA {
 				p.advance()
+				if p.current().Kind == token.RSQUARE {
+					p.trailingComma(token.RSQUARE)
+					break
+				}
 				continue
 			}
 			if p.cursor.Position() == pos {
@@ -132,6 +164,64 @@ func (p *Parser) parsePrefix(stop TokenSet) ast.Expr {
 		}
 		return invalid
 	}
+}
+
+func (p *Parser) roleTypeFollowedByCom() bool {
+	i := p.cursor.Position()
+	k := p.peek(0).Kind
+	if k == token.IDENT || k == token.UNDERSCORE {
+		return p.peek(1).Kind == token.COM
+	}
+	var close token.Kind
+	if k == token.LPAREN {
+		close = token.RPAREN
+	} else if k == token.LSQUARE {
+		close = token.RSQUARE
+	} else {
+		return false
+	}
+	depth := 0
+	for n := 0; i+n < len(p.tokens); n++ {
+		q := p.peek(n).Kind
+		if q == k {
+			depth++
+		}
+		if q == close {
+			depth--
+			if depth == 0 {
+				return p.peek(n+1).Kind == token.COM
+			}
+		}
+		if q == token.EOF {
+			return false
+		}
+	}
+	return false
+}
+func (p *Parser) parseComExpr(stop TokenSet) ast.Expr {
+	s := p.parseRoleType(TokenSet{token.COM})
+	c := p.expect(token.COM, TokenSet{token.IDENT, token.UNDERSCORE, token.LPAREN, token.LSQUARE})
+	r := p.parseRoleType(stop)
+	return &ast.ComExpr{Sender: s, ComToken: c, Receiver: r, Expr: p.parsePrecedence(stop, precPostfix-1)}
+}
+func (p *Parser) parseStructExpr(ri *ast.RoleIdent, stop TokenSet) ast.Expr {
+	f := &ast.StructFields{OpenToken: p.advance()}
+	for p.current().Kind != token.RCURLY && p.current().Kind != token.EOF {
+		n := p.parseIdentifier()
+		c := p.expect(token.COLON, TokenSet{token.COMMA, token.RCURLY}.Union(stop))
+		e := p.parseExpr(TokenSet{token.COMMA, token.RCURLY, token.EOF})
+		f.Fields = append(f.Fields, &ast.StructFieldExpr{Name: n, Colon: c, Expr: e})
+		if p.current().Kind != token.COMMA {
+			break
+		}
+		p.advance()
+		if p.current().Kind == token.RCURLY {
+			p.trailingComma(token.RCURLY)
+			break
+		}
+	}
+	f.CloseToken = p.expect(token.RCURLY, stop)
+	return &ast.StructExpr{RoleIdent: ri, StructFields: f}
 }
 func (p *Parser) primitive(l ast.Literal, stop TokenSet) ast.Expr {
 	r := &ast.PrimitiveExpr{Literal: l}

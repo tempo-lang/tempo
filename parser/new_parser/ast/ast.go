@@ -52,7 +52,10 @@ type SourceFile struct {
 	Functions  []*Func
 	Structs    []*Struct
 	Interfaces []*Interface
-	Tokens     []token.Token
+	// Declarations preserves the lexical top-level order. The typed slices are
+	// retained as convenient indexes for consumers.
+	Declarations []Node
+	Tokens       []token.Token
 }
 
 func (f *SourceFile) StartToken() token.Token {
