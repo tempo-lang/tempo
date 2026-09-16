@@ -3,6 +3,7 @@ package new_parser
 import (
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 
 	"github.com/tempo-lang/tempo/parser/new_parser/ast"
@@ -52,12 +53,7 @@ func (d Diagnostic) String() string {
 type TokenSet []token.Kind
 
 func (s TokenSet) Contains(k token.Kind) bool {
-	for _, x := range s {
-		if x == k {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(s, k)
 }
 func (s TokenSet) With(k token.Kind) TokenSet {
 	if s.Contains(k) {
@@ -88,15 +84,13 @@ func (c *Cursor) Peek(n int) token.Token {
 	if len(c.tokens) == 0 {
 		return token.Token{Kind: token.EOF}
 	}
-	i := c.pos + n
-	if i < 0 {
-		i = 0
-	}
+	i := max(c.pos+n, 0)
 	if i >= len(c.tokens) {
 		i = len(c.tokens) - 1
 	}
 	return c.tokens[i]
 }
+
 func (c *Cursor) Advance() token.Ref {
 	t := c.Current()
 	if t.Kind != token.EOF {
@@ -111,6 +105,7 @@ type Result struct {
 	Tokens      []token.Token
 	Diagnostics []Diagnostic
 }
+
 type ProductionResult struct {
 	Node        ast.Node
 	Source      *token.Source
@@ -131,10 +126,13 @@ func New(r io.RuneReader) *Parser {
 	l := lexer.New(r)
 	return fromLexer(l)
 }
+
 func FromString(s string) *Parser { return FromSource(token.SourceFromString(s)) }
+
 func FromSource(s *token.Source) *Parser {
 	return fromLexer(lexer.FromSource(s))
 }
+
 func fromLexer(l *lexer.Lexer) *Parser {
 	ts, lds := l.LexAll()
 	p := &Parser{source: l.Source(), tokens: ts, cursor: NewCursor(ts)}
@@ -143,6 +141,7 @@ func fromLexer(l *lexer.Lexer) *Parser {
 	}
 	return p
 }
+
 func (p *Parser) Tokens() []token.Token     { return append([]token.Token(nil), p.tokens...) }
 func (p *Parser) Diagnostics() []Diagnostic { return append([]Diagnostic(nil), p.diagnostics...) }
 
@@ -154,6 +153,7 @@ func (p *Parser) advance() token.Token {
 	p.previous = t
 	return t
 }
+
 func (p *Parser) curTokenIs(k ...token.Kind) bool {
 	for _, x := range k {
 		if p.current().Kind == x {
@@ -162,6 +162,7 @@ func (p *Parser) curTokenIs(k ...token.Kind) bool {
 	}
 	return false
 }
+
 func (p *Parser) add(d Diagnostic) {
 	for _, x := range p.diagnostics {
 		if x.Code == d.Code && x.PrimarySpan == d.PrimarySpan && first(x.Expected) == first(d.Expected) {
@@ -170,19 +171,23 @@ func (p *Parser) add(d Diagnostic) {
 	}
 	p.diagnostics = append(p.diagnostics, d)
 }
+
 func first(s []token.Kind) token.Kind {
 	if len(s) > 0 {
 		return s[0]
 	}
 	return ""
 }
+
 func spelling(k token.Kind) string {
 	return map[token.Kind]string{token.SEMICOLON: ";", token.RSQUARE: "]", token.RPAREN: ")", token.RCURLY: "}", token.LCURLY: "{", token.ASSIGN: "=", token.IDENT: "identifier"}[k]
 }
+
 func (p *Parser) missing(k token.Kind, at int, primary Span, found token.Kind) token.Token {
 	p.add(Diagnostic{Code: CodeMissingToken, Message: "missing " + string(k), PrimarySpan: primary, Expected: []token.Kind{k}, Found: found, Fixes: []TextEdit{{Span: Span{Start: at, End: at}, NewText: spelling(k)}}})
 	return token.Missing(token.Ref(len(p.tokens)), k, at, p.source)
 }
+
 func (p *Parser) expect(k token.Kind, follow TokenSet) token.Token {
 	if p.current().Kind == k {
 		return p.advance()
@@ -203,7 +208,9 @@ func (p *Parser) expect(k token.Kind, follow TokenSet) token.Token {
 	}
 	return token.Missing(token.Ref(len(p.tokens)), k, p.current().Span.Start, p.source)
 }
+
 func closing(k token.Kind) bool { return k == token.RPAREN || k == token.RSQUARE || k == token.RCURLY }
+
 func (p *Parser) skipUntil(stop TokenSet) []token.Ref {
 	var out []token.Ref
 	var stack []token.Kind
@@ -229,6 +236,7 @@ func (p *Parser) skipUntil(stop TokenSet) []token.Ref {
 	}
 	return out
 }
+
 func (p *Parser) parseIdentifier() *ast.Identifier {
 	if p.current().Kind == token.IDENT {
 		return &ast.Identifier{Token: p.advance()}
@@ -237,6 +245,7 @@ func (p *Parser) parseIdentifier() *ast.Identifier {
 	p.add(Diagnostic{Code: CodeExpectedIdentifier, Message: "expected identifier", PrimarySpan: cur.Span, Expected: []token.Kind{token.IDENT}, Found: cur.Kind})
 	return &ast.Identifier{Token: token.Missing(token.Ref(len(p.tokens)), token.IDENT, cur.Span.Start, p.source), Invalid: true}
 }
+
 func (p *Parser) expectEOF() {
 	if p.current().Kind != token.EOF {
 		cur := p.current()
@@ -244,10 +253,12 @@ func (p *Parser) expectEOF() {
 		p.skipUntil(TokenSet{token.EOF})
 	}
 }
+
 func (p *Parser) production(node ast.Node) ProductionResult {
 	p.expectEOF()
 	return ProductionResult{Node: node, Source: p.source, Tokens: p.Tokens(), Diagnostics: p.Diagnostics(), Remaining: p.current().Kind}
 }
+
 func Parse(text string) Result {
 	p := FromString(text)
 	root := &ast.SourceFile{Tokens: p.Tokens()}
@@ -262,6 +273,7 @@ func Parse(text string) Result {
 	}
 	return Result{Root: root, Source: p.source, Tokens: p.Tokens(), Diagnostics: p.Diagnostics()}
 }
+
 func FormatDiagnostics(ds []Diagnostic) string {
 	var b strings.Builder
 	for i, d := range ds {
@@ -272,14 +284,17 @@ func FormatDiagnostics(ds []Diagnostic) string {
 	}
 	return b.String()
 }
+
 func ParseExpression(s string) ProductionResult {
 	p := FromString(s)
 	return p.production(p.parseExpr(TokenSet{token.EOF}))
 }
+
 func ParseStatement(s string) ProductionResult {
 	p := FromString(s)
 	return p.production(p.parseStmt())
 }
+
 func ParseScopeText(s string) ProductionResult {
 	p := FromString(s)
 	return p.production(p.parseScope())

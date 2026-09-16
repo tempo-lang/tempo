@@ -38,6 +38,21 @@ func writeNode(b *strings.Builder, n Node) {
 		return
 	}
 	switch x := n.(type) {
+	case *SourceFile:
+		b.WriteString("(source-file")
+		for _, f := range x.Functions {
+			b.WriteByte(' ')
+			writeNode(b, f)
+		}
+		for _, s := range x.Structs {
+			b.WriteByte(' ')
+			writeNode(b, s)
+		}
+		for _, i := range x.Interfaces {
+			b.WriteByte(' ')
+			writeNode(b, i)
+		}
+		b.WriteByte(')')
 	case *Identifier:
 		if x.Invalid {
 			b.WriteString("(invalid-ident)")
