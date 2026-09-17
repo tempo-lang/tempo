@@ -27,16 +27,20 @@ func precedence(k token.Kind) int {
 	}
 	return precLowest
 }
+
 func exprStart(k token.Kind) bool {
 	return k == token.FLOAT || k == token.INT || k == token.STRING || k == token.TRUE || k == token.FALSE || k == token.IDENT || k == token.UNDERSCORE || k == token.LPAREN || k == token.LSQUARE || k == token.AWAIT || k == token.FUNC
 }
+
 func (p *Parser) ParseExpr() (ast.Expr, bool) {
 	before := len(p.diagnostics)
 	e := p.parseExpr(TokenSet{token.EOF})
 	p.expectEOF()
 	return e, len(p.diagnostics) > before
 }
+
 func (p *Parser) parseExpr(stop TokenSet) ast.Expr { return p.parsePrecedence(stop, precLowest) }
+
 func (p *Parser) parsePrecedence(stop TokenSet, min int) ast.Expr {
 	left := p.parsePrefix(stop)
 	for !stop.Contains(p.current().Kind) {
@@ -85,6 +89,7 @@ func (p *Parser) parsePrecedence(stop TokenSet, min int) ast.Expr {
 	}
 	return left
 }
+
 func (p *Parser) parsePrefix(stop TokenSet) ast.Expr {
 	cur := p.current()
 	switch cur.Kind {
@@ -176,11 +181,12 @@ func (p *Parser) roleTypeFollowedByCom() bool {
 		return p.peek(1).Kind == token.COM
 	}
 	var close token.Kind
-	if k == token.LPAREN {
+	switch k {
+	case token.LPAREN:
 		close = token.RPAREN
-	} else if k == token.LSQUARE {
+	case token.LSQUARE:
 		close = token.RSQUARE
-	} else {
+	default:
 		return false
 	}
 	depth := 0
@@ -201,12 +207,14 @@ func (p *Parser) roleTypeFollowedByCom() bool {
 	}
 	return false
 }
+
 func (p *Parser) parseComExpr(stop TokenSet) ast.Expr {
 	s := p.parseRoleType(TokenSet{token.COM})
 	c := p.expect(token.COM, TokenSet{token.IDENT, token.UNDERSCORE, token.LPAREN, token.LSQUARE})
 	r := p.parseRoleType(stop)
 	return &ast.ComExpr{Sender: s, ComToken: c, Receiver: r, Expr: p.parsePrecedence(stop, precPostfix-1)}
 }
+
 func (p *Parser) parseStructExpr(ri *ast.RoleIdent, stop TokenSet) ast.Expr {
 	f := &ast.StructFields{OpenToken: p.advance()}
 	for p.current().Kind != token.RCURLY && p.current().Kind != token.EOF {
@@ -226,6 +234,7 @@ func (p *Parser) parseStructExpr(ri *ast.RoleIdent, stop TokenSet) ast.Expr {
 	f.CloseToken = p.expect(token.RCURLY, stop)
 	return &ast.StructExpr{RoleIdent: ri, StructFields: f}
 }
+
 func (p *Parser) primitive(l ast.Literal, stop TokenSet) ast.Expr {
 	r := &ast.PrimitiveExpr{Literal: l}
 	if p.current().Kind == token.ROLE_AT {

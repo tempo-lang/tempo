@@ -17,12 +17,14 @@ var exprStmtEnd = TokenSet{token.SEMICOLON, token.RCURLY, token.EOF, token.LET, 
 func isStmtStart(k token.Kind) bool {
 	return k == token.LET || k == token.RETURN || k == token.IF || k == token.WHILE || exprStart(k)
 }
+
 func (p *Parser) ParseStmt() (ast.Stmt, bool) {
 	before := len(p.diagnostics)
 	s := p.parseStmt()
 	p.expectEOF()
 	return s, len(p.diagnostics) > before
 }
+
 func (p *Parser) parseStmt() ast.Stmt {
 	switch p.current().Kind {
 	case token.LET:
@@ -37,6 +39,7 @@ func (p *Parser) parseStmt() ast.Stmt {
 		return p.parseExprStmt()
 	}
 }
+
 func (p *Parser) semicolon() token.Token {
 	if p.current().Kind == token.SEMICOLON {
 		return p.advance()
@@ -46,6 +49,7 @@ func (p *Parser) semicolon() token.Token {
 	p.add(Diagnostic{Code: CodeMissingToken, Message: "missing semicolon", PrimarySpan: anchor, Expected: []token.Kind{token.SEMICOLON}, Found: p.current().Kind, Fixes: []TextEdit{{Span: Span{Start: at, End: at}, NewText: ";"}}})
 	return token.Missing(token.Ref(len(p.tokens)), token.SEMICOLON, at, p.source)
 }
+
 func (p *Parser) parseLet() ast.Stmt {
 	s := &ast.LetStmt{LetToken: p.advance()}
 	s.Name = p.parseIdentifier()
@@ -58,6 +62,7 @@ func (p *Parser) parseLet() ast.Stmt {
 	s.SemiToken = p.semicolon()
 	return s
 }
+
 func (p *Parser) parseReturn() ast.Stmt {
 	s := &ast.ReturnStmt{ReturnToken: p.advance()}
 	if p.current().Kind != token.SEMICOLON && p.current().Kind != token.RCURLY && p.current().Kind != token.EOF {
@@ -66,6 +71,7 @@ func (p *Parser) parseReturn() ast.Stmt {
 	s.SemiToken = p.semicolon()
 	return s
 }
+
 func (p *Parser) parseIf() ast.Stmt {
 	s := &ast.IfStmt{IfToken: p.advance()}
 	stops := exprStmtEnd.With(token.LCURLY)
@@ -77,12 +83,14 @@ func (p *Parser) parseIf() ast.Stmt {
 	}
 	return s
 }
+
 func (p *Parser) parseWhile() ast.Stmt {
 	s := &ast.WhileStmt{WhileKeyword: p.advance()}
 	s.Condition = p.parseExpr(exprStmtEnd.With(token.LCURLY))
 	s.Scope = p.parseScope()
 	return s
 }
+
 func assignable(e ast.Expr) bool {
 	switch x := e.(type) {
 	case *ast.Identifier:
@@ -94,6 +102,7 @@ func assignable(e ast.Expr) bool {
 	}
 	return false
 }
+
 func assignableRoot(e ast.Expr) bool {
 	switch x := e.(type) {
 	case *ast.FieldAccessExpr:
@@ -107,6 +116,7 @@ func assignableRoot(e ast.Expr) bool {
 	}
 	return false
 }
+
 func (p *Parser) parseExprStmt() ast.Stmt {
 	lhs := p.parseExpr(exprStmtEnd.With(token.ASSIGN))
 	if p.current().Kind == token.ASSIGN {
@@ -123,12 +133,14 @@ func (p *Parser) parseExprStmt() ast.Stmt {
 	s.SemiToken = p.semicolon()
 	return s
 }
+
 func (p *Parser) ParseScope() (*ast.Scope, bool) {
 	before := len(p.diagnostics)
 	s := p.parseScope()
 	p.expectEOF()
 	return s, len(p.diagnostics) > before
 }
+
 func (p *Parser) parseScope() *ast.Scope {
 	s := &ast.Scope{OpenToken: p.expect(token.LCURLY, stmtBoundaries)}
 	for p.current().Kind != token.RCURLY && p.current().Kind != token.EOF {

@@ -11,7 +11,7 @@ import (
 func (epp *epp) EppStmt(role string, stmt ast.Stmt) (out []projection.Statement) {
 	switch s := stmt.(type) {
 	case *ast.InvalidStmt:
-		return nil
+		panic("endpoint projection encountered an invalid statement")
 	case *ast.LetStmt:
 		sym := epp.info.Symbols[s.Name]
 		expr, aux := epp.eppExpression(role, s.Expr)
@@ -53,6 +53,8 @@ func (epp *epp) EppStmt(role string, stmt ast.Stmt) (out []projection.Statement)
 		}
 	case *ast.AssignStmt:
 		return epp.eppAssign(role, s)
+	default:
+		panic(fmt.Sprintf("unknown statement: %#v", stmt))
 	}
 	return out
 }
@@ -84,7 +86,7 @@ func assignmentParts(expr ast.Expr) (*ast.Identifier, []ast.Expr) {
 func (epp *epp) eppAssign(role string, s *ast.AssignStmt) (out []projection.Statement) {
 	id, parts := assignmentParts(s.LHS)
 	if id == nil {
-		return nil
+		panic("endpoint projection encountered an invalid assignment target")
 	}
 	sym := epp.info.Symbols[id]
 	target := sym.Type()

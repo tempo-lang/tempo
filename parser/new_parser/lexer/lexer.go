@@ -13,6 +13,7 @@ type Diagnostic struct {
 	Message string
 	Span    token.Span
 }
+
 type Lexer struct {
 	source      *token.Source
 	data        []byte
@@ -36,11 +37,14 @@ func New(r io.RuneReader) *Lexer {
 		b.WriteRune(x)
 	}
 }
-func FromString(s string) *Lexer           { return FromSource(token.SourceFromString(s)) }
-func FromBytes(b []byte) *Lexer            { return FromSource(token.NewSource(b)) }
-func FromSource(s *token.Source) *Lexer    { return &Lexer{source: s, data: s.Bytes()} }
+
+func FromString(s string) *Lexer        { return FromSource(token.SourceFromString(s)) }
+func FromBytes(b []byte) *Lexer         { return FromSource(token.NewSource(b)) }
+func FromSource(s *token.Source) *Lexer { return &Lexer{source: s, data: s.Bytes()} }
+
 func (l *Lexer) Source() *token.Source     { return l.source }
 func (l *Lexer) Diagnostics() []Diagnostic { return append([]Diagnostic(nil), l.diagnostics...) }
+
 func (l *Lexer) LexAll() ([]token.Token, []Diagnostic) {
 	var ts []token.Token
 	for {
@@ -52,6 +56,7 @@ func (l *Lexer) LexAll() ([]token.Token, []Diagnostic) {
 	}
 	return ts, l.Diagnostics()
 }
+
 func (l *Lexer) ReadToken() token.Token {
 	tr := l.trivia()
 	if l.offset == len(l.data) {
@@ -95,6 +100,7 @@ func (l *Lexer) ReadToken() token.Token {
 	}
 	return l.bad(s, "unexpected character", tr)
 }
+
 func (l *Lexer) trivia() []token.Trivia {
 	var out []token.Trivia
 	for l.offset < len(l.data) {
@@ -129,6 +135,7 @@ func (l *Lexer) trivia() []token.Trivia {
 	}
 	return out
 }
+
 func (l *Lexer) ident(s int, tr []token.Trivia) token.Token {
 	for l.offset < len(l.data) && (letter(l.data[l.offset]) || digit(l.data[l.offset]) || l.data[l.offset] == '_') {
 		l.offset++
@@ -149,6 +156,7 @@ func (l *Lexer) ident(s int, tr []token.Trivia) token.Token {
 	}
 	return l.emit(token.IDENT, s, x, tr)
 }
+
 func (l *Lexer) number(s int, tr []token.Trivia) token.Token {
 	dot := l.data[s] == '.'
 	for l.offset < len(l.data) && digit(l.data[l.offset]) {
@@ -177,6 +185,7 @@ func (l *Lexer) number(s int, tr []token.Trivia) token.Token {
 	}
 	return l.emit(token.INT, s, int(v), tr)
 }
+
 func (l *Lexer) string(s int, tr []token.Trivia) token.Token {
 	var v strings.Builder
 	for l.offset < len(l.data) {
@@ -215,15 +224,18 @@ func (l *Lexer) string(s int, tr []token.Trivia) token.Token {
 	}
 	return l.bad(s, "unterminated string", tr)
 }
+
 func (l *Lexer) emit(k token.Kind, s int, v any, tr []token.Trivia) token.Token {
 	t := token.NewAt(l.next, k, string(l.data[s:l.offset]), v, token.Span{Start: s, End: l.offset}, tr, l.source)
 	l.next++
 	return t
 }
+
 func (l *Lexer) bad(s int, m string, tr []token.Trivia) token.Token {
 	l.diagnostics = append(l.diagnostics, Diagnostic{m, token.Span{Start: s, End: l.offset}})
 	return l.emit(token.BadToken, s, token.TokenError{Message: m}, tr)
 }
+
 func ws(c byte) bool     { return c == ' ' || c == '\t' || c == '\r' || c == '\n' }
 func digit(c byte) bool  { return c >= '0' && c <= '9' }
 func letter(c byte) bool { return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' }
@@ -259,4 +271,18 @@ var singles = map[byte]token.Kind{'+': token.PLUS,
 	'@': token.ROLE_AT,
 }
 
-var keywords = map[string]token.Kind{"struct": token.STRUCT, "interface": token.INTERFACE, "implements": token.IMPLEMENTS, "func": token.FUNC, "return": token.RETURN, "let": token.LET, "async": token.ASYNC, "await": token.AWAIT, "if": token.IF, "else": token.ELSE, "while": token.WHILE, "true": token.TRUE, "false": token.FALSE}
+var keywords = map[string]token.Kind{
+	"struct":     token.STRUCT,
+	"interface":  token.INTERFACE,
+	"implements": token.IMPLEMENTS,
+	"func":       token.FUNC,
+	"return":     token.RETURN,
+	"let":        token.LET,
+	"async":      token.ASYNC,
+	"await":      token.AWAIT,
+	"if":         token.IF,
+	"else":       token.ELSE,
+	"while":      token.WHILE,
+	"true":       token.TRUE,
+	"false":      token.FALSE,
+}
