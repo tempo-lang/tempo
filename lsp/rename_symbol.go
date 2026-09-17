@@ -16,7 +16,7 @@ func (s *tempoServer) prepareRename(context *glsp.Context, params *protocol.Prep
 		return nil, nil
 	}
 
-	return parserRuleToRange(sym.Ident()), nil
+	return parserRuleToRange(doc.source, sym.Ident()), nil
 }
 
 func (s *tempoServer) renameSymbol(context *glsp.Context, params *protocol.RenameParams) (*protocol.WorkspaceEdit, error) {
@@ -31,19 +31,19 @@ func (s *tempoServer) renameSymbol(context *glsp.Context, params *protocol.Renam
 	}
 
 	edits := []protocol.TextEdit{{
-		Range:   parserRuleToRange(sym.Ident()),
+		Range:   parserRuleToRange(doc.source, sym.Ident()),
 		NewText: params.NewName,
 	}}
 
 	for _, read := range sym.AccessReads() {
 		edits = append(edits, protocol.TextEdit{
-			Range:   parserRuleToRange(read),
+			Range:   parserRuleToRange(doc.source, read),
 			NewText: params.NewName,
 		})
 	}
 	for _, write := range sym.AccessWrites() {
 		edits = append(edits, protocol.TextEdit{
-			Range:   parserRuleToRange(write),
+			Range:   parserRuleToRange(doc.source, write),
 			NewText: params.NewName,
 		})
 	}

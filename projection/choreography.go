@@ -5,7 +5,7 @@
 package projection
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 )
 
 // Choreography represents a Tempo choreography from the perspective of each projected role.
@@ -23,7 +23,7 @@ func NewChoreography(name string) *Choreography {
 	}
 }
 
-func (c *Choreography) AddFunc(sig *FuncSig, funcCtx parser.IFuncContext) *Func {
+func (c *Choreography) AddFunc(sig *FuncSig, funcCtx *ast.Func) *Func {
 	c.Roles = append(c.Roles, sig.Role)
 	c.Funcs[sig.Role] = &Func{
 		FuncSig:      sig,

@@ -3,19 +3,18 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 
-	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 )
 
 type DuplicateRoles struct {
 	baseError
-	Ctx            antlr.ParserRuleContext
+	Ctx            ast.Node
 	DuplicateRoles []string
 }
 
-func NewDuplicateRoles(ctx antlr.ParserRuleContext, duplicateRoles []string) Error {
+func NewDuplicateRoles(ctx ast.Node, duplicateRoles []string) Error {
 	return &DuplicateRoles{
 		Ctx:            ctx,
 		DuplicateRoles: duplicateRoles,
@@ -38,7 +37,7 @@ func (e *DuplicateRoles) Annotations() []Annotation {
 	}}
 }
 
-func (e *DuplicateRoles) ParserRule() antlr.ParserRuleContext {
+func (e *DuplicateRoles) ParserRule() ast.Node {
 	return e.Ctx
 }
 
@@ -48,11 +47,11 @@ func (e *DuplicateRoles) Code() ErrorCode {
 
 type RolesNotInScope struct {
 	baseError
-	RoleType     antlr.ParserRuleContext
+	RoleType     ast.Node
 	UnknownRoles []string
 }
 
-func NewRolesNotInScope(roleType antlr.ParserRuleContext, unknownRoles []string) Error {
+func NewRolesNotInScope(roleType ast.Node, unknownRoles []string) Error {
 	return &RolesNotInScope{
 		RoleType:     roleType,
 		UnknownRoles: unknownRoles,
@@ -64,7 +63,7 @@ func (e *RolesNotInScope) Error() string {
 	return fmt.Sprintf("%s %s not in scope", roles, toBe(e.UnknownRoles))
 }
 
-func (e *RolesNotInScope) ParserRule() antlr.ParserRuleContext {
+func (e *RolesNotInScope) ParserRule() ast.Node {
 	return e.RoleType
 }
 
@@ -74,7 +73,7 @@ func (e *RolesNotInScope) Code() ErrorCode {
 
 type UnmergableRoles struct {
 	baseError
-	Expr  parser.IExprContext
+	Expr  ast.Expr
 	Roles []*types.Roles
 }
 
@@ -89,7 +88,7 @@ func (u *UnmergableRoles) Error() string {
 	return fmt.Sprintf("cannot merge %s", rolesList)
 }
 
-func (u *UnmergableRoles) ParserRule() antlr.ParserRuleContext {
+func (u *UnmergableRoles) ParserRule() ast.Node {
 	return u.Expr
 }
 
@@ -97,7 +96,7 @@ func (e *UnmergableRoles) Code() ErrorCode {
 	return CodeUnmergableRoles
 }
 
-func NewUnmergableRoles(expr parser.IExprContext, roles []*types.Roles) Error {
+func NewUnmergableRoles(expr ast.Expr, roles []*types.Roles) Error {
 	return &UnmergableRoles{
 		Expr:  expr,
 		Roles: roles,
@@ -106,10 +105,10 @@ func NewUnmergableRoles(expr parser.IExprContext, roles []*types.Roles) Error {
 
 type SharedRoleSingleParticipant struct {
 	baseError
-	roleType *parser.RoleTypeSharedContext
+	roleType *ast.RoleType
 }
 
-func NewSharedRoleSingleParticipant(roleType *parser.RoleTypeSharedContext) Error {
+func NewSharedRoleSingleParticipant(roleType *ast.RoleType) Error {
 	return &SharedRoleSingleParticipant{
 		roleType: roleType,
 	}
@@ -119,7 +118,7 @@ func (e *SharedRoleSingleParticipant) Error() string {
 	return "shared role must have more than one participant"
 }
 
-func (e *SharedRoleSingleParticipant) ParserRule() antlr.ParserRuleContext {
+func (e *SharedRoleSingleParticipant) ParserRule() ast.Node {
 	return e.roleType
 }
 
@@ -129,10 +128,10 @@ func (e *SharedRoleSingleParticipant) Code() ErrorCode {
 
 type MissingRoles struct {
 	baseError
-	ValueType antlr.ParserRuleContext
+	ValueType ast.Node
 }
 
-func NewMissingRoles(valueType antlr.ParserRuleContext) Error {
+func NewMissingRoles(valueType ast.Node) Error {
 	return &MissingRoles{
 		ValueType: valueType,
 	}
@@ -142,7 +141,7 @@ func (e *MissingRoles) Error() string {
 	return "unable to determine roles for this type"
 }
 
-func (e *MissingRoles) ParserRule() antlr.ParserRuleContext {
+func (e *MissingRoles) ParserRule() ast.Node {
 	return e.ValueType
 }
 
@@ -150,7 +149,7 @@ func (e *MissingRoles) Annotations() []Annotation {
 	return []Annotation{
 		{
 			Type:    AnnotationTypeHint,
-			Message: fmt.Sprintf("specify roles explicitly, like so `%s@(A,B,C)`", e.ValueType.GetText()),
+			Message: fmt.Sprintf("specify roles explicitly, like so `%s@(A,B,C)`", ast.Text(e.ValueType)),
 		},
 	}
 }
@@ -161,10 +160,10 @@ func (e *MissingRoles) Code() ErrorCode {
 
 type UnexpectedHiddenRoles struct {
 	baseError
-	RoleType parser.IRoleTypeContext
+	RoleType *ast.RoleType
 }
 
-func NewUnexpectedHiddenRoles(roleType parser.IRoleTypeContext) Error {
+func NewUnexpectedHiddenRoles(roleType *ast.RoleType) Error {
 	return &UnexpectedHiddenRoles{
 		RoleType: roleType,
 	}
@@ -178,6 +177,6 @@ func (u *UnexpectedHiddenRoles) Error() string {
 	return "hidden roles `_` not allowed here"
 }
 
-func (u *UnexpectedHiddenRoles) ParserRule() antlr.ParserRuleContext {
+func (u *UnexpectedHiddenRoles) ParserRule() ast.Node {
 	return u.RoleType
 }

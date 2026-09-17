@@ -165,13 +165,15 @@ func (l *Lexer) number(s int, tr []token.Trivia) token.Token {
 	if dot {
 		v, e := strconv.ParseFloat(x, 64)
 		if e != nil {
-			return l.bad(s, "numeric overflow", tr)
+			l.diagnostics = append(l.diagnostics, Diagnostic{"numeric overflow", token.Span{Start: s, End: l.offset}})
+			return l.emit(token.FLOAT, s, nil, tr)
 		}
 		return l.emit(token.FLOAT, s, v, tr)
 	}
 	v, e := strconv.ParseInt(x, 10, 64)
 	if e != nil {
-		return l.bad(s, "numeric overflow", tr)
+		l.diagnostics = append(l.diagnostics, Diagnostic{"numeric overflow", token.Span{Start: s, End: l.offset}})
+		return l.emit(token.INT, s, nil, tr)
 	}
 	return l.emit(token.INT, s, int(v), tr)
 }

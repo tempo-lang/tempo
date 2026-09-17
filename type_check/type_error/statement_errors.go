@@ -3,15 +3,14 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 
-	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 )
 
 type InvalidAssignType struct {
 	baseError
-	ExprCtx  parser.IExprContext
+	ExprCtx  ast.Expr
 	VarType  types.Type
 	ExprType types.Type
 }
@@ -27,7 +26,7 @@ func (i *InvalidAssignType) Annotations() []Annotation {
 	}}
 }
 
-func (i *InvalidAssignType) ParserRule() antlr.ParserRuleContext {
+func (i *InvalidAssignType) ParserRule() ast.Node {
 	return i.ExprCtx
 }
 
@@ -35,7 +34,7 @@ func (e *InvalidAssignType) Code() ErrorCode {
 	return CodeInvalidAssignType
 }
 
-func NewInvalidAssignType(exprCtx parser.IExprContext, varType types.Type, exprType types.Type) Error {
+func NewInvalidAssignType(exprCtx ast.Expr, varType types.Type, exprType types.Type) Error {
 	return &InvalidAssignType{
 		ExprCtx:  exprCtx,
 		VarType:  varType,
@@ -45,11 +44,11 @@ func NewInvalidAssignType(exprCtx parser.IExprContext, varType types.Type, exprT
 
 type ReturnNotAllRoles struct {
 	baseError
-	Return       *parser.StmtReturnContext
+	Return       *ast.ReturnStmt
 	MissignRoles []string
 }
 
-func NewReturnNotAllRoles(ret *parser.StmtReturnContext, missingRoles []string) Error {
+func NewReturnNotAllRoles(ret *ast.ReturnStmt, missingRoles []string) Error {
 	return &ReturnNotAllRoles{
 		Return:       ret,
 		MissignRoles: missingRoles,
@@ -71,7 +70,7 @@ func (e *ReturnNotAllRoles) Annotations() []Annotation {
 	}}
 }
 
-func (e *ReturnNotAllRoles) ParserRule() antlr.ParserRuleContext {
+func (e *ReturnNotAllRoles) ParserRule() ast.Node {
 	return e.Return
 }
 
@@ -81,14 +80,14 @@ func (e *ReturnNotAllRoles) Code() ErrorCode {
 
 type AssignUnitValue struct {
 	baseError
-	Expr parser.IExprContext
+	Expr ast.Expr
 }
 
 func (e *AssignUnitValue) Error() string {
 	return "cannot assign a unit value to a variable"
 }
 
-func (e *AssignUnitValue) ParserRule() antlr.ParserRuleContext {
+func (e *AssignUnitValue) ParserRule() ast.Node {
 	return e.Expr
 }
 
@@ -96,7 +95,7 @@ func (e *AssignUnitValue) Code() ErrorCode {
 	return CodeAssignUnitValue
 }
 
-func NewAssignUnitValue(expr parser.IExprContext) Error {
+func NewAssignUnitValue(expr ast.Expr) Error {
 	return &AssignUnitValue{
 		Expr: expr,
 	}

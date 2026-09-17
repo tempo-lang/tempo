@@ -1,105 +1,79 @@
 package lsp
 
 import (
-	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
 	"github.com/tempo-lang/tempo/sym_table"
 	protocol "github.com/tliron/glsp/protocol_3_16"
+	"reflect"
 )
 
-func parserRuleToRange(rule antlr.ParserRuleContext) protocol.Range {
-	endTokenLength := rule.GetStop().GetStop() - rule.GetStop().GetStart()
-	return protocol.Range{
-		Start: protocol.Position{
-			Line:      uint32(rule.GetStart().GetLine() - 1),
-			Character: uint32(rule.GetStart().GetColumn()),
-		},
-		End: protocol.Position{
-			Line:      uint32(rule.GetStop().GetLine() - 1),
-			Character: uint32(rule.GetStop().GetColumn() + endTokenLength + 1),
-		},
-	}
+func spanToRange(source *token.Source, span token.Span) protocol.Range {
+	a, b := source.LSPPosition(span.Start), source.LSPPosition(span.End)
+	return protocol.Range{Start: protocol.Position{Line: uint32(a.Line), Character: uint32(a.Character)}, End: protocol.Position{Line: uint32(b.Line), Character: uint32(b.Character)}}
+}
+func parserRuleToRange(source *token.Source, node ast.Node) protocol.Range {
+	return spanToRange(source, token.Span{Start: node.StartToken().Span.Start, End: node.EndToken().Span.End})
+}
+func scopeToRange(source *token.Source, scope *sym_table.Scope) protocol.Range {
+	return spanToRange(source, scope.Span())
+}
+func posWithinRange(p protocol.Position, r protocol.Range) bool {
+	return (p.Line > r.Start.Line || p.Line == r.Start.Line && p.Character >= r.Start.Character) && (p.Line < r.End.Line || p.Line == r.End.Line && p.Character <= r.End.Character)
+}
+func rangesOverlap(a, b protocol.Range) bool {
+	return posWithinRange(a.Start, b) || posWithinRange(a.End, b) || posWithinRange(b.Start, a)
 }
 
-func scopeToRange(scope *sym_table.Scope) protocol.Range {
-	endTokenLength := scope.End().GetStop() - scope.End().GetStart()
-	return protocol.Range{
-		Start: protocol.Position{
-			Line:      uint32(scope.Pos().GetLine() - 1),
-			Character: uint32(scope.Pos().GetColumn()),
-		},
-		End: protocol.Position{
-			Line:      uint32(scope.End().GetLine() - 1),
-			Character: uint32(scope.End().GetColumn() + endTokenLength + 1),
-		},
+func astNodeAtPosition(source *token.Source, root ast.Node, pos protocol.Position) (ast.Node, protocol.Range) {
+	nodes := astNodesAtPosition(source, root, pos)
+	if len(nodes) == 0 {
+		return nil, protocol.Range{}
 	}
+	best := nodes[len(nodes)-1]
+	return best, parserRuleToRange(source, best)
 }
 
-func tokenToRange(token antlr.Token) protocol.Range {
-	endTokenLength := token.GetStop() - token.GetStart()
-	return protocol.Range{
-		Start: protocol.Position{
-			Line:      uint32(token.GetLine() - 1),
-			Character: uint32(token.GetColumn()),
-		},
-		End: protocol.Position{
-			Line:      uint32(token.GetLine() - 1),
-			Character: uint32(token.GetColumn() + endTokenLength + 1),
-		},
-	}
-}
-
-func posWithinRange(pos protocol.Position, span protocol.Range) bool {
-	if span.Start.Line <= pos.Line && span.End.Line >= pos.Line {
-		if span.Start.Line == pos.Line && pos.Character < span.Start.Character {
-			return false
+func astNodesAtPosition(source *token.Source, root ast.Node, pos protocol.Position) (matches []ast.Node) {
+	seen := map[uintptr]bool{}
+	var walk func(reflect.Value)
+	walk = func(v reflect.Value) {
+		if !v.IsValid() {
+			return
 		}
-
-		if span.End.Line == pos.Line && span.End.Character < pos.Character {
-			return false
+		if v.Kind() == reflect.Interface {
+			if !v.IsNil() {
+				walk(v.Elem())
+			}
+			return
 		}
-
-		return true
-	}
-
-	return false
-}
-
-func astNodeAtPosition(node antlr.ParserRuleContext, pos protocol.Position) (antlr.ParserRuleContext, protocol.Range) {
-	for _, c := range node.GetChildren() {
-		switch child := c.(type) {
-		case antlr.ParserRuleContext:
-			span := parserRuleToRange(child)
-			if posWithinRange(pos, span) {
-				if result, resultSpan := astNodeAtPosition(child, pos); result != nil {
-					return result, resultSpan
-				} else {
-					logger.Debugf("AST Node at pos (result) %T", child)
-					return child, span
+		if v.Kind() == reflect.Pointer {
+			if v.IsNil() || seen[v.Pointer()] {
+				return
+			}
+			seen[v.Pointer()] = true
+			if v.CanInterface() {
+				if n, ok := v.Interface().(ast.Node); ok {
+					if !posWithinRange(pos, parserRuleToRange(source, n)) {
+						return
+					}
+					matches = append(matches, n)
 				}
 			}
-		case antlr.TerminalNode:
-			span := tokenToRange(child.GetSymbol())
-			if posWithinRange(pos, span) {
-				logger.Debugf("AST Node at pos (terminal) %T", child)
-				return nil, protocol.Range{}
+			walk(v.Elem())
+			return
+		}
+		switch v.Kind() {
+		case reflect.Struct:
+			for i := 0; i < v.NumField(); i++ {
+				walk(v.Field(i))
+			}
+		case reflect.Slice:
+			for i := 0; i < v.Len(); i++ {
+				walk(v.Index(i))
 			}
 		}
 	}
-
-	return node, parserRuleToRange(node)
-}
-
-func rangesOverlap(a, b protocol.Range) bool {
-	posLT := func(p1, p2 protocol.Position) bool {
-		if p1.Line != p2.Line {
-			return p1.Line < p2.Line
-		}
-		return p1.Character < p2.Character
-	}
-
-	// No overlap if a ends before b starts, or b ends before a starts.
-	if posLT(a.End, b.Start) || posLT(b.End, a.Start) {
-		return false
-	}
-	return true
+	walk(reflect.ValueOf(root))
+	return matches
 }

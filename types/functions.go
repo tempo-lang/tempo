@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/tempo-lang/tempo/misc"
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 )
 
 type FunctionType struct {
 	baseType
-	fnSig      parser.IFuncSigContext
+	fnSig      *ast.FuncSig
 	params     []Type
 	returnType Type
 	roles      *Roles
@@ -47,7 +47,7 @@ func (f *FunctionType) CoerceTo(other Type) (Type, bool) {
 		return Invalid(), false
 	}
 
-	if f.NameIdent().GetText() != g.NameIdent().GetText() {
+	if f.NameIdent().Value() != g.NameIdent().Value() {
 		return Invalid(), false
 	}
 
@@ -96,18 +96,18 @@ func (f *FunctionType) ToString() string {
 	}
 
 	if f.Roles().IsUnnamedRole() {
-		return fmt.Sprintf("func %s(%s)%s", f.NameIdent().GetText(), params, returnType)
+		return fmt.Sprintf("func %s(%s)%s", f.NameIdent().Value(), params, returnType)
 	} else {
-		return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.NameIdent().GetText(), params, returnType)
+		return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.NameIdent().Value(), params, returnType)
 	}
 }
 
 // FormatFunctionSig returns a valid function signature for this function type
 func (f *FunctionType) FormatFunctionSig() string {
-	allParams := f.fnSig.GetParams().AllFuncParam()
+	allParams := f.fnSig.Params.Params
 	params := []string{}
 	for i, paramType := range f.params {
-		paramName := allParams[i].Ident().GetText()
+		paramName := allParams[i].Name.Value()
 		params = append(params, fmt.Sprintf("%s: %s", paramName, paramType.ToString()))
 	}
 
@@ -119,9 +119,9 @@ func (f *FunctionType) FormatFunctionSig() string {
 	}
 
 	if f.Roles().IsUnnamedRole() {
-		return fmt.Sprintf("func %s(%s)%s", f.NameIdent().GetText(), paramsStr, returnType)
+		return fmt.Sprintf("func %s(%s)%s", f.NameIdent().Value(), paramsStr, returnType)
 	} else {
-		return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.NameIdent().GetText(), paramsStr, returnType)
+		return fmt.Sprintf("func@%s %s(%s)%s", f.Roles().ToString(), f.NameIdent().Value(), paramsStr, returnType)
 	}
 }
 
@@ -133,11 +133,11 @@ func (f *FunctionType) ReturnType() Type {
 	return f.returnType
 }
 
-func (f *FunctionType) NameIdent() parser.IIdentContext {
-	return f.fnSig.Ident()
+func (f *FunctionType) NameIdent() *ast.Identifier {
+	return f.fnSig.Name
 }
 
-func (f *FunctionType) FuncSig() parser.IFuncSigContext {
+func (f *FunctionType) FuncSig() *ast.FuncSig {
 	return f.fnSig
 }
 
@@ -145,7 +145,7 @@ func (f *FunctionType) ToClosure() Type {
 	return Closure(f.Params(), f.ReturnType(), f.Roles())
 }
 
-func Function(fnSig parser.IFuncSigContext, params []Type, returnType Type, roles *Roles) Type {
+func Function(fnSig *ast.FuncSig, params []Type, returnType Type, roles *Roles) Type {
 	return &FunctionType{
 		fnSig:      fnSig,
 		params:     params,

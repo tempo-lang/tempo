@@ -50,6 +50,8 @@ func (d Diagnostic) String() string {
 	return fmt.Sprintf("%s %d:%d found=%s expected=%v fixes=%v", d.Code, d.PrimarySpan.Start, d.PrimarySpan.End, d.Found, d.Expected, d.Fixes)
 }
 
+func (d Diagnostic) Error() string { return d.String() }
+
 type TokenSet []token.Kind
 
 func (s TokenSet) Contains(k token.Kind) bool {
@@ -137,6 +139,9 @@ func fromLexer(l *lexer.Lexer) *Parser {
 	ts, lds := l.LexAll()
 	p := &Parser{source: l.Source(), tokens: ts, cursor: NewCursor(ts)}
 	for _, d := range lds {
+		if d.Message == "numeric overflow" {
+			continue // reported as the semantic InvalidNumber diagnostic
+		}
 		p.add(Diagnostic{Code: CodeLexical, Message: d.Message, PrimarySpan: d.Span, Found: token.BadToken})
 	}
 	return p
@@ -265,6 +270,10 @@ func (p *Parser) production(node ast.Node) ProductionResult {
 
 func Parse(text string) Result {
 	p := FromString(text)
+	return p.parseSourceFile()
+}
+
+func (p *Parser) parseSourceFile() Result {
 	root := &ast.SourceFile{Tokens: p.Tokens()}
 	if len(p.tokens) > 0 {
 		root.FirstToken = p.tokens[0]
@@ -295,6 +304,12 @@ func Parse(text string) Result {
 		}
 	}
 	return Result{Root: root, Source: p.source, Tokens: p.Tokens(), Diagnostics: p.Diagnostics()}
+}
+
+// ParseSource parses an immutable source and preserves it in the result.
+func ParseSource(source *token.Source) Result {
+	p := FromSource(source)
+	return p.parseSourceFile()
 }
 
 func FormatDiagnostics(ds []Diagnostic) string {

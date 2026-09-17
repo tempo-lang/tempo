@@ -1,8 +1,7 @@
 package lsp
 
 import (
-	"github.com/antlr4-go/antlr/v4"
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -29,7 +28,7 @@ func (s *tempoServer) gotoDef(params *protocol.TextDocumentPositionParams) (*pro
 
 	location := protocol.Location{
 		URI:   doc.uri,
-		Range: parserRuleToRange(sym.Ident()),
+		Range: parserRuleToRange(doc.source, sym.Ident()),
 	}
 
 	return &location, nil
@@ -50,13 +49,13 @@ func (s *tempoServer) gotoReferences(context *glsp.Context, params *protocol.Ref
 	for _, read := range sym.AccessReads() {
 		references = append(references, protocol.Location{
 			URI:   params.TextDocument.URI,
-			Range: parserRuleToRange(read),
+			Range: parserRuleToRange(doc.source, read),
 		})
 	}
 	for _, write := range sym.AccessWrites() {
 		references = append(references, protocol.Location{
 			URI:   params.TextDocument.URI,
-			Range: parserRuleToRange(write),
+			Range: parserRuleToRange(doc.source, write),
 		})
 	}
 
@@ -64,20 +63,14 @@ func (s *tempoServer) gotoReferences(context *glsp.Context, params *protocol.Ref
 }
 
 func findSymFromPos(doc *tempoDoc, pos protocol.Position) (sym_table.Symbol, bool) {
-	leaf, _ := astNodeAtPosition(doc.ast, pos)
+	leaf, _ := astNodeAtPosition(doc.source, doc.ast, pos)
 	if leaf == nil {
 		return nil, false
 	}
 
-	var node antlr.Tree = leaf
-	for node != nil {
-		if ident, ok := node.(*parser.IdentContext); ok {
-			if identSym, ok := doc.info.Symbols[ident]; ok {
-				return identSym, true
-			}
-			break
-		}
-		node = node.GetParent()
+	if ident, ok := leaf.(*ast.Identifier); ok {
+		sym, found := doc.info.Symbols[ident]
+		return sym, found
 	}
 
 	return nil, false

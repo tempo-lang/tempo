@@ -8,7 +8,9 @@ import (
 	"sync"
 
 	"github.com/tempo-lang/tempo/misc"
-	"github.com/tempo-lang/tempo/parser"
+	parser "github.com/tempo-lang/tempo/parser/new_parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
 	"github.com/tempo-lang/tempo/type_check"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tliron/commonlog"
@@ -53,22 +55,24 @@ func (s *tempoServer) UpdateDocument(newDoc *tempoDoc) {
 }
 
 type tempoDoc struct {
-	uri        protocol.URI
-	version    int
-	source     string
-	ast        parser.ISourceFileContext
-	info       *type_check.Info
-	typeErrors []type_error.Error
+	uri          protocol.URI
+	version      int
+	source       *token.Source
+	ast          *ast.SourceFile
+	info         *type_check.Info
+	typeErrors   []type_error.Error
+	syntaxErrors []parser.Diagnostic
 }
 
-func newTempoDoc(uri protocol.URI, version int, source string, ast parser.ISourceFileContext, info *type_check.Info, typeErrors []type_error.Error) *tempoDoc {
+func newTempoDoc(uri protocol.URI, version int, source *token.Source, root *ast.SourceFile, info *type_check.Info, syntaxErrors []parser.Diagnostic, typeErrors []type_error.Error) *tempoDoc {
 	return &tempoDoc{
-		ast:        ast,
-		info:       info,
-		uri:        uri,
-		version:    version,
-		source:     source,
-		typeErrors: typeErrors,
+		ast:          root,
+		info:         info,
+		uri:          uri,
+		version:      version,
+		source:       source,
+		typeErrors:   typeErrors,
+		syntaxErrors: syntaxErrors,
 	}
 }
 

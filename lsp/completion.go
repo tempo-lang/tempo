@@ -1,183 +1,31 @@
 package lsp
 
 import (
-	"github.com/tempo-lang/tempo/misc"
-	"github.com/tempo-lang/tempo/parser"
-	"github.com/tempo-lang/tempo/sym_table"
-
-	"github.com/antlr4-go/antlr/v4"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func (s *tempoServer) textDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (any, error) {
+func (s *tempoServer) textDocumentCompletion(_ *glsp.Context, params *protocol.CompletionParams) (any, error) {
 	doc, ok := s.GetDocument(params.TextDocument.URI)
 	if !ok {
 		return nil, nil
 	}
-
-	leaf, _ := astNodeAtPosition(doc.ast, params.Position)
-	if leaf == nil {
-		return nil, nil
+	node, _ := astNodeAtPosition(doc.source, doc.ast, params.Position)
+	offset := 0
+	if node != nil {
+		offset = node.StartToken().Span.Start
 	}
-
-	scope := doc.info.GlobalScope.Innermost(leaf.GetStart())
-
-	var completionItems []protocol.CompletionItem
-	foundItems := false
-	showGlobalSymbols := false
-
-	var node antlr.Tree = leaf
-	for node != nil {
-		switch node := node.(type) {
-		case *parser.ExprFieldAccessContext:
-			logger.Debugf("Visit Expression (FieldAccess)")
-			items, ok := completionItemsForFieldAccess(doc, node)
-			if ok {
-				completionItems = items
-				foundItems = true
+	scope := doc.info.GlobalScope.Innermost(offset)
+	items := []protocol.CompletionItem{}
+	seen := map[string]bool{}
+	for cur := scope; cur != nil; cur = cur.Parent() {
+		for sym := range cur.Symbols() {
+			if seen[sym.SymbolName()] || sym.SymbolName() == "" {
+				continue
 			}
-		case *parser.ExprIdentContext:
-			logger.Debugf("Visit Expression (Identifier)")
-			showGlobalSymbols = true
-		case parser.IExprContext:
-			logger.Debugf("Visit Expression: %T", node)
-		case parser.IStmtContext:
-			logger.Debugf("Visit Statement: %T", node)
-		case *parser.ScopeContext:
-			logger.Debugf("Visit Scope")
-		case *parser.FuncContext:
-			logger.Debugf("Visit Function")
-		case parser.IRoleTypeContext:
-			logger.Debugf("Visit Role Type: %T", node)
-			items, ok := completionItemsForRoleType(doc, node)
-			if ok {
-				completionItems = items
-				foundItems = true
-			}
-		case *antlr.TerminalNodeImpl:
-			logger.Debugf("Visit Terminal: %s", node.GetText())
-		case *antlr.BaseParserRuleContext:
-			// Attempt to recover ExprFieldAccess
-			if leaf.GetText() == "." {
-				logger.Debug("Attempting to recover ExprFieldAccess")
-				if fieldAccess, ok := node.GetChild(0).GetParent().(*parser.ExprFieldAccessContext); ok {
-					items, ok := completionItemsForFieldAccess(doc, fieldAccess)
-					if ok {
-						completionItems = items
-						foundItems = true
-					}
-				}
-			}
-
-			// Attempt to recover RoleType
-			if leaf.GetText() == "@" {
-				logger.Debug("Attempting to recover RoleType")
-				if roleType, ok := node.GetChild(node.GetChildCount() - 1).(parser.IRoleTypeContext); ok {
-					items, ok := completionItemsForRoleType(doc, roleType)
-					if ok {
-						completionItems = items
-						foundItems = true
-					}
-				}
-			}
-
-			logger.Debugf("Visit Base: %#v", node)
-		default:
-			logger.Debugf("Visit Other: %T", node)
-		}
-
-		node = node.GetParent()
-		if foundItems {
-			break
+			seen[sym.SymbolName()] = true
+			items = append(items, protocol.CompletionItem{Label: sym.SymbolName(), Detail: func() *string { v := sym.Type().ToString(); return &v }()})
 		}
 	}
-
-	if !foundItems && showGlobalSymbols {
-		completionItems = completionItemsAllInScope(scope)
-	}
-
-	return protocol.CompletionList{
-		IsIncomplete: false,
-		Items:        completionItems,
-	}, nil
-}
-
-func symbolToCompletionItem(sym sym_table.Symbol) protocol.CompletionItem {
-
-	var kind *protocol.CompletionItemKind = nil
-	switch sym.(type) {
-	case *sym_table.FuncParamSymbol:
-		kind = misc.ToPtr(protocol.CompletionItemKindProperty)
-	case *sym_table.FuncSymbol:
-		kind = misc.ToPtr(protocol.CompletionItemKindFunction)
-	case *sym_table.StructSymbol:
-		kind = misc.ToPtr(protocol.CompletionItemKindStruct)
-	case *sym_table.StructFieldSymbol:
-		kind = misc.ToPtr(protocol.CompletionItemKindField)
-	case *sym_table.VariableSymbol:
-		kind = misc.ToPtr(protocol.CompletionItemKindVariable)
-	case *sym_table.InterfaceSymbol:
-		kind = misc.ToPtr(protocol.CompletionItemKindInterface)
-	}
-
-	return protocol.CompletionItem{
-		Label:  sym.SymbolName(),
-		Kind:   kind,
-		Detail: misc.ToPtr(sym.Type().ToString()),
-	}
-}
-
-func completionItemsAllInScope(scope *sym_table.Scope) []protocol.CompletionItem {
-	completionItems := []protocol.CompletionItem{}
-	cursorScope := scope
-	for cursorScope != nil {
-		for sym := range cursorScope.Symbols() {
-			completionItems = append(completionItems, symbolToCompletionItem(sym))
-		}
-		cursorScope = cursorScope.Parent()
-	}
-	return completionItems
-}
-
-func completionItemsForFieldAccess(file *tempoDoc, fieldAccess *parser.ExprFieldAccessContext) ([]protocol.CompletionItem, bool) {
-	logger.Infof("Finding completions for ExprFieldAccess")
-
-	exprType, ok := file.info.Types[fieldAccess.Expr()]
-	if !ok {
-		logger.Debugf("")
-		return nil, false
-	}
-
-	completionItems := []protocol.CompletionItem{}
-	for name, fieldType := range file.info.Fields(exprType) {
-		completionItems = append(completionItems, protocol.CompletionItem{
-			Label:  name,
-			Kind:   misc.ToPtr(protocol.CompletionItemKindField),
-			Detail: misc.ToPtr(fieldType.ToString()),
-		})
-	}
-
-	return completionItems, true
-}
-
-func completionItemsForRoleType(file *tempoDoc, roleType parser.IRoleTypeContext) ([]protocol.CompletionItem, bool) {
-	logger.Infof("Finding completions for RoleType")
-
-	scope := file.info.GlobalScope.Innermost(roleType.GetStart())
-	if scope == nil {
-		return nil, false
-	}
-
-	completionItems := []protocol.CompletionItem{}
-	for _, role := range scope.Roles().Participants() {
-		detail := "role"
-
-		completionItems = append(completionItems, protocol.CompletionItem{
-			Label:  role,
-			Detail: &detail,
-		})
-	}
-
-	return completionItems, true
+	return items, nil
 }

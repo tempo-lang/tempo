@@ -2,58 +2,34 @@ package type_error
 
 import (
 	"fmt"
-	"io"
-	"math"
-	"strings"
-
-	"github.com/antlr4-go/antlr/v4"
 	"github.com/fatih/color"
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"io"
+	"strings"
 )
 
-func FormatError(w io.Writer, inputStream *antlr.InputStream, sourceName string, err Error, colorOutput bool) {
-	withColor := func(colorAttr color.Attribute, format string, args ...any) string {
+// FormatError renders a semantic diagnostic from the AST's byte span.
+func FormatError(w io.Writer, source *token.Source, sourceName string, err Error, colorOutput bool) {
+	n := err.ParserRule()
+	span := token.Span{Start: n.StartToken().Span.Start, End: n.EndToken().Span.End}
+	start, end := source.Position(span.Start), source.Position(span.End)
+	lines := strings.Split(source.String(), "\n")
+	line := ""
+	if start.Line > 0 && start.Line <= len(lines) {
+		line = lines[start.Line-1]
+	}
+	length := end.Col - start.Col
+	if end.Line != start.Line || length < 1 {
+		length = 1
+	}
+	red := func(s string, a ...any) string {
 		if colorOutput {
-			return color.New(colorAttr).Sprintf(format, args...)
-		} else {
-			return fmt.Sprintf(format, args...)
+			return color.RedString(s, a...)
 		}
+		return fmt.Sprintf(s, a...)
 	}
-
-	tokenStart := err.ParserRule().GetStart()
-	tokenEnd := err.ParserRule().GetStop()
-
-	// Swap start and end tokens if their indices are reversed
-	if tokenStart.GetTokenIndex() > tokenEnd.GetTokenIndex() {
-		tokenStart, tokenEnd = tokenEnd, tokenStart
-	}
-
-	sourceLines := strings.Split(inputStream.String(), "\n")
-	line := sourceLines[tokenStart.GetLine()-1]
-
-	lineNrSpace := int(math.Ceil(math.Log10(float64(tokenStart.GetLine() + 1))))
-	lineNrStr := strings.Repeat(" ", lineNrSpace)
-
-	tokenCol := tokenStart.GetColumn()
-
-	errorLength := tokenEnd.GetStop() - tokenStart.GetStart() + 1
-	if tokenStart.GetLine() != tokenEnd.GetLine() {
-		errorLength = len(line) - tokenCol
-	}
-
-	fmt.Fprintf(w, "%s: %s\n", withColor(color.FgRed, "error[E%d]", err.Code()), withColor(color.Bold, "%s", err.Error()))
-	fmt.Fprintf(w, "%s %s %s:%d:%d\n", lineNrStr, withColor(color.FgBlue, "->"), sourceName, tokenStart.GetLine(), tokenCol+1)
-
-	if colorOutput {
-		line = fmt.Sprintf("%s%s%s", line[0:tokenCol], withColor(color.FgRed, "%s", line[tokenCol:tokenCol+errorLength]), line[tokenCol+errorLength:])
-	}
-
-	fmt.Fprintf(w, "%s %s\n", withColor(color.FgBlue, "%s |\n%d |", lineNrStr, tokenStart.GetLine()), line)
-
-	space := strings.Repeat(" ", tokenCol+1)
-	highlight := strings.Repeat("^", errorLength)
-	fmt.Fprintf(w, "%s%s%s\n\n", withColor(color.FgBlue, "%s |", lineNrStr), space, withColor(color.FgRed, "%s", highlight))
-
-	for _, annotation := range err.Annotations() {
-		fmt.Fprintf(w, "%s: %s\n\n", withColor(color.FgBlue, "%s", string(annotation.Type)), annotation.Message)
+	fmt.Fprintf(w, "%s: %s\n -> %s:%d:%d\n%d | %s\n  | %s%s\n\n", red("error[E%d]", err.Code()), err.Error(), sourceName, start.Line, start.Col, start.Line, line, strings.Repeat(" ", max(start.Col-1, 0)), red("%s", strings.Repeat("^", length)))
+	for _, a := range err.Annotations() {
+		fmt.Fprintf(w, "%s: %s\n\n", a.Type, a.Message)
 	}
 }

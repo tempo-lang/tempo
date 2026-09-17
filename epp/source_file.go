@@ -1,24 +1,24 @@
 package epp
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/projection"
 )
 
-func (epp *epp) eppSourceFile(sourceFile parser.ISourceFileContext) *projection.SourceFile {
+func (epp *epp) eppSourceFile(sourceFile *ast.SourceFile) *projection.SourceFile {
 	result := projection.NewSourceFile()
 
-	for _, inf := range sourceFile.AllInterface_() {
+	for _, inf := range sourceFile.Interfaces {
 		eppInf := epp.eppInterface(inf)
 		result.AddInterface(eppInf)
 	}
 
-	for _, st := range sourceFile.AllStruct_() {
+	for _, st := range sourceFile.Structs {
 		eppSt := epp.eppStruct(st)
 		result.AddStruct(eppSt)
 	}
 
-	for _, fn := range sourceFile.AllFunc_() {
+	for _, fn := range sourceFile.Functions {
 		chor := epp.eppFunc(fn)
 		result.AddChoreography(chor)
 	}

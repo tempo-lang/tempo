@@ -15,7 +15,11 @@ type Span struct{ Start, End int }
 
 func (s Span) Empty() bool { return s.Start == s.End }
 
+// SourcePos holds a human readable source position that starts counting from 1 and counts UTF runes.
 type SourcePos struct{ Line, Col int }
+
+// LSPPos holds a source position compatible with the LSP protocol.
+// It starts counting from 0 and counts UTF-16 code units.
 type LSPPos struct{ Line, Character int }
 
 type Source struct {
@@ -42,20 +46,16 @@ func (s *Source) Text(span Span) string {
 	}
 	return string(s.data[span.Start:span.End])
 }
+
 func (s *Source) Position(offset int) SourcePos {
 	offset = clamp(offset, 0, len(s.data))
-	line := sort.Search(len(s.lines), func(i int) bool { return s.lines[i] > offset }) - 1
-	if line < 0 {
-		line = 0
-	}
+	line := max(sort.Search(len(s.lines), func(i int) bool { return s.lines[i] > offset })-1, 0)
 	return SourcePos{Line: line + 1, Col: utf8.RuneCount(s.data[s.lines[line]:offset]) + 1}
 }
+
 func (s *Source) LSPPosition(offset int) LSPPos {
 	offset = clamp(offset, 0, len(s.data))
-	line := sort.Search(len(s.lines), func(i int) bool { return s.lines[i] > offset }) - 1
-	if line < 0 {
-		line = 0
-	}
+	line := max(sort.Search(len(s.lines), func(i int) bool { return s.lines[i] > offset })-1, 0)
 	units := 0
 	for _, r := range string(s.data[s.lines[line]:offset]) {
 		if r > 0xffff {
@@ -66,6 +66,7 @@ func (s *Source) LSPPosition(offset int) LSPPos {
 	}
 	return LSPPos{Line: line, Character: units}
 }
+
 func clamp(n, lo, hi int) int {
 	if n < lo {
 		return lo

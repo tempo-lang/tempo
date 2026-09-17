@@ -14,6 +14,9 @@ func (i *Identifier) Value() string {
 	return v
 }
 
+// Text returns the identifier spelling without exposing parser internals.
+func (i *Identifier) Text() string { return i.Value() }
+
 func (i *Identifier) StartToken() token.Token {
 	return i.Token
 }
@@ -29,7 +32,8 @@ type FloatLit struct {
 }
 
 func (n *FloatLit) Value() float64 {
-	return n.FloatToken.Value.(float64)
+	v, _ := n.FloatToken.Value.(float64)
+	return v
 }
 
 func (n *FloatLit) StartToken() token.Token {
@@ -47,7 +51,8 @@ type IntLit struct {
 }
 
 func (n *IntLit) Value() int {
-	return n.IntToken.Value.(int)
+	v, _ := n.IntToken.Value.(int)
+	return v
 }
 
 func (n *IntLit) StartToken() token.Token {

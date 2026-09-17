@@ -1,14 +1,14 @@
 package sym_table
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/types"
 )
 
 // CallableEnv describes an environment that can be called.
 // Such as a [FuncSymbol] or a [ClosureEnv].
 type CallableEnv interface {
-	ReturnCtx() parser.IValueTypeContext
+	ReturnCtx() ast.ValueType
 	Scope() *Scope
 	Params() []*FuncParamSymbol
 	AddParam(param *FuncParamSymbol)
@@ -20,11 +20,11 @@ type ClosureEnv struct {
 	scope        *Scope
 	params       []*FuncParamSymbol
 	callableType types.CallableType
-	returnCtx    parser.IValueTypeContext
+	returnCtx    ast.ValueType
 }
 
 // ReturnCtx implements CallableEnv.
-func (f *ClosureEnv) ReturnCtx() parser.IValueTypeContext {
+func (f *ClosureEnv) ReturnCtx() ast.ValueType {
 	return f.returnCtx
 }
 
@@ -54,7 +54,7 @@ func (c *ClosureEnv) Scope() *Scope {
 }
 
 // NewClosureEnv constructs a new closure callable environment.
-func NewClosureEnv(scope *Scope, callableType types.CallableType, returnCtx parser.IValueTypeContext) CallableEnv {
+func NewClosureEnv(scope *Scope, callableType types.CallableType, returnCtx ast.ValueType) CallableEnv {
 	return &ClosureEnv{
 		scope:        scope,
 		params:       []*FuncParamSymbol{},

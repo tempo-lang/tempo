@@ -4,10 +4,9 @@ package sym_table
 import (
 	"iter"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
 	"github.com/tempo-lang/tempo/types"
-
-	"github.com/antlr4-go/antlr/v4"
 )
 
 // Scope contains all information for a particular scope in the symbol table.
@@ -16,8 +15,7 @@ type Scope struct {
 	symbols      map[string]Symbol
 	parent       *Scope
 	children     []*Scope
-	pos          antlr.Token
-	end          antlr.Token
+	span         token.Span
 	roles        []string
 	callableEnv  CallableEnv
 	structSym    *StructSymbol
@@ -28,13 +26,12 @@ type Scope struct {
 //
 // The parent scope is not automatically updated to include the new child scope.
 // For that, use [Scope.MakeChild] instead.
-func NewScope(pos antlr.Token, end antlr.Token, parent *Scope, roles []string) *Scope {
+func NewScope(span token.Span, parent *Scope, roles []string) *Scope {
 	return &Scope{
 		symbols:      map[string]Symbol{},
 		parent:       parent,
 		children:     []*Scope{},
-		pos:          pos,
-		end:          end,
+		span:         span,
 		roles:        roles,
 		callableEnv:  nil,
 		structSym:    nil,
@@ -65,8 +62,8 @@ func (scope *Scope) Lookup(name string) Symbol {
 }
 
 // LookupSymbol is a safe version of [Scope.LookupParent] which returns a boolean indicating whether the symbol was found or not.
-func (scope *Scope) LookupSymbol(name parser.IIdentContext) (Symbol, bool) {
-	symbol := scope.LookupParent(name.GetText())
+func (scope *Scope) LookupSymbol(name *ast.Identifier) (Symbol, bool) {
+	symbol := scope.LookupParent(name.Value())
 	if symbol != nil {
 		return symbol, true
 	}
@@ -129,25 +126,21 @@ func (scope *Scope) Roles() *types.Roles {
 }
 
 // Pos returns the AST token of the first token in the source code which is a part of this scope.
-func (scope *Scope) Pos() antlr.Token {
-	return scope.pos
+func (scope *Scope) Span() token.Span {
+	return scope.span
 }
 
 // End returns the AST token of the last token in the source chode which is a part of this scope.
-func (scope *Scope) End() antlr.Token {
-	return scope.end
-}
-
-// Contains returns whether the provided AST token lies within this scope, as well as any child scopes.
-func (scope *Scope) Contains(pos antlr.Token) bool {
-	return scope.pos.GetTokenIndex() <= pos.GetTokenIndex() && pos.GetTokenIndex() <= scope.end.GetTokenIndex()
+// Contains returns whether the provided byte offset lies within this scope.
+func (scope *Scope) Contains(offset int) bool {
+	return scope.span.Start <= offset && offset <= scope.span.End
 }
 
 // Innermost finds the innermost scope containing the provided AST token.
-func (scope *Scope) Innermost(pos antlr.Token) *Scope {
+func (scope *Scope) Innermost(offset int) *Scope {
 	for _, child := range scope.children {
-		if child.Contains(pos) {
-			inner := child.Innermost(pos)
+		if child.Contains(offset) {
+			inner := child.Innermost(offset)
 			if inner != nil {
 				return inner
 			} else {
@@ -160,13 +153,13 @@ func (scope *Scope) Innermost(pos antlr.Token) *Scope {
 
 // MakeChild creates a new child scope and adds it to the list of children of this scope.
 // The newly created child scope is returned.
-func (scope *Scope) MakeChild(pos antlr.Token, end antlr.Token, roles []string) *Scope {
+func (scope *Scope) MakeChild(span token.Span, roles []string) *Scope {
 	if len(roles) == 0 {
 		// empty roles implicitly means everyone
 		roles = scope.roles
 	}
 
-	child := NewScope(pos, end, scope, roles)
+	child := NewScope(span, scope, roles)
 	scope.children = append(scope.children, child)
 	return child
 }

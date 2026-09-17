@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/tempo-lang/tempo/epp"
-	"github.com/tempo-lang/tempo/parser"
+	parser "github.com/tempo-lang/tempo/parser/new_parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
 	"github.com/tempo-lang/tempo/projection/codegen_go"
 	"github.com/tempo-lang/tempo/projection/codegen_java"
 	"github.com/tempo-lang/tempo/projection/codegen_ts"
 	"github.com/tempo-lang/tempo/type_check"
 
-	"github.com/antlr4-go/antlr/v4"
 	"github.com/dave/jennifer/jen"
 )
 
@@ -40,11 +40,12 @@ func DefaultOptions() Options {
 }
 
 // Compile takes Tempo source code and outputs its projection, or all syntax and type errors.
-func Compile(input antlr.CharStream, options *Options) (output string, errors []error) {
+func Compile(source *token.Source, options *Options) (output string, errors []error) {
 	// parse source input
-	sourceFile, syntaxErrors := parser.Parse(input)
-	if len(syntaxErrors) > 0 {
-		for _, err := range syntaxErrors {
+	parsed := parser.ParseSource(source)
+	sourceFile := parsed.Root
+	if len(parsed.Diagnostics) > 0 {
+		for _, err := range parsed.Diagnostics {
 			errors = append(errors, err)
 		}
 	}

@@ -1,10 +1,62 @@
 package ast
 
-import "github.com/tempo-lang/tempo/parser/new_parser/token"
+import (
+	"strings"
+
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
+)
 
 type Node interface {
 	StartToken() token.Token
 	EndToken() token.Token
+}
+
+type TokenRange struct{ First, Last token.Token }
+
+func (r *TokenRange) StartToken() token.Token { return r.First }
+func (r *TokenRange) EndToken() token.Token   { return r.Last }
+
+// Text returns the source spelling carried by simple nodes. It is primarily
+// used in diagnostics, where retaining a parser-runtime context is undesirable.
+func Text(n Node) string {
+	switch n := n.(type) {
+	case *Identifier:
+		return n.Value()
+	case *IdentAccessExpr:
+		text := n.Ident.Value()
+		if n.RoleType != nil {
+			text += "@" + Text(n.RoleType)
+		}
+		return text
+	case *FieldAccessExpr:
+		return Text(n.Object) + "." + n.Field.Value()
+	case *NamedType:
+		return Text(n.RoleIdent)
+	case *RoleIdent:
+		text := n.Ident.Value()
+		if n.RoleType != nil {
+			text += "@" + Text(n.RoleType)
+		}
+		return text
+	case *Role:
+		return n.Token.Text
+	case *RoleType:
+		rs := n.Roles()
+		parts := make([]string, len(rs))
+		for i, role := range rs {
+			parts[i] = role.Token.Text
+		}
+		if n.IsShared() {
+			return "[" + strings.Join(parts, ",") + "]"
+		}
+		if len(parts) == 1 {
+			return parts[0]
+		}
+		if len(parts) > 1 {
+			return "(" + strings.Join(parts, ",") + ")"
+		}
+	}
+	return n.StartToken().Text
 }
 
 type Stmt interface {

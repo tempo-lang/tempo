@@ -3,12 +3,12 @@ package types
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 )
 
 type InterfaceType struct {
 	baseType
-	ident    parser.IIdentContext
+	ident    *ast.Identifier
 	roles    *Roles
 	substMap *RoleSubst
 }
@@ -67,13 +67,13 @@ func (t *InterfaceType) IsEquatable() bool {
 
 func (t *InterfaceType) ToString() string {
 	if t.Roles().IsUnnamedRole() {
-		return fmt.Sprintf("interface %s", t.ident.GetText())
+		return fmt.Sprintf("interface %s", t.ident.Value())
 	} else {
-		return fmt.Sprintf("interface@%s %s", t.Roles().ToString(), t.ident.GetText())
+		return fmt.Sprintf("interface@%s %s", t.Roles().ToString(), t.ident.Value())
 	}
 }
 
-func Interface(ident parser.IIdentContext, roles *Roles) Type {
+func Interface(ident *ast.Identifier, roles *Roles) Type {
 	substMap, ok := roles.SubstituteMap(roles)
 	if !ok {
 		panic("should always be ok to substitute with itself")
@@ -87,9 +87,9 @@ func Interface(ident parser.IIdentContext, roles *Roles) Type {
 }
 
 func (t *InterfaceType) Name() string {
-	return t.ident.GetText()
+	return t.ident.Value()
 }
 
-func (t *InterfaceType) Ident() parser.IIdentContext {
+func (t *InterfaceType) Ident() *ast.Identifier {
 	return t.ident
 }

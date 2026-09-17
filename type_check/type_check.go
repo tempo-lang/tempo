@@ -2,16 +2,14 @@
 package type_check
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
-
-	"github.com/antlr4-go/antlr/v4"
 )
 
 type typeChecker struct {
-	*antlr.BaseParseTreeVisitor
 	errors []type_error.Error
 
 	currentScope    *sym_table.Scope
@@ -19,16 +17,15 @@ type typeChecker struct {
 	currentTypeHint types.Type
 }
 
+func nodeSpan(n ast.Node) token.Span {
+	return token.Span{Start: n.StartToken().Span.Start, End: n.EndToken().Span.End}
+}
+
 // TypeCheck takes a parsed AST and returns an [Info] object and list of type errors.
 // If the list of errors is empty, then the input program is valid.
-func TypeCheck(sourceFile parser.ISourceFileContext) (*Info, []type_error.Error) {
+func TypeCheck(sourceFile *ast.SourceFile) (*Info, []type_error.Error) {
 	tc := new()
-
-	// check that tc implements visitor
-	var visitor parser.TempoVisitor = tc
-	_ = visitor
-
-	sourceFile.Accept(tc)
+	tc.checkSourceFile(sourceFile)
 
 	return tc.info, tc.errors
 }
@@ -46,42 +43,33 @@ func (tc *typeChecker) reportError(err ...type_error.Error) {
 	tc.errors = append(tc.errors, err...)
 }
 
-func (tc *typeChecker) VisitSourceFile(ctx *parser.SourceFileContext) (result any) {
-	tc.info.GlobalScope = sym_table.NewScope(ctx.GetStart(), ctx.GetStop(), nil, nil)
+func (tc *typeChecker) checkSourceFile(ctx *ast.SourceFile) {
+	span := token.Span{Start: ctx.StartToken().Span.Start, End: ctx.EndToken().Span.End}
+	tc.info.GlobalScope = sym_table.NewScope(span, nil, nil)
 	tc.currentScope = tc.info.GlobalScope
 	tc.populateGlobalSymbols()
 
 	tc.addGlobalSymbols(ctx)
 
-	for _, inf := range ctx.AllInterface_() {
-		inf.Accept(tc)
+	for _, inf := range ctx.Interfaces {
+		tc.visitInterface(inf)
 	}
 
-	for _, st := range ctx.AllStruct_() {
-		st.Accept(tc)
+	for _, st := range ctx.Structs {
+		tc.visitStruct(st)
 	}
 
-	for _, fn := range ctx.AllFunc_() {
-		fn.Accept(tc)
+	for _, fn := range ctx.Functions {
+		tc.visitFunc(fn)
 	}
 
 	tc.currentScope = tc.currentScope.Parent()
-	return
 }
 
-func (tc *typeChecker) VisitScope(ctx *parser.ScopeContext) any {
+func (tc *typeChecker) visitScope(ctx *ast.Scope) bool {
 	returnsValue := false
-	for _, stmt := range ctx.AllStmt() {
-		result := stmt.Accept(tc)
-		returnsValue = returnsValue || result == true
+	for _, stmt := range ctx.Stmts {
+		returnsValue = returnsValue || tc.visitStmt(stmt)
 	}
 	return returnsValue
-}
-
-func (tc *typeChecker) VisitIdent(ctx *parser.IdentContext) any {
-	return nil
-}
-
-func (tc *typeChecker) VisitRoleIdent(ctx *parser.RoleIdentContext) any {
-	return nil
 }

@@ -1,13 +1,13 @@
 package epp
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (epp *epp) eppStruct(st parser.IStructContext) *projection.ChoreographyStruct {
-	sym := epp.info.Symbols[st.Ident()]
+func (epp *epp) eppStruct(st *ast.Struct) *projection.ChoreographyStruct {
+	sym := epp.info.Symbols[st.Name]
 	result := projection.NewChoreographyStruct(sym.SymbolName())
 
 	stType := sym.Type().(*types.StructType)
@@ -22,21 +22,21 @@ func (epp *epp) eppStruct(st parser.IStructContext) *projection.ChoreographyStru
 			}
 		}
 
-		for _, field := range st.GetBody().AllStructField() {
-			fieldSym := epp.info.Symbols[field.Ident()]
+		for _, field := range st.Body.Fields {
+			fieldSym := epp.info.Symbols[field.Name]
 			if fieldSym.Type().Roles().Contains(role) {
 				fieldType := epp.eppType(role, fieldSym.Type())
 				str.AddField(field, fieldType)
 			}
 		}
 
-		for _, method := range st.GetBody().AllFunc_() {
-			methodSym := epp.info.Symbols[method.FuncSig().Ident()]
+		for _, method := range st.Body.Functions {
+			methodSym := epp.info.Symbols[method.FuncSig.Name]
 			if methodSym.Type().Roles().Contains(role) {
-				funcSig := epp.eppFuncSig(role, method.FuncSig())
+				funcSig := epp.eppFuncSig(role, method.FuncSig)
 				m := str.AddMethod(funcSig, method)
 
-				for _, stmt := range method.Scope().AllStmt() {
+				for _, stmt := range method.Scope.Stmts {
 					eppStmts := epp.EppStmt(role, stmt)
 					m.AddStmt(eppStmts...)
 				}

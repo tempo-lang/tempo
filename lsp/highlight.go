@@ -19,21 +19,21 @@ func (s *tempoServer) highlight(context *glsp.Context, params *protocol.Document
 
 	highlights := []protocol.DocumentHighlight{
 		{
-			Range: parserRuleToRange(sym.Ident()),
+			Range: parserRuleToRange(doc.source, sym.Ident()),
 			Kind:  misc.ToPtr(protocol.DocumentHighlightKindWrite),
 		},
 	}
 
 	for _, read := range sym.AccessReads() {
 		highlights = append(highlights, protocol.DocumentHighlight{
-			Range: parserRuleToRange(read),
+			Range: parserRuleToRange(doc.source, read),
 			Kind:  misc.ToPtr(protocol.DocumentHighlightKindRead),
 		})
 	}
 
 	for _, write := range sym.AccessWrites() {
 		highlights = append(highlights, protocol.DocumentHighlight{
-			Range: parserRuleToRange(write),
+			Range: parserRuleToRange(doc.source, write),
 			Kind:  misc.ToPtr(protocol.DocumentHighlightKindWrite),
 		})
 	}

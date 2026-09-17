@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/antlr4-go/antlr/v4"
 	"github.com/tempo-lang/tempo/compiler"
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
 )
 
 func BenchmarkProjection(b *testing.B) {
@@ -37,7 +37,7 @@ func BenchmarkProjection(b *testing.B) {
 	for _, sample := range samples {
 		b.Run(sample.name, func(b *testing.B) {
 			for b.Loop() {
-				input := antlr.NewInputStream(sample.source)
+				input := token.SourceFromString(sample.source)
 				_, errors := compiler.Compile(input, nil)
 				if len(errors) > 0 {
 					b.Fatalf("tempo compiler error: %v", errors[0])

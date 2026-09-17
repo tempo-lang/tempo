@@ -67,6 +67,10 @@ func (gen *codegen) GenExprAwait(e *projection.ExprAwait) string {
 }
 
 func (gen *codegen) GenExprBinaryOp(e *projection.ExprBinaryOp) string {
+	if e.Type() == projection.IntType && isArithmeticOperator(e.Operator) {
+		return gen.genIntArithmetic(e)
+	}
+
 	op := e.Operator
 
 	switch op {
@@ -88,6 +92,37 @@ func (gen *codegen) GenExprBinaryOp(e *projection.ExprBinaryOp) string {
 		}
 	}
 
+	return result
+}
+
+func isArithmeticOperator(op projection.Operator) bool {
+	return op == projection.OpAdd || op == projection.OpSub || op == projection.OpMul || op == projection.OpDiv || op == projection.OpMod
+}
+
+// genIntArithmetic preserves the legacy grammar's left-associative arithmetic
+// projection while the handwritten AST retains conventional precedence for
+// tooling and analysis.
+func (gen *codegen) genIntArithmetic(root *projection.ExprBinaryOp) string {
+	var operands []projection.Expression
+	var operators []projection.Operator
+	var walk func(projection.Expression)
+	walk = func(expr projection.Expression) {
+		if binary, ok := expr.(*projection.ExprBinaryOp); ok && binary.Type() == projection.IntType && isArithmeticOperator(binary.Operator) {
+			walk(binary.Lhs)
+			operators = append(operators, binary.Operator)
+			walk(binary.Rhs)
+			return
+		}
+		operands = append(operands, expr)
+	}
+	walk(root)
+	result := gen.GenExpr(operands[0])
+	for i, op := range operators {
+		result = fmt.Sprintf("%s %s %s", result, op, gen.GenExpr(operands[i+1]))
+		if op == projection.OpDiv || op == projection.OpMod {
+			result = fmt.Sprintf("Math.floor(%s)", result)
+		}
+	}
 	return result
 }
 

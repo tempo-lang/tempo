@@ -348,6 +348,9 @@ func (r *Roles) SubstituteMap(other *Roles) (*RoleSubst, bool) {
 	}
 
 	// local or shared roles
+	if len(r.participants) > 0 && len(other.participants) == 0 {
+		return nil, false
+	}
 	roleSubst := NewRoleSubst()
 	for _, role := range r.Participants() {
 		roleSubst.AddRole(role, other.participants...)

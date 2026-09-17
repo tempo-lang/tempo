@@ -1,103 +1,61 @@
 package type_check
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
-
-	"github.com/antlr4-go/antlr/v4"
 )
 
-func (tc *typeChecker) VisitFunc(ctx *parser.FuncContext) any {
-	// functions are already resolved by addGlobalSymbols
-	sym, found := tc.info.Symbols[ctx.FuncSig().GetName()].(*sym_table.FuncSymbol)
-	if !found {
-		// was not found if function has parser errors
-		return nil
+func (tc *typeChecker) visitFunc(fn *ast.Func) {
+	sym, ok := tc.info.Symbols[fn.FuncSig.Name].(*sym_table.FuncSymbol)
+	if !ok {
+		return
 	}
-
 	tc.currentScope = sym.Scope()
-
-	ctx.FuncSig().Accept(tc)
-
-	// nil if parser error
-	if ctx.Scope() != nil {
-		returnsValue := ctx.Scope().Accept(tc) == true
-		if !returnsValue && sym.FuncType().ReturnType() != types.Unit() {
-			tc.reportError(type_error.NewFunctionMissingReturn(sym))
-		}
+	tc.visitFuncParams(fn.FuncSig.Params)
+	if !tc.visitScope(fn.Scope) && sym.FuncType().ReturnType() != types.Unit() {
+		tc.reportError(type_error.NewFunctionMissingReturn(sym))
 	}
-
 	tc.currentScope = tc.currentScope.Parent()
-	return nil
 }
 
-func (tc *typeChecker) VisitFuncSig(ctx *parser.FuncSigContext) any {
-
-	ctx.FuncParamList().Accept(tc)
-
-	return nil
-}
-
-func (tc *typeChecker) VisitFuncParam(ctx *parser.FuncParamContext) any {
-	return nil
-}
-
-func (tc *typeChecker) VisitFuncParamList(ctx *parser.FuncParamListContext) any {
-	sym := tc.currentScope.GetCallableEnv()
-
-	for i, paramCtx := range ctx.AllFuncParam() {
-		paramType := sym.CallableType().Params()[i]
-		paramSym := sym_table.NewFuncParamSymbol(paramCtx, tc.currentScope, paramType)
+func (tc *typeChecker) visitFuncParams(params *ast.FuncParams) {
+	env := tc.currentScope.GetCallableEnv()
+	for i, param := range params.Params {
+		paramSym := sym_table.NewFuncParamSymbol(param, tc.currentScope, env.CallableType().Params()[i])
 		tc.insertSymbol(paramSym)
-
-		funcSym := tc.currentScope.GetCallableEnv()
-		funcSym.AddParam(paramSym.(*sym_table.FuncParamSymbol))
+		env.AddParam(paramSym.(*sym_table.FuncParamSymbol))
 	}
-
-	return nil
 }
 
-// addFuncSymbol creates a new function symbol and stores it in the current scope.
-// It returns the new symbol along with a success boolean.
-func (tc *typeChecker) addFuncSymbol(fn parser.IFuncSigContext, scopeRange antlr.ParserRuleContext) (funcSym sym_table.Symbol, success bool) {
-	funcRoles, ok := tc.parseRoleType(fn.RoleType())
+func (tc *typeChecker) addFuncSymbol(fn *ast.FuncSig, scopeNode ast.Node) (sym_table.Symbol, bool) {
+	roles, ok := tc.parseRoleType(fn.RoleType)
 	if !ok {
 		return nil, false
 	}
-
-	if !funcRoles.IsComplete() {
-		tc.reportError(type_error.NewUnexpectedHiddenRoles(fn.RoleType()))
+	if !roles.IsComplete() {
+		tc.reportError(type_error.NewUnexpectedHiddenRoles(fn.RoleType))
 	}
-
-	funcScope := tc.currentScope.MakeChild(scopeRange.GetStart(), scopeRange.GetStop(), funcRoles.Participants())
+	funcScope := tc.currentScope.MakeChild(nodeSpan(scopeNode), roles.Participants())
 	tc.currentScope = funcScope
-
 	fnType, ok := tc.parseFuncType(fn)
 	if !ok {
-		return nil, false
+		params := make([]types.Type, len(fn.Params.Params))
+		for i := range params {
+			params[i] = types.Invalid()
+		}
+		fnType = types.Function(fn, params, types.Unit(), roles)
 	}
-
-	// return type
-	if fn.GetReturnType() != nil {
-		fn.GetReturnType().Accept(tc)
-
-		if roleType, found := parser.FindRoleType(fn.GetReturnType()); found {
-			if !tc.checkRolesInScope(roleType) {
-				if fnValue, ok := fnType.(*types.FunctionType); ok {
-					// make return type invalid
-					fnType = types.Function(fnValue.FuncSig(), fnValue.Params(), types.Invalid(), fnValue.Roles())
-				}
-			}
+	if fn.ReturnType != nil {
+		if rt, found := findRoleType(fn.ReturnType); found && !tc.checkRolesInScope(rt) {
+			f := fnType.(*types.FunctionType)
+			fnType = types.Function(f.FuncSig(), f.Params(), types.Invalid(), f.Roles())
 		}
 	}
-
 	tc.currentScope = tc.currentScope.Parent()
-
-	funcSym = sym_table.NewFuncSymbol(fn, funcScope, fnType)
-	funcScope.SetCallableEnv(funcSym.(*sym_table.FuncSymbol))
-	tc.insertSymbol(funcSym)
-
-	return funcSym, true
+	sym := sym_table.NewFuncSymbol(fn, funcScope, fnType)
+	funcScope.SetCallableEnv(sym.(*sym_table.FuncSymbol))
+	tc.insertSymbol(sym)
+	return sym, true
 }

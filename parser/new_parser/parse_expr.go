@@ -135,6 +135,9 @@ func (p *Parser) parsePrefix(stop TokenSet) ast.Expr {
 		c := p.expect(token.RPAREN, stop)
 		return &ast.GroupExpr{OpenParen: o, Expr: e, CloseParen: c}
 	case token.LSQUARE:
+		if p.roleTypeFollowedByCom() {
+			return p.parseComExpr(stop)
+		}
 		o := p.advance()
 		var es []ast.Expr
 		for p.current().Kind != token.RSQUARE && p.current().Kind != token.EOF {

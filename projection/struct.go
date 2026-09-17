@@ -3,7 +3,7 @@ package projection
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/types"
 )
 
@@ -22,7 +22,7 @@ func NewChoreographyStruct(name string) *ChoreographyStruct {
 }
 
 type Struct struct {
-	StructCtx  parser.IStructContext
+	StructCtx  *ast.Struct
 	Name       string
 	Role       string
 	Fields     []StructField
@@ -30,11 +30,11 @@ type Struct struct {
 	Implements []Type
 }
 
-func (c *ChoreographyStruct) AddStruct(role string, structCtx parser.IStructContext) *Struct {
+func (c *ChoreographyStruct) AddStruct(role string, structCtx *ast.Struct) *Struct {
 	c.Roles = append(c.Roles, role)
 	c.Structs[role] = &Struct{
 		StructCtx:  structCtx,
-		Name:       structCtx.Ident().GetText(),
+		Name:       structCtx.Name.Value(),
 		Role:       role,
 		Fields:     []StructField{},
 		Implements: []Type{},
@@ -42,16 +42,16 @@ func (c *ChoreographyStruct) AddStruct(role string, structCtx parser.IStructCont
 	return c.Structs[role]
 }
 
-func (s *Struct) AddField(field parser.IStructFieldContext, fieldType Type) {
+func (s *Struct) AddField(field *ast.StructField, fieldType Type) {
 	s.Fields = append(s.Fields, StructField{
 		Struct:   s,
 		FieldCtx: field,
-		Name:     field.Ident().GetText(),
+		Name:     field.Name.Value(),
 		Type:     fieldType,
 	})
 }
 
-func (s *Struct) AddMethod(sig *FuncSig, funcCtx parser.IFuncContext) *StructMethod {
+func (s *Struct) AddMethod(sig *FuncSig, funcCtx *ast.Func) *StructMethod {
 	method := &StructMethod{
 		Struct:  s,
 		FuncSig: sig,
@@ -78,7 +78,7 @@ func (s *Struct) StructName() string {
 
 type StructField struct {
 	Struct   *Struct
-	FieldCtx parser.IStructFieldContext
+	FieldCtx *ast.StructField
 	Name     string
 	Type     Type
 }
@@ -86,7 +86,7 @@ type StructField struct {
 type StructMethod struct {
 	Struct  *Struct
 	FuncSig *FuncSig
-	FuncCtx parser.IFuncContext
+	FuncCtx *ast.Func
 	Body    []Statement
 }
 

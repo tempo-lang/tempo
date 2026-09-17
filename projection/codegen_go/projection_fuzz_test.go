@@ -10,7 +10,7 @@ import (
 	"github.com/tempo-lang/tempo/compiler"
 	"github.com/tempo-lang/tempo/projection/codegen_go"
 
-	"github.com/antlr4-go/antlr/v4"
+	parser_token "github.com/tempo-lang/tempo/parser/new_parser/token"
 
 	"go/ast"
 	"go/importer"
@@ -103,7 +103,7 @@ func FuzzProjection(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, source string) {
-		input := antlr.NewInputStream(source)
+		input := parser_token.SourceFromString(source)
 		output, errors := compiler.Compile(input, nil)
 		if len(errors) > 0 {
 			t.Skip()

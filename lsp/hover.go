@@ -3,10 +3,9 @@ package lsp
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/types"
 
-	"github.com/antlr4-go/antlr/v4"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
@@ -18,65 +17,35 @@ func (s *tempoServer) textDocumentHover(context *glsp.Context, params *protocol.
 		return nil, nil
 	}
 
-	leaf, _ := astNodeAtPosition(doc.ast, params.Position)
+	leaf, _ := astNodeAtPosition(doc.source, doc.ast, params.Position)
 	if leaf == nil {
 		return nil, nil
 	}
 
-	var node antlr.Tree = leaf
-	for node != nil {
-		switch node := node.(type) {
-		case *parser.StmtReturnContext:
-			if exprType, ok := doc.info.Types[node.Expr()]; ok {
+	switch node := leaf.(type) {
+	case *ast.Identifier:
+		if identSym, ok := doc.info.Symbols[node]; ok {
+			identRange := parserRuleToRange(doc.source, node)
+			identCode := fmt.Sprintf("let %s: %s", identSym.SymbolName(), identSym.Type().ToString())
 
-				if len(exprType.Roles().Participants()) == 0 {
-					scope := doc.info.GlobalScope.Innermost(node.GetStart())
-					exprType = exprType.ReplaceSharedRoles(scope.Roles().Participants())
-				}
-
-				stmtRange := parserRuleToRange(node)
-				return hoverCode(fmt.Sprintf("return %s", exprType.ToString()), &stmtRange), nil
-			}
-		case *parser.IdentContext:
-			isExpr := false
-			var cursor antlr.Tree = node
-			for cursor != nil {
-				if _, ok := cursor.(parser.IExprContext); ok {
-					isExpr = true
-					break
-				}
-				cursor = cursor.GetParent()
-			}
-			if isExpr {
-				// prefer expression interpretation of ident if possible
-				break
+			switch identSym.Type().(type) {
+			case *types.FunctionType, *types.StructType, *types.InterfaceType:
+				identCode = identSym.Type().ToString()
 			}
 
-			if identSym, ok := doc.info.Symbols[node]; ok {
-				identRange := parserRuleToRange(node)
-				identCode := fmt.Sprintf("let %s: %s", identSym.SymbolName(), identSym.Type().ToString())
-
-				switch identSym.Type().(type) {
-				case *types.FunctionType, *types.StructType, *types.InterfaceType:
-					identCode = identSym.Type().ToString()
-				}
-
-				return hoverCode(identCode, &identRange), nil
-			}
-		case parser.IExprContext:
-			if exprType, ok := doc.info.Types[node]; ok {
-
-				if len(exprType.Roles().Participants()) == 0 {
-					scope := doc.info.GlobalScope.Innermost(node.GetStart())
-					exprType = exprType.ReplaceSharedRoles(scope.Roles().Participants())
-				}
-
-				exprRange := parserRuleToRange(node)
-				return hoverCode(exprType.ToString(), &exprRange), nil
-			}
+			return hoverCode(identCode, &identRange), nil
 		}
+	case ast.Expr:
+		if exprType, ok := doc.info.Types[node]; ok {
 
-		node = node.GetParent()
+			if len(exprType.Roles().Participants()) == 0 {
+				scope := doc.info.GlobalScope.Innermost(node.StartToken().Span.Start)
+				exprType = exprType.ReplaceSharedRoles(scope.Roles().Participants())
+			}
+
+			exprRange := parserRuleToRange(doc.source, node)
+			return hoverCode(exprType.ToString(), &exprRange), nil
+		}
 	}
 
 	return nil, nil

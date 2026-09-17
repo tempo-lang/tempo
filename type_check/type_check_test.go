@@ -11,7 +11,7 @@ import (
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 
-	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/parser/new_parser/token"
 )
 
 func TestExamples(t *testing.T) {
@@ -35,7 +35,7 @@ func TestExamples(t *testing.T) {
 			source := split[0]
 			expectedErrors := split[1]
 
-			input := antlr.NewInputStream(source)
+			input := token.SourceFromString(source)
 
 			_, compilerErrors := compiler.Compile(input, nil)
 			formattedErrors := []string{}
@@ -46,8 +46,8 @@ func TestExamples(t *testing.T) {
 					continue
 				}
 
-				line := typeError.ParserRule().GetStart().GetLine()
-				col := typeError.ParserRule().GetStart().GetColumn() + 1
+				pos := input.Position(typeError.ParserRule().StartToken().Span.Start)
+				line, col := pos.Line, pos.Col
 				formattedErrors = append(formattedErrors, fmt.Sprintf("E%d %d:%d: %s", typeError.Code(), line, col, typeError.Error()))
 			}
 

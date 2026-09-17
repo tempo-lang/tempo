@@ -3,7 +3,7 @@ package projection
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/types"
 )
 
@@ -14,7 +14,7 @@ type ChoreographyInterface struct {
 }
 
 type Interface struct {
-	InterfaceCtx parser.IInterfaceContext
+	InterfaceCtx *ast.Interface
 	Name         string
 	Role         string
 	Methods      []*InterfaceMethod
@@ -22,7 +22,7 @@ type Interface struct {
 
 type InterfaceMethod struct {
 	*FuncSig
-	MethodCtx parser.IInterfaceMethodContext
+	MethodCtx *ast.InterfaceMethod
 }
 
 func NewChoreographyInterface(name string) *ChoreographyInterface {
@@ -33,7 +33,7 @@ func NewChoreographyInterface(name string) *ChoreographyInterface {
 	}
 }
 
-func (inf *ChoreographyInterface) AddInterface(role string, ctx parser.IInterfaceContext) *Interface {
+func (inf *ChoreographyInterface) AddInterface(role string, ctx *ast.Interface) *Interface {
 	result := &Interface{
 		Name:         inf.Name,
 		Role:         role,
@@ -47,7 +47,7 @@ func (inf *ChoreographyInterface) AddInterface(role string, ctx parser.IInterfac
 	return result
 }
 
-func (inf *Interface) AddMethod(sig *FuncSig, ctx parser.IInterfaceMethodContext) *InterfaceMethod {
+func (inf *Interface) AddMethod(sig *FuncSig, ctx *ast.InterfaceMethod) *InterfaceMethod {
 	method := &InterfaceMethod{
 		FuncSig:   sig,
 		MethodCtx: ctx,

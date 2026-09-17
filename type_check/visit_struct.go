@@ -2,114 +2,67 @@ package type_check
 
 import (
 	"fmt"
-
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/new_parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (tc *typeChecker) VisitStruct(ctx *parser.StructContext) any {
-	// structs are already resolved by addGlobalSymbols
-	structSym, found := tc.info.Symbols[ctx.Ident()].(*sym_table.StructSymbol)
-	if !found {
-		// was not found if struct has parser errors
-		return nil
+func (tc *typeChecker) visitStruct(st *ast.Struct) {
+	sym, ok := tc.info.Symbols[st.Name].(*sym_table.StructSymbol)
+	if !ok {
+		return
 	}
-
-	if ctx.GetBody() == nil {
-		// parser error
-		return nil
+	tc.currentScope = sym.Scope()
+	for _, field := range st.Body.Fields {
+		fieldType := tc.visitValueType(field.Type)
+		fs := sym_table.NewStructFieldSymbol(field, sym, fieldType)
+		tc.insertSymbol(fs)
+		sym.AddField(fs.(*sym_table.StructFieldSymbol))
+		if !fieldType.IsInvalid() {
+			if rt, found := findRoleType(field.Type); found {
+				tc.checkRolesInScope(rt)
+			}
+		}
 	}
-
-	tc.currentScope = structSym.Scope()
-
-	ctx.GetBody().Accept(tc)
-
+	for _, method := range st.Body.Functions {
+		if fs, ok := tc.addFuncSymbol(method.FuncSig, method); ok {
+			sym.AddMethod(fs.(*sym_table.FuncSymbol))
+		}
+	}
+	for _, method := range st.Body.Functions {
+		if method.FuncSig.RoleType != nil {
+			tc.checkRolesInScope(method.FuncSig.RoleType)
+		}
+		tc.visitFunc(method)
+	}
 	tc.currentScope = tc.currentScope.Parent()
-
-	tc.checkStructImplementsConform(structSym)
-
-	return nil
-}
-
-func (tc *typeChecker) VisitStructBody(ctx *parser.StructBodyContext) any {
-	for _, field := range ctx.AllStructField() {
-		field.Accept(tc)
-	}
-
-	structSym := tc.currentScope.GetStruct()
-
-	for _, method := range ctx.AllFunc_() {
-		funcSym, ok := tc.addFuncSymbol(method.FuncSig(), method)
-		if ok {
-			structSym.AddMethod(funcSym.(*sym_table.FuncSymbol))
-		}
-	}
-
-	for _, method := range ctx.AllFunc_() {
-
-		tc.checkRolesInScope(method.FuncSig().RoleType())
-
-		method.Accept(tc)
-	}
-
-	return nil
-}
-
-func (tc *typeChecker) VisitStructField(ctx *parser.StructFieldContext) any {
-	fieldType := tc.visitValueType(ctx.ValueType())
-	fieldSym := sym_table.NewStructFieldSymbol(ctx, tc.currentScope.GetStruct(), fieldType)
-	tc.insertSymbol(fieldSym)
-
-	structSym := tc.currentScope.GetStruct()
-	structSym.AddField(fieldSym.(*sym_table.StructFieldSymbol))
-
-	if !fieldType.IsInvalid() {
-		if roleType, found := parser.FindRoleType(ctx.ValueType()); found {
-			tc.checkRolesInScope(roleType)
-		}
-	}
-
-	return nil
-}
-
-func (tc *typeChecker) VisitStructImplements(ctx *parser.StructImplementsContext) any {
-	return nil
+	tc.checkStructImplementsConform(sym)
 }
 
 func (tc *typeChecker) checkStructImplementsConform(sym *sym_table.StructSymbol) {
-	structType := sym.Type().(*types.StructType)
-
-	for _, impl := range structType.Implements() {
-		infType, ok := impl.(*types.InterfaceType)
+	st := sym.Type().(*types.StructType)
+	for _, impl := range st.Implements() {
+		inf, ok := impl.(*types.InterfaceType)
 		if !ok {
-			panic(fmt.Sprintf("Struct can only implement interfaces, type was %T", impl))
+			panic(fmt.Sprintf("struct implementation is %T", impl))
 		}
-
-		infSym := tc.info.Symbols[infType.Ident()].(*sym_table.InterfaceSymbol)
-
-		for _, field := range tc.info.Fields(infType) {
+		infSym := tc.info.Symbols[inf.Ident()].(*sym_table.InterfaceSymbol)
+		for _, field := range tc.info.Fields(inf) {
 			fn, ok := field.(*types.FunctionType)
 			if !ok {
-				panic(fmt.Sprintf("Interface can only have function fields, was %T", field))
+				continue
 			}
-
-			method, found := tc.info.Field(structType, fn.NameIdent().GetText())
+			method, found := tc.info.Field(st, fn.NameIdent().Value())
 			if !found {
-				tc.reportError(type_error.NewMissingImplementationMethod(sym, infSym, fn.NameIdent().GetText()))
+				tc.reportError(type_error.NewMissingImplementationMethod(sym, infSym, fn.NameIdent().Value()))
 				continue
 			}
-
-			if _, canCoerce := fn.CoerceTo(method); !canCoerce {
-				methodFn, ok := method.(*types.FunctionType)
-				if !ok {
-					continue // likely due to parser error
+			if _, ok := fn.CoerceTo(method); !ok {
+				if m, ok := method.(*types.FunctionType); ok {
+					tc.reportError(type_error.NewIncompatibleImplementationMethod(sym, infSym, m, fn))
 				}
-				tc.reportError(type_error.NewIncompatibleImplementationMethod(sym, infSym, methodFn, fn))
-				continue
 			}
 		}
 	}
-
 }
