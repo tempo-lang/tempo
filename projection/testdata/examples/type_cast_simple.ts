@@ -8,11 +8,10 @@ export async function main(env: Env) {
   let int1: number = Number(integer);
   let int2: number = Math.floor(Number(integer));
   let int3: string = String(integer);
-  let float: number = 8.200000;
+  let float: number = 8.2;
   let float1: number = Math.floor(Number(float));
   let float2: number = Number(float);
   let float3: string = String(float);
   let bool: boolean = true;
   let bool1: string = String(bool);
 }
-

@@ -5,8 +5,7 @@ import { Env } from '../../../typescript/runtime.ts';
 // Projection of choreography `constants`
 export async function constants_A(env: Env) {
   let intValue: number = 123;
-  let floatValue: number = 123.000000;
+  let floatValue: number = 123.0;
   let booleanValue: boolean = true;
   let stringValue: string = "Hello";
 }
-
