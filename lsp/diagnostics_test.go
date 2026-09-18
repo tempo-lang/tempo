@@ -3,8 +3,8 @@ package lsp
 import (
 	"testing"
 
-	parser "github.com/tempo-lang/tempo/parser/new_parser"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/token"
 )
 
 func TestSpanToRangeUTF16(t *testing.T) {

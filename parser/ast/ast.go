@@ -3,7 +3,7 @@ package ast
 import (
 	"strings"
 
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/token"
 )
 
 type Node interface {

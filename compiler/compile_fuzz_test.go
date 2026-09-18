@@ -9,7 +9,7 @@ import (
 
 	"github.com/tempo-lang/tempo/compiler"
 	"github.com/tempo-lang/tempo/misc"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 )
 

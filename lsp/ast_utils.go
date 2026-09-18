@@ -1,11 +1,12 @@
 package lsp
 
 import (
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"reflect"
+
+	"github.com/tempo-lang/tempo/parser/ast"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/sym_table"
 	protocol "github.com/tliron/glsp/protocol_3_16"
-	"reflect"
 )
 
 func spanToRange(source *token.Source, span token.Span) protocol.Range {

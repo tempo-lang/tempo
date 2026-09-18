@@ -2,10 +2,11 @@ package type_error
 
 import (
 	"fmt"
-	"github.com/fatih/color"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
 	"io"
 	"strings"
+
+	"github.com/fatih/color"
+	"github.com/tempo-lang/tempo/parser/token"
 )
 
 // FormatError renders a semantic diagnostic from the AST's byte span.

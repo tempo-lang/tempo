@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/tempo-lang/tempo/misc"
-	parser "github.com/tempo-lang/tempo/parser/new_parser"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/type_check"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 

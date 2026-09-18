@@ -1,4 +1,4 @@
-package new_parser
+package parser
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/ast"
 )
 
 const exampleSeparator = "---"

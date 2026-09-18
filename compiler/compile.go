@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/tempo-lang/tempo/epp"
-	parser "github.com/tempo-lang/tempo/parser/new_parser"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/projection/codegen_go"
 	"github.com/tempo-lang/tempo/projection/codegen_java"
 	"github.com/tempo-lang/tempo/projection/codegen_ts"

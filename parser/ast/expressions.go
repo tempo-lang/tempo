@@ -1,6 +1,6 @@
 package ast
 
-import "github.com/tempo-lang/tempo/parser/new_parser/token"
+import "github.com/tempo-lang/tempo/parser/token"
 
 // Expressions
 

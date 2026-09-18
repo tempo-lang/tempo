@@ -1,4 +1,4 @@
-package new_parser
+package parser
 
 import (
 	"fmt"
@@ -6,9 +6,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
-	"github.com/tempo-lang/tempo/parser/new_parser/lexer"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/ast"
+	"github.com/tempo-lang/tempo/parser/lexer"
+	"github.com/tempo-lang/tempo/parser/token"
 )
 
 type Span = token.Span

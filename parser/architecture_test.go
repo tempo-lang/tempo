@@ -1,12 +1,12 @@
-package new_parser
+package parser
 
 import (
 	"strings"
 	"testing"
 
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
-	"github.com/tempo-lang/tempo/parser/new_parser/lexer"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/ast"
+	"github.com/tempo-lang/tempo/parser/lexer"
+	"github.com/tempo-lang/tempo/parser/token"
 )
 
 func reconstruct(ts []token.Token) string {
@@ -19,6 +19,7 @@ func reconstruct(ts []token.Token) string {
 	}
 	return b.String()
 }
+
 func TestLexerLossless(t *testing.T) {
 	cases := []string{"", " a\r\n// hi\n/* x */+b", "@#\x00", "\"x\\n\"", "/*unterminated"}
 	for _, s := range cases {
@@ -29,6 +30,7 @@ func TestLexerLossless(t *testing.T) {
 		}
 	}
 }
+
 func TestLexerTokenTable(t *testing.T) {
 	src := "struct interface implements func return let async await if else while true false ( ) [ ] { } + - * / % == != < <= > >= && || = @ , . : ; _ -> name 1 1. .5"
 	want := []token.Kind{token.STRUCT, token.INTERFACE, token.IMPLEMENTS, token.FUNC, token.RETURN, token.LET, token.ASYNC, token.AWAIT, token.IF, token.ELSE, token.WHILE, token.TRUE, token.FALSE, token.LPAREN, token.RPAREN, token.LSQUARE, token.RSQUARE, token.LCURLY, token.RCURLY, token.PLUS, token.MINUS, token.MULTIPLY, token.DIVIDE, token.MODULO, token.EQUAL, token.NOT_EQUAL, token.LESS, token.LESS_EQ, token.GREATER, token.GREATER_EQ, token.AND, token.OR, token.ASSIGN, token.ROLE_AT, token.COMMA, token.DOT, token.COLON, token.SEMICOLON, token.UNDERSCORE, token.COM, token.IDENT, token.INT, token.FLOAT, token.FLOAT, token.EOF}
@@ -45,6 +47,7 @@ func TestLexerTokenTable(t *testing.T) {
 		}
 	}
 }
+
 func TestLexerDiagnostics(t *testing.T) {
 	for _, src := range []string{"#", "\x00", "\"bad\\q\"", "\"unterminated", "/*unterminated", "999999999999999999999999999999999999"} {
 		l := lexer.FromString(src)
@@ -57,6 +60,7 @@ func TestLexerDiagnostics(t *testing.T) {
 		}
 	}
 }
+
 func TestKeywordAndIdentifierContract(t *testing.T) {
 	ts, _ := lexer.FromString("letter _name letx å").LexAll()
 	want := []token.Kind{token.IDENT, token.IDENT, token.IDENT, token.BadToken, token.EOF}
@@ -66,6 +70,7 @@ func TestKeywordAndIdentifierContract(t *testing.T) {
 		}
 	}
 }
+
 func TestSourceCoordinates(t *testing.T) {
 	s := token.SourceFromString("a😀\r\nb")
 	if got := s.Position(5); got.Line != 1 || got.Col != 3 {
@@ -75,6 +80,7 @@ func TestSourceCoordinates(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
 func TestCursorStableEOF(t *testing.T) {
 	ts, _ := lexer.FromString("x").LexAll()
 	c := NewCursor(ts)
@@ -86,6 +92,7 @@ func TestCursorStableEOF(t *testing.T) {
 		t.Fatal(a, b)
 	}
 }
+
 func TestExpressionSuites(t *testing.T) {
 	cases := map[string]string{"1 + 2 * 3": "(binary + (int 1) (binary * (int 2) (int 3)))", "(1).x[0]": "(index (field (group (int 1) \")\") x) (int 0) \"]\")", "foo(1, 2)": "(call foo (int 1) (int 2) \")\")"}
 	for src, want := range cases {
@@ -128,6 +135,7 @@ func TestRecoveryLocality(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
 func TestRecoveryPreservesExpressionSentinel(t *testing.T) {
 	r := ParseScopeText("{#; 42;}")
 	s := r.Node.(*ast.Scope)
@@ -135,6 +143,7 @@ func TestRecoveryPreservesExpressionSentinel(t *testing.T) {
 		t.Fatal(ast.SExpr(s))
 	}
 }
+
 func TestMissingSemicolonFix(t *testing.T) {
 	r := ParseScopeText("{let x = 1 let y = 2;}")
 	if len(r.Diagnostics) == 0 {
@@ -145,6 +154,7 @@ func TestMissingSemicolonFix(t *testing.T) {
 		t.Fatal(d)
 	}
 }
+
 func TestASTInvariantsOnPartialResults(t *testing.T) {
 	results := []ProductionResult{
 		ParseExpression("foo[1 + ]"),
@@ -158,6 +168,7 @@ func TestASTInvariantsOnPartialResults(t *testing.T) {
 		}
 	}
 }
+
 func TestASTInvariantsRejectNilRequiredChild(t *testing.T) {
 	r := ParseExpression("1 + 2")
 	binary := r.Node.(*ast.BinaryExpr)
@@ -166,6 +177,7 @@ func TestASTInvariantsRejectNilRequiredChild(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 }
+
 func TestASTInvariantsRejectInvalidTokenReference(t *testing.T) {
 	r := ParseExpression("1")
 	primitive := r.Node.(*ast.PrimitiveExpr)
@@ -175,12 +187,14 @@ func TestASTInvariantsRejectInvalidTokenReference(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 }
+
 func TestASTInvariantsAllowOptionalChild(t *testing.T) {
 	r := ParseStatement("return;")
 	if err := ast.Validate(r.Node, r.Tokens, r.Source.Len()); err != nil {
 		t.Fatal(err)
 	}
 }
+
 func TestRoleRecovery(t *testing.T) {
 	p := FromString("[A,123,B]")
 	r := p.parseRoleType(TokenSet{token.EOF})
@@ -192,6 +206,7 @@ func TestRoleRecovery(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
 func FuzzLexer(f *testing.F) {
 	f.Add("let x = 1;")
 	f.Fuzz(func(t *testing.T, s string) {
@@ -202,6 +217,7 @@ func FuzzLexer(f *testing.F) {
 		}
 	})
 }
+
 func FuzzExpression(f *testing.F) {
 	f.Add("a[0]+1")
 	f.Fuzz(func(t *testing.T, s string) {
@@ -212,6 +228,7 @@ func FuzzExpression(f *testing.F) {
 		}
 	})
 }
+
 func FuzzStatement(f *testing.F) {
 	f.Add("let x = 1;")
 	f.Fuzz(func(t *testing.T, s string) {
@@ -222,6 +239,7 @@ func FuzzStatement(f *testing.F) {
 		}
 	})
 }
+
 func FuzzType(f *testing.F) {
 	f.Add("async [T]")
 	f.Fuzz(func(t *testing.T, s string) {
@@ -232,6 +250,7 @@ func FuzzType(f *testing.F) {
 		}
 	})
 }
+
 func FuzzScope(f *testing.F) {
 	f.Add("{let x = 1;}")
 	f.Fuzz(func(t *testing.T, s string) {
@@ -242,11 +261,13 @@ func FuzzScope(f *testing.F) {
 		}
 	})
 }
+
 func BenchmarkExpression(b *testing.B) {
 	for b.Loop() {
 		ParseExpression("a.b[1 + 2 * 3]")
 	}
 }
+
 func BenchmarkScope(b *testing.B) {
 	for b.Loop() {
 		ParseScopeText("{let x = a.b[1 + 2 * 3]; return x;}")

@@ -3,7 +3,7 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/types"
 )

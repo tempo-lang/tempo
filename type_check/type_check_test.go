@@ -11,7 +11,7 @@ import (
 	"github.com/tempo-lang/tempo/misc"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/token"
 )
 
 func TestExamples(t *testing.T) {

@@ -1,7 +1,7 @@
 package lsp
 
 import (
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"

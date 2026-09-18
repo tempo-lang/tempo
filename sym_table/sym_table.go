@@ -4,8 +4,8 @@ package sym_table
 import (
 	"iter"
 
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/ast"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/types"
 )
 

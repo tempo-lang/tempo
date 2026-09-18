@@ -2,7 +2,7 @@ package lsp
 
 import (
 	"github.com/tempo-lang/tempo/misc"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"

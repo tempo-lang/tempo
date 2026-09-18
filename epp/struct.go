@@ -1,7 +1,7 @@
 package epp
 
 import (
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/types"
 )

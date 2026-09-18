@@ -11,7 +11,7 @@ import (
 	"github.com/tempo-lang/tempo/compiler"
 
 	"github.com/andreyvit/diff"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/token"
 )
 
 // TestExamples finds all examples located in the testdata directory/examples,

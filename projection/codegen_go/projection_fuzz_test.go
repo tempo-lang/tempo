@@ -10,7 +10,7 @@ import (
 	"github.com/tempo-lang/tempo/compiler"
 	"github.com/tempo-lang/tempo/projection/codegen_go"
 
-	parser_token "github.com/tempo-lang/tempo/parser/new_parser/token"
+	parser_token "github.com/tempo-lang/tempo/parser/token"
 
 	"go/ast"
 	"go/importer"

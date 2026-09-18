@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tempo-lang/tempo/compiler"
-	"github.com/tempo-lang/tempo/parser/new_parser/token"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 )
 

@@ -5,7 +5,7 @@
 package projection
 
 import (
-	"github.com/tempo-lang/tempo/parser/new_parser/ast"
+	"github.com/tempo-lang/tempo/parser/ast"
 )
 
 // Choreography represents a Tempo choreography from the perspective of each projected role.
