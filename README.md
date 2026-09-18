@@ -159,3 +159,25 @@ func@(A,B) hello(printA: Printer@A, printB: Printer@B) {
   printB.print("Hello from B");
 }
 ```
+
+# Testing
+
+Run `go test ./...` to run unit tests.
+
+## Simulator tests
+
+After changing the Tempo code, run the `examples/generate.sh` script to recompile the programs.
+
+In order to test the examples with the simulator follow the instructions for each host language here.
+
+### Go
+
+Run `go test ./examples/...` in the project root directory.
+
+### Typescript
+
+Make sure Deno is installed, then run `deno test` in the `examples/` directory.
+
+### Java
+
+With JDK and Maven installed, run `mvn test` in the project root directory.

@@ -212,7 +212,7 @@ func (p *Parser) parseComExpr(stop TokenSet) ast.Expr {
 	s := p.parseRoleType(TokenSet{token.COM})
 	c := p.expect(token.COM, TokenSet{token.IDENT, token.UNDERSCORE, token.LPAREN, token.LSQUARE})
 	r := p.parseRoleType(stop)
-	return &ast.ComExpr{Sender: s, ComToken: c, Receiver: r, Expr: p.parsePrecedence(stop, precPostfix-1)}
+	return &ast.ComExpr{Sender: s, ComToken: c, Receiver: r, Expr: p.parsePrecedence(stop, precLowest)}
 }
 
 func (p *Parser) parseStructExpr(ri *ast.RoleIdent, stop TokenSet) ast.Expr {

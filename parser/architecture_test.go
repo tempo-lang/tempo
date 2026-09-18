@@ -178,6 +178,22 @@ func TestASTInvariantsRejectNilRequiredChild(t *testing.T) {
 	}
 }
 
+func TestCommunicationBindsWeakerThanBinaryOperators(t *testing.T) {
+	r := ParseExpression("A->B math.Exp(g, a) % p")
+	if len(r.Diagnostics) != 0 {
+		t.Fatal(r.Diagnostics)
+	}
+
+	communication, ok := r.Node.(*ast.ComExpr)
+	if !ok {
+		t.Fatalf("root is %T, want *ast.ComExpr", r.Node)
+	}
+	binary, ok := communication.Expr.(*ast.BinaryExpr)
+	if !ok || binary.Operator.Kind != token.MODULO {
+		t.Fatalf("communication payload is %T, want modulo *ast.BinaryExpr: %s", communication.Expr, ast.SExpr(r.Node, r.Tokens))
+	}
+}
+
 func TestASTInvariantsRejectInvalidTokenReference(t *testing.T) {
 	r := ParseExpression("1")
 	primitive := r.Node.(*ast.PrimitiveExpr)
