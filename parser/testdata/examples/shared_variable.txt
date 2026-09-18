@@ -12,7 +12,7 @@ func@(A,B) shared() {
     (scope "{"
       (let x
         (type
-          (named-type Int@
+          (named-type Int
             (shared-role-type
               (role A)
               (role B))))

@@ -38,7 +38,7 @@ func@(A,B) main() {
           (role-type
             (role A)) read
           (params)
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A)))))))
   (interface
@@ -51,21 +51,21 @@ func@(A,B) main() {
             (role A)) write
           (params
             (param out
-              (named-type Int@
+              (named-type Int
                 (role-type
                   (role A)))))))))
   (struct
     (role-type
       (role X)) Buffer
-    (implements Reader@
+    (implements Reader
       (role-type
         (role X)))
-    (implements Writer@
+    (implements Writer
       (role-type
         (role X)))
     (struct-body
       (struct-field buf
-        (named-type Int@
+        (named-type Int
           (role-type
             (role X))))
       (func
@@ -73,7 +73,7 @@ func@(A,B) main() {
           (role-type
             (role X)) read
           (params)
-          (named-type Int@
+          (named-type Int
             (role-type
               (role X))))
         (scope "{"
@@ -84,7 +84,7 @@ func@(A,B) main() {
             (role X)) write
           (params
             (param out
-              (named-type Int@
+              (named-type Int
                 (role-type
                   (role X))))))
         (scope "{"
@@ -98,22 +98,22 @@ func@(A,B) main() {
     (scope "{"
       (let buffer
         (type
-          (named-type Buffer@
+          (named-type Buffer
             (role-type
               (role A))))
-        (struct-expr Buffer@
+        (struct-expr Buffer
           (role-type
             (role A))
           (field-init buf
             (int 10)) "}") ";")
       (let reader
         (type
-          (named-type Reader@
+          (named-type Reader
             (role-type
               (role A)))) buffer ";")
       (let writer
         (type
-          (named-type Writer@
+          (named-type Writer
             (role-type
               (role A)))) buffer ";")
       (expr

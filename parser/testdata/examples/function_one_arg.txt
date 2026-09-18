@@ -8,7 +8,7 @@ func@(B,A) foo(snd: Int@[B,A]) {}
         (role A)) foo
       (params
         (param snd
-          (named-type Int@
+          (named-type Int
             (shared-role-type
               (role B)
               (role A))))))

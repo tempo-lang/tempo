@@ -15,11 +15,11 @@ func@(X,Y) foo() {
       (role B)) Pair
     (struct-body
       (struct-field num
-        (named-type Int@
+        (named-type Int
           (role-type
             (role A))))
       (struct-field logic
-        (named-type Bool@
+        (named-type Bool
           (role-type
             (role B))))))
   (func
@@ -31,11 +31,11 @@ func@(X,Y) foo() {
     (scope "{"
       (let p
         (type
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role X)
               (role Y))))
-        (struct-expr Pair@
+        (struct-expr Pair
           (role-type
             (role X)
             (role Y))
@@ -45,7 +45,7 @@ func@(X,Y) foo() {
             (bool true)) "}") ";")
       (let x
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role X))))
         (field p num) ";") "}")))

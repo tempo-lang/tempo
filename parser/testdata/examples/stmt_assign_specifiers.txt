@@ -29,11 +29,11 @@ func@(X,Y,Z) main() {
       (role B)) Pair
     (struct-body
       (struct-field x
-        (named-type Int@
+        (named-type Int
           (role-type
             (role A))))
       (struct-field y
-        (named-type Int@
+        (named-type Int
           (role-type
             (role B))))))
   (struct
@@ -44,12 +44,12 @@ func@(X,Y,Z) main() {
     (struct-body
       (struct-field pairs
         (list-type
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role A)
               (role B))) "]"))
       (struct-field z
-        (named-type Int@
+        (named-type Int
           (role-type
             (role C))))))
   (func
@@ -61,7 +61,7 @@ func@(X,Y,Z) main() {
       (params))
     (scope "{"
       (let foo
-        (struct-expr Foo@
+        (struct-expr Foo
           (role-type
             (role X)
             (role Y)
@@ -73,7 +73,7 @@ func@(X,Y,Z) main() {
       (assign
         (field foo pairs)
         (list
-          (struct-expr Pair@
+          (struct-expr Pair
             (role-type
               (role X)
               (role Y))
@@ -81,7 +81,7 @@ func@(X,Y,Z) main() {
               (int 1))
             (field-init y
               (int 2)) "}")
-          (struct-expr Pair@
+          (struct-expr Pair
             (role-type
               (role X)
               (role Y))

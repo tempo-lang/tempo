@@ -21,11 +21,11 @@ func@(A,B,C) foo() {
       (role B)) Pair
     (struct-body
       (struct-field x
-        (named-type Int@
+        (named-type Int
           (role-type
             (role A))))
       (struct-field y
-        (named-type Int@
+        (named-type Int
           (role-type
             (role B))))))
   (func
@@ -39,12 +39,12 @@ func@(A,B,C) foo() {
       (let pair
         (type
           (list-type
-            (named-type Pair@
+            (named-type Pair
               (role-type
                 (role A)
                 (role B))) "]"))
         (list
-          (struct-expr Pair@
+          (struct-expr Pair
             (role-type
               (role A)
               (role B))
@@ -59,7 +59,7 @@ func@(A,B,C) foo() {
             (role A))) ";")
       (let x
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A))))
         (field
@@ -72,7 +72,7 @@ func@(A,B,C) foo() {
         (scope "{"
           (let y
             (type
-              (named-type Int@
+              (named-type Int
                 (role-type
                   (role B))))
             (field

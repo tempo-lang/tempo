@@ -22,10 +22,10 @@ func@(A,B) foo() {
               (role B))
             (params
               (param input
-                (named-type Int@
+                (named-type Int
                   (role-type
                     (role A)))))
-            (named-type Int@
+            (named-type Int
               (role-type
                 (role B))))
           (scope "{"
@@ -38,7 +38,7 @@ func@(A,B) foo() {
                     (role B)) input)) ";") "}")) ";")
       (let result
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role B))))
         (call closure

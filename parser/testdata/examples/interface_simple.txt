@@ -17,14 +17,14 @@ func@A foo(x: Sum@A) {
             (role X)) sum
           (params
             (param a
-              (named-type Int@
+              (named-type Int
                 (role-type
                   (role X))))
             (param b
-              (named-type Int@
+              (named-type Int
                 (role-type
                   (role X)))))
-          (named-type Int@
+          (named-type Int
             (role-type
               (role X)))))))
   (func
@@ -33,13 +33,13 @@ func@A foo(x: Sum@A) {
         (role A)) foo
       (params
         (param x
-          (named-type Sum@
+          (named-type Sum
             (role-type
               (role A))))))
     (scope "{"
       (let value
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A))))
         (call

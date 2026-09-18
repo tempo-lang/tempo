@@ -14,13 +14,13 @@ func@(A,B,C) foo() {
     (scope "{"
       (let x
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A))))
         (int 10) ";")
       (let y
         (type
-          (named-type Int@
+          (named-type Int
             (shared-role-type
               (role A)
               (role B)

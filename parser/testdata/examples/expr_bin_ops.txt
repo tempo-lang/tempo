@@ -17,7 +17,7 @@ func@(A) binOps() {
     (scope "{"
       (let a
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A))))
         (binary -
@@ -33,7 +33,7 @@ func@(A) binOps() {
             (int 6))) ";")
       (let b
         (type
-          (named-type Bool@
+          (named-type Bool
             (role-type
               (role A))))
         (binary ==
@@ -41,7 +41,7 @@ func@(A) binOps() {
           (bool true)) ";")
       (let c
         (type
-          (named-type Bool@
+          (named-type Bool
             (role-type
               (role A))))
         (binary !=
@@ -49,7 +49,7 @@ func@(A) binOps() {
           (bool false)) ";")
       (let d
         (type
-          (named-type Bool@
+          (named-type Bool
             (role-type
               (role A))))
         (binary <
@@ -57,7 +57,7 @@ func@(A) binOps() {
           (int 20)) ";")
       (let e
         (type
-          (named-type Bool@
+          (named-type Bool
             (role-type
               (role A))))
         (binary <=
@@ -65,7 +65,7 @@ func@(A) binOps() {
           (int 20)) ";")
       (let f
         (type
-          (named-type Bool@
+          (named-type Bool
             (role-type
               (role A))))
         (binary >
@@ -73,7 +73,7 @@ func@(A) binOps() {
           (int 20)) ";")
       (let g
         (type
-          (named-type Bool@
+          (named-type Bool
             (role-type
               (role A))))
         (binary >=

@@ -16,7 +16,7 @@ func@(A,B) foo() {
         (role X)) call
       (params
         (param val
-          (named-type Int@
+          (named-type Int
             (role-type
               (role X))))))
     (scope "{" "}"))
@@ -33,7 +33,7 @@ func@(A,B) foo() {
             (role-type
               (role A))
             (type-params
-              (named-type Int@
+              (named-type Int
                 (role-type
                   (role A))))))
         (at call
@@ -45,7 +45,7 @@ func@(A,B) foo() {
             (role-type
               (role B))
             (type-params
-              (named-type Int@
+              (named-type Int
                 (role-type
                   (role B))))))
         (at call

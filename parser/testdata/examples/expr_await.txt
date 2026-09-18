@@ -13,13 +13,13 @@ func@(A) foo() {
       (let x
         (type
           (async-type
-            (named-type Int@
+            (named-type Int
               (role-type
                 (role A)))))
         (int 10) ";")
       (let y
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A))))
         (await x) ";") "}")))

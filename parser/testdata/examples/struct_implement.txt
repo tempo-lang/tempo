@@ -28,7 +28,7 @@ func@(L,M) main() {
             (role A)
             (role B)) combine
           (params)
-          (named-type Int@
+          (named-type Int
             (shared-role-type
               (role A)
               (role B)))))))
@@ -36,17 +36,17 @@ func@(L,M) main() {
     (role-type
       (role X)
       (role Y)) Sum
-    (implements Combine@
+    (implements Combine
       (role-type
         (role X)
         (role Y)))
     (struct-body
       (struct-field x
-        (named-type Int@
+        (named-type Int
           (role-type
             (role X))))
       (struct-field y
-        (named-type Int@
+        (named-type Int
           (role-type
             (role Y))))
       (func
@@ -55,7 +55,7 @@ func@(L,M) main() {
             (role X)
             (role Y)) combine
           (params)
-          (named-type Int@
+          (named-type Int
             (shared-role-type
               (role X)
               (role Y))))
@@ -85,11 +85,11 @@ func@(L,M) main() {
     (scope "{"
       (let sum
         (type
-          (named-type Combine@
+          (named-type Combine
             (role-type
               (role L)
               (role M))))
-        (struct-expr Sum@
+        (struct-expr Sum
           (role-type
             (role L)
             (role M))
@@ -99,7 +99,7 @@ func@(L,M) main() {
             (int 20)) "}") ";")
       (let result
         (type
-          (named-type Int@
+          (named-type Int
             (shared-role-type
               (role L)
               (role M))))

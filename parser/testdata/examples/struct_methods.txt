@@ -30,11 +30,11 @@ func@(X,Y) main() {
       (role B)) Pair
     (struct-body
       (struct-field x
-        (named-type Int@
+        (named-type Int
           (role-type
             (role A))))
       (struct-field y
-        (named-type Int@
+        (named-type Int
           (role-type
             (role B))))
       (func
@@ -43,13 +43,13 @@ func@(X,Y) main() {
             (role A)
             (role B)) swap
           (params)
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role B)
               (role A))))
         (scope "{"
           (return
-            (struct-expr Pair@
+            (struct-expr Pair
               (role-type
                 (role B)
                 (role A))
@@ -61,13 +61,13 @@ func@(X,Y) main() {
             (role A)
             (role B)) exchange
           (params)
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role A)
               (role B))))
         (scope "{"
           (return
-            (struct-expr Pair@
+            (struct-expr Pair
               (role-type
                 (role A)
                 (role B))
@@ -93,7 +93,7 @@ func@(X,Y) main() {
       (params))
     (scope "{"
       (let pair
-        (struct-expr Pair@
+        (struct-expr Pair
           (role-type
             (role X)
             (role Y))
@@ -103,7 +103,7 @@ func@(X,Y) main() {
             (int 20)) "}") ";")
       (let pair_swapped
         (type
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role Y)
               (role X))))
@@ -111,7 +111,7 @@ func@(X,Y) main() {
           (field pair swap) ")") ";")
       (let pair_exchanged
         (type
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role X)
               (role Y))))

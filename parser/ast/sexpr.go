@@ -47,11 +47,67 @@ type sexprWriter struct {
 	tokens []token.Token
 }
 
-func tok(t token.Token) string {
-	if t.Synthetic {
-		return "(missing " + string(t.Kind) + ")"
+type sexprListWriter struct {
+	writer *sexprWriter
+}
+
+func (b *sexprWriter) writeList(name string, writeElements func(*sexprListWriter)) {
+	b.WriteByte('(')
+	b.WriteString(name)
+	if writeElements != nil {
+		writeElements(&sexprListWriter{writer: b})
 	}
-	return strconv.Quote(t.Text)
+	b.WriteByte(')')
+}
+
+func (l *sexprListWriter) atom(value string) {
+	l.writer.WriteByte(' ')
+	l.writer.WriteString(value)
+}
+
+func (l *sexprListWriter) node(n Node) {
+	l.writer.WriteByte(' ')
+	l.writer.writeNode(n)
+}
+
+func (l *sexprListWriter) roleIdent(roleIdent *RoleIdent) {
+	l.node(roleIdent.Ident)
+	if roleIdent.RoleType != nil {
+		l.node(roleIdent.RoleType)
+	}
+}
+
+func (l *sexprListWriter) list(name string, writeElements func(*sexprListWriter)) {
+	l.element(func(writer *sexprWriter) {
+		writer.writeList(name, writeElements)
+	})
+}
+
+func (l *sexprListWriter) element(write func(*sexprWriter)) {
+	l.writer.WriteByte(' ')
+	write(l.writer)
+}
+
+func (l *sexprListWriter) token(t token.Token) {
+	if t.Synthetic {
+		l.list("missing", func(list *sexprListWriter) {
+			list.atom(string(t.Kind))
+		})
+		return
+	}
+	l.atom(strconv.Quote(t.Text))
+}
+
+func (l *sexprListWriter) skipped(r token.Ref) {
+	i := int(r)
+	l.list("skipped", func(list *sexprListWriter) {
+		if i >= 0 && i < len(l.writer.tokens) {
+			list.atom(string(l.writer.tokens[i].Kind))
+			list.atom(strconv.Quote(l.writer.tokens[i].Text))
+			return
+		}
+		list.atom(strconv.Itoa(i))
+	})
 }
 
 func (b *sexprWriter) writeNode(n Node) {
@@ -59,17 +115,17 @@ func (b *sexprWriter) writeNode(n Node) {
 		b.WriteString("nil")
 		return
 	}
+
 	switch x := n.(type) {
 	case *SourceFile:
-		b.WriteString("(source-file")
-		for _, d := range x.Declarations {
-			b.WriteByte(' ')
-			b.writeNode(d)
-		}
-		b.WriteByte(')')
+		b.writeList("source-file", func(list *sexprListWriter) {
+			for _, declaration := range x.Declarations {
+				list.node(declaration)
+			}
+		})
 	case *Identifier:
 		if x.Invalid {
-			b.WriteString("(invalid-ident)")
+			b.writeList("invalid-ident", nil)
 		} else {
 			b.WriteString(x.Value())
 		}
@@ -78,349 +134,273 @@ func (b *sexprWriter) writeNode(n Node) {
 			b.writeNode(x.Ident)
 			break
 		}
-		b.WriteString("(at ")
-		b.writeNode(x.Ident)
-		b.WriteByte(' ')
-		b.writeNode(x.RoleType)
-		b.WriteByte(')')
+		b.writeList("at", func(list *sexprListWriter) {
+			list.node(x.Ident)
+			list.node(x.RoleType)
+		})
 	case *RoleIdent:
-		b.writeNode(x.Ident)
-		if x.RoleType != nil {
-			b.WriteByte('@')
-			b.writeNode(x.RoleType)
-		}
+		b.writeList("role-ident", func(list *sexprListWriter) {
+			list.roleIdent(x)
+		})
 	case *StructExpr:
-		b.WriteString("(struct-expr ")
-		b.writeNode(x.RoleIdent)
-		for _, f := range x.StructFields.Fields {
-			b.WriteByte(' ')
-			b.writeNode(f)
-		}
-		b.WriteByte(' ')
-		b.WriteString(tok(x.StructFields.CloseToken))
-		b.WriteByte(')')
+		b.writeList("struct-expr", func(list *sexprListWriter) {
+			list.roleIdent(x.RoleIdent)
+			for _, field := range x.StructFields.Fields {
+				list.node(field)
+			}
+			list.token(x.StructFields.CloseToken)
+		})
 	case *StructFieldExpr:
-		b.WriteString("(field-init ")
-		b.writeNode(x.Name)
-		b.WriteByte(' ')
-		b.writeNode(x.Expr)
-		b.WriteByte(')')
+		b.writeList("field-init", func(list *sexprListWriter) {
+			list.node(x.Name)
+			list.node(x.Expr)
+		})
 	case *ComExpr:
-		b.WriteString("(com ")
-		b.writeNode(x.Sender)
-		b.WriteByte(' ')
-		b.writeNode(x.Receiver)
-		b.WriteByte(' ')
-		b.writeNode(x.Expr)
-		b.WriteByte(')')
+		b.writeList("com", func(list *sexprListWriter) {
+			list.node(x.Sender)
+			list.node(x.Receiver)
+			list.node(x.Expr)
+		})
 	case *ClosureExpr:
-		b.WriteString("(closure ")
-		b.writeNode(x.ClosureSig)
-		b.WriteByte(' ')
-		b.writeNode(x.Scope)
-		b.WriteByte(')')
+		b.writeList("closure", func(list *sexprListWriter) {
+			list.node(x.ClosureSig)
+			list.node(x.Scope)
+		})
 	case *ClosureSig:
-		b.WriteString("(closure-sig ")
-		b.writeNode(x.RoleType)
-		b.WriteByte(' ')
-		b.writeNode(x.Params)
-		if x.ReturnType != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.ReturnType)
-		}
-		b.WriteByte(')')
+		b.writeList("closure-sig", func(list *sexprListWriter) {
+			list.node(x.RoleType)
+			list.node(x.Params)
+			if x.ReturnType != nil {
+				list.node(x.ReturnType)
+			}
+		})
 	case *PrimitiveExpr:
-		if x.RoleType != nil {
-			b.WriteString("(at ")
+		writeLiteral := func(writer *sexprWriter) {
+			switch literal := x.Literal.(type) {
+			case *IntLit:
+				writer.writeList("int", func(value *sexprListWriter) { value.atom(fmt.Sprint(literal.Value())) })
+			case *FloatLit:
+				writer.writeList("float", func(value *sexprListWriter) { value.atom(fmt.Sprint(literal.Value())) })
+			case *StringLit:
+				writer.writeList("string", func(value *sexprListWriter) { value.atom(strconv.Quote(literal.Value())) })
+			case *BoolLit:
+				writer.writeList("bool", func(value *sexprListWriter) { value.atom(fmt.Sprint(literal.Value())) })
+			}
 		}
-		switch v := x.Literal.(type) {
-		case *IntLit:
-			fmt.Fprintf(b, "(int %v)", v.Value())
-		case *FloatLit:
-			fmt.Fprintf(b, "(float %v)", v.Value())
-		case *StringLit:
-			fmt.Fprintf(b, "(string %q)", v.Value())
-		case *BoolLit:
-			fmt.Fprintf(b, "(bool %v)", v.Value())
-		}
 		if x.RoleType != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.RoleType)
-			b.WriteByte(')')
+			b.writeList("at", func(list *sexprListWriter) {
+				list.element(writeLiteral)
+				list.node(x.RoleType)
+			})
+		} else {
+			writeLiteral(b)
 		}
 	case *BinaryExpr:
-		b.WriteString("(binary ")
-		b.WriteString(x.Operator.Text)
-		b.WriteString(" ")
-		b.writeNode(x.Left)
-		b.WriteByte(' ')
-		b.writeNode(x.Right)
-		b.WriteByte(')')
+		b.writeList("binary", func(list *sexprListWriter) {
+			list.atom(x.Operator.Text)
+			list.node(x.Left)
+			list.node(x.Right)
+		})
 	case *FieldAccessExpr:
-		b.WriteString("(field ")
-		b.writeNode(x.Object)
-		b.WriteByte(' ')
-		b.writeNode(x.Field)
-		b.WriteByte(')')
+		b.writeList("field", func(list *sexprListWriter) {
+			list.node(x.Object)
+			list.node(x.Field)
+		})
 	case *IndexExpr:
-		b.WriteString("(index ")
-		b.writeNode(x.Object)
-		b.WriteByte(' ')
-		b.writeNode(x.Index)
-		b.WriteByte(' ')
-		b.WriteString(tok(x.CloseBracket))
-		b.WriteByte(')')
+		b.writeList("index", func(list *sexprListWriter) {
+			list.node(x.Object)
+			list.node(x.Index)
+			list.token(x.CloseBracket)
+		})
 	case *GroupExpr:
-		b.WriteString("(group ")
-		b.writeNode(x.Expr)
-		b.WriteByte(' ')
-		b.WriteString(tok(x.CloseParen))
-		b.WriteByte(')')
+		b.writeList("group", func(list *sexprListWriter) {
+			list.node(x.Expr)
+			list.token(x.CloseParen)
+		})
 	case *ListExpr:
-		b.WriteString("(list")
-		for _, e := range x.Elements {
-			b.WriteByte(' ')
-			b.writeNode(e)
-		}
-		b.WriteByte(' ')
-		b.WriteString(tok(x.CloseBracket))
-		b.WriteByte(')')
+		b.writeList("list", func(list *sexprListWriter) {
+			for _, element := range x.Elements {
+				list.node(element)
+			}
+			list.token(x.CloseBracket)
+		})
 	case *CallExpr:
-		b.WriteString("(call ")
-		b.writeNode(x.Function)
-		for _, a := range x.Args {
-			b.WriteByte(' ')
-			b.writeNode(a)
-		}
-		b.WriteByte(' ')
-		b.WriteString(tok(x.CloseParen))
-		b.WriteByte(')')
+		b.writeList("call", func(list *sexprListWriter) {
+			list.node(x.Function)
+			for _, argument := range x.Args {
+				list.node(argument)
+			}
+			list.token(x.CloseParen)
+		})
 	case *AwaitExpr:
-		b.WriteString("(await ")
-		b.writeNode(x.Expr)
-		b.WriteByte(')')
+		b.writeList("await", func(list *sexprListWriter) { list.node(x.Expr) })
 	case *InvalidExpr:
-		b.WriteString("(invalid-expr")
-		for _, r := range x.Skipped {
-			b.writeSkipped(r)
-		}
-		b.WriteByte(')')
+		b.writeList("invalid-expr", func(list *sexprListWriter) {
+			for _, skipped := range x.Skipped {
+				list.skipped(skipped)
+			}
+		})
 	case *LetStmt:
-		b.WriteString("(let ")
-		b.writeNode(x.Name)
-		if x.Type != nil {
-			b.WriteByte(' ')
-			b.WriteString("(type ")
-			b.writeNode(x.Type)
-			b.WriteByte(')')
-		}
-		b.WriteByte(' ')
-		b.writeNode(x.Expr)
-		b.WriteByte(' ')
-		b.WriteString(tok(x.SemiToken))
-		b.WriteByte(')')
+		b.writeList("let", func(list *sexprListWriter) {
+			list.node(x.Name)
+			if x.Type != nil {
+				list.list("type", func(typeList *sexprListWriter) { typeList.node(x.Type) })
+			}
+			list.node(x.Expr)
+			list.token(x.SemiToken)
+		})
 	case *ReturnStmt:
-		b.WriteString("(return")
-		if x.Expr != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.Expr)
-		}
-		b.WriteByte(' ')
-		b.WriteString(tok(x.SemiToken))
-		b.WriteByte(')')
+		b.writeList("return", func(list *sexprListWriter) {
+			if x.Expr != nil {
+				list.node(x.Expr)
+			}
+			list.token(x.SemiToken)
+		})
 	case *AssignStmt:
-		b.WriteString("(assign ")
-		b.writeNode(x.LHS)
-		b.WriteByte(' ')
-		b.writeNode(x.RHS)
-		b.WriteByte(' ')
-		b.WriteString(tok(x.SemiToken))
-		b.WriteByte(')')
+		b.writeList("assign", func(list *sexprListWriter) {
+			list.node(x.LHS)
+			list.node(x.RHS)
+			list.token(x.SemiToken)
+		})
 	case *ExprStmt:
-		b.WriteString("(expr ")
-		b.writeNode(x.Expr)
-		b.WriteByte(' ')
-		b.WriteString(tok(x.SemiToken))
-		b.WriteByte(')')
+		b.writeList("expr", func(list *sexprListWriter) {
+			list.node(x.Expr)
+			list.token(x.SemiToken)
+		})
 	case *IfStmt:
-		b.WriteString("(if ")
-		b.writeNode(x.Condition)
-		b.WriteByte(' ')
-		b.writeNode(x.ThenScope)
-		if x.ElseScope != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.ElseScope)
-		}
-		b.WriteByte(')')
+		b.writeList("if", func(list *sexprListWriter) {
+			list.node(x.Condition)
+			list.node(x.ThenScope)
+			if x.ElseScope != nil {
+				list.node(x.ElseScope)
+			}
+		})
 	case *WhileStmt:
-		b.WriteString("(while ")
-		b.writeNode(x.Condition)
-		b.WriteByte(' ')
-		b.writeNode(x.Scope)
-		b.WriteByte(')')
+		b.writeList("while", func(list *sexprListWriter) {
+			list.node(x.Condition)
+			list.node(x.Scope)
+		})
 	case *Scope:
-		b.WriteString("(scope ")
-		b.WriteString(tok(x.OpenToken))
-		for _, s := range x.Stmts {
-			b.WriteByte(' ')
-			b.writeNode(s)
-		}
-		b.WriteByte(' ')
-		b.WriteString(tok(x.CloseToken))
-		b.WriteByte(')')
+		b.writeList("scope", func(list *sexprListWriter) {
+			list.token(x.OpenToken)
+			for _, statement := range x.Stmts {
+				list.node(statement)
+			}
+			list.token(x.CloseToken)
+		})
 	case *RoleType:
+		name := "role-type"
 		if x.IsShared() {
-			b.WriteString("(shared-role-type")
-		} else {
-			b.WriteString("(role-type")
+			name = "shared-role-type"
 		}
-		for _, r := range x.RoleNodes {
-			b.WriteByte(' ')
-			b.writeNode(r)
-		}
-		b.WriteByte(')')
+		b.writeList(name, func(list *sexprListWriter) {
+			for _, role := range x.RoleNodes {
+				list.node(role)
+			}
+		})
 	case *Role:
 		if x.Invalid {
-			b.WriteString("(invalid-role")
-			for _, r := range x.Skipped {
-				b.writeSkipped(r)
-			}
-			b.WriteByte(')')
+			b.writeList("invalid-role", func(list *sexprListWriter) {
+				for _, skipped := range x.Skipped {
+					list.skipped(skipped)
+				}
+			})
 		} else {
-			b.WriteString("(role ")
-			b.WriteString(x.Token.Text)
-			b.WriteString(")")
+			b.writeList("role", func(list *sexprListWriter) { list.atom(x.Token.Text) })
 		}
 	case *NamedType:
-		b.WriteString("(named-type ")
-		b.writeNode(x.RoleIdent)
-		b.WriteByte(')')
+		b.writeList("named-type", func(list *sexprListWriter) { list.roleIdent(x.RoleIdent) })
 	case *ClosureType:
-		b.WriteString("(closure-type ")
-		b.writeNode(x.RoleType)
-		b.WriteByte(' ')
-		b.writeNode(x.Params)
-		if x.ReturnType != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.ReturnType)
-		}
-		b.WriteByte(')')
+		b.writeList("closure-type", func(list *sexprListWriter) {
+			list.node(x.RoleType)
+			list.node(x.Params)
+			if x.ReturnType != nil {
+				list.node(x.ReturnType)
+			}
+		})
 	case *ClosureTypeParams:
-		b.WriteString("(type-params")
-		for _, p := range x.Params {
-			b.WriteByte(' ')
-			b.writeNode(p)
-		}
-		b.WriteByte(')')
+		b.writeList("type-params", func(list *sexprListWriter) {
+			for _, parameter := range x.Params {
+				list.node(parameter)
+			}
+		})
 	case *FuncParams:
-		b.WriteString("(params")
-		for _, p := range x.Params {
-			b.WriteByte(' ')
-			b.writeNode(p)
-		}
-		b.WriteByte(')')
+		b.writeList("params", func(list *sexprListWriter) {
+			for _, parameter := range x.Params {
+				list.node(parameter)
+			}
+		})
 	case *FuncParam:
-		b.WriteString("(param ")
-		b.writeNode(x.Name)
-		b.WriteByte(' ')
-		b.writeNode(x.Type)
-		b.WriteByte(')')
+		b.writeList("param", func(list *sexprListWriter) {
+			list.node(x.Name)
+			list.node(x.Type)
+		})
 	case *FuncSig:
-		b.WriteString("(func-sig")
-		if x.RoleType != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.RoleType)
-		}
-		b.WriteByte(' ')
-		b.writeNode(x.Name)
-		b.WriteByte(' ')
-		b.writeNode(x.Params)
-		if x.ReturnType != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.ReturnType)
-		}
-		b.WriteByte(')')
+		b.writeList("func-sig", func(list *sexprListWriter) {
+			if x.RoleType != nil {
+				list.node(x.RoleType)
+			}
+			list.node(x.Name)
+			list.node(x.Params)
+			if x.ReturnType != nil {
+				list.node(x.ReturnType)
+			}
+		})
 	case *Func:
-		b.WriteString("(func ")
-		b.writeNode(x.FuncSig)
-		b.WriteByte(' ')
-		b.writeNode(x.Scope)
-		b.WriteByte(')')
+		b.writeList("func", func(list *sexprListWriter) {
+			list.node(x.FuncSig)
+			list.node(x.Scope)
+		})
 	case *Struct:
-		b.WriteString("(struct")
-		if x.RoleType != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.RoleType)
-		}
-		b.WriteByte(' ')
-		b.writeNode(x.Name)
-		for _, i := range x.Implements {
-			b.WriteByte(' ')
-			b.WriteString("(implements ")
-			b.writeNode(i)
-			b.WriteByte(')')
-		}
-		b.WriteByte(' ')
-		b.writeNode(x.Body)
-		b.WriteByte(')')
+		b.writeList("struct", func(list *sexprListWriter) {
+			if x.RoleType != nil {
+				list.node(x.RoleType)
+			}
+			list.node(x.Name)
+			for _, implemented := range x.Implements {
+				list.list("implements", func(implements *sexprListWriter) { implements.roleIdent(implemented) })
+			}
+			list.node(x.Body)
+		})
 	case *StructBody:
-		b.WriteString("(struct-body")
-		for _, f := range x.Members {
-			b.WriteByte(' ')
-			b.writeNode(f)
-		}
-		b.WriteByte(')')
+		b.writeList("struct-body", func(list *sexprListWriter) {
+			for _, member := range x.Members {
+				list.node(member)
+			}
+		})
 	case *StructField:
-		b.WriteString("(struct-field ")
-		b.writeNode(x.Name)
-		b.WriteByte(' ')
-		b.writeNode(x.Type)
-		b.WriteByte(')')
+		b.writeList("struct-field", func(list *sexprListWriter) {
+			list.node(x.Name)
+			list.node(x.Type)
+		})
 	case *Interface:
-		b.WriteString("(interface")
-		if x.RoleType != nil {
-			b.WriteByte(' ')
-			b.writeNode(x.RoleType)
-		}
-		b.WriteByte(' ')
-		b.writeNode(x.Name)
-		b.WriteByte(' ')
-		b.writeNode(x.Methods)
-		b.WriteByte(')')
+		b.writeList("interface", func(list *sexprListWriter) {
+			if x.RoleType != nil {
+				list.node(x.RoleType)
+			}
+			list.node(x.Name)
+			list.node(x.Methods)
+		})
 	case *InterfaceMethodsList:
-		b.WriteString("(methods")
-		for _, m := range x.Methods {
-			b.WriteByte(' ')
-			b.writeNode(m)
-		}
-		b.WriteByte(')')
+		b.writeList("methods", func(list *sexprListWriter) {
+			for _, method := range x.Methods {
+				list.node(method)
+			}
+		})
 	case *InterfaceMethod:
-		b.WriteString("(method ")
-		b.writeNode(x.FuncSig)
-		b.WriteByte(')')
+		b.writeList("method", func(list *sexprListWriter) { list.node(x.FuncSig) })
 	case *ListType:
-		b.WriteString("(list-type ")
-		b.writeNode(x.Inner)
-		b.WriteByte(' ')
-		b.WriteString(tok(x.CloseBracket))
-		b.WriteByte(')')
+		b.writeList("list-type", func(list *sexprListWriter) {
+			list.node(x.Inner)
+			list.token(x.CloseBracket)
+		})
 	case *AsyncType:
-		b.WriteString("(async-type ")
-		b.writeNode(x.Inner)
-		b.WriteByte(')')
+		b.writeList("async-type", func(list *sexprListWriter) { list.node(x.Inner) })
 	case *InvalidType:
-		b.WriteString("(invalid-type)")
+		b.writeList("invalid-type", nil)
 	default:
 		fmt.Fprintf(b, "(%T)", n)
 	}
-}
-func (b *sexprWriter) writeSkipped(r token.Ref) {
-	i := int(r)
-	if i >= 0 && i < len(b.tokens) {
-		fmt.Fprintf(b, " (skipped %s %q)", b.tokens[i].Kind, b.tokens[i].Text)
-		return
-	}
-	fmt.Fprintf(b, " (skipped %d)", r)
 }
 
 // indentSExpr keeps atoms on their parent's line and starts each nested list on

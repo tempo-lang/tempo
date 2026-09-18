@@ -31,12 +31,12 @@ func@(P,Q) foo() {
       (role B)) Foo
     (struct-body
       (struct-field first
-        (named-type Bar@
+        (named-type Bar
           (role-type
             (role A)
             (role B))))
       (struct-field second
-        (named-type Bar@
+        (named-type Bar
           (role-type
             (role B)
             (role A))))))
@@ -46,11 +46,11 @@ func@(P,Q) foo() {
       (role Y)) Bar
     (struct-body
       (struct-field num
-        (named-type Int@
+        (named-type Int
           (role-type
             (role X))))
       (struct-field logic
-        (named-type Bool@
+        (named-type Bool
           (role-type
             (role Y))))))
   (func
@@ -62,28 +62,28 @@ func@(P,Q) foo() {
     (scope "{"
       (let x
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role P))))
         (int 10) ";")
       (let y
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role Q))))
         (int 20) ";")
       (let nested
         (type
-          (named-type Foo@
+          (named-type Foo
             (role-type
               (role P)
               (role Q))))
-        (struct-expr Foo@
+        (struct-expr Foo
           (role-type
             (role P)
             (role Q))
           (field-init first
-            (struct-expr Bar@
+            (struct-expr Bar
               (role-type
                 (role P)
                 (role Q))
@@ -91,7 +91,7 @@ func@(P,Q) foo() {
               (field-init logic
                 (bool true)) "}"))
           (field-init second
-            (struct-expr Bar@
+            (struct-expr Bar
               (role-type
                 (role Q)
                 (role P))

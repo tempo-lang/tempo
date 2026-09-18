@@ -12,7 +12,7 @@ func@(A,B) foo() {
         (role X)) call
       (params
         (param val
-          (named-type Int@
+          (named-type Int
             (role-type
               (role X))))))
     (scope "{" "}"))

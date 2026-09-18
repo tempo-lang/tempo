@@ -26,10 +26,10 @@ struct@(A,B) Foo implements Bar@A, Baz@B {
     (role-type
       (role A)
       (role B)) Foo
-    (implements Bar@
+    (implements Bar
       (role-type
         (role A)))
-    (implements Baz@
+    (implements Baz
       (role-type
         (role B)))
     (struct-body

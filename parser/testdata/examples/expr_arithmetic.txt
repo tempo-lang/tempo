@@ -14,7 +14,7 @@ func@A foo() {
     (scope "{"
       (let x
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A))))
         (binary -
@@ -30,7 +30,7 @@ func@A foo() {
             (int 7))) ";")
       (let y
         (type
-          (named-type String@
+          (named-type String
             (role-type
               (role A))))
         (binary +
@@ -38,7 +38,7 @@ func@A foo() {
           (string " world")) ";")
       (let z
         (type
-          (named-type Float@
+          (named-type Float
             (role-type
               (role A))))
         (binary -
@@ -52,7 +52,7 @@ func@A foo() {
             (float 6))) ";")
       (let w
         (type
-          (named-type Bool@
+          (named-type Bool
             (role-type
               (role A))))
         (binary ||

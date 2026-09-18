@@ -14,7 +14,7 @@ func@(A,B) foo() {
       (let x
         (type
           (list-type
-            (named-type Int@
+            (named-type Int
               (shared-role-type
                 (role A)
                 (role B))) "]"))
@@ -25,6 +25,6 @@ func@(A,B) foo() {
       (let y
         (type
           (list-type
-            (named-type Int@
+            (named-type Int
               (role-type
                 (role A))) "]")) x ";") "}")))

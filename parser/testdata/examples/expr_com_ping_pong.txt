@@ -12,7 +12,7 @@ func@(A,B) foo() {
     (scope "{"
       (let result
         (type
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A))))
         (await

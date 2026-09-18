@@ -21,11 +21,11 @@ func@(A,B) main() {
       (role B)) Pair
     (struct-body
       (struct-field x
-        (named-type Int@
+        (named-type Int
           (role-type
             (role A))))
       (struct-field y
-        (named-type Int@
+        (named-type Int
           (role-type
             (role B))))))
   (func
@@ -35,22 +35,22 @@ func@(A,B) main() {
         (role B)) combine
       (params
         (param pairA
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role A)
               (role _))))
         (param pairB
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role _)
               (role B)))))
-      (named-type Pair@
+      (named-type Pair
         (role-type
           (role A)
           (role B))))
     (scope "{"
       (return
-        (struct-expr Pair@
+        (struct-expr Pair
           (role-type
             (role A)
             (role B))
@@ -66,14 +66,14 @@ func@(A,B) main() {
       (params))
     (scope "{"
       (let pairA
-        (struct-expr Pair@
+        (struct-expr Pair
           (role-type
             (role A)
             (role _))
           (field-init x
             (int 10)) "}") ";")
       (let pairB
-        (struct-expr Pair@
+        (struct-expr Pair
           (role-type
             (role _)
             (role B))

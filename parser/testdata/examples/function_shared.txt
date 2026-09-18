@@ -13,10 +13,10 @@ func@(A,B) main() {
         (role A)) double
       (params
         (param val
-          (named-type Int@
+          (named-type Int
             (role-type
               (role A)))))
-      (named-type Int@
+      (named-type Int
         (role-type
           (role A))))
     (scope "{"
@@ -32,7 +32,7 @@ func@(A,B) main() {
     (scope "{"
       (let x
         (type
-          (named-type Int@
+          (named-type Int
             (shared-role-type
               (role A)
               (role B))))

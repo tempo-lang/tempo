@@ -37,7 +37,7 @@ func@(X,Y) start(action: Action@(X,Y)) {
         (role Y)) start
       (params
         (param action
-          (named-type Action@
+          (named-type Action
             (role-type
               (role X)
               (role Y))))))

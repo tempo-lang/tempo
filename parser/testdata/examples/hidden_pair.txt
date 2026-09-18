@@ -14,11 +14,11 @@ func@(A,B) main() {
       (role B)) Pair
     (struct-body
       (struct-field x
-        (named-type Int@
+        (named-type Int
           (role-type
             (role A))))
       (struct-field y
-        (named-type Int@
+        (named-type Int
           (role-type
             (role B))))))
   (func
@@ -30,11 +30,11 @@ func@(A,B) main() {
     (scope "{"
       (let pair
         (type
-          (named-type Pair@
+          (named-type Pair
             (role-type
               (role A)
               (role _))))
-        (struct-expr Pair@
+        (struct-expr Pair
           (role-type
             (role A)
             (role B))

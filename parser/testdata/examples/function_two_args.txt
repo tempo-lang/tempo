@@ -9,11 +9,11 @@ func@(A,B,C) foo(fst: Float@A, snd: String@[A,B]) {}
         (role C)) foo
       (params
         (param fst
-          (named-type Float@
+          (named-type Float
             (role-type
               (role A))))
         (param snd
-          (named-type String@
+          (named-type String
             (shared-role-type
               (role A)
               (role B))))))
