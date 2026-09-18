@@ -5,7 +5,7 @@ package epp
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/type_check"
 )
@@ -26,7 +26,7 @@ func newEpp(info *type_check.Info) *epp {
 //
 // It is undefined to run this function on an AST that produced any type errors.
 // Doing so will likely cause a `panic`.
-func EndpointProject(info *type_check.Info, sourceFile parser.ISourceFileContext) *projection.SourceFile {
+func EndpointProject(info *type_check.Info, sourceFile *ast.SourceFile) *projection.SourceFile {
 	return newEpp(info).eppSourceFile(sourceFile)
 }
 

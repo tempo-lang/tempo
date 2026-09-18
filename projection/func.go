@@ -3,12 +3,12 @@ package projection
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/types"
 )
 
 type FuncSig struct {
-	FuncSigCtx  parser.IFuncSigContext
+	FuncSigCtx  *ast.FuncSig
 	Name        string
 	Role        string
 	Params      []FuncParam
@@ -18,32 +18,32 @@ type FuncSig struct {
 type Func struct {
 	*FuncSig
 	Choreography *Choreography
-	FuncCtx      parser.IFuncContext
+	FuncCtx      *ast.Func
 	Body         []Statement
 }
 
 type FuncParam struct {
 	FuncSig   *FuncSig
-	ParamCtx  parser.IFuncParamContext
+	ParamCtx  *ast.FuncParam
 	Name      string
 	TypeValue Type
 }
 
-func NewFuncSig(role string, funcSigCtx parser.IFuncSigContext, returnValue Type) *FuncSig {
+func NewFuncSig(role string, funcSigCtx *ast.FuncSig, returnValue Type) *FuncSig {
 	return &FuncSig{
 		FuncSigCtx:  funcSigCtx,
-		Name:        funcSigCtx.Ident().GetText(),
+		Name:        funcSigCtx.Name.Value(),
 		Role:        role,
 		Params:      []FuncParam{},
 		ReturnValue: returnValue,
 	}
 }
 
-func (f *FuncSig) AddParam(param parser.IFuncParamContext, paramType Type) *FuncSig {
+func (f *FuncSig) AddParam(param *ast.FuncParam, paramType Type) *FuncSig {
 	f.Params = append(f.Params, FuncParam{
 		FuncSig:   f,
 		ParamCtx:  param,
-		Name:      param.Ident().GetText(),
+		Name:      param.Name.Value(),
 		TypeValue: paramType,
 	})
 	return f

@@ -1,12 +1,12 @@
 package type_check
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 )
 
-func (tc *typeChecker) lookupSymbol(name parser.IIdentContext) (sym_table.Symbol, type_error.Error) {
+func (tc *typeChecker) lookupSymbol(name *ast.Identifier) (sym_table.Symbol, type_error.Error) {
 	sym, ok := tc.currentScope.LookupSymbol(name)
 	if !ok {
 		return nil, type_error.NewUnknownSymbol(name)

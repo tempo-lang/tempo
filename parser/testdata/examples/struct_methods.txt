@@ -1,0 +1,119 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+
+  func@(A,B) swap() Pair@(B,A) {
+    return Pair@(B,A) {
+      x: y,
+      y: x
+    };
+  }
+
+  func@(A,B) exchange() Pair@(A,B) {
+    return Pair@(A,B) {
+      x: await B->A y,
+      y: await A->B x
+    };
+  }
+}
+
+func@(X,Y) main() {
+  let pair = Pair@(X,Y) { x: 10, y: 20 };
+  let pair_swapped: Pair@(Y,X) = pair.swap();
+  let pair_exchanged: Pair@(X,Y) = pair.exchange();
+}
+---
+(source-file
+  (struct
+    (role-type
+      (role A)
+      (role B)) Pair
+    (struct-body
+      (struct-field x
+        (named-type Int
+          (role-type
+            (role A))))
+      (struct-field y
+        (named-type Int
+          (role-type
+            (role B))))
+      (func
+        (func-sig
+          (role-type
+            (role A)
+            (role B)) swap
+          (params)
+          (named-type Pair
+            (role-type
+              (role B)
+              (role A))))
+        (scope "{"
+          (return
+            (struct-expr Pair
+              (role-type
+                (role B)
+                (role A))
+              (field-init x y)
+              (field-init y x) "}") ";") "}"))
+      (func
+        (func-sig
+          (role-type
+            (role A)
+            (role B)) exchange
+          (params)
+          (named-type Pair
+            (role-type
+              (role A)
+              (role B))))
+        (scope "{"
+          (return
+            (struct-expr Pair
+              (role-type
+                (role A)
+                (role B))
+              (field-init x
+                (await
+                  (com
+                    (role-type
+                      (role B))
+                    (role-type
+                      (role A)) y)))
+              (field-init y
+                (await
+                  (com
+                    (role-type
+                      (role A))
+                    (role-type
+                      (role B)) x))) "}") ";") "}"))))
+  (func
+    (func-sig
+      (role-type
+        (role X)
+        (role Y)) main
+      (params))
+    (scope "{"
+      (let pair
+        (struct-expr Pair
+          (role-type
+            (role X)
+            (role Y))
+          (field-init x
+            (int 10))
+          (field-init y
+            (int 20)) "}") ";")
+      (let pair_swapped
+        (type
+          (named-type Pair
+            (role-type
+              (role Y)
+              (role X))))
+        (call
+          (field pair swap) ")") ";")
+      (let pair_exchanged
+        (type
+          (named-type Pair
+            (role-type
+              (role X)
+              (role Y))))
+        (call
+          (field pair exchange) ")") ";") "}")))

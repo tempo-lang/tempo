@@ -11,7 +11,7 @@ import (
 	"github.com/tempo-lang/tempo/compiler"
 
 	"github.com/andreyvit/diff"
-	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/parser/token"
 )
 
 // TestExamples finds all examples located in the testdata directory/examples,
@@ -30,12 +30,12 @@ func TestExamples(t *testing.T) {
 		t.Run(testname+".go", func(t *testing.T) {
 			t.Parallel()
 
-			input, err := antlr.NewFileStream(path)
+			data, err := os.ReadFile(path)
 			if err != nil {
 				t.Fatal("error reading source file:", err)
 			}
 
-			output, compilerErrors := compiler.Compile(input, nil)
+			output, compilerErrors := compiler.Compile(token.NewSource(data), nil)
 			if len(compilerErrors) > 0 {
 				errorsFormatted := ""
 				for _, err := range compilerErrors {
@@ -52,7 +52,7 @@ func TestExamples(t *testing.T) {
 		t.Run(testname+".ts", func(t *testing.T) {
 			t.Parallel()
 
-			input, err := antlr.NewFileStream(path)
+			data, err := os.ReadFile(path)
 			if err != nil {
 				t.Fatal("error reading source file:", err)
 			}
@@ -61,7 +61,7 @@ func TestExamples(t *testing.T) {
 			options.Language = compiler.LangTS
 			options.RuntimePath = "../../../typescript/runtime.ts"
 
-			output, compilerErrors := compiler.Compile(input, &options)
+			output, compilerErrors := compiler.Compile(token.NewSource(data), &options)
 			if len(compilerErrors) > 0 {
 				errorsFormatted := ""
 				for _, err := range compilerErrors {

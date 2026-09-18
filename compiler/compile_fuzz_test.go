@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/antlr4-go/antlr/v4"
 	"github.com/tempo-lang/tempo/compiler"
 	"github.com/tempo-lang/tempo/misc"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 )
 
@@ -36,7 +36,7 @@ func FuzzExtendedCompile(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, source string) {
 		for _, opt := range opts {
-			input_stream := antlr.NewInputStream(source)
+			input_stream := token.SourceFromString(source)
 			_, type_errors := compiler.Compile(input_stream, opt)
 			for _, err := range type_errors {
 				if type_err, ok := err.(type_error.Error); ok {

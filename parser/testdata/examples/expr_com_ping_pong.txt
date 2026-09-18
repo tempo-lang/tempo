@@ -1,0 +1,31 @@
+func@(A,B) foo() {
+  let result: Int@A = await B->A (await A->B 10);
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) foo
+      (params))
+    (scope "{"
+      (let result
+        (type
+          (named-type Int
+            (role-type
+              (role A))))
+        (await
+          (com
+            (role-type
+              (role B))
+            (role-type
+              (role A))
+            (group
+              (await
+                (com
+                  (role-type
+                    (role A))
+                  (role-type
+                    (role B))
+                  (int 10))) ")"))) ";") "}")))

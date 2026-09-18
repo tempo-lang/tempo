@@ -3,16 +3,14 @@ package type_check
 import (
 	"slices"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
-
-	"github.com/antlr4-go/antlr/v4"
 )
 
 // coerceExprToScope takes an expression node and its type and returns a supertype of its type that only includes the roles in scope.
 // If this coercion was not possible, an error is reported and the [types.Invalid] type is returned instead.
-func (tc *typeChecker) coerceExprToScope(value parser.IExprContext, exprType types.Type) types.Type {
+func (tc *typeChecker) coerceExprToScope(value ast.Expr, exprType types.Type) types.Type {
 	scopeRoles := tc.currentScope.Roles()
 	typeParticipants := exprType.Roles().Participants()
 
@@ -89,7 +87,7 @@ func limitTypeToRoles(exprType types.Type, roles []string) (types.Type, bool) {
 
 // checkExprInScope returns true if the roles in the expression is in scope.
 // Otherwise it returns false and reports an appropriate error.
-func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType *types.Roles) bool {
+func (tc *typeChecker) checkExprInScope(value ast.Node, roleType *types.Roles) bool {
 	unknownRoles := roleType.SubtractParticipants(tc.currentScope.Roles().Participants())
 
 	if len(unknownRoles) > 0 {
@@ -102,11 +100,11 @@ func (tc *typeChecker) checkExprInScope(value antlr.ParserRuleContext, roleType 
 
 // checkRolesInScope returns true if the roles explicitly specified in the RoleType node are in scope.
 // Otherwise it returns false and reports an appropriate error.
-func (tc *typeChecker) checkRolesInScope(roleType parser.IRoleTypeContext) bool {
+func (tc *typeChecker) checkRolesInScope(roleType *ast.RoleType) bool {
 
 	participants := []string{}
-	for _, p := range parser.RoleTypeAllRoles(roleType) {
-		participants = append(participants, p.GetText())
+	for _, p := range roleType.Roles() {
+		participants = append(participants, p.Token.Text)
 	}
 
 	unknownRoles := types.NewRole(participants, false).SubtractParticipants(tc.currentScope.Roles().Participants())

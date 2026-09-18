@@ -3,20 +3,19 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/types"
 
-	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/parser/ast"
 )
 
 type CallNonFunction struct {
 	baseError
-	callExpr *parser.ExprCallContext
+	callExpr *ast.CallExpr
 	symType  types.Type
 }
 
-func NewCallNonFunction(callExpr *parser.ExprCallContext, symType types.Type) Error {
+func NewCallNonFunction(callExpr *ast.CallExpr, symType types.Type) Error {
 	return &CallNonFunction{
 		callExpr: callExpr,
 		symType:  symType,
@@ -27,7 +26,7 @@ func (e *CallNonFunction) Error() string {
 	return fmt.Sprintf("cannot call value of type `%s`, since it is not a function", e.symType.ToString())
 }
 
-func (e *CallNonFunction) ParserRule() antlr.ParserRuleContext {
+func (e *CallNonFunction) ParserRule() ast.Node {
 	return e.callExpr
 }
 
@@ -37,12 +36,12 @@ func (e *CallNonFunction) Code() ErrorCode {
 
 type CallWrongArgCount struct {
 	baseError
-	callExpr *parser.ExprCallContext
+	callExpr *ast.CallExpr
 	expected int
 	actual   int
 }
 
-func NewCallWrongArgCount(callExpr *parser.ExprCallContext, expected, actual int) Error {
+func NewCallWrongArgCount(callExpr *ast.CallExpr, expected, actual int) Error {
 	return &CallWrongArgCount{
 		callExpr: callExpr,
 		expected: expected,
@@ -64,8 +63,8 @@ func (e *CallWrongArgCount) Error() string {
 	return fmt.Sprintf("function expected %s, but %s was given", expectedArgs, actualArgs)
 }
 
-func (e *CallWrongArgCount) ParserRule() antlr.ParserRuleContext {
-	return e.callExpr.FuncArgList()
+func (e *CallWrongArgCount) ParserRule() ast.Node {
+	return &ast.TokenRange{First: e.callExpr.OpenParen, Last: e.callExpr.CloseParen}
 }
 
 func (e *CallWrongArgCount) Code() ErrorCode {
@@ -74,11 +73,11 @@ func (e *CallWrongArgCount) Code() ErrorCode {
 
 type InstantiateNonFunction struct {
 	baseError
-	identAccess parser.IIdentAccessContext
+	identAccess *ast.IdentAccessExpr
 	sym         sym_table.Symbol
 }
 
-func NewInstantiateNonFunction(identAccess parser.IIdentAccessContext, sym sym_table.Symbol) Error {
+func NewInstantiateNonFunction(identAccess *ast.IdentAccessExpr, sym sym_table.Symbol) Error {
 	return &InstantiateNonFunction{
 		identAccess: identAccess,
 		sym:         sym,
@@ -89,8 +88,8 @@ func (e *InstantiateNonFunction) Error() string {
 	return fmt.Sprintf("cannot instantiate roles of `%s` with type `%s`, since it is not a function", e.sym.SymbolName(), e.sym.Type().ToString())
 }
 
-func (e *InstantiateNonFunction) ParserRule() antlr.ParserRuleContext {
-	return e.identAccess.RoleType()
+func (e *InstantiateNonFunction) ParserRule() ast.Node {
+	return e.identAccess.RoleType
 }
 
 func (e *InstantiateNonFunction) Code() ErrorCode {
@@ -99,11 +98,11 @@ func (e *InstantiateNonFunction) Code() ErrorCode {
 
 type FunctionNotInstantiated struct {
 	baseError
-	identAccess parser.IIdentAccessContext
+	identAccess *ast.IdentAccessExpr
 	sym         sym_table.Symbol
 }
 
-func NewFunctionNotInstantiated(identAccess parser.IIdentAccessContext, sym sym_table.Symbol) Error {
+func NewFunctionNotInstantiated(identAccess *ast.IdentAccessExpr, sym sym_table.Symbol) Error {
 	return &FunctionNotInstantiated{
 		identAccess: identAccess,
 		sym:         sym,
@@ -117,11 +116,11 @@ func (e *FunctionNotInstantiated) Error() string {
 func (e *FunctionNotInstantiated) Annotations() []Annotation {
 	return []Annotation{{
 		Type:    AnnotationTypeHint,
-		Message: fmt.Sprintf("add roles after the name of the function, like %s@(A,B,C)", e.identAccess.GetText()),
+		Message: fmt.Sprintf("add roles after the name of the function, like %s@(A,B,C)", e.identAccess.Ident.Value()),
 	}}
 }
 
-func (e *FunctionNotInstantiated) ParserRule() antlr.ParserRuleContext {
+func (e *FunctionNotInstantiated) ParserRule() ast.Node {
 	return e.identAccess
 }
 
@@ -144,7 +143,7 @@ func (e *FunctionMissingReturn) Error() string {
 	return "missing return statement"
 }
 
-func (e *FunctionMissingReturn) ParserRule() antlr.ParserRuleContext {
+func (e *FunctionMissingReturn) ParserRule() ast.Node {
 	return e.callableEnv.ReturnCtx()
 }
 
@@ -155,10 +154,10 @@ func (e *FunctionMissingReturn) Code() ErrorCode {
 type ReturnValueMissing struct {
 	baseError
 	callableEnv sym_table.CallableEnv
-	returnCtx   *parser.StmtReturnContext
+	returnCtx   *ast.ReturnStmt
 }
 
-func NewReturnValueMissing(callableEnv sym_table.CallableEnv, returnCtx *parser.StmtReturnContext) Error {
+func NewReturnValueMissing(callableEnv sym_table.CallableEnv, returnCtx *ast.ReturnStmt) Error {
 	return &ReturnValueMissing{
 		callableEnv: callableEnv,
 		returnCtx:   returnCtx,
@@ -169,7 +168,7 @@ func (e *ReturnValueMissing) Error() string {
 	return fmt.Sprintf("return is missing value of type `%s`", e.callableEnv.ReturnType().ToString())
 }
 
-func (e *ReturnValueMissing) ParserRule() antlr.ParserRuleContext {
+func (e *ReturnValueMissing) ParserRule() ast.Node {
 	return e.returnCtx
 }
 
@@ -186,11 +185,11 @@ func (e *ReturnValueMissing) RelatedInfo() []RelatedInfo {
 
 type IncompleteFunction struct {
 	baseError
-	FnIdent parser.IIdentContext
+	FnIdent *ast.Identifier
 	FnType  types.Type
 }
 
-func NewIncompleteFunction(fn parser.IIdentContext, fnType types.Type) Error {
+func NewIncompleteFunction(fn *ast.Identifier, fnType types.Type) Error {
 	return &IncompleteFunction{
 		FnIdent: fn,
 		FnType:  fnType,
@@ -201,7 +200,7 @@ func (e *IncompleteFunction) Error() string {
 	return fmt.Sprintf("function of type `%s` is incomplete", e.FnType.ToString())
 }
 
-func (e *IncompleteFunction) ParserRule() antlr.ParserRuleContext {
+func (e *IncompleteFunction) ParserRule() ast.Node {
 	return e.FnIdent
 }
 

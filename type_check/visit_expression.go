@@ -3,39 +3,62 @@ package type_check
 import (
 	"slices"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/projection"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (tc *typeChecker) visitExpr(ctx parser.IExprContext) types.Type {
+func (tc *typeChecker) visitExpr(ctx ast.Expr) types.Type {
 	if ctx == nil {
-		return tc.registerType(ctx, types.Invalid())
+		return types.Invalid()
 	}
-	result := ctx.Accept(tc)
-	if result == nil {
-		return tc.registerType(ctx, types.Invalid())
+	var result types.Type
+	switch e := ctx.(type) {
+	case *ast.InvalidExpr:
+		result = types.Invalid()
+	case *ast.PrimitiveExpr:
+		return tc.visitPrimitive(e)
+	case *ast.BinaryExpr:
+		result = tc.visitBinary(e)
+	case *ast.GroupExpr:
+		result = tc.visitExpr(e.Expr)
+	case *ast.IdentAccessExpr:
+		result = tc.visitIdent(e)
+	case *ast.AwaitExpr:
+		result = tc.visitAwait(e)
+	case *ast.ComExpr:
+		result = tc.visitCom(e)
+	case *ast.CallExpr:
+		result = tc.visitCall(e)
+	case *ast.FieldAccessExpr:
+		result = tc.visitFieldAccess(e)
+	case *ast.IndexExpr:
+		result = tc.visitIndex(e)
+	case *ast.ListExpr:
+		result = tc.visitList(e)
+	case *ast.StructExpr:
+		result = tc.visitStructExpr(e)
+	case *ast.ClosureExpr:
+		result = tc.visitClosure(e)
+	default:
+		result = types.Invalid()
 	}
-
-	exprType := result.(types.Type)
-
-	if exprType.Roles().IsHidden() {
-		tc.reportError(type_error.NewHiddenExpression(ctx, exprType))
+	if result.Roles().IsHidden() {
+		tc.reportError(type_error.NewHiddenExpression(ctx, result))
 	}
-
-	return exprType
+	return tc.registerType(ctx, result)
 }
 
-func (tc *typeChecker) registerType(expr parser.IExprContext, exprType types.Type) types.Type {
+func (tc *typeChecker) registerType(expr ast.Expr, exprType types.Type) types.Type {
 	tc.info.Types[expr] = exprType
 	return exprType
 }
 
-func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
-	lhs := tc.visitExpr(ctx.GetLhs())
-	rhs := tc.visitExpr(ctx.GetRhs())
+func (tc *typeChecker) visitBinary(ctx *ast.BinaryExpr) types.Type {
+	lhs := tc.visitExpr(ctx.Left)
+	rhs := tc.visitExpr(ctx.Right)
 
 	if lhs.IsInvalid() || rhs.IsInvalid() {
 		return tc.registerType(ctx, types.Invalid())
@@ -67,7 +90,7 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	}
 
 	typeError := false
-	op := projection.ParseOperator(ctx)
+	op := projection.Operator(ctx.Operator.Text)
 
 	mergedType, ok := tc.mergeTypes(ctx, lhs, rhs)
 	if !ok {
@@ -158,13 +181,8 @@ func (tc *typeChecker) VisitExprBinOp(ctx *parser.ExprBinOpContext) any {
 	return tc.registerType(ctx, types.Invalid())
 }
 
-func (tc *typeChecker) VisitExprGroup(ctx *parser.ExprGroupContext) any {
-	innerType := tc.visitExpr(ctx.Expr())
-	return tc.registerType(ctx, innerType)
-}
-
-func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
-	sym, err := tc.lookupSymbol(ctx.IdentAccess().Ident())
+func (tc *typeChecker) visitIdent(ctx *ast.IdentAccessExpr) types.Type {
+	sym, err := tc.lookupSymbol(ctx.Ident)
 	if err != nil {
 		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
@@ -175,8 +193,8 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	tc.info.Symbols[ctx.IdentAccess().Ident()] = sym
-	sym.AddRead(ctx.IdentAccess().Ident())
+	tc.info.Symbols[ctx.Ident] = sym
+	sym.AddRead(ctx.Ident)
 
 	identType := sym.Type()
 
@@ -186,10 +204,10 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	}
 
 	if _, isFunc := identType.(*types.FunctionType); isFunc {
-		if ctx.IdentAccess().RoleType() != nil {
+		if ctx.RoleType != nil {
 			// function role substitution is defined explicitly
 
-			roles, ok := tc.parseRoleType(ctx.IdentAccess().RoleType())
+			roles, ok := tc.parseRoleType(ctx.RoleType)
 			if !ok {
 				return tc.registerType(ctx, types.Invalid())
 			}
@@ -212,13 +230,13 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 				}
 				identType = identType.SubstituteRoles(roleSubst)
 			} else {
-				tc.reportError(type_error.NewFunctionNotInstantiated(ctx.IdentAccess(), sym))
+				tc.reportError(type_error.NewFunctionNotInstantiated(ctx, sym))
 				return tc.registerType(ctx, types.Invalid())
 			}
 		}
 	} else {
-		if ctx.IdentAccess().RoleType() != nil {
-			tc.reportError(type_error.NewInstantiateNonFunction(ctx.IdentAccess(), sym))
+		if ctx.RoleType != nil {
+			tc.reportError(type_error.NewInstantiateNonFunction(ctx, sym))
 			return tc.registerType(ctx, types.Invalid())
 		}
 	}
@@ -228,9 +246,9 @@ func (tc *typeChecker) VisitExprIdent(ctx *parser.ExprIdentContext) any {
 	return tc.registerType(ctx, identType)
 }
 
-func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
+func (tc *typeChecker) visitAwait(ctx *ast.AwaitExpr) types.Type {
 
-	exprType := tc.visitExpr(ctx.Expr())
+	exprType := tc.visitExpr(ctx.Expr)
 
 	if exprType.IsInvalid() {
 		return tc.registerType(ctx, types.Invalid())
@@ -244,9 +262,9 @@ func (tc *typeChecker) VisitExprAwait(ctx *parser.ExprAwaitContext) any {
 	return tc.registerType(ctx, types.Invalid())
 }
 
-func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
+func (tc *typeChecker) visitCom(ctx *ast.ComExpr) types.Type {
 
-	innerExprType := tc.visitExpr(ctx.Expr())
+	innerExprType := tc.visitExpr(ctx.Expr)
 
 	invalidType := false
 	invalidRole := false
@@ -256,12 +274,12 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		invalidType = true
 	}
 
-	if fromRoles, ok := tc.parseRoleType(ctx.GetSender()); ok {
+	if fromRoles, ok := tc.parseRoleType(ctx.Sender); ok {
 		if !fromRoles.IsLocalRole() {
 			tc.reportError(type_error.NewComNonLocalSender(ctx))
 		}
 
-		if tc.checkRolesInScope(ctx.GetSender()) {
+		if tc.checkRolesInScope(ctx.Sender) {
 			tc.checkExprInScope(ctx, fromRoles)
 		}
 
@@ -273,9 +291,9 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 		invalidRole = true
 	}
 
-	toRoles, ok := tc.parseRoleType(ctx.GetReceiver())
+	toRoles, ok := tc.parseRoleType(ctx.Receiver)
 	if ok {
-		if !tc.checkRolesInScope(ctx.GetReceiver()) {
+		if !tc.checkRolesInScope(ctx.Receiver) {
 			invalidRole = true
 		} else {
 			if !tc.checkExprInScope(ctx, toRoles) {
@@ -306,13 +324,13 @@ func (tc *typeChecker) VisitExprCom(ctx *parser.ExprComContext) any {
 	return tc.registerType(ctx, recvType)
 }
 
-func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
+func (tc *typeChecker) visitCall(ctx *ast.CallExpr) types.Type {
 
 	// Special case for type casting
-	if exprIdent, isIdent := ctx.Expr().(*parser.ExprIdentContext); isIdent {
-		if sym, err := tc.lookupSymbol(exprIdent.IdentAccess().Ident()); err == nil {
+	if exprIdent, isIdent := ctx.Function.(*ast.IdentAccessExpr); isIdent {
+		if sym, err := tc.lookupSymbol(exprIdent.Ident); err == nil {
 			if typeSym, ok := sym.(*sym_table.TypeSymbol); ok {
-				args := ctx.FuncArgList().AllExpr()
+				args := ctx.Args
 				if len(args) != 1 {
 					tc.reportError(type_error.NewCallWrongArgCount(ctx, 1, len(args)))
 					return tc.registerType(ctx, types.Invalid())
@@ -320,8 +338,8 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 
 				argType := tc.visitExpr(args[0])
 
-				tc.info.Symbols[exprIdent.IdentAccess().Ident()] = typeSym
-				sym.AddRead(exprIdent.IdentAccess().Ident())
+				tc.info.Symbols[exprIdent.Ident] = typeSym
+				sym.AddRead(exprIdent.Ident)
 
 				validType := true
 				switch typeSym.Type().(type) {
@@ -357,8 +375,8 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 
 				newType := typeSym.Type().ReplaceSharedRoles(argType.Roles().Participants())
 
-				if exprIdent.IdentAccess().RoleType() != nil {
-					if explicitRoles, ok := tc.parseRoleType(exprIdent.IdentAccess().RoleType()); ok {
+				if exprIdent.RoleType != nil {
+					if explicitRoles, ok := tc.parseRoleType(exprIdent.RoleType); ok {
 						newRoles, ok := types.RoleIntersect(newType.Roles(), explicitRoles)
 						if !ok {
 							tc.reportError(type_error.NewUnmergableRoles(ctx, []*types.Roles{newType.Roles(), explicitRoles}))
@@ -374,7 +392,7 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		}
 	}
 
-	callType := tc.visitExpr(ctx.Expr())
+	callType := tc.visitExpr(ctx.Function)
 	if callType.IsInvalid() {
 		return tc.registerType(ctx, types.Invalid())
 	}
@@ -382,11 +400,11 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	switch callFuncValue := callType.(type) {
 	case *types.FunctionType:
 		funcParamCount := len(callFuncValue.Params())
-		callArgCount := len(ctx.FuncArgList().AllExpr())
+		callArgCount := len(ctx.Args)
 		if funcParamCount != callArgCount {
 			tc.reportError(type_error.NewCallWrongArgCount(ctx, funcParamCount, callArgCount))
 		} else {
-			for i, arg := range ctx.FuncArgList().AllExpr() {
+			for i, arg := range ctx.Args {
 				argType := tc.visitExpr(arg)
 				paramType := callFuncValue.Params()[i]
 
@@ -398,11 +416,11 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 		return tc.registerType(ctx, callFuncValue.ReturnType())
 	case *types.ClosureType:
 		funcParamCount := len(callFuncValue.Params())
-		callArgCount := len(ctx.FuncArgList().AllExpr())
+		callArgCount := len(ctx.Args)
 		if funcParamCount != callArgCount {
 			tc.reportError(type_error.NewCallWrongArgCount(ctx, funcParamCount, callArgCount))
 		} else {
-			for i, arg := range ctx.FuncArgList().AllExpr() {
+			for i, arg := range ctx.Args {
 				argType := tc.visitExpr(arg)
 				paramType := callFuncValue.Params()[i]
 
@@ -418,16 +436,8 @@ func (tc *typeChecker) VisitExprCall(ctx *parser.ExprCallContext) any {
 	}
 }
 
-func (tc *typeChecker) VisitFuncArgList(ctx *parser.FuncArgListContext) any {
-	return nil
-}
-
-func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
-	if ctx.ExprStructField() == nil {
-		return tc.registerType(ctx, types.Invalid())
-	}
-
-	sym, err := tc.lookupSymbol(ctx.RoleIdent().Ident())
+func (tc *typeChecker) visitStructExpr(ctx *ast.StructExpr) types.Type {
+	sym, err := tc.lookupSymbol(ctx.RoleIdent.Ident)
 	if err != nil {
 		tc.reportError(err)
 		return tc.registerType(ctx, types.Invalid())
@@ -439,10 +449,10 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	tc.info.Symbols[ctx.RoleIdent().Ident()] = sym
-	sym.AddRead(ctx.RoleIdent().Ident())
+	tc.info.Symbols[ctx.RoleIdent.Ident] = sym
+	sym.AddRead(ctx.RoleIdent.Ident)
 
-	roles, ok := tc.parseRoleType(ctx.RoleIdent().RoleType())
+	roles, ok := tc.parseRoleType(ctx.RoleIdent.RoleType)
 	if !ok {
 		return tc.registerType(ctx, types.Invalid())
 	}
@@ -454,15 +464,16 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	}
 
 	// check that no fields are duplicated
-	fieldsCount := map[string]parser.IIdentContext{}
-	for _, fieldName := range ctx.ExprStructField().AllIdent() {
-		if first, found := fieldsCount[fieldName.GetText()]; found {
-			fieldsCount[fieldName.GetText()] = nil
+	fieldsCount := map[string]*ast.Identifier{}
+	for _, field := range ctx.StructFields.Fields {
+		fieldName := field.Name
+		if first, found := fieldsCount[fieldName.Value()]; found {
+			fieldsCount[fieldName.Value()] = nil
 			if first != nil {
 				tc.reportError(type_error.NewDuplicateStructField(ctx, first, fieldName))
 			}
 		} else {
-			fieldsCount[fieldName.GetText()] = fieldName
+			fieldsCount[fieldName.Value()] = fieldName
 		}
 	}
 
@@ -470,7 +481,7 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	structRoles := defStructType.Roles()
 	defRoleSubst, ok := structRoles.SubstituteMap(roles)
 	if !ok {
-		tc.reportError(type_error.NewWrongRoleCount(sym, ctx.RoleIdent(), roles))
+		tc.reportError(type_error.NewWrongRoleCount(sym, ctx.RoleIdent, roles))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -478,10 +489,10 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 
 	// check that all struct fields are present
 	for _, defField := range stSym.Fields() {
-		var exprFieldIdent parser.IIdentContext = nil
-		for _, field := range ctx.ExprStructField().AllIdent() {
-			if field.GetText() == defField.SymbolName() {
-				exprFieldIdent = field
+		var exprFieldIdent *ast.Identifier
+		for _, field := range ctx.StructFields.Fields {
+			if field.Name.Value() == defField.SymbolName() {
+				exprFieldIdent = field.Name
 				break
 			}
 		}
@@ -500,12 +511,12 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 		}
 	}
 
-	fieldIdents := ctx.ExprStructField().AllIdent()
-	for i, fieldExpr := range ctx.ExprStructField().AllExpr() {
+	for _, field := range ctx.StructFields.Fields {
+		fieldIdent, fieldExpr := field.Name, field.Expr
 		// check that field exists in struct
-		fieldType, fieldFound := tc.info.Field(structType, fieldIdents[i].GetText())
+		fieldType, fieldFound := tc.info.Field(structType, fieldIdent.Value())
 		if !fieldFound {
-			tc.reportError(type_error.NewUnexpectedStructField(fieldIdents[i], defStructType))
+			tc.reportError(type_error.NewUnexpectedStructField(fieldIdent, defStructType))
 			continue
 		}
 
@@ -529,49 +540,45 @@ func (tc *typeChecker) VisitExprStruct(ctx *parser.ExprStructContext) any {
 	return tc.registerType(ctx, structType)
 }
 
-func (tc *typeChecker) VisitExprStructField(ctx *parser.ExprStructFieldContext) any {
-	return nil
-}
+func (tc *typeChecker) visitFieldAccess(ctx *ast.FieldAccessExpr) types.Type {
 
-func (tc *typeChecker) VisitExprFieldAccess(ctx *parser.ExprFieldAccessContext) any {
-
-	baseType := tc.visitExpr(ctx.Expr())
+	baseType := tc.visitExpr(ctx.Object)
 	if baseType.IsInvalid() {
 		return tc.registerType(ctx, types.Invalid())
 	}
 
-	fieldName := ctx.Ident().GetText()
+	fieldName := ctx.Field.Value()
 	fieldType, found := tc.info.Field(baseType, fieldName)
 	if !found {
-		tc.reportError(type_error.NewFieldAccessUnknownField(ctx.Ident(), baseType))
+		tc.reportError(type_error.NewFieldAccessUnknownField(ctx.Field, baseType))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
 	switch fieldType.(type) {
 	case *types.FunctionType, *types.ClosureType:
 		if !fieldType.Roles().IsComplete() {
-			tc.reportError(type_error.NewIncompleteFunction(ctx.Ident(), fieldType))
+			tc.reportError(type_error.NewIncompleteFunction(ctx.Field, fieldType))
 		}
 	}
 
 	return tc.registerType(ctx, fieldType)
 }
 
-func (tc *typeChecker) VisitExprIndex(ctx *parser.ExprIndexContext) any {
-	baseType := tc.visitExpr(ctx.GetBaseExpr())
+func (tc *typeChecker) visitIndex(ctx *ast.IndexExpr) types.Type {
+	baseType := tc.visitExpr(ctx.Object)
 
 	listType, isList := baseType.(*types.ListType)
 	if !isList {
-		tc.reportError(type_error.NewIndexWrongBaseType(ctx.GetBaseExpr(), baseType))
+		tc.reportError(type_error.NewIndexWrongBaseType(ctx.Object, baseType))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
 	innerType := listType.Inner()
 
-	indexTypeRaw := tc.visitExpr(ctx.GetIndexExpr())
+	indexTypeRaw := tc.visitExpr(ctx.Index)
 	indexType, ok := indexTypeRaw.CoerceTo(types.Int(indexTypeRaw.Roles().Participants()))
 	if !ok {
-		tc.reportError(type_error.NewInvalidValue(ctx.GetIndexExpr(), indexTypeRaw, types.Int(indexTypeRaw.Roles().Participants())))
+		tc.reportError(type_error.NewInvalidValue(ctx.Index, indexTypeRaw, types.Int(indexTypeRaw.Roles().Participants())))
 		return tc.registerType(ctx, types.Invalid())
 	}
 
@@ -589,12 +596,8 @@ func (tc *typeChecker) VisitExprIndex(ctx *parser.ExprIndexContext) any {
 	return tc.registerType(ctx, limitedInnerType)
 }
 
-func (tc *typeChecker) VisitExprList(ctx *parser.ExprListContext) any {
-	if ctx == nil {
-		return tc.registerType(ctx, types.Invalid())
-	}
-
-	if len(ctx.AllExpr()) == 0 {
+func (tc *typeChecker) visitList(ctx *ast.ListExpr) types.Type {
+	if len(ctx.Elements) == 0 {
 		if tc.currentTypeHint != nil {
 			if _, isList := tc.currentTypeHint.(*types.ListType); isList {
 				return tc.registerType(ctx, tc.currentTypeHint)
@@ -606,7 +609,7 @@ func (tc *typeChecker) VisitExprList(ctx *parser.ExprListContext) any {
 	}
 
 	var exprType types.Type = nil
-	for _, expr := range ctx.AllExpr() {
+	for _, expr := range ctx.Elements {
 		if exprType == nil {
 			exprType = tc.visitExpr(expr)
 		} else {
@@ -619,13 +622,9 @@ func (tc *typeChecker) VisitExprList(ctx *parser.ExprListContext) any {
 	return tc.registerType(ctx, types.List(exprType))
 }
 
-func (tc *typeChecker) VisitIdentAccess(ctx *parser.IdentAccessContext) any {
-	return nil
-}
-
-func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
-	sig := ctx.ClosureSig()
-	if sig == nil || sig.FuncParamList() == nil {
+func (tc *typeChecker) visitClosure(ctx *ast.ClosureExpr) types.Type {
+	sig := ctx.ClosureSig
+	if sig == nil || sig.Params == nil {
 		// parser error
 		return tc.registerType(ctx, types.Invalid())
 	}
@@ -637,14 +636,14 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 	closureType := t.(*types.ClosureType)
 
 	// enter scope
-	tc.currentScope = tc.currentScope.MakeChild(ctx.Scope().GetStart(), ctx.Scope().GetStop(), closureType.Roles().Participants())
-	closureEnv := sym_table.NewClosureEnv(tc.currentScope, closureType, sig.GetReturnType())
+	tc.currentScope = tc.currentScope.MakeChild(nodeSpan(ctx.Scope), closureType.Roles().Participants())
+	closureEnv := sym_table.NewClosureEnv(tc.currentScope, closureType, sig.ReturnType)
 	tc.currentScope.SetCallableEnv(closureEnv)
 
 	// add params to scope
-	sig.FuncParamList().Accept(tc)
+	tc.visitFuncParams(sig.Params)
 
-	returnsValue := ctx.Scope().Accept(tc) == true
+	returnsValue := tc.visitScope(ctx.Scope)
 	if !returnsValue && closureType.ReturnType() != types.Unit() {
 		tc.reportError(type_error.NewFunctionMissingReturn(closureEnv))
 	}
@@ -658,8 +657,4 @@ func (tc *typeChecker) VisitExprClosure(ctx *parser.ExprClosureContext) any {
 	}
 
 	return tc.registerType(ctx, closureType)
-}
-
-func (tc *typeChecker) VisitClosureSig(ctx *parser.ClosureSigContext) any {
-	return nil
 }

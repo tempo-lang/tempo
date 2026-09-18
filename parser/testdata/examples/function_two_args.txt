@@ -1,0 +1,20 @@
+func@(A,B,C) foo(fst: Float@A, snd: String@[A,B]) {}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)
+        (role C)) foo
+      (params
+        (param fst
+          (named-type Float
+            (role-type
+              (role A))))
+        (param snd
+          (named-type String
+            (shared-role-type
+              (role A)
+              (role B))))))
+    (scope "{" "}")))

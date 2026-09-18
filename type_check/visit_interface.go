@@ -1,51 +1,30 @@
 package type_check
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 )
 
-func (tc *typeChecker) VisitInterface(ctx *parser.InterfaceContext) any {
+func (tc *typeChecker) visitInterface(inf *ast.Interface) {
 	// interfaces are already resolved by addGlobalSymbols
-	sym, found := tc.info.Symbols[ctx.Ident()].(*sym_table.InterfaceSymbol)
-	if !found {
-		// was not found if interface has parser errors
-		return nil
-	}
-
-	tc.currentScope = sym.Scope()
-
-	ctx.InterfaceMethodsList().Accept(tc)
-
-	tc.currentScope = tc.currentScope.Parent()
-	return nil
-}
-
-func (tc *typeChecker) VisitInterfaceMethodsList(ctx *parser.InterfaceMethodsListContext) any {
-
-	for _, mtd := range ctx.AllInterfaceMethod() {
-		mtd.Accept(tc)
-	}
-
-	return nil
-}
-
-func (tc *typeChecker) VisitInterfaceMethod(ctx *parser.InterfaceMethodContext) any {
-	sym, ok := tc.addFuncSymbol(ctx.FuncSig(), ctx)
+	sym, ok := tc.info.Symbols[inf.Name].(*sym_table.InterfaceSymbol)
 	if !ok {
-		return nil
+		return
 	}
-
-	funcSym := sym.(*sym_table.FuncSymbol)
-
-	infSym := tc.currentScope.GetInterface()
-	infSym.AddMethod(funcSym)
-
-	tc.checkRolesInScope(ctx.FuncSig().RoleType())
-
-	tc.currentScope = funcSym.Scope()
-	ctx.FuncSig().Accept(tc)
+	tc.currentScope = sym.Scope()
+	for _, method := range inf.Methods.Methods {
+		s, ok := tc.addFuncSymbol(method.FuncSig, method)
+		if !ok {
+			continue
+		}
+		fn := s.(*sym_table.FuncSymbol)
+		sym.AddMethod(fn)
+		if method.FuncSig.RoleType != nil {
+			tc.checkRolesInScope(method.FuncSig.RoleType)
+		}
+		tc.currentScope = fn.Scope()
+		tc.visitFuncParams(method.FuncSig.Params)
+		tc.currentScope = tc.currentScope.Parent()
+	}
 	tc.currentScope = tc.currentScope.Parent()
-
-	return nil
 }

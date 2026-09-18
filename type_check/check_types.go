@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
 )
 
-func (tc *typeChecker) mergeTypes(expr parser.IExprContext, a, b types.Type) (types.Type, bool) {
+func (tc *typeChecker) mergeTypes(expr ast.Expr, a, b types.Type) (types.Type, bool) {
 	if a.Roles().IsDistributedRole() && !b.Roles().IsDistributedRole() {
 		tc.reportError(type_error.NewUnmergableRoles(expr, []*types.Roles{a.Roles(), b.Roles()}))
 		return types.Invalid(), false

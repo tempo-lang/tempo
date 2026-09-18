@@ -1,0 +1,44 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B) main() {
+  let pair: Pair@(A,_) = Pair@(A,B) { x: 10, y: 20 };
+}
+---
+(source-file
+  (struct
+    (role-type
+      (role A)
+      (role B)) Pair
+    (struct-body
+      (struct-field x
+        (named-type Int
+          (role-type
+            (role A))))
+      (struct-field y
+        (named-type Int
+          (role-type
+            (role B))))))
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) main
+      (params))
+    (scope "{"
+      (let pair
+        (type
+          (named-type Pair
+            (role-type
+              (role A)
+              (role _))))
+        (struct-expr Pair
+          (role-type
+            (role A)
+            (role B))
+          (field-init x
+            (int 10))
+          (field-init y
+            (int 20)) "}") ";") "}")))

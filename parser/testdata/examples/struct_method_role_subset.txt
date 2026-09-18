@@ -1,0 +1,16 @@
+struct@(A,B) Foo {
+  func@(A) onlyAtA() {}
+}
+---
+(source-file
+  (struct
+    (role-type
+      (role A)
+      (role B)) Foo
+    (struct-body
+      (func
+        (func-sig
+          (role-type
+            (role A)) onlyAtA
+          (params))
+        (scope "{" "}")))))

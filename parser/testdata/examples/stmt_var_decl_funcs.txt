@@ -1,0 +1,59 @@
+func@X call(val: Int@X) {}
+
+func@(A,B) foo() {
+  let x: func@A(Int@A) = call@A;
+  let y: func@B(Int@B) = call@B;
+
+  let val = 10;
+  x(val);
+  y(val);
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role X)) call
+      (params
+        (param val
+          (named-type Int
+            (role-type
+              (role X))))))
+    (scope "{" "}"))
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) foo
+      (params))
+    (scope "{"
+      (let x
+        (type
+          (closure-type
+            (role-type
+              (role A))
+            (type-params
+              (named-type Int
+                (role-type
+                  (role A))))))
+        (at call
+          (role-type
+            (role A))) ";")
+      (let y
+        (type
+          (closure-type
+            (role-type
+              (role B))
+            (type-params
+              (named-type Int
+                (role-type
+                  (role B))))))
+        (at call
+          (role-type
+            (role B))) ";")
+      (let val
+        (int 10) ";")
+      (expr
+        (call x val ")") ";")
+      (expr
+        (call y val ")") ";") "}")))

@@ -1,0 +1,80 @@
+struct@(A,B) Pair {
+  x: Int@A;
+  y: Int@B;
+}
+
+func@(A,B,C) foo() {
+  let pair: [Pair@(A,B)] = [Pair@(A,B) { x: 10, y: 20 }];
+
+  let i = 0@A;
+  let x: Int@A = pair[i].x; // valid since `i` and `x` both at `A`
+
+  if true@B {
+    let y: Int@B = pair[0].y; // valid since `y` at `B` which is in scope
+  }
+}
+---
+(source-file
+  (struct
+    (role-type
+      (role A)
+      (role B)) Pair
+    (struct-body
+      (struct-field x
+        (named-type Int
+          (role-type
+            (role A))))
+      (struct-field y
+        (named-type Int
+          (role-type
+            (role B))))))
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)
+        (role C)) foo
+      (params))
+    (scope "{"
+      (let pair
+        (type
+          (list-type
+            (named-type Pair
+              (role-type
+                (role A)
+                (role B))) "]"))
+        (list
+          (struct-expr Pair
+            (role-type
+              (role A)
+              (role B))
+            (field-init x
+              (int 10))
+            (field-init y
+              (int 20)) "}") "]") ";")
+      (let i
+        (at
+          (int 0)
+          (role-type
+            (role A))) ";")
+      (let x
+        (type
+          (named-type Int
+            (role-type
+              (role A))))
+        (field
+          (index pair i "]") x) ";")
+      (if
+        (at
+          (bool true)
+          (role-type
+            (role B)))
+        (scope "{"
+          (let y
+            (type
+              (named-type Int
+                (role-type
+                  (role B))))
+            (field
+              (index pair
+                (int 0) "]") y) ";") "}")) "}")))

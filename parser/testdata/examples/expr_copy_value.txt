@@ -1,0 +1,30 @@
+func@(A,B) foo() {
+  let x: [Int@[A,B]] = [1,2,3];
+  let y: [Int@A] = x;
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) foo
+      (params))
+    (scope "{"
+      (let x
+        (type
+          (list-type
+            (named-type Int
+              (shared-role-type
+                (role A)
+                (role B))) "]"))
+        (list
+          (int 1)
+          (int 2)
+          (int 3) "]") ";")
+      (let y
+        (type
+          (list-type
+            (named-type Int
+              (role-type
+                (role A))) "]")) x ";") "}")))

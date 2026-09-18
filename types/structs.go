@@ -3,12 +3,12 @@ package types
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 )
 
 type StructType struct {
 	baseType
-	structIdent parser.IIdentContext
+	structIdent *ast.Identifier
 	roles       *Roles
 	substMap    *RoleSubst
 	implements  []Type
@@ -87,13 +87,13 @@ func (t *StructType) IsEquatable() bool {
 
 func (t *StructType) ToString() string {
 	if t.Roles().IsUnnamedRole() {
-		return fmt.Sprintf("struct %s", t.structIdent.GetText())
+		return fmt.Sprintf("struct %s", t.structIdent.Value())
 	} else {
-		return fmt.Sprintf("struct@%s %s", t.Roles().ToString(), t.structIdent.GetText())
+		return fmt.Sprintf("struct@%s %s", t.Roles().ToString(), t.structIdent.Value())
 	}
 }
 
-func Struct(structIdent parser.IIdentContext, roles *Roles, implements []Type) Type {
+func Struct(structIdent *ast.Identifier, roles *Roles, implements []Type) Type {
 	substMap, ok := roles.SubstituteMap(roles)
 	if !ok {
 		panic("should always be ok to substitute with itself")
@@ -103,10 +103,10 @@ func Struct(structIdent parser.IIdentContext, roles *Roles, implements []Type) T
 }
 
 func (t *StructType) Name() string {
-	return t.structIdent.GetText()
+	return t.structIdent.Value()
 }
 
-func (t *StructType) Ident() parser.IIdentContext {
+func (t *StructType) Ident() *ast.Identifier {
 	return t.structIdent
 }
 

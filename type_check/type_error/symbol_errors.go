@@ -3,20 +3,19 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/types"
 
-	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/parser/ast"
 )
 
 type SymbolAlreadyExists struct {
 	baseError
-	ExistingSymbol parser.IIdentContext
-	NewSymbol      parser.IIdentContext
+	ExistingSymbol *ast.Identifier
+	NewSymbol      *ast.Identifier
 }
 
-func NewSymbolAlreadyExistsError(existing parser.IIdentContext, newSym parser.IIdentContext) Error {
+func NewSymbolAlreadyExistsError(existing *ast.Identifier, newSym *ast.Identifier) Error {
 	return &SymbolAlreadyExists{
 		ExistingSymbol: existing,
 		NewSymbol:      newSym,
@@ -24,10 +23,10 @@ func NewSymbolAlreadyExistsError(existing parser.IIdentContext, newSym parser.II
 }
 
 func (s *SymbolAlreadyExists) Error() string {
-	return fmt.Sprintf("symbol `%s` is already declared", s.NewSymbol.GetText())
+	return fmt.Sprintf("symbol `%s` is already declared", s.NewSymbol.Value())
 }
 
-func (e *SymbolAlreadyExists) ParserRule() antlr.ParserRuleContext {
+func (e *SymbolAlreadyExists) ParserRule() ast.Node {
 	return e.NewSymbol
 }
 
@@ -44,20 +43,20 @@ func (e *SymbolAlreadyExists) RelatedInfo() []RelatedInfo {
 
 type UnknownSymbol struct {
 	baseError
-	SymName parser.IIdentContext
+	SymName *ast.Identifier
 }
 
-func NewUnknownSymbol(symName parser.IIdentContext) Error {
+func NewUnknownSymbol(symName *ast.Identifier) Error {
 	return &UnknownSymbol{
 		SymName: symName,
 	}
 }
 
 func (e *UnknownSymbol) Error() string {
-	return fmt.Sprintf("value `%s` is undefined or not in scope", e.SymName.GetText())
+	return fmt.Sprintf("value `%s` is undefined or not in scope", e.SymName.Value())
 }
 
-func (e *UnknownSymbol) ParserRule() antlr.ParserRuleContext {
+func (e *UnknownSymbol) ParserRule() ast.Node {
 	return e.SymName
 }
 
@@ -67,7 +66,7 @@ func (e *UnknownSymbol) Code() ErrorCode {
 
 type UnassignableSymbol struct {
 	baseError
-	Assign *parser.StmtAssignContext
+	Assign *ast.AssignStmt
 	Type   types.Type
 }
 
@@ -75,7 +74,7 @@ func (u *UnassignableSymbol) Error() string {
 	return fmt.Sprintf("type `%s` is not assignable", u.Type.ToString())
 }
 
-func (u *UnassignableSymbol) ParserRule() antlr.ParserRuleContext {
+func (u *UnassignableSymbol) ParserRule() ast.Node {
 	return u.Assign
 }
 
@@ -83,7 +82,7 @@ func (e *UnassignableSymbol) Code() ErrorCode {
 	return CodeUnassignableSymbol
 }
 
-func NewUnassignableSymbol(assign *parser.StmtAssignContext, symType types.Type) Error {
+func NewUnassignableSymbol(assign *ast.AssignStmt, symType types.Type) Error {
 	return &UnassignableSymbol{
 		Assign: assign,
 		Type:   symType,
@@ -92,15 +91,15 @@ func NewUnassignableSymbol(assign *parser.StmtAssignContext, symType types.Type)
 
 type FieldAccessUnknownField struct {
 	baseError
-	FieldIdent parser.IIdentContext
+	FieldIdent *ast.Identifier
 	BaseType   types.Type
 }
 
 func (e *FieldAccessUnknownField) Error() string {
-	return fmt.Sprintf("value of type `%s` has not field named `%s`", e.BaseType.ToString(), e.FieldIdent.GetText())
+	return fmt.Sprintf("value of type `%s` has not field named `%s`", e.BaseType.ToString(), e.FieldIdent.Value())
 }
 
-func (e *FieldAccessUnknownField) ParserRule() antlr.ParserRuleContext {
+func (e *FieldAccessUnknownField) ParserRule() ast.Node {
 	return e.FieldIdent
 }
 
@@ -108,7 +107,7 @@ func (e *FieldAccessUnknownField) Code() ErrorCode {
 	return CodeFieldAccessUnknownField
 }
 
-func NewFieldAccessUnknownField(fieldIdent parser.IIdentContext, baseType types.Type) Error {
+func NewFieldAccessUnknownField(fieldIdent *ast.Identifier, baseType types.Type) Error {
 	return &FieldAccessUnknownField{
 		FieldIdent: fieldIdent,
 		BaseType:   baseType,
@@ -118,14 +117,14 @@ func NewFieldAccessUnknownField(fieldIdent parser.IIdentContext, baseType types.
 type ExpectedInterfaceType struct {
 	baseError
 	sym   sym_table.Symbol
-	ident parser.IIdentContext
+	ident *ast.Identifier
 }
 
 func (e *ExpectedInterfaceType) Error() string {
 	return fmt.Sprintf("type `%s` is not an interface", e.sym.Type().ToString())
 }
 
-func (e *ExpectedInterfaceType) ParserRule() antlr.ParserRuleContext {
+func (e *ExpectedInterfaceType) ParserRule() ast.Node {
 	return e.ident
 }
 
@@ -133,7 +132,7 @@ func (e *ExpectedInterfaceType) Code() ErrorCode {
 	return CodeExpectedInterfaceType
 }
 
-func NewExpectedInterfaceType(sym sym_table.Symbol, ident parser.IIdentContext) Error {
+func NewExpectedInterfaceType(sym sym_table.Symbol, ident *ast.Identifier) Error {
 	return &ExpectedInterfaceType{
 		sym:   sym,
 		ident: ident,

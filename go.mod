@@ -6,7 +6,6 @@ toolchain go1.24.3
 
 require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
-	github.com/antlr4-go/antlr/v4 v4.13.1
 	github.com/fatih/color v1.18.0
 	github.com/google/go-cmp v0.7.0
 	github.com/spf13/cobra v1.8.1
@@ -37,7 +36,4 @@ require (
 	golang.org/x/term v0.32.0 // indirect
 )
 
-require (
-	github.com/dave/jennifer v1.7.1
-	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // indirect
-)
+require github.com/dave/jennifer v1.7.1

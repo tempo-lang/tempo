@@ -1,0 +1,19 @@
+func@(A,B) shared() {
+  let x: Int@[A,B] = 10;
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) shared
+      (params))
+    (scope "{"
+      (let x
+        (type
+          (named-type Int
+            (shared-role-type
+              (role A)
+              (role B))))
+        (int 10) ";") "}")))

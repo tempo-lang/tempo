@@ -1,7 +1,6 @@
 package projection
 
 import (
-	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 )
 
@@ -207,39 +206,6 @@ const (
 	// For [BoolType] values, eagerly evaluates whether one of the values is false.
 	OpOr Operator = "||"
 )
-
-func ParseOperator(binOp *parser.ExprBinOpContext) Operator {
-	var operator Operator
-	switch {
-	case binOp.PLUS() != nil:
-		operator = OpAdd
-	case binOp.MINUS() != nil:
-		operator = OpSub
-	case binOp.MULTIPLY() != nil:
-		operator = OpMul
-	case binOp.DIVIDE() != nil:
-		operator = OpDiv
-	case binOp.MODULO() != nil:
-		operator = OpMod
-	case binOp.EQUAL() != nil:
-		operator = OpEq
-	case binOp.NOT_EQUAL() != nil:
-		operator = OpNotEq
-	case binOp.LESS() != nil:
-		operator = OpLess
-	case binOp.LESS_EQ() != nil:
-		operator = OpLessEq
-	case binOp.GREATER() != nil:
-		operator = OpGreater
-	case binOp.GREATER_EQ() != nil:
-		operator = OpGreaterEq
-	case binOp.AND() != nil:
-		operator = OpAnd
-	case binOp.OR() != nil:
-		operator = OpOr
-	}
-	return operator
-}
 
 type ExprBinaryOp struct {
 	Operator Operator
@@ -477,7 +443,7 @@ type ExprStruct struct {
 }
 
 func (e *ExprStruct) Name() string {
-	return e.StructType.Ident().GetText()
+	return e.StructType.Ident().Value()
 }
 
 func (e *ExprStruct) Role() string {

@@ -1,0 +1,47 @@
+interface@(A,B) Action {
+  func@(A,B) foo();
+  func@A callA();
+  func@B callB();
+}
+
+func@(X,Y) start(action: Action@(X,Y)) {
+  action.foo();
+}
+---
+(source-file
+  (interface
+    (role-type
+      (role A)
+      (role B)) Action
+    (methods
+      (method
+        (func-sig
+          (role-type
+            (role A)
+            (role B)) foo
+          (params)))
+      (method
+        (func-sig
+          (role-type
+            (role A)) callA
+          (params)))
+      (method
+        (func-sig
+          (role-type
+            (role B)) callB
+          (params)))))
+  (func
+    (func-sig
+      (role-type
+        (role X)
+        (role Y)) start
+      (params
+        (param action
+          (named-type Action
+            (role-type
+              (role X)
+              (role Y))))))
+    (scope "{"
+      (expr
+        (call
+          (field action foo) ")") ";") "}")))

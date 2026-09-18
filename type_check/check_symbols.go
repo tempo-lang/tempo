@@ -1,18 +1,18 @@
 package type_check
 
 import (
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 )
 
-func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
-	for _, inf := range sourceFile.AllInterface_() {
+func (tc *typeChecker) addGlobalSymbols(sourceFile *ast.SourceFile) {
+	for _, inf := range sourceFile.Interfaces {
 		infType, ok := tc.parseInterfaceType(inf)
 		if !ok {
 			continue
 		}
 
-		infScope := tc.currentScope.MakeChild(inf.GetStart(), inf.GetStop(), infType.Roles().Participants())
+		infScope := tc.currentScope.MakeChild(nodeSpan(inf), infType.Roles().Participants())
 		tc.currentScope = infScope
 
 		infSym := sym_table.NewInterfaceSymbol(inf, infScope, infType)
@@ -23,13 +23,13 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		tc.insertSymbol(infSym)
 	}
 
-	for _, st := range sourceFile.AllStruct_() {
+	for _, st := range sourceFile.Structs {
 		stType, ok := tc.parseStructType(st)
 		if !ok {
 			continue
 		}
 
-		structScope := tc.currentScope.MakeChild(st.GetStart(), st.GetStop(), stType.Roles().Participants())
+		structScope := tc.currentScope.MakeChild(nodeSpan(st), stType.Roles().Participants())
 		tc.currentScope = structScope
 
 		structSym := sym_table.NewStructSymbol(st, structScope, stType)
@@ -40,7 +40,7 @@ func (tc *typeChecker) addGlobalSymbols(sourceFile *parser.SourceFileContext) {
 		tc.insertSymbol(structSym)
 	}
 
-	for _, fn := range sourceFile.AllFunc_() {
-		tc.addFuncSymbol(fn.FuncSig(), fn)
+	for _, fn := range sourceFile.Functions {
+		tc.addFuncSymbol(fn.FuncSig, fn)
 	}
 }

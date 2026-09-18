@@ -3,8 +3,7 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/antlr4-go/antlr/v4"
-	"github.com/tempo-lang/tempo/parser"
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/sym_table"
 	"github.com/tempo-lang/tempo/types"
 )
@@ -12,14 +11,14 @@ import (
 type ExpectedStructType struct {
 	baseError
 	sym  sym_table.Symbol
-	expr *parser.ExprStructContext
+	expr *ast.StructExpr
 }
 
 func (e *ExpectedStructType) Error() string {
 	return fmt.Sprintf("type `%s` is not a struct", e.sym.Type().ToString())
 }
 
-func (e *ExpectedStructType) ParserRule() antlr.ParserRuleContext {
+func (e *ExpectedStructType) ParserRule() ast.Node {
 	return e.expr
 }
 
@@ -27,7 +26,7 @@ func (e *ExpectedStructType) Code() ErrorCode {
 	return CodeExpectedStructType
 }
 
-func NewExpectedStructType(sym sym_table.Symbol, expr *parser.ExprStructContext) Error {
+func NewExpectedStructType(sym sym_table.Symbol, expr *ast.StructExpr) Error {
 	return &ExpectedStructType{
 		sym:  sym,
 		expr: expr,
@@ -36,15 +35,15 @@ func NewExpectedStructType(sym sym_table.Symbol, expr *parser.ExprStructContext)
 
 type UnexpectedStructField struct {
 	baseError
-	ident      parser.IIdentContext
+	ident      *ast.Identifier
 	structType *types.StructType
 }
 
 func (e *UnexpectedStructField) Error() string {
-	return fmt.Sprintf("unexpected field `%s` in struct `%s`", e.ident.GetText(), e.structType.Name())
+	return fmt.Sprintf("unexpected field `%s` in struct `%s`", e.ident.Value(), e.structType.Name())
 }
 
-func (e *UnexpectedStructField) ParserRule() antlr.ParserRuleContext {
+func (e *UnexpectedStructField) ParserRule() ast.Node {
 	return e.ident
 }
 
@@ -52,7 +51,7 @@ func (e *UnexpectedStructField) Code() ErrorCode {
 	return CodeUnexpectedStructField
 }
 
-func NewUnexpectedStructField(ident parser.IIdentContext, structType *types.StructType) Error {
+func NewUnexpectedStructField(ident *ast.Identifier, structType *types.StructType) Error {
 	return &UnexpectedStructField{
 		ident:      ident,
 		structType: structType,
@@ -61,7 +60,7 @@ func NewUnexpectedStructField(ident parser.IIdentContext, structType *types.Stru
 
 type MissingStructField struct {
 	baseError
-	expr       *parser.ExprStructContext
+	expr       *ast.StructExpr
 	field      string
 	structType *types.StructType
 }
@@ -70,7 +69,7 @@ func (e *MissingStructField) Error() string {
 	return fmt.Sprintf("missing field `%s` in struct `%s`", e.field, e.structType.Name())
 }
 
-func (e *MissingStructField) ParserRule() antlr.ParserRuleContext {
+func (e *MissingStructField) ParserRule() ast.Node {
 	return e.expr
 }
 
@@ -78,7 +77,7 @@ func (e *MissingStructField) Code() ErrorCode {
 	return CodeMissingStructField
 }
 
-func NewMissingStructField(expr *parser.ExprStructContext, field string, structType *types.StructType) Error {
+func NewMissingStructField(expr *ast.StructExpr, field string, structType *types.StructType) Error {
 	return &MissingStructField{
 		expr:       expr,
 		field:      field,
@@ -88,16 +87,16 @@ func NewMissingStructField(expr *parser.ExprStructContext, field string, structT
 
 type DuplicateStructField struct {
 	baseError
-	expr           *parser.ExprStructContext
-	fieldDuplicate parser.IIdentContext
-	fieldFirst     parser.IIdentContext
+	expr           *ast.StructExpr
+	fieldDuplicate *ast.Identifier
+	fieldFirst     *ast.Identifier
 }
 
 func (e *DuplicateStructField) Error() string {
-	return fmt.Sprintf("duplicate field `%s`", e.fieldDuplicate.GetText())
+	return fmt.Sprintf("duplicate field `%s`", e.fieldDuplicate.Value())
 }
 
-func (e *DuplicateStructField) ParserRule() antlr.ParserRuleContext {
+func (e *DuplicateStructField) ParserRule() ast.Node {
 	return e.fieldDuplicate
 }
 
@@ -112,7 +111,7 @@ func (e *DuplicateStructField) Code() ErrorCode {
 	return CodeDuplicateStructField
 }
 
-func NewDuplicateStructField(expr *parser.ExprStructContext, fieldFirst parser.IIdentContext, fieldDuplicate parser.IIdentContext) Error {
+func NewDuplicateStructField(expr *ast.StructExpr, fieldFirst *ast.Identifier, fieldDuplicate *ast.Identifier) Error {
 	return &DuplicateStructField{
 		expr:           expr,
 		fieldDuplicate: fieldDuplicate,
@@ -122,12 +121,12 @@ func NewDuplicateStructField(expr *parser.ExprStructContext, fieldFirst parser.I
 
 type HiddenStructField struct {
 	baseError
-	Expr      *parser.ExprStructContext
-	Field     parser.IIdentContext
+	Expr      *ast.StructExpr
+	Field     *ast.Identifier
 	FieldType types.Type
 }
 
-func NewHiddenStructField(expr *parser.ExprStructContext, field parser.IIdentContext, fieldType types.Type) Error {
+func NewHiddenStructField(expr *ast.StructExpr, field *ast.Identifier, fieldType types.Type) Error {
 	return &HiddenStructField{
 		Expr:      expr,
 		Field:     field,
@@ -136,10 +135,10 @@ func NewHiddenStructField(expr *parser.ExprStructContext, field parser.IIdentCon
 }
 
 func (e *HiddenStructField) Error() string {
-	return fmt.Sprintf("hidden field `%s` of type `%s`", e.Field.GetText(), e.FieldType.ToString())
+	return fmt.Sprintf("hidden field `%s` of type `%s`", e.Field.Value(), e.FieldType.ToString())
 }
 
-func (e *HiddenStructField) ParserRule() antlr.ParserRuleContext {
+func (e *HiddenStructField) ParserRule() ast.Node {
 	return e.Field
 }
 
@@ -151,7 +150,7 @@ func (e *HiddenStructField) Annotations() []Annotation {
 	return []Annotation{
 		{
 			Type:    AnnotationTypeHint,
-			Message: fmt.Sprintf("remove the hidden field `%s` from the constructor", e.Field.GetText()),
+			Message: fmt.Sprintf("remove the hidden field `%s` from the constructor", e.Field.Value()),
 		},
 	}
 }
@@ -159,7 +158,7 @@ func (e *HiddenStructField) Annotations() []Annotation {
 type StructWrongRoleCount struct {
 	baseError
 	sym        sym_table.Symbol
-	roleType   parser.IRoleIdentContext
+	roleType   *ast.RoleIdent
 	parsedRole *types.Roles
 }
 
@@ -167,7 +166,7 @@ func (e *StructWrongRoleCount) Error() string {
 	return fmt.Sprintf("wrong number of roles in `%s`", e.sym.SymbolName())
 }
 
-func (e *StructWrongRoleCount) ParserRule() antlr.ParserRuleContext {
+func (e *StructWrongRoleCount) ParserRule() ast.Node {
 	return e.roleType
 }
 
@@ -175,7 +174,7 @@ func (e *StructWrongRoleCount) Code() ErrorCode {
 	return CodeStructWrongRoleCount
 }
 
-func NewWrongRoleCount(sym sym_table.Symbol, roleType parser.IRoleIdentContext, parsedRole *types.Roles) Error {
+func NewWrongRoleCount(sym sym_table.Symbol, roleType *ast.RoleIdent, parsedRole *types.Roles) Error {
 	return &StructWrongRoleCount{
 		sym:        sym,
 		roleType:   roleType,
@@ -215,9 +214,9 @@ func (e *MissingImplementationMethod) Error() string {
 	return fmt.Sprintf("struct `%s` does not implement method `%s` of interface `%s`", e.structSym.SymbolName(), e.methodName, e.interfaceSym.SymbolName())
 }
 
-func (e *MissingImplementationMethod) ParserRule() antlr.ParserRuleContext {
-	for _, impl := range e.structSym.StructCtx().StructImplements().AllRoleIdent() {
-		if impl.Ident().GetText() == e.interfaceSym.SymbolName() {
+func (e *MissingImplementationMethod) ParserRule() ast.Node {
+	for _, impl := range e.structSym.StructCtx().Implements {
+		if impl.Ident.Value() == e.interfaceSym.SymbolName() {
 			return impl
 		}
 	}
@@ -236,7 +235,7 @@ func (e *MissingImplementationMethod) RelatedInfo() []RelatedInfo {
 
 	return []RelatedInfo{{
 		Message:    "missing method declared here",
-		ParserRule: fn.FuncSig().Ident(),
+		ParserRule: fn.FuncSig().Name,
 	}}
 }
 
@@ -292,11 +291,11 @@ type IncompatibleImplementationMethod struct {
 func (e *IncompatibleImplementationMethod) Error() string {
 	return fmt.Sprintf(
 		"method `%s` does not match the signature required by interface `%s`",
-		e.structFn.NameIdent().GetText(), e.interfaceSym.SymbolName(),
+		e.structFn.NameIdent().Value(), e.interfaceSym.SymbolName(),
 	)
 }
 
-func (e *IncompatibleImplementationMethod) ParserRule() antlr.ParserRuleContext {
+func (e *IncompatibleImplementationMethod) ParserRule() ast.Node {
 	return e.structFn.FuncSig()
 }
 
@@ -307,7 +306,7 @@ func (e *IncompatibleImplementationMethod) Code() ErrorCode {
 func (e *IncompatibleImplementationMethod) RelatedInfo() []RelatedInfo {
 	return []RelatedInfo{{
 		Message:    "interface method declared here",
-		ParserRule: e.interfaceFn.FuncSig().Ident(),
+		ParserRule: e.interfaceFn.FuncSig().Name,
 	}}
 }
 

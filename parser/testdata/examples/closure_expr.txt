@@ -1,0 +1,48 @@
+func@(A,B) foo() {
+  let closure = func@(A,B) (input: Int@A) Int@B {
+    return await A->B input;
+  };
+
+  let result: Int@B = closure(10@A);
+}
+---
+(source-file
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) foo
+      (params))
+    (scope "{"
+      (let closure
+        (closure
+          (closure-sig
+            (role-type
+              (role A)
+              (role B))
+            (params
+              (param input
+                (named-type Int
+                  (role-type
+                    (role A)))))
+            (named-type Int
+              (role-type
+                (role B))))
+          (scope "{"
+            (return
+              (await
+                (com
+                  (role-type
+                    (role A))
+                  (role-type
+                    (role B)) input)) ";") "}")) ";")
+      (let result
+        (type
+          (named-type Int
+            (role-type
+              (role B))))
+        (call closure
+          (at
+            (int 10)
+            (role-type
+              (role A))) ")") ";") "}")))

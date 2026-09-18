@@ -1,0 +1,48 @@
+interface@X Sum {
+  func@X sum(a: Int@X, b: Int@X) Int@X;
+}
+
+func@A foo(x: Sum@A) {
+  let value: Int@A = x.sum(10, 20);
+}
+---
+(source-file
+  (interface
+    (role-type
+      (role X)) Sum
+    (methods
+      (method
+        (func-sig
+          (role-type
+            (role X)) sum
+          (params
+            (param a
+              (named-type Int
+                (role-type
+                  (role X))))
+            (param b
+              (named-type Int
+                (role-type
+                  (role X)))))
+          (named-type Int
+            (role-type
+              (role X)))))))
+  (func
+    (func-sig
+      (role-type
+        (role A)) foo
+      (params
+        (param x
+          (named-type Sum
+            (role-type
+              (role A))))))
+    (scope "{"
+      (let value
+        (type
+          (named-type Int
+            (role-type
+              (role A))))
+        (call
+          (field x sum)
+          (int 10)
+          (int 20) ")") ";") "}")))

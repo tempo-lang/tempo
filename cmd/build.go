@@ -7,9 +7,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/antlr4-go/antlr/v4"
 	"github.com/spf13/cobra"
 	"github.com/tempo-lang/tempo/compiler"
+	"github.com/tempo-lang/tempo/parser/token"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 )
 
@@ -61,7 +61,7 @@ var buildCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		inputFile := path.Clean(args[0])
 
-		input, err := antlr.NewFileStream(inputFile)
+		data, err := os.ReadFile(inputFile)
 		if err != nil {
 			fmt.Printf("failed to get file stream: %v\n", err)
 			os.Exit(1)
@@ -77,11 +77,12 @@ var buildCmd = &cobra.Command{
 			RuntimePath: runtimePath,
 		}
 
-		output, errors := compiler.Compile(input, &options)
+		source := token.NewSource(data)
+		output, errors := compiler.Compile(source, &options)
 		if errors != nil {
 			for _, err := range errors {
 				if typeErr, ok := err.(type_error.Error); ok {
-					type_error.FormatError(os.Stdout, &input.InputStream, input.GetSourceName(), typeErr, !*disableTerminalColor)
+					type_error.FormatError(os.Stdout, source, inputFile, typeErr, !*disableTerminalColor)
 				} else {
 					fmt.Printf("%v\n", err)
 				}

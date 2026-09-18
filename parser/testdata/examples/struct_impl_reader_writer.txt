@@ -1,0 +1,125 @@
+interface@A Reader {
+  func@A read() Int@A;
+}
+
+interface@A Writer {
+  func@A write(out: Int@A);
+}
+
+struct@X Buffer implements Reader@X, Writer@X {
+  buf: Int@X;
+
+  func@X read() Int@X {
+    return buf;
+  }
+
+  func@X write(out: Int@X) {
+    buf = out;
+  }
+}
+
+func@(A,B) main() {
+  let buffer: Buffer@A = Buffer@A { buf: 10 };
+  
+  let reader: Reader@A = buffer;
+  let writer: Writer@A = buffer;
+
+  writer.write(10);
+  reader.read();
+}
+---
+(source-file
+  (interface
+    (role-type
+      (role A)) Reader
+    (methods
+      (method
+        (func-sig
+          (role-type
+            (role A)) read
+          (params)
+          (named-type Int
+            (role-type
+              (role A)))))))
+  (interface
+    (role-type
+      (role A)) Writer
+    (methods
+      (method
+        (func-sig
+          (role-type
+            (role A)) write
+          (params
+            (param out
+              (named-type Int
+                (role-type
+                  (role A)))))))))
+  (struct
+    (role-type
+      (role X)) Buffer
+    (implements Reader
+      (role-type
+        (role X)))
+    (implements Writer
+      (role-type
+        (role X)))
+    (struct-body
+      (struct-field buf
+        (named-type Int
+          (role-type
+            (role X))))
+      (func
+        (func-sig
+          (role-type
+            (role X)) read
+          (params)
+          (named-type Int
+            (role-type
+              (role X))))
+        (scope "{"
+          (return buf ";") "}"))
+      (func
+        (func-sig
+          (role-type
+            (role X)) write
+          (params
+            (param out
+              (named-type Int
+                (role-type
+                  (role X))))))
+        (scope "{"
+          (assign buf out ";") "}"))))
+  (func
+    (func-sig
+      (role-type
+        (role A)
+        (role B)) main
+      (params))
+    (scope "{"
+      (let buffer
+        (type
+          (named-type Buffer
+            (role-type
+              (role A))))
+        (struct-expr Buffer
+          (role-type
+            (role A))
+          (field-init buf
+            (int 10)) "}") ";")
+      (let reader
+        (type
+          (named-type Reader
+            (role-type
+              (role A)))) buffer ";")
+      (let writer
+        (type
+          (named-type Writer
+            (role-type
+              (role A)))) buffer ";")
+      (expr
+        (call
+          (field writer write)
+          (int 10) ")") ";")
+      (expr
+        (call
+          (field reader read) ")") ";") "}")))

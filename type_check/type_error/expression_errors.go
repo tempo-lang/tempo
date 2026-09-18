@@ -3,19 +3,18 @@ package type_error
 import (
 	"fmt"
 
-	"github.com/tempo-lang/tempo/parser"
 	"github.com/tempo-lang/tempo/types"
 
-	"github.com/antlr4-go/antlr/v4"
+	"github.com/tempo-lang/tempo/parser/ast"
 )
 
 type InvalidNumber struct {
 	baseError
-	Num    parser.ILiteralContext
+	Num    ast.Literal
 	Reason error
 }
 
-func NewInvalidNumber(num parser.ILiteralContext, reason error) Error {
+func NewInvalidNumber(num ast.Literal, reason error) Error {
 	return &InvalidNumber{
 		Num:    num,
 		Reason: reason,
@@ -23,10 +22,10 @@ func NewInvalidNumber(num parser.ILiteralContext, reason error) Error {
 }
 
 func (i *InvalidNumber) Error() string {
-	return fmt.Sprintf("value `%s` is an invalid number", i.Num.GetText())
+	return fmt.Sprintf("value `%s` is an invalid number", ast.Text(i.Num))
 }
 
-func (i *InvalidNumber) ParserRule() antlr.ParserRuleContext {
+func (i *InvalidNumber) ParserRule() ast.Node {
 	return i.Num
 }
 
@@ -43,22 +42,22 @@ func (e *InvalidNumber) Code() ErrorCode {
 
 type ComNonLocalSender struct {
 	baseError
-	Com *parser.ExprComContext
+	Com *ast.ComExpr
 }
 
 func (e *ComNonLocalSender) Error() string {
 	return "only a single sender is allowed"
 }
 
-func (e *ComNonLocalSender) ParserRule() antlr.ParserRuleContext {
-	return e.Com.GetSender()
+func (e *ComNonLocalSender) ParserRule() ast.Node {
+	return e.Com.Sender
 }
 
 func (e *ComNonLocalSender) Code() ErrorCode {
 	return CodeComNonLocalSender
 }
 
-func NewComNonLocalSender(com *parser.ExprComContext) Error {
+func NewComNonLocalSender(com *ast.ComExpr) Error {
 	return &ComNonLocalSender{
 		Com: com,
 	}
@@ -66,17 +65,17 @@ func NewComNonLocalSender(com *parser.ExprComContext) Error {
 
 type ComValueNotAtSender struct {
 	baseError
-	Com      *parser.ExprComContext
+	Com      *ast.ComExpr
 	ExprType types.Type
 }
 
 func (c *ComValueNotAtSender) Error() string {
-	sender := parser.RoleTypeAllRoles(c.Com.RoleType(0))[0]
-	return fmt.Sprintf("value of type `%s` is not present at sender `%s`", c.ExprType.ToString(), sender.GetText())
+	sender := ast.Text(c.Com.Sender)
+	return fmt.Sprintf("value of type `%s` is not present at sender `%s`", c.ExprType.ToString(), sender)
 }
 
-func (c *ComValueNotAtSender) ParserRule() antlr.ParserRuleContext {
-	return c.Com.Expr()
+func (c *ComValueNotAtSender) ParserRule() ast.Node {
+	return c.Com.Expr
 }
 
 func (e *ComValueNotAtSender) Code() ErrorCode {
@@ -103,7 +102,7 @@ func (c *ComValueNotAtSender) Annotations() []Annotation {
 	}
 }
 
-func NewComValueNotAtSender(com *parser.ExprComContext, exprType types.Type) Error {
+func NewComValueNotAtSender(com *ast.ComExpr, exprType types.Type) Error {
 	return &ComValueNotAtSender{
 		Com:      com,
 		ExprType: exprType,
@@ -112,7 +111,7 @@ func NewComValueNotAtSender(com *parser.ExprComContext, exprType types.Type) Err
 
 type UnequatableType struct {
 	baseError
-	BinOp *parser.ExprBinOpContext
+	BinOp *ast.BinaryExpr
 	Value types.Type
 }
 
@@ -120,7 +119,7 @@ func (e *UnequatableType) Error() string {
 	return fmt.Sprintf("values of type `%s` cannot be compared", e.Value.ToString())
 }
 
-func (e *UnequatableType) ParserRule() antlr.ParserRuleContext {
+func (e *UnequatableType) ParserRule() ast.Node {
 	return e.BinOp
 }
 
@@ -128,7 +127,7 @@ func (e *UnequatableType) Code() ErrorCode {
 	return CodeUnequatableType
 }
 
-func NewUnequatableType(binOp *parser.ExprBinOpContext, value types.Type) Error {
+func NewUnequatableType(binOp *ast.BinaryExpr, value types.Type) Error {
 	return &UnequatableType{
 		BinOp: binOp,
 		Value: value,
@@ -137,14 +136,14 @@ func NewUnequatableType(binOp *parser.ExprBinOpContext, value types.Type) Error 
 
 type StructNotInitialized struct {
 	baseError
-	Ident *parser.ExprIdentContext
+	Ident *ast.IdentAccessExpr
 }
 
 func (e *StructNotInitialized) Error() string {
-	return fmt.Sprintf("struct `%s` is not initialized", e.Ident.GetText())
+	return fmt.Sprintf("struct `%s` is not initialized", e.Ident.Ident.Value())
 }
 
-func (e *StructNotInitialized) ParserRule() antlr.ParserRuleContext {
+func (e *StructNotInitialized) ParserRule() ast.Node {
 	return e.Ident
 }
 
@@ -155,11 +154,11 @@ func (e *StructNotInitialized) Code() ErrorCode {
 func (e *StructNotInitialized) Annotations() []Annotation {
 	return []Annotation{{
 		Type:    "hint",
-		Message: fmt.Sprintf("add roles after the name of the structure, like %s@(A,B,C)", e.Ident.GetText()),
+		Message: fmt.Sprintf("add roles after the name of the structure, like %s@(A,B,C)", e.Ident.Ident.Value()),
 	}}
 }
 
-func NewStructNotInitialized(ident *parser.ExprIdentContext) Error {
+func NewStructNotInitialized(ident *ast.IdentAccessExpr) Error {
 	return &StructNotInitialized{
 		Ident: ident,
 	}
@@ -167,14 +166,14 @@ func NewStructNotInitialized(ident *parser.ExprIdentContext) Error {
 
 type TypeNotAnExpression struct {
 	baseError
-	Ident *parser.ExprIdentContext
+	Ident *ast.IdentAccessExpr
 }
 
 func (e *TypeNotAnExpression) Error() string {
-	return fmt.Sprintf("type `%s` is not an expression", e.Ident.GetText())
+	return fmt.Sprintf("type `%s` is not an expression", e.Ident.Ident.Value())
 }
 
-func (e *TypeNotAnExpression) ParserRule() antlr.ParserRuleContext {
+func (e *TypeNotAnExpression) ParserRule() ast.Node {
 	return e.Ident
 }
 
@@ -182,7 +181,7 @@ func (e *TypeNotAnExpression) Code() ErrorCode {
 	return CodeTypeNotAnExpression
 }
 
-func NewTypeNotAnExpression(ident *parser.ExprIdentContext) Error {
+func NewTypeNotAnExpression(ident *ast.IdentAccessExpr) Error {
 	return &TypeNotAnExpression{
 		Ident: ident,
 	}
@@ -192,14 +191,14 @@ type IncompatibleTypeCast struct {
 	baseError
 	CastFrom types.Type
 	CastTo   types.Type
-	CastExpr *parser.ExprCallContext
+	CastExpr *ast.CallExpr
 }
 
 func (e *IncompatibleTypeCast) Error() string {
 	return fmt.Sprintf("cannot cast value of type `%s` to `%s`", e.CastFrom.ToString(), e.CastTo.ToString())
 }
 
-func (e *IncompatibleTypeCast) ParserRule() antlr.ParserRuleContext {
+func (e *IncompatibleTypeCast) ParserRule() ast.Node {
 	return e.CastExpr
 }
 
@@ -207,7 +206,7 @@ func (e *IncompatibleTypeCast) Code() ErrorCode {
 	return CodeIncompatibleTypeCast
 }
 
-func NewIncompatibleTypeCast(castFrom types.Type, castTo types.Type, castExpr *parser.ExprCallContext) Error {
+func NewIncompatibleTypeCast(castFrom types.Type, castTo types.Type, castExpr *ast.CallExpr) Error {
 	return &IncompatibleTypeCast{
 		CastFrom: castFrom,
 		CastTo:   castTo,
@@ -217,11 +216,11 @@ func NewIncompatibleTypeCast(castFrom types.Type, castTo types.Type, castExpr *p
 
 type HiddenExpression struct {
 	baseError
-	Expr parser.IExprContext
+	Expr ast.Expr
 	Type types.Type
 }
 
-func NewHiddenExpression(expr parser.IExprContext, exprType types.Type) Error {
+func NewHiddenExpression(expr ast.Expr, exprType types.Type) Error {
 	return &HiddenExpression{
 		Expr: expr,
 		Type: exprType,
@@ -241,7 +240,7 @@ func (e *HiddenExpression) Annotations() []Annotation {
 	}
 }
 
-func (e *HiddenExpression) ParserRule() antlr.ParserRuleContext {
+func (e *HiddenExpression) ParserRule() ast.Node {
 	return e.Expr
 }
 

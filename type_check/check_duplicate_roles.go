@@ -1,13 +1,12 @@
 package type_check
 
 import (
+	"github.com/tempo-lang/tempo/parser/ast"
 	"github.com/tempo-lang/tempo/type_check/type_error"
 	"github.com/tempo-lang/tempo/types"
-
-	"github.com/antlr4-go/antlr/v4"
 )
 
-func (tc typeChecker) checkDuplicateRoles(ctx antlr.ParserRuleContext, roleType *types.Roles) type_error.Error {
+func (tc typeChecker) checkDuplicateRoles(ctx ast.Node, roleType *types.Roles) type_error.Error {
 	roles := roleType.Participants()
 	duplications := []string{}
 	for i := range roles {
